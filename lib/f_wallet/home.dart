@@ -9,14 +9,14 @@ import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:provider/provider.dart';
+import 'package:walletdz/f_wallet/main.dart';
+import '../Profile.dart';
+import '../f_wallet/payment.dart';
+import '../f_wallet/qr_scanner.dart';
+import '../f_wallet/usersList.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:ticket_widget/ticket_widget.dart';
-import 'package:walletdz/wallet/payment.dart';
-import 'package:walletdz/wallet/qr_scanner.dart';
-import 'package:walletdz/wallet/usersList.dart';
-import '../Profile.dart';
-import 'MyListLotties.dart';
-import 'main.dart';
+import '../wallet/MyListLotties.dart';
 import 'models.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -34,6 +34,157 @@ class HomeScreen extends StatelessWidget {
         //   primary: false,
         shrinkWrap: true,
         slivers: [
+          // SliverAppBar(
+          //   backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          //   centerTitle: true,
+          //   expandedHeight: 170,
+          //   //pinned: true,
+          //   stretch: true,
+          //   automaticallyImplyLeading: true, // hides leading widget
+          //   flexibleSpace: FlexibleSpaceBar(
+          //     titlePadding: EdgeInsets.zero,
+          //     centerTitle: true,
+          //     collapseMode: CollapseMode.pin,
+          //     stretchModes: const <StretchMode>[StretchMode.zoomBackground],
+          //     background: Stack(
+          //       alignment: Alignment.center,
+          //       children: [
+          //         Lottie.asset(
+          //           'assets/lotties/1 (5).json',
+          //           fit: BoxFit.cover,
+          //         ),
+          //         MyTotalCoins(
+          //           currentUserDatas: currentUserDatas,
+          //           fontsize: 30,
+          //           colorCoins: Colors.lightGreenAccent,
+          //         ),
+          //       ],
+          //     ),
+          //     expandedTitleScale: 1.5,
+          //     // title: Padding(
+          //     //   padding: const EdgeInsets.all(8.0),
+          //     //   child: Row(
+          //     //     mainAxisAlignment: MainAxisAlignment.spaceAround,
+          //     //     children: [
+          //     //       SizedBox(
+          //     //         width: 10,
+          //     //       ),
+          //     //       Consumer<UserDataProvider>(
+          //     //         builder: (context, userDataProvider, _) {
+          //     //           final currentUserData =
+          //     //               userDataProvider.currentUserData;
+          //     //           final avatar = currentUserData['avatar'];
+          //     //
+          //     //           if (avatar == null) {
+          //     //             return Icon(Icons.account_circle_rounded);
+          //     //           }
+          //     //           return InkWell(
+          //     //             onTap: () => Navigator.of(context).push(
+          //     //                 MaterialPageRoute(
+          //     //                     builder: (context) => Profile())),
+          //     //             child: CircleAvatar(
+          //     //               backgroundImage: CachedNetworkImageProvider(avatar),
+          //     //               radius: 10,
+          //     //             ),
+          //     //           );
+          //     //         },
+          //     //       ),
+          //     //       SizedBox(
+          //     //           width: 10.0), // Espacement entre l'avatar et le titre
+          //     //       Expanded(
+          //     //         child: Consumer<UserDataProvider>(
+          //     //           builder: (context, userDataProvider, _) {
+          //     //             final currentUserData =
+          //     //                 userDataProvider.currentUserData;
+          //     //             final displayName =
+          //     //                 currentUserData['displayName'] ?? '';
+          //     //
+          //     //             return Text(
+          //     //               displayName.toString(),
+          //     //               overflow: TextOverflow.ellipsis,
+          //     //               style: TextStyle(
+          //     //                 color: Colors.lightBlue.shade200,
+          //     //                 fontSize: 15,
+          //     //                 fontWeight: FontWeight.w600,
+          //     //               ),
+          //     //             );
+          //     //           },
+          //     //         ),
+          //     //       ),
+          //     //       SizedBox(
+          //     //           width: 10.0), // Espacement entre l'avatar et le titre
+          //     //       MyTotalCoins(
+          //     //         currentUserDatas: currentUserDatas,
+          //     //         fontsize: 15,
+          //     //         colorCoins: Colors.black87,
+          //     //       ),
+          //     //     ],
+          //     //   ),
+          //     // ),
+          //   ),
+          //   // bottom: PreferredSize(
+          //   //
+          //   //   preferredSize: Size.fromHeight(
+          //   //       10), // Ajustez la hauteur préférée en conséquence
+          //   //   child: Container(
+          //   //     padding: EdgeInsets.fromLTRB(
+          //   //         20, 0, 20, 8), // Ajustez le padding selon vos préférences
+          //   //     child: Row(
+          //   //       mainAxisAlignment: MainAxisAlignment.start,
+          //   //       children: [
+          //   //         Consumer<UserDataProvider>(
+          //   //           builder: (context, userDataProvider, _) {
+          //   //             final currentUserData =
+          //   //                 userDataProvider.currentUserData;
+          //   //             final avatar = currentUserData['avatar'];
+          //   //
+          //   //             if (avatar == null) {
+          //   //               return Icon(Icons.account_circle_rounded);
+          //   //             }
+          //   //             return InkWell(
+          //   //               onTap: () => Navigator.of(context).push(
+          //   //                   MaterialPageRoute(
+          //   //                       builder: (context) => Profile())),
+          //   //               child: CircleAvatar(
+          //   //                 backgroundImage: CachedNetworkImageProvider(avatar),
+          //   //               ),
+          //   //             );
+          //   //           },
+          //   //         ),
+          //   //         SizedBox(
+          //   //             width: 10.0), // Espacement entre l'avatar et le titre
+          //   //         Expanded(
+          //   //           child: Consumer<UserDataProvider>(
+          //   //             builder: (context, userDataProvider, _) {
+          //   //               final currentUserData =
+          //   //                   userDataProvider.currentUserData;
+          //   //               final displayName =
+          //   //                   currentUserData['displayName'] ?? '';
+          //   //
+          //   //               return Text(
+          //   //                 displayName.toString(),
+          //   //                 overflow: TextOverflow.ellipsis,
+          //   //                 style: TextStyle(
+          //   //                   color: Colors.lightBlue.shade200,
+          //   //                   fontSize: 20,
+          //   //                   fontWeight: FontWeight.w600,
+          //   //                 ),
+          //   //               );
+          //   //             },
+          //   //           ),
+          //   //         ),
+          //   //         SizedBox(
+          //   //             width: 10.0), // Espacement entre l'avatar et le titre
+          //   //         MyTotalCoins(
+          //   //           currentUserDatas: currentUserDatas,
+          //   //           fontsize: 20,
+          //   //           colorCoins: Colors.black87,
+          //   //         ),
+          //   //       ],
+          //   //     ),
+          //   //   ),
+          //   // ),
+          // ),
           SliverPersistentHeader(
             pinned: true,
             delegate: NetworkingPageHeader(),
@@ -44,9 +195,38 @@ class HomeScreen extends StatelessWidget {
             ),
             //TotalCoinsWidget(),
           ),
+          //           SliverToBoxAdapter(
+          //             child: GestureDetector(
+          //               onTap: () => Navigator.of(context)
+          //                   .push(MaterialPageRoute(builder: (context) => Historique())),
+          //               child: Container(
+          // //                color: Colors.yellow,
+          //                 height: 250,
+          //                 child: Stack(
+          //                   alignment: Alignment.center,
+          //                   children: [
+          //                     // Ajoutez l'animation Lottie en arrière-plan
+          //                     Lottie.asset(
+          //                       width: MediaQuery.of(context).size.width * 0.8,
+          //                       height: 300,
+          //                       'assets/lotties/animation_lnekrur4.json', // Remplacez par le chemin de votre fichier d'animation Lottie
+          //                       fit: BoxFit
+          //                           .contain, // Ajustez le mode d'ajustement selon vos préférences
+          //                     ),
+          //
+          //                     MyTotalCoins(currentUserDatas: currentUserDatas)
+          //                     // Contenu de la carte (texte, boutons, etc.) va au-dessus de l'animation Lottie
+          //                   ],
+          //                 ),
+          //               ),
+          //             ),
+          //           ),
+          SliverToBoxAdapter(
+            child: TransactionList(),
+          ),
           SliverToBoxAdapter(
             child: Container(
-              height: 80,
+              height: 150,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -58,7 +238,8 @@ class HomeScreen extends StatelessWidget {
                             Navigator.of(context).push(MaterialPageRoute(
                                 builder: (context) => QrScanner()));
                           },
-                          child: Lottie.asset('assets/lotties/1 (85).json',
+                          child: Lottie.asset(
+                              'assets/lotties/animation_qr1.json',
                               fit: BoxFit.cover)),
                     ),
                   ),
@@ -70,31 +251,8 @@ class HomeScreen extends StatelessWidget {
                             Navigator.of(context).push(MaterialPageRoute(
                                 builder: (context) => UserListPageCoins()));
                           },
-                          child: Lottie.asset('assets/lotties/1 (34).json',
-                              fit: BoxFit.cover)),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Card(
-                      child: GestureDetector(
-                          // onTap: () {
-                          //   Navigator.of(context).push(MaterialPageRoute(
-                          //       builder: (context) => QrScanner()));
-                          // },
-                          child: Lottie.asset('assets/lotties/1 (92).json',
-                              fit: BoxFit.cover)),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Card(
-                      child: GestureDetector(
-                          // onTap: () {
-                          //   Navigator.of(context).push(MaterialPageRoute(
-                          //       builder: (context) => UserListPageCoins()));
-                          // },
-                          child: Lottie.asset('assets/lotties/1 (116).json',
+                          child: Lottie.asset(
+                              'assets/lotties/animation_lneit2vo.json',
                               fit: BoxFit.cover)),
                     ),
                   ),
@@ -116,12 +274,9 @@ class HomeScreen extends StatelessWidget {
                           //   Navigator.of(context).push(MaterialPageRoute(
                           //       builder: (context) => QrScanner()));
                           // },
-                          child: Container(
-                        height: 120,
-                        width: 120,
-                        child: Lottie.asset('assets/lotties/1 (93).json',
-                            fit: BoxFit.cover),
-                      )),
+                          child: Lottie.asset(
+                              'assets/lotties/animation_lnejodtw.json',
+                              fit: BoxFit.cover)),
                     ),
                   ),
                   Padding(
@@ -132,12 +287,9 @@ class HomeScreen extends StatelessWidget {
                           //   Navigator.of(context).push(MaterialPageRoute(
                           //       builder: (context) => UserListPageCoins()));
                           // },
-                          child: Container(
-                        height: 120,
-                        width: 120,
-                        child: Lottie.asset('assets/lotties/1 (117).json',
-                            fit: BoxFit.cover),
-                      )),
+                          child: Lottie.asset(
+                              'assets/lotties/animation_lnejdoi9.json',
+                              fit: BoxFit.cover)),
                     ),
                   ),
                 ],
@@ -145,13 +297,113 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           SliverToBoxAdapter(
-            child: TransactionList(),
+            child: Container(
+              height: 150,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Card(
+                      child: GestureDetector(
+                          // onTap: () {
+                          //   Navigator.of(context).push(MaterialPageRoute(
+                          //       builder: (context) => QrScanner()));
+                          // },
+                          child: Lottie.asset(
+                              'assets/lotties/animation_lnejodtw.json',
+                              fit: BoxFit.cover)),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Card(
+                      child: GestureDetector(
+                          // onTap: () {
+                          //   Navigator.of(context).push(MaterialPageRoute(
+                          //       builder: (context) => UserListPageCoins()));
+                          // },
+                          child: Lottie.asset(
+                              'assets/lotties/animation_lnejdoi9.json',
+                              fit: BoxFit.cover)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
           SliverToBoxAdapter(
-            child: SizedBox(
-              height: 50,
+            child: Container(
+              height: 150,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Card(
+                      child: GestureDetector(
+                          // onTap: () {
+                          //   Navigator.of(context).push(MaterialPageRoute(
+                          //       builder: (context) => QrScanner()));
+                          // },
+                          child: Lottie.asset(
+                              'assets/lotties/animation_lnejodtw.json',
+                              fit: BoxFit.cover)),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Card(
+                      child: GestureDetector(
+                          // onTap: () {
+                          //   Navigator.of(context).push(MaterialPageRoute(
+                          //       builder: (context) => UserListPageCoins()));
+                          // },
+                          child: Lottie.asset(
+                              'assets/lotties/animation_lnejdoi9.json',
+                              fit: BoxFit.cover)),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          )
+          ),
+          SliverToBoxAdapter(
+            child: Container(
+              height: 150,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Card(
+                      child: GestureDetector(
+                          // onTap: () {
+                          //   Navigator.of(context).push(MaterialPageRoute(
+                          //       builder: (context) => QrScanner()));
+                          // },
+                          child: Lottie.asset(
+                              'assets/lotties/animation_lnejodtw.json',
+                              fit: BoxFit.cover)),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Card(
+                      child: GestureDetector(
+                          // onTap: () {
+                          //   Navigator.of(context).push(MaterialPageRoute(
+                          //       builder: (context) => UserListPageCoins()));
+                          // },
+                          child: Lottie.asset(
+                              'assets/lotties/animation_lnejdoi9.json',
+                              fit: BoxFit.cover)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -229,7 +481,7 @@ class MyGaines extends StatelessWidget {
         builder: (context, userDataProvider, _) {
           final String role = currentUserDatas['role'] ?? '';
           if (role == 'owner') {
-            return TotalGainsWidget();
+            return TotalCoinsWidget();
           } else {
             return SizedBox();
           }
@@ -798,6 +1050,8 @@ class NetworkingPageHeader extends SliverPersistentHeaderDelegate {
 }
 
 class TransactionList extends StatelessWidget {
+  get _color => Colors.white;
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
@@ -809,12 +1063,7 @@ class TransactionList extends StatelessWidget {
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return Center(
-            child: Lottie.asset(
-              'assets/lotties/1 (13).json',
-              repeat: false,
-            ),
-          );
+          return Center(child: CircularProgressIndicator());
         }
 
         List<TransactionData> transactions = snapshot.data!.docs.map((doc) {
@@ -823,7 +1072,6 @@ class TransactionList extends StatelessWidget {
             id: data['id'],
             amount: data['amount'],
             state: data['state'],
-            direction: data['direction'] ?? true,
             description: data['description'],
             timestamp: data['timestamp'],
           );
@@ -839,7 +1087,6 @@ class TransactionList extends StatelessWidget {
         final latestTransactions = transactions.take(3).toList();
 
         return ListView.builder(
-          physics: NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           itemCount: latestTransactions.length,
           itemBuilder: (BuildContext context, int index) {
@@ -854,12 +1101,10 @@ class TransactionList extends StatelessWidget {
               builder: (context, snap) {
                 if (snap.hasError) {
                   // Gérer les erreurs ici si nécessaire.
-                  return Text(//"Une erreur s'est produite: ${snap.error}"
-                      "");
+                  return Text("Une erreur s'est produite: ${snap.error}");
                 } else if (!snap.hasData) {
                   // Gérer le cas où les données sont absentes.
-                  return Text(//"Données non trouvées"
-                      '');
+                  return Text("Données non trouvées");
                 } else {
                   // Les données sont disponibles, affichez-les.
                   final userData = snap.data!;
@@ -871,12 +1116,11 @@ class TransactionList extends StatelessWidget {
                       child: Row(
                         children: [
                           CircleAvatar(
-                            backgroundImage: NetworkImage(userData['avatar'] ??
-                                Icon(Icons.account_circle_rounded)),
+                            backgroundImage: NetworkImage(userData['avatar']),
                           ),
-                          transactionData.direction == true
+                          transactionData.description == 'reçu'
                               ? Icon(Icons.arrow_upward, color: Colors.green)
-                              : transactionData.direction == false
+                              : transactionData.description == 'envoyer'
                                   ? Icon(Icons.arrow_downward,
                                       color: Colors.red)
                                   : Icon(Icons.arrow_circle_left,
@@ -903,9 +1147,9 @@ class TransactionList extends StatelessWidget {
                       ).format(transactionData.amount),
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: transactionData.direction == true
+                        color: transactionData.description == 'reçu'
                             ? Colors.green
-                            : transactionData.direction == false
+                            : transactionData.description == 'envoyer'
                                 ? Colors.red
                                 : Colors.grey,
                         fontSize: 18,
@@ -913,10 +1157,19 @@ class TransactionList extends StatelessWidget {
                       ),
                     ),
                   );
+
+                  //   ListTile(
+                  //   leading: CircleAvatar(
+                  //     backgroundImage: NetworkImage(userData['avatar']),
+                  //   ),
+                  //   title: Text(userData['displayName']),
+                  //   trailing: PriceWidget(
+                  //     price: transactionData.amount,
+                  //   ),
+                  // );
                 }
               },
             );
-            //Container();
           },
         );
       },

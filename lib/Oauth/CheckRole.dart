@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../f_wallet/home.dart';
 import '../wallet/main.dart';
 import 'Ogoogle/googleSignInProvider.dart';
 import 'VerifyEmailPage.dart';
@@ -38,7 +39,7 @@ class CheckRole extends StatelessWidget {
           //  if (userRole == "admin") {
           //   return adminLoggedPage(); // Normalement Tani Premium Page
           // } else {
-          return MyWalletApp();
+          return HomeScreen(); //MyWalletApp();
           // }
         } else
           return Scaffold(

@@ -12,10 +12,9 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:walletdz/wallet/usersList.dart';
-
-import 'main.dart';
-import 'models.dart';
+import '../f_wallet/main.dart';
+import '../f_wallet/models.dart';
+import '../f_wallet/usersList.dart';
 
 class TransactionPage extends StatefulWidget {
   final String scannedUserId;
@@ -32,32 +31,15 @@ class _TransactionPageState extends State<TransactionPage> {
   final GlobalKey<FormState> _formCoinsMKey = GlobalKey<FormState>();
   bool _isSubmitting =
       false; // Variable pour suivre l'état de soumission du formulaire
-  // @override
-  // void dispose() {
-  //   Provider.of<UserDataProvider>(context, listen: false)
-  //       .fetchCurrentUserData();
-  //   Provider.of<UserDataProvider>(context, listen: false)
-  //       .fetchScannedUserData(widget.scannedUserId);
-  //   amountController.dispose();
-  //   super.dispose();
-  // }
-  /////////////////////////////////////
   @override
-  void initState() {
-    super.initState();
-    // You can fetch data or initialize things here
+  void dispose() {
     Provider.of<UserDataProvider>(context, listen: false)
         .fetchCurrentUserData();
     Provider.of<UserDataProvider>(context, listen: false)
         .fetchScannedUserData(widget.scannedUserId);
+    amountController.dispose();
+    super.dispose();
   }
-
-  // @override
-  // void dispose() {
-  //   amountController.dispose();
-  //   super.dispose();
-  // }
-  /////////////////////////////////////
 
   @override
   Widget build(BuildContext context) {
@@ -90,75 +72,43 @@ class _TransactionPageState extends State<TransactionPage> {
                       //         MaterialPageRoute(
                       //             builder: (context) => TotalCoinsWidget())),
                       //     icon: Icon(FontAwesomeIcons.moneyBill)),
-
-                      Padding(
-                        padding: const EdgeInsets.all(18.0),
-                        child: Card(
-                          color: Theme.of(context).cardColor,
-                          child: Column(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(18.0),
-                                child: Center(
-                                  child: Text(
-                                    'Recharger Mon Compte',
-                                    style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w100,
-                                        color: Colors.black54),
-                                  ),
-                                ),
-                              ),
-                              TotalGainsWidget(),
-                              ListTile(
-                                dense: true,
-                                leading: CircleAvatar(
-                                  backgroundImage:
-                                      NetworkImage(userData['avatar']),
-                                ),
-                                title: Text(
-                                  userData['email'],
-                                  style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w300,
-                                      color: Colors.black54),
-                                ),
-                                subtitle: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'MON SOLDE : ',
-                                      style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w300,
-                                          color: Colors.black54),
-                                    ),
-                                    AnimatedFlipCounter(
-                                      value: userData[
-                                          'coins'], // Utilisez la partie entière de priceValue.
-                                      //prefix: "DZD ",
-                                      suffix: ' DZD',
-                                      fractionDigits: 2,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      duration:
-                                          const Duration(milliseconds: 800),
-                                      textStyle: TextStyle(
-                                        fontFamily: 'OSWALD',
-                                        color: Colors.green,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              IncrementCoinsRow(
-                                userId: userData['id'],
-                              ),
-                            ],
+                      SizedBox(
+                        height: 30,
+                      ),
+                      TotalCoinsWidget(),
+                      SizedBox(
+                        height: 30,
+                      ),
+                      ListTile(
+                        dense: true,
+                        leading: CircleAvatar(
+                          backgroundImage: NetworkImage(userData['avatar']),
+                        ),
+                        title: Text(
+                          'MON SOLDE : ',
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black54),
+                        ),
+                        subtitle: AnimatedFlipCounter(
+                          value: userData[
+                              'coins'], // Utilisez la partie entière de priceValue.
+                          //prefix: "DZD ",
+                          suffix: ' DZD',
+                          fractionDigits: 2,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          duration: const Duration(milliseconds: 800),
+                          textStyle: TextStyle(
+                            fontFamily: 'OSWALD',
+                            color: Colors.green,
+                            fontSize: 30,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
+                      ),
+                      IncrementCoinsRow(
+                        userId: userData['id'],
                       ),
                       ScannedConsumer(
                         scannedUserId: widget.scannedUserId,
@@ -329,15 +279,15 @@ class _IncrementCoinsRowState extends State<IncrementCoinsRow> {
                     child: _isSubmitting
                         ? FittedBox(
                             child: Lottie.asset(
-                              'assets/lotties/1 (15).json',
+                              'assets/lotties/124102-loading-screen.json',
                               animate: true,
                               repeat: true,
-                              // width: 150,
-                              //height: 150,
+                              width: 150,
+                              height: 150,
                             ),
                           )
                         : Icon(
-                            Icons.add,
+                            Icons.send,
                             color: Color.fromARGB(255, 0, 127, 232),
                             size: 25,
                           ),
@@ -398,8 +348,7 @@ class ScannedConsumer extends StatelessWidget {
           final coins = userData['coins'];
 
           return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(18.0),
+            child: Card(
               child: ListTile(
                 dense: true,
                 leading: CircleAvatar(
@@ -414,21 +363,18 @@ class ScannedConsumer extends StatelessWidget {
                     displayName,
                   )
                       ? GoogleFonts.cairo(
-                          fontSize: 15,
+                          fontSize: 16,
                           color: Colors.black54,
                           fontWeight: FontWeight.w700)
                       : TextStyle(
                           color: Colors.black54,
-                          fontSize: 15,
+                          fontSize: 16,
                         ),
                 ),
                 subtitle: FittedBox(
                   child: Text(
                     email,
-                    style: TextStyle(
-                      color: Colors.black54,
-                      fontSize: 15,
-                    ),
+                    style: TextStyle(color: Colors.black54),
                   ),
                 ),
                 trailing: PriceWidget(
@@ -523,8 +469,10 @@ class _TransactionSubmitButtonState extends State<TransactionSubmitButton> {
                           return;
                         }
 
+                        // Calculez la commission de 3.5%
+                        double commission = amount * 3.5 / 100;
+
                         try {
-                          ///////////////////////////////////////////////////
                           // Effectuez la transaction Firestore
                           await FirebaseFirestore.instance
                               .runTransaction((transaction) async {
@@ -546,22 +494,12 @@ class _TransactionSubmitButtonState extends State<TransactionSubmitButton> {
 
                             // Vérifiez si l'utilisateur a suffisamment de coins à envoyer (incluant la commission)
                             double senderCoins = senderSnapshot['coins'] ?? 0.0;
-                            // Calculez la commission de 3.5%
-                            double commission = amount * 3.5 / 100;
-                            print(commission);
-                            double newSenderCoins = amount - commission;
-                            print(newSenderCoins);
 
                             // Vérifiez si l'utilisateur a suffisamment de coins à envoyer (incluant la commission)
-                            if (amount > senderCoins
-                                // senderCoins < (amount + commission)
-                                ) {
-                              // L'utilisateur n'a pas suffisamment de coins, affichez le message d'erreur avec un bouton "Recharger le Solde"
-                              print('Solde insuffisant amount >');
-                              print(senderCoins);
-                              print(amount);
-                              print(commission);
-                              print(amount - commission);
+                            if (senderCoins < (amount + commission)) {
+                              // L'utilisateur n'a pas suffisamment de coins, annulez la transaction
+                              print('Solde insuffisant');
+                              // Affichez un message d'erreur ici
                               showDialog(
                                 context: context,
                                 builder: (BuildContext context) {
@@ -571,115 +509,13 @@ class _TransactionSubmitButtonState extends State<TransactionSubmitButton> {
                                       "ALERT",
                                       style: TextStyle(color: Colors.white),
                                     ),
-                                    content: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          "Votre Solde est Insuffisant",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 20,
-                                          ),
-                                        ),
-                                        Text(
-                                          'Veuillez Recharger Votre Compte',
-                                          // "Tu ne peux pas envoyer plus que ${(senderCoins - commission).toStringAsFixed(2)} DZD",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 20,
-                                          ),
-                                        ),
-                                        // ElevatedButton(
-                                        //   onPressed: () async {
-                                        //     // Enregistrez la transaction dans la sous-collection de l'utilisateur envoyeur
-                                        //     transaction.set(
-                                        //       senderRef
-                                        //           .collection('transactions')
-                                        //           .doc(), // Générez un nouvel ID de document
-                                        //       {
-                                        //         'id': widget.scannedUserId,
-                                        //         'amount':
-                                        //             senderCoins - commission,
-                                        //         'state': 'completed',
-                                        //         'direction': false,
-                                        //         'description':
-                                        //             'Transaction envoyée',
-                                        //         'timestamp': FieldValue
-                                        //             .serverTimestamp(),
-                                        //       },
-                                        //     );
-                                        //     // Enregistrez la transaction dans la sous-collection de l'utilisateur destinataire
-                                        //     transaction.set(
-                                        //       receiverRef
-                                        //           .collection('transactions')
-                                        //           .doc(), // Générez un nouvel ID de document
-                                        //       {
-                                        //         'id': widget.userData['id'],
-                                        //         'amount':
-                                        //             senderCoins - commission,
-                                        //         'state': 'completed',
-                                        //         'direction': true,
-                                        //         'description':
-                                        //             'Transaction reçue',
-                                        //         'timestamp': FieldValue
-                                        //             .serverTimestamp(),
-                                        //       },
-                                        //     );
-                                        //     // Mettez à jour les soldes des deux utilisateurs
-                                        //     transaction.set(
-                                        //       senderRef, //1000-965-35
-                                        //       {
-                                        //         'coins':
-                                        //             senderCoins - commission,
-                                        //         'dialogShown': false,
-                                        //       },
-                                        //       SetOptions(merge: true),
-                                        //     );
-                                        //
-                                        //     double receiverCoins =
-                                        //         receiverSnapshot['coins'] ??
-                                        //             0.0;
-                                        //
-                                        //     transaction.set(
-                                        //       receiverRef,
-                                        //       {
-                                        //         'coins':
-                                        //             senderCoins - commission,
-                                        //         'dialogShown': false,
-                                        //       },
-                                        //       SetOptions(merge: true),
-                                        //     );
-                                        //
-                                        //     // Enregistrez la transaction dans la collection "gaines"
-                                        //     await FirebaseFirestore.instance
-                                        //         .collection('gaines')
-                                        //         .add({
-                                        //       'percentage': 10,
-                                        //       'coins': commission,
-                                        //       'fromUserId':
-                                        //           widget.userData['id'],
-                                        //       'toUserId': widget.scannedUserId,
-                                        //     });
-                                        //     showCongratulationsDialog(
-                                        //       context,
-                                        //       amount,
-                                        //       receiverCoins +
-                                        //           senderCoins -
-                                        //           commission,
-                                        //     );
-                                        //     addTransactionToFirestore(
-                                        //       widget.userData['id'],
-                                        //       widget.scannedUserId,
-                                        //       senderCoins - commission,
-                                        //     );
-                                        //     // Réinitialisez l'état après la transaction réussie
-                                        //     widget.amountController.clear();
-                                        //     FocusScope.of(context).unfocus();
-                                        //   },
-                                        //   child: Text(
-                                        //       "Envoyer ${(senderCoins - commission).toStringAsFixed(2)} DZD"),
-                                        // ),
-                                      ],
+                                    content: Text(
+                                      "Votre Solde est Insuffisant \nVeuillez Recharger Votre Compte`\n "
+                                      "Tu ne peux pas envoyer plus que ${(senderCoins - commission).toStringAsFixed(2)} DZD",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 20,
+                                      ),
                                     ),
                                   );
                                 },
@@ -694,9 +530,8 @@ class _TransactionSubmitButtonState extends State<TransactionSubmitButton> {
                                   .doc(), // Générez un nouvel ID de document
                               {
                                 'id': widget.scannedUserId,
-                                'amount': senderCoins - newSenderCoins,
+                                'amount': amount,
                                 'state': 'completed',
-                                'direction': false,
                                 'description': 'Transaction envoyée',
                                 'timestamp': FieldValue.serverTimestamp(),
                               },
@@ -709,9 +544,8 @@ class _TransactionSubmitButtonState extends State<TransactionSubmitButton> {
                                   .doc(), // Générez un nouvel ID de document
                               {
                                 'id': widget.userData['id'],
-                                'amount': newSenderCoins,
+                                'amount': amount,
                                 'state': 'completed',
-                                'direction': true,
                                 'description': 'Transaction reçue',
                                 'timestamp': FieldValue.serverTimestamp(),
                               },
@@ -719,9 +553,9 @@ class _TransactionSubmitButtonState extends State<TransactionSubmitButton> {
 
                             // Mettez à jour les soldes des deux utilisateurs
                             transaction.set(
-                              senderRef, //1000-965-35
+                              senderRef,
                               {
-                                'coins': FieldValue.increment(-amount),
+                                'coins': senderCoins - (amount + commission),
                                 'dialogShown': false,
                               },
                               SetOptions(merge: true),
@@ -733,7 +567,7 @@ class _TransactionSubmitButtonState extends State<TransactionSubmitButton> {
                             transaction.set(
                               receiverRef,
                               {
-                                'coins': FieldValue.increment(newSenderCoins),
+                                'coins': receiverCoins + amount,
                                 'dialogShown': false,
                               },
                               SetOptions(merge: true),
@@ -743,7 +577,7 @@ class _TransactionSubmitButtonState extends State<TransactionSubmitButton> {
                             await FirebaseFirestore.instance
                                 .collection('gaines')
                                 .add({
-                              //'percentage': 10,
+                              'percentage': 10,
                               'coins': commission,
                               'fromUserId': widget.userData['id'],
                               'toUserId': widget.scannedUserId,
@@ -760,7 +594,6 @@ class _TransactionSubmitButtonState extends State<TransactionSubmitButton> {
                               amount,
                             );
                           });
-                          ///////////////////////////////////////////////////
 
                           // Réinitialisez l'état après la transaction réussie
                           widget.amountController.clear();
@@ -784,7 +617,7 @@ class _TransactionSubmitButtonState extends State<TransactionSubmitButton> {
                       children: [
                         FittedBox(
                           child: Lottie.asset(
-                            'assets/lotties/1 (15).json',
+                            'assets/lotties/animation_lmtavzq3.json',
                             // repeat: false,
                           ),
                         ),
@@ -854,7 +687,7 @@ void showCongratulationsDialog(
                 child: CircleAvatar(
                   backgroundColor: Colors.grey[100],
                   child: Lottie.asset(
-                    'assets/lotties/1 (37).json',
+                    'assets/lotties/animation_lmqwfkzg.json',
                     height: 60,
                     width: 60,
                     repeat: true,
@@ -880,7 +713,7 @@ void showCongratulationsDialog(
               ),
             ),
             Lottie.asset(
-              'assets/lotties/1 (36).json', // Chemin vers votre animation Lottie
+              'assets/lotties/animation_lmqwf1by.json', // Chemin vers votre animation Lottie
               width: 150,
               height: 150,
               repeat: true,
@@ -955,7 +788,7 @@ void showTransactionErrorDialog(BuildContext context, String errorMessage) {
                 child: CircleAvatar(
                   backgroundColor: Colors.grey[100],
                   child: Lottie.asset(
-                    'assets/lotties/1 (31).json',
+                    'assets/lotties/animation_lmqwfkzg.json',
                     height: 60,
                     width: 60,
                   ),
@@ -964,7 +797,7 @@ void showTransactionErrorDialog(BuildContext context, String errorMessage) {
               ),
             ),
             Lottie.asset(
-              'assets/lotties/1 (30).json', // Chemin vers votre animation Lottie
+              'assets/lotties/animation_lmqwf1by.json', // Chemin vers votre animation Lottie
               width: 150,
               height: 150,
               repeat: false,
@@ -1010,7 +843,7 @@ void addTransactionToFirestore(
   }
 }
 
-class TotalGainsWidget extends StatelessWidget {
+class TotalCoinsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final gainesStream =
@@ -1022,8 +855,11 @@ class TotalGainsWidget extends StatelessWidget {
         if (!snapshot.hasData) {
           // Afficher un indicateur de chargement si les données ne sont pas encore disponibles.
           return Center(
-            child: Lottie.asset('assets/lotties/1 (113).json', height: 70),
-          );
+              child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+            child: Lottie.asset('assets/lotties/animation_lnej0a47.json'),
+            // LinearProgressIndicator(),
+          ));
         }
 
         final gaines = snapshot.data;
@@ -1031,12 +867,17 @@ class TotalGainsWidget extends StatelessWidget {
         if (gaines == null || gaines.isEmpty) {
           // Si la liste des "gaines" est vide ou nulle, affichez un message approprié.
           return Center(
-              // child: FittedBox(
-              //   child: Lottie.asset(
-              //     'assets/lotties/1 (16).json',
+            child: FittedBox(
+              child: Lottie.asset('assets/lotties/animation_lmvyx93w.json',
+                  height: 100),
+              // Text(
+              //   "Gaines Indisponible.",
+              //   style: TextStyle(
+              //     color: Colors.red,
               //   ),
               // ),
-              );
+            ),
+          );
         }
 
         // Calculez le total des "gaines"
@@ -1077,6 +918,10 @@ class TotalGainsWidget extends StatelessWidget {
                 ),
               ],
             ),
+            // Text( assets/lotties/127466-glassmorphism-ellipse-lottie-animation.json
+            //   'Gaines: ${totalGaines.toStringAsFixed(2)}',
+            //   style: TextStyle(fontSize: 18, color: Colors.teal),
+            // ),
           ),
         );
       },
