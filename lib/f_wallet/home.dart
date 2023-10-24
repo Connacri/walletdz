@@ -1,3 +1,5 @@
+// ignore_for_file: non_const_call_to_literal_constructor
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:calendar_timeline/calendar_timeline.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -238,8 +240,7 @@ class HomeScreen extends StatelessWidget {
                             Navigator.of(context).push(MaterialPageRoute(
                                 builder: (context) => QrScanner()));
                           },
-                          child: Lottie.asset(
-                              'assets/lotties/animation_qr1.json',
+                          child: Lottie.asset('assets/lotties/1 (85)',
                               fit: BoxFit.cover)),
                     ),
                   ),
@@ -251,8 +252,7 @@ class HomeScreen extends StatelessWidget {
                             Navigator.of(context).push(MaterialPageRoute(
                                 builder: (context) => UserListPageCoins()));
                           },
-                          child: Lottie.asset(
-                              'assets/lotties/animation_lneit2vo.json',
+                          child: Lottie.asset('assets/lotties/1 (34).json',
                               fit: BoxFit.cover)),
                     ),
                   ),
@@ -274,8 +274,7 @@ class HomeScreen extends StatelessWidget {
                           //   Navigator.of(context).push(MaterialPageRoute(
                           //       builder: (context) => QrScanner()));
                           // },
-                          child: Lottie.asset(
-                              'assets/lotties/animation_lnejodtw.json',
+                          child: Lottie.asset('assets/lotties/1 (92).json',
                               fit: BoxFit.cover)),
                     ),
                   ),
@@ -287,8 +286,7 @@ class HomeScreen extends StatelessWidget {
                           //   Navigator.of(context).push(MaterialPageRoute(
                           //       builder: (context) => UserListPageCoins()));
                           // },
-                          child: Lottie.asset(
-                              'assets/lotties/animation_lnejdoi9.json',
+                          child: Lottie.asset('assets/lotties/1 (116).json',
                               fit: BoxFit.cover)),
                     ),
                   ),
@@ -310,8 +308,7 @@ class HomeScreen extends StatelessWidget {
                           //   Navigator.of(context).push(MaterialPageRoute(
                           //       builder: (context) => QrScanner()));
                           // },
-                          child: Lottie.asset(
-                              'assets/lotties/animation_lnejodtw.json',
+                          child: Lottie.asset('assets/lotties/1 (93).json',
                               fit: BoxFit.cover)),
                     ),
                   ),
@@ -323,8 +320,7 @@ class HomeScreen extends StatelessWidget {
                           //   Navigator.of(context).push(MaterialPageRoute(
                           //       builder: (context) => UserListPageCoins()));
                           // },
-                          child: Lottie.asset(
-                              'assets/lotties/animation_lnejdoi9.json',
+                          child: Lottie.asset('assets/lotties/1 (117).json',
                               fit: BoxFit.cover)),
                     ),
                   ),
@@ -346,8 +342,7 @@ class HomeScreen extends StatelessWidget {
                           //   Navigator.of(context).push(MaterialPageRoute(
                           //       builder: (context) => QrScanner()));
                           // },
-                          child: Lottie.asset(
-                              'assets/lotties/animation_lnejodtw.json',
+                          child: Lottie.asset('assets/lotties/1 (93).json',
                               fit: BoxFit.cover)),
                     ),
                   ),
@@ -359,8 +354,7 @@ class HomeScreen extends StatelessWidget {
                           //   Navigator.of(context).push(MaterialPageRoute(
                           //       builder: (context) => UserListPageCoins()));
                           // },
-                          child: Lottie.asset(
-                              'assets/lotties/animation_lnejdoi9.json',
+                          child: Lottie.asset('assets/lotties/1 (34).json',
                               fit: BoxFit.cover)),
                     ),
                   ),
@@ -382,8 +376,7 @@ class HomeScreen extends StatelessWidget {
                           //   Navigator.of(context).push(MaterialPageRoute(
                           //       builder: (context) => QrScanner()));
                           // },
-                          child: Lottie.asset(
-                              'assets/lotties/animation_lnejodtw.json',
+                          child: Lottie.asset('assets/lotties/1 (93).json',
                               fit: BoxFit.cover)),
                     ),
                   ),
@@ -395,8 +388,7 @@ class HomeScreen extends StatelessWidget {
                           //   Navigator.of(context).push(MaterialPageRoute(
                           //       builder: (context) => UserListPageCoins()));
                           // },
-                          child: Lottie.asset(
-                              'assets/lotties/animation_lnejdoi9.json',
+                          child: Lottie.asset('assets/lotties/1 (117).json',
                               fit: BoxFit.cover)),
                     ),
                   ),

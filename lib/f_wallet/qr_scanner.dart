@@ -1,9 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:walletdz/f_wallet/payment.dart';
@@ -85,7 +83,7 @@ class _QrScannerState extends State<QrScanner> {
                     children: [
                       Center(
                         child: Lottie.asset(
-                          "assets/lotties/8998-scanning.json",
+                          "assets/lotties/1 (86).json",
                           fit: BoxFit.contain,
                         ),
                       ),
@@ -93,7 +91,7 @@ class _QrScannerState extends State<QrScanner> {
                         padding: const EdgeInsets.all(28.0),
                         child: Text(
                           'Wainting To Scan...',
-                          style: Theme.of(context).textTheme.headline5,
+                          style: Theme.of(context).textTheme.headlineSmall,
                         ),
                       ),
                     ],
@@ -115,12 +113,12 @@ class _QrScannerState extends State<QrScanner> {
         Text(
           result!.code.toString(),
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.headline5,
+          style: Theme.of(context).textTheme.headlineSmall,
         ),
         Text(
           'Code Content \n Unacceptable Character!!!',
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.headline5,
+          style: Theme.of(context).textTheme.headlineSmall,
         ),
       ],
     ));
@@ -138,7 +136,7 @@ class _QrScannerState extends State<QrScanner> {
             Padding(
               padding: const EdgeInsets.all(40.0),
               child: Lottie.asset(
-                'assets/lotties/123752-start-up-meeting.json',
+                'assets/lotties/1 (22).json',
               ),
             ),
             Positioned(
@@ -229,7 +227,7 @@ class _QrScannerState extends State<QrScanner> {
                 child: FutureBuilder(
                   future: controller?.getFlashStatus(),
                   builder: (context, snapshot) {
-                    bool? onoff = snapshot.data as bool?;
+                    bool? onoff = snapshot.data;
                     return onoff == true
                         ? const Icon(
                             Icons.light_mode,
@@ -399,14 +397,14 @@ class _FutureBuilderScannedItemSingleState
           if (snapshot.connectionState == ConnectionState.none) {
             return Text(
               'Error!!!',
-              style: Theme.of(context).textTheme.headline5,
+              style: Theme.of(context).textTheme.headlineSmall,
             );
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
               child: Padding(
                   padding: const EdgeInsets.all(60.0),
-                  child: Lottie.asset('assets/lotties/animation_lmtxbxih.json')
+                  child: Lottie.asset('assets/lotties/1 (86).json')
                   //CircularProgressIndicator(),
                   ),
             );
@@ -555,11 +553,10 @@ class _FutureBuilderScannedItemSingleState
               ),
               keyboardType: TextInputType.number,
               controller: _qtyController,
-              validator: (valueQty) => valueQty!.isEmpty ||
-                      valueQty == null ||
-                      int.tryParse(valueQty.toString()) == 0
-                  ? 'Cant be 0 or Empty'
-                  : null,
+              validator: (valueQty) =>
+                  valueQty!.isEmpty || int.tryParse(valueQty.toString()) == 0
+                      ? 'Cant be 0 or Empty'
+                      : null,
               decoration: const InputDecoration(
                 border: InputBorder.none,
                 filled: true,
@@ -633,7 +630,7 @@ class _FutureBuilderScannedItemSingleState
           child: Text(
             'Item Exist In Our Base But \nNot Have Dealer & Prices',
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headline5,
+            style: Theme.of(context).textTheme.headlineSmall,
           ),
         ),
         Center(

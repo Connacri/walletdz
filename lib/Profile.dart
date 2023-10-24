@@ -7,22 +7,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_islamic_icons/flutter_islamic_icons.dart';
-import 'package:flutterflow_paginate_firestore/paginate_firestore.dart';
-import 'package:flutterflow_paginate_firestore/widgets/bottom_loader.dart';
-import 'package:flutterflow_paginate_firestore/widgets/empty_display.dart';
-import 'package:flutterflow_paginate_firestore/widgets/empty_separator.dart';
-import 'package:flutterflow_paginate_firestore/widgets/initial_loader.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
 import 'package:path/path.dart' as Path;
 
 import '../Oauth/Ogoogle/googleSignInProvider.dart';
-import '../Oauth/Privacy_Policy.dart';
 
 import 'package:intl/intl.dart';
 

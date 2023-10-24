@@ -1,13 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../f_wallet/home.dart';
-import '../wallet/main.dart';
 import 'Ogoogle/googleSignInProvider.dart';
-import 'VerifyEmailPage.dart';
 
 class CheckRole extends StatelessWidget {
   final String documentId;
@@ -57,7 +54,7 @@ class CheckRole extends StatelessWidget {
                     padding: const EdgeInsets.all(28.0),
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                          primary: Colors.black54,
+                          backgroundColor: Colors.black54,
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15)),
                           elevation: 4.0,

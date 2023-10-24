@@ -5,13 +5,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart' as intl;
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../f_wallet/main.dart';
 import '../f_wallet/models.dart';
 import '../f_wallet/usersList.dart';
@@ -279,7 +276,7 @@ class _IncrementCoinsRowState extends State<IncrementCoinsRow> {
                     child: _isSubmitting
                         ? FittedBox(
                             child: Lottie.asset(
-                              'assets/lotties/124102-loading-screen.json',
+                              'assets/lotties/1 (15).json',
                               animate: true,
                               repeat: true,
                               width: 150,
@@ -617,7 +614,7 @@ class _TransactionSubmitButtonState extends State<TransactionSubmitButton> {
                       children: [
                         FittedBox(
                           child: Lottie.asset(
-                            'assets/lotties/animation_lmtavzq3.json',
+                            'assets/lotties/1 (15).json',
                             // repeat: false,
                           ),
                         ),
@@ -687,7 +684,7 @@ void showCongratulationsDialog(
                 child: CircleAvatar(
                   backgroundColor: Colors.grey[100],
                   child: Lottie.asset(
-                    'assets/lotties/animation_lmqwfkzg.json',
+                    'assets/lotties/1 (37).json',
                     height: 60,
                     width: 60,
                     repeat: true,
@@ -713,7 +710,7 @@ void showCongratulationsDialog(
               ),
             ),
             Lottie.asset(
-              'assets/lotties/animation_lmqwf1by.json', // Chemin vers votre animation Lottie
+              'assets/lotties/1 (36).json', // Chemin vers votre animation Lottie
               width: 150,
               height: 150,
               repeat: true,
@@ -788,7 +785,7 @@ void showTransactionErrorDialog(BuildContext context, String errorMessage) {
                 child: CircleAvatar(
                   backgroundColor: Colors.grey[100],
                   child: Lottie.asset(
-                    'assets/lotties/animation_lmqwfkzg.json',
+                    'assets/lotties/1 (31).json',
                     height: 60,
                     width: 60,
                   ),
@@ -797,7 +794,7 @@ void showTransactionErrorDialog(BuildContext context, String errorMessage) {
               ),
             ),
             Lottie.asset(
-              'assets/lotties/animation_lmqwf1by.json', // Chemin vers votre animation Lottie
+              'assets/lotties/1 (30).json', // Chemin vers votre animation Lottie
               width: 150,
               height: 150,
               repeat: false,
@@ -857,7 +854,7 @@ class TotalCoinsWidget extends StatelessWidget {
           return Center(
               child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-            child: Lottie.asset('assets/lotties/animation_lnej0a47.json'),
+            child: Lottie.asset('assets/lotties/1 (113).json'),
             // LinearProgressIndicator(),
           ));
         }
@@ -868,8 +865,7 @@ class TotalCoinsWidget extends StatelessWidget {
           // Si la liste des "gaines" est vide ou nulle, affichez un message approprié.
           return Center(
             child: FittedBox(
-              child: Lottie.asset('assets/lotties/animation_lmvyx93w.json',
-                  height: 100),
+              child: Lottie.asset('assets/lotties/1 (16).json', height: 100),
               // Text(
               //   "Gaines Indisponible.",
               //   style: TextStyle(

@@ -4,7 +4,6 @@ import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:lottie/lottie.dart';
 
 import '../main.dart';
 
@@ -109,7 +108,7 @@ class _reset_passwordState extends State<reset_password> {
                                       ),
                                       ElevatedButton.icon(
                                           style: ElevatedButton.styleFrom(
-                                              primary: Colors.black54,
+                                              backgroundColor: Colors.black54,
                                               shape: RoundedRectangleBorder(
                                                   borderRadius:
                                                       BorderRadius.circular(

@@ -1,11 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:calendar_timeline/calendar_timeline.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:lottie/lottie.dart';
-import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:provider/provider.dart';
 
 import 'home.dart';
@@ -44,18 +39,16 @@ class UserDataProvider extends ChangeNotifier {
   Map<String, dynamic> get scannedUserData => _scannedUserData;
 
   Future<Map<String, dynamic>> fetchScannedUserData(String scannedUser) async {
-    if (scannedUser != null) {
-      final DocumentSnapshot<Map<String, dynamic>> userSnapshot =
-          await _firestore.collection('Users').doc(scannedUser).get();
+    final DocumentSnapshot<Map<String, dynamic>> userSnapshot =
+        await _firestore.collection('Users').doc(scannedUser).get();
 
-      if (userSnapshot.exists) {
-        _scannedUserData = userSnapshot.data()!;
+    if (userSnapshot.exists) {
+      _scannedUserData = userSnapshot.data()!;
 
-        notifyListeners();
-        return _scannedUserData; // Ajoutez cette ligne pour renvoyer les données
-      }
+      notifyListeners();
+      return _scannedUserData; // Ajoutez cette ligne pour renvoyer les données
     }
-
+  
     return {}; // Ajoutez cette ligne pour renvoyer un objet vide si les données ne sont pas trouvées
   }
 

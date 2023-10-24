@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import '../Oauth/reset_password.dart';
-import '../Oauth/verifi_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,9 +8,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
-import 'AuthPage.dart';
 import 'Ogoogle/googleSignInProvider.dart';
 import 'SignUpWidget.dart';
 
@@ -191,7 +188,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                                     const SizedBox(height: 20),
                                     ElevatedButton.icon(
                                       style: ElevatedButton.styleFrom(
-                                          primary: Colors.blue,
+                                          backgroundColor: Colors.blue,
                                           shape: RoundedRectangleBorder(
                                               borderRadius:
                                                   BorderRadius.circular(15)),
@@ -254,7 +251,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                                     const SizedBox(height: 10),
                                     ElevatedButton.icon(
                                       style: ElevatedButton.styleFrom(
-                                          primary: Colors.black54,
+                                          backgroundColor: Colors.black54,
                                           shape: RoundedRectangleBorder(
                                               borderRadius:
                                                   BorderRadius.circular(15)),

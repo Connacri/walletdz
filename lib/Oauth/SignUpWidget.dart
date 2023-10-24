@@ -1,13 +1,11 @@
 import 'dart:ui';
 
-import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:lottie/lottie.dart';
 
-import '../main.dart';
 import 'VerifyEmailPage.dart';
 import 'reset_password.dart';
 
@@ -182,7 +180,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                                   const SizedBox(height: 10),
                                   ElevatedButton.icon(
                                     style: ElevatedButton.styleFrom(
-                                        primary: Colors.black54,
+                                        backgroundColor: Colors.black54,
                                         shape: RoundedRectangleBorder(
                                             borderRadius:
                                                 BorderRadius.circular(15)),

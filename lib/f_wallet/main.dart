@@ -59,18 +59,16 @@ class UserDataProvider extends ChangeNotifier {
   Map<String, dynamic> get scannedUserData => _scannedUserData;
 
   Future<Map<String, dynamic>> fetchScannedUserData(String scannedUser) async {
-    if (scannedUser != null) {
-      final DocumentSnapshot<Map<String, dynamic>> userSnapshot =
-          await _firestore.collection('Users').doc(scannedUser).get();
+    final DocumentSnapshot<Map<String, dynamic>> userSnapshot =
+        await _firestore.collection('Users').doc(scannedUser).get();
 
-      if (userSnapshot.exists) {
-        _scannedUserData = userSnapshot.data()!;
+    if (userSnapshot.exists) {
+      _scannedUserData = userSnapshot.data()!;
 
-        notifyListeners();
-        return _scannedUserData; // Ajoutez cette ligne pour renvoyer les données
-      }
+      notifyListeners();
+      return _scannedUserData; // Ajoutez cette ligne pour renvoyer les données
     }
-
+  
     return {}; // Ajoutez cette ligne pour renvoyer un objet vide si les données ne sont pas trouvées
   }
 

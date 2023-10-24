@@ -185,8 +185,7 @@ class Historique extends StatelessWidget {
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(
-                child: Lottie.asset('assets/lotties/animation_lmqwf1by.json'));
+            return Center(child: Lottie.asset('assets/lotties/1 (3).json'));
           }
 
           final transactions = snapshot.data!.docs;
@@ -330,7 +329,7 @@ class Historique extends StatelessWidget {
               ),
               SliverToBoxAdapter(
                 child: Lottie.asset(
-                  'assets/lotties/animation_lmtavzq3.json',
+                  'assets/lotties/1 (11).json',
                   // repeat: false,
                 ),
               ),
