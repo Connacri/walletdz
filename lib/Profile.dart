@@ -91,7 +91,7 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
     if (_imageFile == null) {
       return;
     }
-    final fileName = DateTime.now().millisecondsSinceEpoch.toString();
+    //final fileName = DateTime.now().millisecondsSinceEpoch.toString();
     final firebaseStorageRef = FirebaseStorage.instance
         .ref()
         .child('Users/${Path.basename(_imageFile!.path)}');
@@ -108,7 +108,7 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
     if (_imageUrl == null) {
       return;
     }
-    final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+    //final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
     final firestoreRef =
         FirebaseFirestore.instance.collection('Users').doc(userGoo!.uid);
     await firestoreRef.update({field: _imageUrl});
@@ -755,7 +755,7 @@ class NumbersWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final birthday = data['birthday'];
+    //final birthday = data['birthday'];
 
     // final int age =
     //     ((DateTime.now().difference(birthday.toDate()).inDays) / 365).toInt();
@@ -862,7 +862,7 @@ class PostListOfMyProfil extends StatelessWidget {
                     ),
                   ),
                   title: Text(
-                    data['Description'].toString().toUpperCase() ?? '',
+                    data['Description'].toString().toUpperCase(),
                     overflow: TextOverflow.ellipsis,
                     textAlign: isArabic(data['Description'])
                         ? TextAlign.right

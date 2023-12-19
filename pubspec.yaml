@@ -65,6 +65,7 @@ dependencies:
   rive:
   cupertino_icons: ^1.0.2
   decimal:
+  openfoodfacts: ^3.2.1
 
 dev_dependencies:
   flutter_test:
@@ -130,5 +131,6 @@ flutter:
     - assets/google_logo.png
     - assets/foodsList.json
     - assets/maliste.json
+    - assets/listcode.json
 
 

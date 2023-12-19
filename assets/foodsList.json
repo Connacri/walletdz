@@ -13,7 +13,7 @@
     "item": "Burger",
     "desc": "Juicy burger with fries",
     "price": 8,
-    "image": sandwitch
+    "image": "sandwitch",
     "flav": "Beef",
     "cat": "sandwitch",
     "createdAt": "2023-08-26T11:00:00Z",

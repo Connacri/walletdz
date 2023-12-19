@@ -10,6 +10,7 @@ import 'Oauth/verifi_auth.dart';
 import 'package:intl/date_symbol_data_local.dart'; // Importez cette ligne
 import 'dart:async';
 import 'firebase_options.dart';
+import 'open_food/JsonTest.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,7 +27,10 @@ Future<void> main() async {
   SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.edgeToEdge, //.immersiveSticky,
       overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom]);
-  runApp(MyApp());
+  runApp(
+    //MyMainTest(),
+    MyApp(),
+  );
 }
 
 //FlutterNativeSplash.remove();
@@ -49,7 +53,7 @@ class MyApp extends StatelessWidget {
 
   static const String _title = 'DZ Wallet';
 
-  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+  //final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +75,24 @@ class MyApp extends StatelessWidget {
         home:
             verifi_auth(), //MyWalletApp(), //const MyHomePage(title: 'Flutter Demo Home Page'),
       ),
+    );
+  }
+}
+
+class MyMainTest extends StatelessWidget {
+  const MyMainTest({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: Icon(Icons.e_mobiledata),
+      ),
+      body: Center(
+          child: Text(
+        'test one badya',
+        style: TextStyle(fontFamily: 'oswald', fontSize: 40),
+      )),
     );
   }
 }

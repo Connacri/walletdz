@@ -2,21 +2,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:walletdz/wallet_3/mainLocal.dart';
 
-import '../f_wallet/home.dart';
 import 'Ogoogle/googleSignInProvider.dart';
 
 class CheckRole extends StatelessWidget {
-  final String documentId;
+  final String userId;
 
-  CheckRole(this.documentId);
+  CheckRole(this.userId);
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<DocumentSnapshot>(
       stream: FirebaseFirestore.instance
           .collection("Users")
-          .doc(documentId)
+          .doc(userId)
           .snapshots(),
       builder:
           (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
@@ -36,7 +36,7 @@ class CheckRole extends StatelessWidget {
           //  if (userRole == "admin") {
           //   return adminLoggedPage(); // Normalement Tani Premium Page
           // } else {
-          return HomeScreen(); //MyWalletApp();
+          return MyWallet3(userId: userId ,); /*home2();*/ // MyWalletApp(); //MyWalletApp();
           // }
         } else
           return Scaffold(
