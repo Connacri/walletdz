@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:walletdz/wallet_3/mainLocal.dart';
 
+import '../DZWallet/home.dart';
 import 'Ogoogle/googleSignInProvider.dart';
 
 class CheckRole extends StatelessWidget {
@@ -36,7 +37,13 @@ class CheckRole extends StatelessWidget {
           //  if (userRole == "admin") {
           //   return adminLoggedPage(); // Normalement Tani Premium Page
           // } else {
-          return MyWallet3(userId: userId ,); /*home2();*/ // MyWalletApp(); //MyWalletApp();
+          return mainDz(
+            currentUser: userId,
+          );
+
+          HomeWalletPage(
+            currentUser: userId,
+          ); //MyWallet3(userId: userId ,);
           // }
         } else
           return Scaffold(

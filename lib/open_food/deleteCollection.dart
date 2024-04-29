@@ -7,16 +7,16 @@ class deleteCollection extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Suppression de Document'),
+          title: Text('Suppression de Documents'),
         ),
         body: Center(
           child: ElevatedButton(
             onPressed: () async {
-              // Appel de la fonction pour supprimer le document
-              await deleteDocument(
-                  'votre_collection', 'document_id_a_supprimer');
+              // Appel de la fonction pour supprimer tous les documents
+              await deleteAllDocuments('FoodPods');
+              await deleteAllDocuments('requeteError');
             },
-            child: Text('Supprimer Document'),
+            child: Text('Supprimer Tous les Documents'),
           ),
         ),
       ),
@@ -24,18 +24,21 @@ class deleteCollection extends StatelessWidget {
   }
 }
 
-// Fonction pour supprimer un document par son ID
-Future<void> deleteDocument(String collectionName, String documentId) async {
+// Fonction pour supprimer tous les documents d'une collection
+Future<void> deleteAllDocuments(String collectionName) async {
   try {
-    // Référence au document spécifié
-    DocumentReference documentReference =
-        FirebaseFirestore.instance.collection(collectionName).doc(documentId);
+    // Récupérer tous les documents de la collection
+    QuerySnapshot querySnapshot =
+        await FirebaseFirestore.instance.collection(collectionName).get();
 
-    // Supprimer le document
-    await documentReference.delete();
+    // Supprimer chaque document de la collection
+    for (QueryDocumentSnapshot document in querySnapshot.docs) {
+      await document.reference.delete();
+    }
+
     print(
-        'Document $documentId supprimé avec succès de la collection $collectionName');
+        'Tous les documents de la collection $collectionName ont été supprimés avec succès');
   } catch (e) {
-    print('Erreur lors de la suppression du document : $e');
+    print('Erreur lors de la suppression des documents de la collection : $e');
   }
 }

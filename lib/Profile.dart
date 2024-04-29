@@ -149,7 +149,7 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                             listen: false);
                         await provider.logout();
 // Navigator.of(context).pop();
-                        Navigator.pop(context, true);
+                        //Navigator.pop(context, true);
                       },
                       icon: ClipOval(
                         child: Container(

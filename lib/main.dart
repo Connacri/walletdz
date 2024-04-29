@@ -5,12 +5,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'Oauth/AuthPage.dart';
 import 'Oauth/Ogoogle/googleSignInProvider.dart';
-import 'Oauth/verifi_auth.dart';
 import 'package:intl/date_symbol_data_local.dart'; // Importez cette ligne
 import 'dart:async';
+import 'Oauth/verifi_auth2.dart';
 import 'firebase_options.dart';
-import 'open_food/JsonTest.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -72,27 +72,9 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: _title,
         themeMode: ThemeMode.dark,
-        home:
-            verifi_auth(), //MyWalletApp(), //const MyHomePage(title: 'Flutter Demo Home Page'),
+        home: //AuthPage(),
+        verifi_auth2(), //MyWalletApp(), //const MyHomePage(title: 'Flutter Demo Home Page'),
       ),
-    );
-  }
-}
-
-class MyMainTest extends StatelessWidget {
-  const MyMainTest({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: Icon(Icons.e_mobiledata),
-      ),
-      body: Center(
-          child: Text(
-        'test one badya',
-        style: TextStyle(fontFamily: 'oswald', fontSize: 40),
-      )),
     );
   }
 }
