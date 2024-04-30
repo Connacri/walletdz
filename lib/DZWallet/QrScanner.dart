@@ -7,7 +7,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-
+import 'payment.dart';
 import 'MoneyTransferPage.dart';
 import 'providers.dart';
 
@@ -501,11 +501,14 @@ class _FutureBuilderScannedItemSingleState
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => MoneyTransferPage(
-                            fromAccount: widget.currentUser,
-                            toAccount: widget.result.toString(),
-                          ),
-                        ),
+                            builder: (context) => TransactionPage(
+                                  scannedUserId: widget.result.toString(),
+                                )
+                            //     MoneyTransferPage(
+                            //   fromAccount: widget.currentUser,
+                            //   toAccount: widget.result.toString(),
+                            // ),
+                            ),
                       );
                     },
                     icon: Icon(Icons.send),

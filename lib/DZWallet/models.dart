@@ -145,3 +145,80 @@ class Gaine {
 
   Gaine({required this.coins});
 }
+
+class TransactionModel {
+  String senderUserId;
+  String receiverUserId;
+  double amount;
+  final Timestamp timestamp;
+  // Utilisez Timestamp au lieu de DateTime
+
+  TransactionModel({
+    required this.senderUserId,
+    required this.receiverUserId,
+    required this.amount,
+    required this.timestamp,
+  });
+
+  // Méthode pour convertir votre modèle en Map
+  Map<String, dynamic> toMap() {
+    return {
+      'senderUserId': senderUserId,
+      'receiverUserId': receiverUserId,
+      'amount': amount,
+      'timestamp': timestamp, // Conservez le Timestamp ici
+    };
+  }
+
+  // Méthode pour créer un modèle à partir d'une Map
+  factory TransactionModel.fromMap(Map<String, dynamic> map) {
+    return TransactionModel(
+      senderUserId: map['senderUserId'],
+      receiverUserId: map['receiverUserId'],
+      amount: map['amount'],
+      timestamp: map['timestamp'], // Conservez le Timestamp ici
+    );
+  }
+}
+
+class TransactionsSous {
+  final String id;
+  final double amount;
+  final String state;
+  final bool direction;
+  final String description;
+  final Timestamp timestamp;
+
+  TransactionsSous({
+    required this.id,
+    required this.amount,
+    required this.state,
+    required this.direction,
+    required this.description,
+    required this.timestamp,
+  });
+
+  // Méthode pour convertir votre modèle en Map
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'amount': amount,
+      'state': state,
+      'direction': direction,
+      'description': description,
+      'timestamp': timestamp,
+    };
+  }
+
+  // Méthode pour créer un modèle à partir d'une Map
+  factory TransactionsSous.fromMap(Map<String, dynamic> map) {
+    return TransactionsSous(
+      id: map['id'],
+      amount: map['amount'],
+      state: map['state'],
+      direction: map['direction'],
+      description: map['description'],
+      timestamp: map['timestamp'],
+    );
+  }
+}

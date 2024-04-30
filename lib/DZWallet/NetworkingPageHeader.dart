@@ -3,9 +3,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
-import 'package:walletdz/DZWallet/providers.dart';
-
 import '../Profile.dart';
+import 'providers.dart';
 
 class NetworkingPageHeader extends SliverPersistentHeaderDelegate {
   @override
@@ -16,6 +15,7 @@ class NetworkingPageHeader extends SliverPersistentHeaderDelegate {
   ) {
     final opacity = (shrinkOffset < 1) ? 1.0 : 0.0;
     final opacity2 = (shrinkOffset > 1) ? 1.0 : 0.0;
+
     return Stack(
       alignment: Alignment.bottomCenter,
       fit: StackFit.expand,

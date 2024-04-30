@@ -2,10 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:path/path.dart';
-import 'models.dart';
-
 import 'dart:async';
 import 'package:flutter/material.dart';
+
+import 'models.dart';
 
 class WalletProvider extends ChangeNotifier {
   final String currentUser;
@@ -120,44 +120,6 @@ class UserProvider with ChangeNotifier {
     notifyListeners(); // Notifie les écouteurs du changement.
   }
 
-  // void fetchUserAndWatchCoins(String userId) {
-  //   FirebaseFirestore.instance
-  //       .collection('Users')
-  //       .doc(userId)
-  //       .get()
-  //       .then((userDoc) {
-  //     if (!_isDisposed && userDoc.exists) {
-  //       final userData = userDoc.data();
-  //       if (userData != null) {
-  //         _coins = userData['coins']?.toDouble() ?? 0;
-  //         _displayName = userData['displayName'] ?? '';
-  //         _email = userData['email'] ?? '';
-  //         _avatar = userData['avatar'] ?? '';
-  //
-  //         notifyListeners(); // Notifier les écouteurs du changement.
-  //
-  //         // Mise en place de la surveillance de "coins" pour les mises à jour futures.
-  //         _coinsSubscription = FirebaseFirestore.instance
-  //             .collection('Users')
-  //             .doc(userId)
-  //             .snapshots()
-  //             .listen((docSnapshot) {
-  //           if (!_isDisposed && docSnapshot.exists) {
-  //             final coins = docSnapshot['coins'];
-  //             if (coins != null) {
-  //               _coins = coins
-  //                   .toDouble(); // Mettre à jour la valeur locale des coins.
-  //               if (!_isDisposed) {
-  //                 // Vérifiez avant de notifier
-  //                 notifyListeners();
-  //               } // Notifier les écouteurs du changement.
-  //             }
-  //           }
-  //         });
-  //       }
-  //     }
-  //   });
-  // }
   void fetchUserAndWatchCoins(String userId) {
     FirebaseFirestore.instance
         .collection('Users')
@@ -167,13 +129,14 @@ class UserProvider with ChangeNotifier {
       if (!_isDisposed && userDoc.exists) {
         final userData = userDoc.data();
         if (userData != null) {
-          // Créez une instance de User à partir du document Firestore
-          _user = UserModele.fromMap(userData, userId); // Correction
+          _coins = userData['coins']?.toDouble() ?? 0;
+          _displayName = userData['displayName'] ?? '';
+          _email = userData['email'] ?? '';
+          _avatar = userData['avatar'] ?? '';
 
-          // Notifiez les auditeurs que le profil utilisateur a été chargé
-          notifyListeners();
+          notifyListeners(); // Notifier les écouteurs du changement.
 
-          // Configurez la surveillance du champ 'coins'
+          // Mise en place de la surveillance de "coins" pour les mises à jour futures.
           _coinsSubscription = FirebaseFirestore.instance
               .collection('Users')
               .doc(userId)
@@ -181,13 +144,13 @@ class UserProvider with ChangeNotifier {
               .listen((docSnapshot) {
             if (!_isDisposed && docSnapshot.exists) {
               final coins = docSnapshot['coins'];
-              if (coins != null && _user != null) {
-                _user!.coins =
-                    coins.toDouble(); // Mettez à jour la valeur des coins.
+              if (coins != null) {
+                _coins = coins
+                    .toDouble(); // Mettre à jour la valeur locale des coins.
                 if (!_isDisposed) {
                   // Vérifiez avant de notifier
                   notifyListeners();
-                }
+                } // Notifier les écouteurs du changement.
               }
             }
           });
@@ -195,6 +158,44 @@ class UserProvider with ChangeNotifier {
       }
     });
   }
+
+  // void fetchUserAndWatchCoins(String userId) {
+  //   FirebaseFirestore.instance
+  //       .collection('Users')
+  //       .doc(userId)
+  //       .get()
+  //       .then((userDoc) {
+  //     if (!_isDisposed && userDoc.exists) {
+  //       final userData = userDoc.data();
+  //       if (userData != null) {
+  //         // Créez une instance de User à partir du document Firestore
+  //         _user = UserModele.fromMap(userData, userId); // Correction
+  //
+  //         // Notifiez les auditeurs que le profil utilisateur a été chargé
+  //         notifyListeners();
+  //
+  //         // Configurez la surveillance du champ 'coins'
+  //         _coinsSubscription = FirebaseFirestore.instance
+  //             .collection('Users')
+  //             .doc(userId)
+  //             .snapshots()
+  //             .listen((docSnapshot) {
+  //           if (!_isDisposed && docSnapshot.exists) {
+  //             final coins = docSnapshot['coins'];
+  //             if (coins != null && _user != null) {
+  //               _user!.coins =
+  //                   coins.toDouble(); // Mettez à jour la valeur des coins.
+  //               if (!_isDisposed) {
+  //                 // Vérifiez avant de notifier
+  //                 notifyListeners();
+  //               }
+  //             }
+  //           }
+  //         });
+  //       }
+  //     }
+  //   });
+  // }
 
   @override
   void dispose() {
@@ -245,7 +246,7 @@ class UserProvider with ChangeNotifier {
     return {}; // Ajoutez cette ligne pour renvoyer un objet vide si les données ne sont pas trouvées
   }
 
-  Stream<List<Gaine>> get gainesStream {
+  Stream<List<Gaine>>? get gainesStream {
     return FirebaseFirestore.instance
         .collection('gaines')
         .snapshots()
