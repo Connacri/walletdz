@@ -25,26 +25,26 @@ class TransactionPage extends StatefulWidget {
 
 class _TransactionPageState extends State<TransactionPage> {
   final TextEditingController amountController = TextEditingController();
+  final GlobalKey<FormState> _formCoinsKey = GlobalKey<FormState>();
+  bool _isSubmitting = false;
 
-  // Ajout de cette ligne
-  final GlobalKey<FormState> _formCoinsMKey = GlobalKey<FormState>();
-  bool _isSubmitting =
-      false; // Variable pour suivre l'état de soumission du formulaire
+  @override
+  void initState() {
+    super.initState();
+    // Initialiser les appels Firestore
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    userProvider.fetchCurrentUserData();
+    userProvider.fetchScannedUserData(widget.scannedUserId);
+  }
+
   @override
   void dispose() {
-    Provider.of<UserProvider>(context, listen: false).fetchCurrentUserData();
-    Provider.of<UserProvider>(context, listen: false)
-        .fetchScannedUserData(widget.scannedUserId);
-    amountController.dispose();
-    super.dispose();
+    amountController.dispose(); // Détruire le contrôleur de texte
+    super.dispose(); // Appeler la méthode dispose du super
   }
 
   @override
   Widget build(BuildContext context) {
-    Provider.of<UserProvider>(context, listen: false).fetchCurrentUserData();
-    Provider.of<UserProvider>(context, listen: false)
-        .fetchScannedUserData(widget.scannedUserId);
-    Provider.of<UserProvider>(context, listen: false).gainesStream;
     return Scaffold(
       appBar: AppBar(
         title: Text('User Profile'),
@@ -121,10 +121,14 @@ class _TransactionPageState extends State<TransactionPage> {
                         ),
                       ),
                       TransactionSubmitButton(
-                          userData: userData,
-                          scannedUserId: widget.scannedUserId,
-                          formKey: _formCoinsMKey,
-                          amountController: amountController),
+                        userData: userData,
+                        scannedUserId: widget.scannedUserId,
+                        formKey: _formCoinsKey,
+                        amountController: amountController,
+                        avatar: '',
+                        displayName: '',
+                        direction: true,
+                      ),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(0, 50, 0, 20),
                         child: ElevatedButton(
@@ -399,12 +403,18 @@ class TransactionSubmitButton extends StatefulWidget {
   final String scannedUserId;
   final GlobalKey<FormState> formKey;
   final TextEditingController amountController;
+  final String avatar;
+  final bool? direction;
+  final String displayName;
 
   TransactionSubmitButton({
     required this.userData,
     required this.scannedUserId,
     required this.formKey,
     required this.amountController,
+    required this.avatar,
+    required this.displayName,
+    required this.direction,
   });
 
   @override
@@ -532,9 +542,12 @@ class _TransactionSubmitButtonState extends State<TransactionSubmitButton> {
                               {
                                 'id': widget.scannedUserId,
                                 'amount': amount,
-                                'state': 'completed',
                                 'description': 'Transaction envoyée',
+                                'direction': widget.direction,
+                                'state': 'completed',
                                 'timestamp': FieldValue.serverTimestamp(),
+                                'avatar': widget.avatar,
+                                'displayName': widget.displayName,
                               },
                             );
 
@@ -546,9 +559,12 @@ class _TransactionSubmitButtonState extends State<TransactionSubmitButton> {
                               {
                                 'id': widget.userData['id'],
                                 'amount': amount,
-                                'state': 'completed',
                                 'description': 'Transaction reçue',
+                                'direction': widget.direction,
+                                'state': 'completed',
                                 'timestamp': FieldValue.serverTimestamp(),
+                                'avatar': widget.avatar,
+                                'displayName': widget.displayName,
                               },
                             );
 
@@ -590,10 +606,15 @@ class _TransactionSubmitButtonState extends State<TransactionSubmitButton> {
                               receiverCoins + amount,
                             );
                             addTransactionToFirestore(
-                              widget.userData['id'],
-                              widget.scannedUserId,
-                              amount,
-                            );
+                                widget.userData['id'],
+                                widget.scannedUserId,
+                                'description',
+                                false,
+                                'state',
+                                amount,
+                                FieldValue.serverTimestamp(),
+                                'avatar',
+                                'displayName');
                           });
 
                           // Réinitialisez l'état après la transaction réussie
@@ -827,15 +848,32 @@ void showTransactionErrorDialog(BuildContext context, String errorMessage) {
 }
 
 void addTransactionToFirestore(
-    String senderUserId, String receiverUserId, double amount) async {
+    String senderUserId,
+    String receiverUserId,
+    description,
+    bool direction,
+    state,
+    double amount,
+    timestamp,
+    avatar,
+    displayName) async {
   try {
     final Timestamp timestamp = Timestamp.now();
-    final TransactionModel transaction = TransactionModel(
-      senderUserId: senderUserId,
-      receiverUserId: receiverUserId,
-      amount: amount,
-      timestamp: timestamp,
-    );
+    final Transactions transaction = Transactions(
+        id: receiverUserId,
+        amount: amount,
+        description: description,
+        direction: direction,
+        state: state,
+        timestamp: timestamp,
+        avatar: avatar,
+        displayName: displayName);
+    // final TransactionModel transaction = TransactionModel(
+    //   senderUserId: senderUserId,
+    //   receiverUserId: receiverUserId,
+    //   amount: amount,
+    //   timestamp: timestamp,
+    // );
 
     final DocumentReference transactionRef =
         FirebaseFirestore.instance.collection('transactions').doc();

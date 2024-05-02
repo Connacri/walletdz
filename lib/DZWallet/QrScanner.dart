@@ -498,18 +498,27 @@ class _FutureBuilderScannedItemSingleState
                       )),
                   trailing: IconButton(
                     onPressed: () {
-                      Navigator.push(
+                      Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => TransactionPage(
-                                  scannedUserId: widget.result.toString(),
-                                )
-                            //     MoneyTransferPage(
-                            //   fromAccount: widget.currentUser,
-                            //   toAccount: widget.result.toString(),
-                            // ),
-                            ),
+                          builder: (context) => TransactionPage(
+                            scannedUserId: widget.result,
+                          ),
+                        ),
                       );
+
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //       builder: (context) => TransactionPage(
+                      //             scannedUserId: widget.result.toString(),
+                      //           )
+                      //       //     MoneyTransferPage(
+                      //       //   fromAccount: widget.currentUser,
+                      //       //   toAccount: widget.result.toString(),
+                      //       // ),
+                      //       ),
+                      // );
                     },
                     icon: Icon(Icons.send),
                   ),

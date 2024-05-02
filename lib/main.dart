@@ -62,9 +62,9 @@ class MyApp extends StatelessWidget {
       //lazy: true,
       child: MaterialApp(
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
-        ),
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+            useMaterial3: true,
+            fontFamily: 'OSWALD'),
         locale: const Locale('fr', 'CA'),
 
         //scaffoldMessengerKey: Utils.messengerKey,
@@ -73,7 +73,7 @@ class MyApp extends StatelessWidget {
         title: _title,
         themeMode: ThemeMode.dark,
         home: //AuthPage(),
-        verifi_auth2(), //MyWalletApp(), //const MyHomePage(title: 'Flutter Demo Home Page'),
+            verifi_auth2(), //MyWalletApp(), //const MyHomePage(title: 'Flutter Demo Home Page'),
       ),
     );
   }
