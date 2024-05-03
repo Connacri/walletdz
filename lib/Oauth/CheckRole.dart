@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import 'package:walletdz/wallet_3/mainLocal.dart';
 
 import '../DZWallet/home.dart';
-import '../DZWallet_clean/home.dart';
 import '../MyListLotties.dart';
 import 'Ogoogle/googleSignInProvider.dart';
 
