@@ -1,135 +1,131 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'transfers_provider.dart';
+import 'package:walletdz/1/providers.dart';
+
+import 'NetworkingPageHeader.dart';
+import 'models1.dart';
 
 class home1 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (context) => UserProviderPref()),
+        ChangeNotifierProvider(create: (context) => UserProviderFire()),
         ChangeNotifierProvider(create: (context) => TransfersProvider()),
       ],
-      child: MaterialApp(
-        home: HomeScreen(),
-      ),
+      child: MyHomePage(),
     );
   }
 }
 
-class HomeScreen extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  @override
+  void initState() {
+    super.initState();
+    final userProvider = Provider.of<UserProviderFire>(context, listen: false);
+    userProvider.loadUser(); // Charger l'utilisateur au démarrage
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Selector<TransfersProvider, double>(
-          selector: (context, provider) => provider.balance,
-          builder: (context, balance, child) => Text('Solde: \$${balance}'),
-        ),
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisignment.start,
-        children: [
-          Selector<TransfersProvider, List<Transfer>>(
-            selector: (context, provider) => provider.recentTransfers,
-            builder: (context, recentTransfers, child) => SizedBox(
-              height: 100,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: recentTransfers.length,
-                itemBuilder: (context, index) {
-                  final transfer = recentTransfers[index];
-                  return Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(transfer.toUser),
-                    ),
-                  );
-                },
-              ),
+      body: CustomScrollView(
+        slivers: [
+          _buildHeader(),
+          buildAllTrans(),
+          buildPagination(),
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 50,
             ),
-          ),
-
-          // Afficher tous les transferts
-          Selector<TransfersProvider, List<Transfer>>(
-            selector: (context, provider) => provider.allTransfers,
-            builder: (context, allTransfers, child) => Expanded(
-              child: ListView.builder(
-                itemCount: allTransfers.length,
-                itemBuilder: (context, index) {
-                  final transfer = allTransfers[index];
-                  return ListTile(
-                    title: Text(
-                      'Transfert de ${transfer.fromUser} à ${transfer.toUser} de \$${transfer.amount}',
-                    ),
-                    subtitle: Text('Date: ${transfer.date.toLocal()}'),
-                  );
-                },
-              ),
-            ),
-          ),
+          )
         ],
       ),
     );
   }
-}
 
-// // Widget affichant le solde et les utilisateurs récents
-// class HomeScreen extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     final provider = Provider.of<TransfersProvider>(context);
-//
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Home'),
-//       ),
-//       body: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           // Afficher le solde
-//           Padding(
-//             padding: const EdgeInsets.all(16.0),
-//             child: Text(
-//               'Solde: \$${provider.balance}',
-//               style: TextStyle(fontSize: 24),
-//             ),
-//           ),
-//
-//           // Liste horizontale des utilisateurs récents
-//           SizedBox(
-//             height: 100,
-//             child: ListView.builder(
-//               scrollDirection: Axis.horizontal,
-//               itemCount: provider.recentTransfers.length,
-//               itemBuilder: (context, index) {
-//                 final transfer = provider.recentTransfers[index];
-//                 return Card(
-//                   child: Padding(
-//                     padding: const EdgeInsets.all(16.0),
-//                     child: Text(transfer.toUser),
-//                   ),
-//                 );
-//               },
-//             ),
-//           ),
-//
-//           // Historique des transferts
-//           Expanded(
-//             child: ListView.builder(
-//               itemCount: provider.allTransfers.length,
-//               itemBuilder: (context, index) {
-//                 final transfer = provider.allTransfers[index];
-//                 return ListTile(
-//                   title: Text(
-//                     'Transfert de ${transfer.fromUser} à ${transfer.toUser} de \$${transfer.amount}',
-//                   ),
-//                   subtitle: Text('Date: ${transfer.date.toLocal()}'),
-//                 );
-//               },
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
+  SliverPersistentHeader _buildHeader() {
+    return SliverPersistentHeader(
+      pinned: true,
+      delegate: NetworkingPageHeader(), // Utilisez votre délégate ici
+    );
+  }
+
+  Selector<TransfersProvider, List<Transactionss>> buildAllTrans() {
+    return Selector<TransfersProvider, List<Transactionss>>(
+      selector: (_, provider) => provider.paginatedTransfers, // Paginated list
+      builder: (context, transactions, child) {
+        return SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              final transfer = transactions[index];
+              final formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss')
+                  .format(transfer.timestamp.toDate());
+              // Vérifier si l'URL de l'image est valide
+              final isValidUrl =
+                  Uri.tryParse(transfer.avatar)?.hasAbsolutePath == true;
+              return ListTile(
+                leading: transfer.avatar.isEmpty || transfer.avatar == ''
+                    ? CircleAvatar(
+                        backgroundImage: CachedNetworkImageProvider(
+                            'https://picsum.photos/200/300?random=$index'))
+                    : isValidUrl
+                        ? CircleAvatar(
+                            backgroundImage: CachedNetworkImageProvider(
+                            transfer.avatar,
+                          ))
+                        : CircleAvatar(
+                            child: Text(
+                            transfer.displayName.substring(0, 1).toUpperCase(),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 24, fontWeight: FontWeight.bold),
+                          )),
+                title: transfer.displayName.isNotEmpty
+                    ? Text(transfer.displayName)
+                    : Text('Utilisateur Inconnu'),
+                trailing: Text(transfer.amount.toStringAsFixed(2)),
+                subtitle: Text(formattedDate),
+              );
+            },
+            childCount: transactions.length,
+          ),
+        );
+      },
+    );
+  }
+
+  SliverToBoxAdapter buildPagination() {
+    return SliverToBoxAdapter(
+      child: Selector<TransfersProvider, bool>(
+        selector: (_, provider) =>
+            provider.currentPage * provider.itemsPerPage >=
+            provider.allTransfers.length,
+        builder: (context, isEndReached, child) {
+          return Visibility(
+            visible:
+                !isEndReached, // Afficher le bouton si on peut encore charger plus de données
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  // Chargez la page suivante lorsqu'on clique sur le bouton
+                  context.read<TransfersProvider>().loadNextPage();
+                },
+                child: Text("Charger Plus"),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}

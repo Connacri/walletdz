@@ -45,7 +45,7 @@ dependencies:
   screenshot: ^2.1.0
   email_validator: ^2.1.17
   flutter_islamic_icons: ^1.0.2
-
+  supabase_flutter: ^2.5.2
   horizontal_calendar: any
   geocoding: ^2.1.1
   geolocator: ^10.1.0

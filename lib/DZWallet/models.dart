@@ -91,7 +91,7 @@ class UserModele {
   final bool? state; // Optional
   final String? role; // Optional
   final String plan;
-  double coins; // Mutable
+  double balance; // Mutable
   final Timestamp lastActive;
   final Timestamp createdAt;
   final double stars; // Optional
@@ -108,7 +108,7 @@ class UserModele {
     this.state,
     this.role,
     required this.plan,
-    required this.coins,
+    required this.balance,
     required this.lastActive,
     required this.createdAt,
     required this.stars,
@@ -128,7 +128,7 @@ class UserModele {
       state: data['state'] as bool? ?? false,
       role: data['role'] as String? ?? '',
       plan: data['plan'] ?? 'free', // Default plan
-      coins: data['coins'] as double? ?? 0.0, // Default coins
+      balance: data['balance'] as double? ?? 0.0, // Default coins
       lastActive: data['lastActive'] as Timestamp,
       createdAt: data['createdAt'] as Timestamp,
       stars: data['stars'] as double? ?? 0.0,
@@ -149,7 +149,7 @@ class UserModele {
       'state': state,
       'role': role,
       'plan': plan,
-      'coins': coins,
+      'balance': balance,
       'lastActive': lastActive,
       'createdAt': createdAt,
       'stars': stars,

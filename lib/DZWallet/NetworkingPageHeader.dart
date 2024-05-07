@@ -208,7 +208,7 @@ class NetworkingPageHeader extends SliverPersistentHeaderDelegate {
                       MaterialPageRoute(builder: (context) => Profile()),
                     ),
                     child: CircleAvatar(
-                      backgroundImage: userProvider!.avatar.isNotEmpty
+                      backgroundImage: userProvider.avatar.isNotEmpty
                           ? CachedNetworkImageProvider(userProvider.avatar)
                           : null, // Assurez-vous que 'avatar' existe
                     ),

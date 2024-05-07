@@ -5,6 +5,7 @@ import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:walletdz/wallet_3/mainLocal.dart';
 
+import '../1/home1.dart';
 import '../DZWallet/home.dart';
 import '../MyListLotties.dart';
 import 'Ogoogle/googleSignInProvider.dart';
@@ -66,13 +67,10 @@ class CheckRole extends StatelessWidget {
             //  if (userRole == "admin") {
             //   return adminLoggedPage(); // Normalement Tani Premium Page
             // } else {
-            return
-                //   homeC(
-                //   currentUser: userId,
-                // );
-                mainDz(
-              currentUser: userId,
-            );
+            return home1();
+            // mainDz(
+            //   currentUser: userId,
+            // );
 
             HomeWalletPage(
               currentUser: userId,

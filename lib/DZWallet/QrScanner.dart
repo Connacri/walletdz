@@ -32,8 +32,8 @@ class _QrScannerState extends State<QrScanner> {
 
   Barcode? result;
   QRViewController? controller;
-  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-
+  //final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  final GlobalKey qrKey = GlobalKey();
   @override
   void reassemble() {
     super.reassemble();

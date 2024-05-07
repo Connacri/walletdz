@@ -170,7 +170,6 @@ class HomeWalletPage extends StatelessWidget {
       delegate: SliverChildBuilderDelegate(
         (context, index) {
           final transaction = walletProvider.transactions[index];
-          print(transaction);
           return _buildTransactionTile(transaction, index);
         },
         childCount: walletProvider.transactions.length,
