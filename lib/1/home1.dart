@@ -3,8 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:walletdz/1/providers.dart';
+import 'package:lottie/lottie.dart';
+import 'package:walletdz/iptv/main.dart';
 
+import '../MyListLotties.dart';
 import 'NetworkingPageHeader.dart';
+import 'QrScanner.dart';
 import 'models1.dart';
 
 class home1 extends StatelessWidget {
@@ -12,7 +16,6 @@ class home1 extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => UserProviderPref()),
         ChangeNotifierProvider(create: (context) => UserProviderFire()),
         ChangeNotifierProvider(create: (context) => TransfersProvider()),
       ],
@@ -40,6 +43,8 @@ class _MyHomePageState extends State<MyHomePage> {
       body: CustomScrollView(
         slivers: [
           _buildHeader(),
+          _buildTransactionOptions(context),
+          UniqueUsersHorizontalList(),
           buildAllTrans(),
           buildPagination(),
           SliverToBoxAdapter(
@@ -56,6 +61,56 @@ class _MyHomePageState extends State<MyHomePage> {
     return SliverPersistentHeader(
       pinned: true,
       delegate: NetworkingPageHeader(), // Utilisez votre délégate ici
+    );
+  }
+
+  // Construire les options de transaction (QR Scanner, etc.)
+  SliverToBoxAdapter _buildTransactionOptions(BuildContext context) {
+    return SliverToBoxAdapter(
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 5),
+        height: 120,
+        child: ListView(
+          shrinkWrap: true, scrollDirection: Axis.horizontal,
+
+          //mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildCard(
+              context,
+              'assets/lotties/1 (85).json',
+              () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => QrScanner(),
+                  ),
+                );
+              },
+            ),
+            _buildCard(
+              context,
+              'assets/lotties/1 (17).json',
+              () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => MyAppIptv(),
+                  ),
+                );
+              },
+            ),
+            _buildCard(
+              context,
+              'assets/lotties/1 (104).json',
+              () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => LottieListPage(),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -93,7 +148,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     ? Text(transfer.displayName)
                     : Text('Utilisateur Inconnu'),
                 trailing: Text(transfer.amount.toStringAsFixed(2)),
-                subtitle: Text(formattedDate),
+                subtitle: Text(
+                  formattedDate,
+                  style: TextStyle(fontSize: 10),
+                ),
               );
             },
             childCount: transactions.length,
@@ -126,6 +184,103 @@ class _MyHomePageState extends State<MyHomePage> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildCard(BuildContext context, String asset, VoidCallback onTap) {
+    return Padding(
+      padding: const EdgeInsets.all(5.0),
+      child: Card(
+        child: Container(
+          height: 100,
+          width: 100,
+          child: GestureDetector(
+            onTap: onTap,
+            child: Lottie.asset(
+              asset,
+              // fit: BoxFit.cover,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class UniqueUsersHorizontalList extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<TransfersProvider>(
+      builder: (context, transfersProvider, child) {
+        // Extraire les utilisateurs uniques avec détails des transactions
+        final uniqueUsers = {
+          for (var transaction in transfersProvider.allTransfers)
+            {
+              'userId': transaction.id,
+              'avatar': transaction.avatar, // Image associée à l'utilisateur
+              'displayName': transaction.displayName, // Nom d'affichage
+            }
+        }.toList(); // Convertir le set en liste
+
+        return SliverToBoxAdapter(
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+            height: 150.0, // Hauteur pour la liste horizontale
+            child: ListView.builder(
+              shrinkWrap: true,
+              scrollDirection: Axis.horizontal, // Liste horizontale
+              itemCount: uniqueUsers.length, // Nombre d'utilisateurs uniques
+              itemBuilder: (context, index) {
+                final user = uniqueUsers[index];
+                final avatar = user['avatar'] as String?; // URL de l'avatar
+                final displayName =
+                    user['displayName'] as String?; // Nom d'affichage
+
+                return Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircleAvatar(
+                        radius: 30.0,
+                        backgroundColor: Colors.blue, // Couleur par défaut
+                        backgroundImage: avatar != null && avatar.isNotEmpty
+                            ? NetworkImage(
+                                avatar) // Charger l'image si elle existe
+                            : null, // Aucun avatar si vide ou nul
+                        child: (avatar == null ||
+                                avatar
+                                    .isEmpty) // Afficher texte si pas d'avatar
+                            ? displayName != null && displayName.isNotEmpty
+                                ? Text(
+                                    displayName[0].toUpperCase(),
+                                    style: TextStyle(
+                                        fontSize: 24, color: Colors.white),
+                                  )
+                                : Center(
+                                    child: Icon(
+                                      Icons.account_circle_sharp,
+                                      size: 40,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                            : null,
+                      ),
+                      SizedBox(height: 8.0),
+                      Text(
+                        displayName != null && displayName.isNotEmpty
+                            ? displayName
+                            : 'Inconnu', // Afficher le nom d'affichage
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 }

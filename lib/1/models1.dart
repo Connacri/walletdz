@@ -78,39 +78,94 @@ class UserModele {
   }
 }
 
-// class Transfer {
-//   final String id;
-//   final String fromUser;
-//   final String toUser;
-//   final double amount;
-//   final DateTime date;
+// class UserModele {
+//   final String uid;
+//   final String name;
+//   final String? email; // Optionnel
+//   final int? phone; // Optionnel
+//   final String? avatar; // Optionnel
+//   final String? timeline; // Optionnel
+//   final bool? state; // Optionnel
+//   final String? role; // Optionnel
+//   final String plan; // Nécessaire
+//   double coins; // Mutable
+//   final Timestamp lastActive;
+//   final Timestamp createdAt;
+//   final double stars; // Optionnel
+//   final String levelUser; // Optionnel
+//   final int userItemsNbr; // Optionnel
 //
-//   Transfer({
-//     required this.id,
-//     required this.fromUser,
-//     required this.toUser,
-//     required this.amount,
-//     required this.date,
+//   UserModele({
+//     required this.uid,
+//     required this.name,
+//     this.email,
+//     this.phone,
+//     this.avatar,
+//     this.timeline,
+//     this.state,
+//     this.role,
+//     required this.plan,
+//     required this.coins,
+//     required this.lastActive,
+//     required this.createdAt,
+//     this.stars = 0.0, // Valeur par défaut
+//     this.levelUser = 'beginner', // Valeur par défaut
+//     this.userItemsNbr = 0, // Valeur par défaut
 //   });
 //
-//   Map<String, dynamic> toMap() {
-//     return {
-//       'id': id,
-//       'fromUser': fromUser,
-//       'toUser': toUser,
-//       'amount': amount,
-//       'date': date.toIso8601String(),
-//     };
+//   factory UserModele.fromMap(Map<String, dynamic> data, String uid) {
+//     // Vérifications de types et valeurs par défaut sécurisées
+//     return UserModele(
+//       uid: uid,
+//       name: data['displayName'] as String? ?? 'Nom Inconnu',
+//       email: data['email'] as String?,
+//       phone: (data['phone'] is int)
+//           ? data['phone'] as int
+//           : null, // Validation de type
+//       avatar: data['avatar'] as String?,
+//       timeline: data['timeline'] as String?,
+//       state: (data['state'] is bool)
+//           ? data['state'] as bool
+//           : null, // Validation de type
+//       role: data['role'] as String?,
+//       plan: data.containsKey('plan')
+//           ? data['plan'] as String
+//           : 'free', // Plan par défaut
+//       coins: data.containsKey('coins')
+//           ? data['coins'] as double? ?? 0.0
+//           : 0.0, // Valeur par défaut sécurisée
+//       lastActive: data['lastActive'] as Timestamp? ??
+//           Timestamp.now(), // Utilisation de l'heure actuelle si manquante
+//       createdAt: data['createdAt'] as Timestamp? ??
+//           Timestamp.now(), // Utilisation de l'heure actuelle si manquante
+//       stars: data['stars'] as double? ?? 0.0, // Valeur par défaut
+//       levelUser:
+//           data['levelUser'] as String? ?? 'beginner', // Valeur par défaut
+//       userItemsNbr: (data['userItemsNbr'] is int)
+//           ? data['userItemsNbr'] as int
+//           : 0, // Validation de type
+//     );
 //   }
 //
-//   static Transfer fromMap(Map<String, dynamic> map) {
-//     return Transfer(
-//       id: map['id'],
-//       fromUser: map['fromUser'],
-//       toUser: map['toUser'],
-//       amount: map['amount'],
-//       date: DateTime.parse(map['date']),
-//     );
+//   Map<String, dynamic> toMap() {
+//     // Convertir en carte de données pour Firestore
+//     return {
+//       'uid': uid,
+//       'name': name,
+//       'email': email,
+//       'phone': phone,
+//       'avatar': avatar,
+//       'timeline': timeline,
+//       'state': state,
+//       'role': role,
+//       'plan': plan,
+//       'coins': coins,
+//       'lastActive': lastActive,
+//       'createdAt': createdAt,
+//       'stars': stars,
+//       'levelUser': levelUser,
+//       'userItemsNbr': userItemsNbr,
+//     };
 //   }
 // }
 
@@ -161,4 +216,10 @@ class Transactionss {
       'timestamp': timestamp,
     };
   }
+}
+
+class Gaine {
+  final double coins;
+
+  Gaine({required this.coins});
 }

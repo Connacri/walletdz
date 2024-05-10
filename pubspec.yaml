@@ -46,6 +46,7 @@ dependencies:
   email_validator: ^2.1.17
   flutter_islamic_icons: ^1.0.2
   supabase_flutter: ^2.5.2
+  side_menu_animation: ^1.1.0
   horizontal_calendar: any
   geocoding: ^2.1.1
   geolocator: ^10.1.0
@@ -66,6 +67,10 @@ dependencies:
   cupertino_icons: ^1.0.2
   decimal:
   openfoodfacts: ^3.2.1
+  video_player:
+  chewie:
+  flutter_easyloading:
+  wakelock_plus:
 
 dev_dependencies:
   flutter_test:
