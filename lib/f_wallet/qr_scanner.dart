@@ -93,7 +93,7 @@ class _QrScannerState extends State<QrScanner> {
                         padding: const EdgeInsets.all(28.0),
                         child: Text(
                           'Wainting To Scan...',
-                          style: Theme.of(context).textTheme.headline5,
+                          style: Theme.of(context).textTheme.headlineMedium,
                         ),
                       ),
                     ],
@@ -115,12 +115,12 @@ class _QrScannerState extends State<QrScanner> {
         Text(
           result!.code.toString(),
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.headline5,
+          style: Theme.of(context).textTheme.headlineMedium,
         ),
         Text(
           'Code Content \n Unacceptable Character!!!',
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.headline5,
+          style: Theme.of(context).textTheme.headlineMedium,
         ),
       ],
     ));
@@ -399,7 +399,7 @@ class _FutureBuilderScannedItemSingleState
           if (snapshot.connectionState == ConnectionState.none) {
             return Text(
               'Error!!!',
-              style: Theme.of(context).textTheme.headline5,
+              style: Theme.of(context).textTheme.headlineMedium,
             );
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -633,7 +633,7 @@ class _FutureBuilderScannedItemSingleState
           child: Text(
             'Item Exist In Our Base But \nNot Have Dealer & Prices',
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headline5,
+            style: Theme.of(context).textTheme.headlineMedium,
           ),
         ),
         Center(

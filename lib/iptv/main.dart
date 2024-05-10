@@ -16,12 +16,12 @@ class MyAppIptv extends StatelessWidget {
     bool isRTL = languageCode == "ar";
 
     return MaterialApp(
-      //debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: Colors.blue[900],
-        colorScheme:
-            ColorScheme.fromSwatch().copyWith(secondary: Colors.blue[600]),
-      ),
+          //primaryColor: Colors.blue[900],
+          // colorScheme:
+          //     ColorScheme.fromSwatch().copyWith(secondary: Colors.blue[600]),
+          ),
       home: Directionality(
         textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
         child: Builder(
