@@ -11,6 +11,8 @@ import 'navbar/curved_navigation_bar.dart';
 
 class MyAppIptv extends StatelessWidget {
   String languageCode = Platform.localeName.split('_')[0];
+  static const String _title = 'IPTV Oran;
+
   @override
   Widget build(BuildContext context) {
     bool isRTL = languageCode == "ar";
@@ -18,10 +20,16 @@ class MyAppIptv extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-          //primaryColor: Colors.blue[900],
-          // colorScheme:
-          //     ColorScheme.fromSwatch().copyWith(secondary: Colors.blue[600]),
-          ),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
+          fontFamily: 'OSWALD'),
+      locale: const Locale('fr', 'CA'),
+
+      //scaffoldMessengerKey: Utils.messengerKey,
+      navigatorKey: navigatorKey,
+      debugShowCheckedModeBanner: false,
+       title: _title,
+      themeMode: ThemeMode.dark,
       home: Directionality(
         textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
         child: Builder(
