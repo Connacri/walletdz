@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../f_wallet/home.dart';
+
 import 'Models.dart';
 import 'home.dart';
 
@@ -79,6 +79,7 @@ class UserProvider with ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Map<String, dynamic> _currentUserData = {};
+
   Map<String, dynamic> get currentUserData => _currentUserData;
 
   Future<Map<String, dynamic>> fetchCurrentUserData() async {
@@ -100,6 +101,7 @@ class UserProvider with ChangeNotifier {
   }
 
   Map<String, dynamic> _scannedUserData = {};
+
   Map<String, dynamic> get scannedUserData => _scannedUserData;
 
   Future<Map<String, dynamic>> fetchScannedUserData(String scannedUser) async {
@@ -137,6 +139,7 @@ class MyWallet3 extends StatelessWidget {
   });
 
   final String userId;
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(

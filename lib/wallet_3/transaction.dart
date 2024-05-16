@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:walletdz/wallet_3/payment.dart';
-import 'TotalCoinsWidget.dart';
+
 import 'UserListPageCoins.dart';
 import 'mainLocal.dart';
 

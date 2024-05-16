@@ -1,15 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart' as intl;
+import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
-
-import 'package:intl/intl.dart';
-
 import 'package:shimmer/shimmer.dart';
-import 'package:intl/intl.dart' as intl;
 import 'package:walletdz/f_wallet/payment.dart';
 
 import '../wallet_3/mainLocal.dart';

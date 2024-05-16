@@ -2,11 +2,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
-import 'models.dart';
-import 'providers.dart';
+
 import 'NetworkingPageHeader.dart';
 import 'QrScanner.dart';
 import 'lastUsersList.dart';
+import 'models.dart';
+import 'providers.dart';
 
 class mainDz extends StatelessWidget {
   const mainDz({

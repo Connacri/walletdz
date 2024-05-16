@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:walletdz/iptv/utils/modal_channel_info.dart';
 
 import '../l10n/localization.dart';
@@ -21,6 +21,7 @@ class _ListIptvPageState extends State<ListIptvPage> {
   int selectedCardIndex = -1;
   List<ChannelInfo> channels = [];
   GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();

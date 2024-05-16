@@ -6,11 +6,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart' as intl;
+
 import 'UserListPageCoins.dart';
 import 'models1.dart';
 import 'providers.dart';
@@ -73,6 +73,7 @@ class _TransactionPage1State extends State<TransactionPage1> {
   final GlobalKey<FormState> _formCoinsKey = GlobalKey<FormState>();
   bool _isSubmitting = false;
   final currentUser = FirebaseAuth.instance.currentUser!.uid;
+
   @override
   void initState() {
     // TODO: implement initState

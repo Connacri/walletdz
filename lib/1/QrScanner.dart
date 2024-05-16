@@ -1,18 +1,20 @@
 import 'dart:developer';
 import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+
 import 'payment.dart';
-import 'test.dart';
 
 class QrScanner extends StatefulWidget {
   const QrScanner({
     super.key,
     // required this.currentUser,
   });
+
   // final String currentUser;
   @override
   _QrScannerState createState() => _QrScannerState();
@@ -29,8 +31,10 @@ class _QrScannerState extends State<QrScanner> {
 
   Barcode? result;
   QRViewController? controller;
+
   //final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   final GlobalKey qrKey = GlobalKey();
+
   @override
   void reassemble() {
     super.reassemble();

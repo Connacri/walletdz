@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 class Privacy_Policy extends StatelessWidget {
   final String data = '';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

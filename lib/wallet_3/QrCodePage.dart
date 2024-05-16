@@ -29,7 +29,8 @@ class QRCodePage extends StatelessWidget {
           width: 1000,
           height: 600,
           color: Theme.of(context).secondaryHeaderColor,
-          isCornerRounded: true, // Coins arrondis
+          isCornerRounded: true,
+          // Coins arrondis
           // shadow: [
           //   BoxShadow(
           //     color: Colors.black.withOpacity(0.3),

@@ -1,29 +1,23 @@
-import 'dart:math';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:calendar_timeline/calendar_timeline.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/rendering/sliver_persistent_header.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:provider/provider.dart';
+import 'package:ticket_widget/ticket_widget.dart';
+
 import '../MyListLotties.dart';
+import '../Profile.dart';
 import '../f_wallet/main.dart';
 import '../f_wallet/payment.dart';
 import '../f_wallet/qr_scanner.dart';
 import '../f_wallet/usersList.dart';
-
-import 'package:intl/intl.dart' as intl;
-import '../Profile.dart';
-//import 'package:screenshot/screenshot.dart';
-import 'package:shimmer/shimmer.dart';
-import 'package:ticket_widget/ticket_widget.dart';
-
 import 'models.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -794,7 +788,8 @@ class QRCodePage extends StatelessWidget {
           width: 1000,
           height: 600,
           color: Theme.of(context).secondaryHeaderColor,
-          isCornerRounded: true, // Coins arrondis
+          isCornerRounded: true,
+          // Coins arrondis
           // shadow: [
           //   BoxShadow(
           //     color: Colors.black.withOpacity(0.3),
@@ -892,6 +887,7 @@ class listMove extends StatelessWidget {
       : super(key: key);
   final ScrollController scrollController;
   final List images;
+
   @override
   Widget build(BuildContext context) {
     return Container(

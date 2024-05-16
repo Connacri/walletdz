@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as htmlParser;
-import 'package:html/dom.dart' as htmlDom;
+import 'package:http/http.dart' as http;
 
 class openFoodFacts extends StatefulWidget {
   @override

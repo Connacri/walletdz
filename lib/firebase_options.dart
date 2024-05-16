@@ -73,8 +73,10 @@ class DefaultFirebaseOptions {
     projectId: 'walletdz-d12e0',
     databaseURL: 'https://walletdz-d12e0-default-rtdb.firebaseio.com',
     storageBucket: 'walletdz-d12e0.appspot.com',
-    androidClientId: '330293988254-oipcq87lmch78m131nauh2b6c2fb0875.apps.googleusercontent.com',
-    iosClientId: '330293988254-gfocd18j16kdnsvqhp1fk61ggr6ovp42.apps.googleusercontent.com',
+    androidClientId:
+        '330293988254-oipcq87lmch78m131nauh2b6c2fb0875.apps.googleusercontent.com',
+    iosClientId:
+        '330293988254-gfocd18j16kdnsvqhp1fk61ggr6ovp42.apps.googleusercontent.com',
     iosBundleId: 'com.wallet.dz.walletdz',
   );
 }

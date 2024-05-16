@@ -5,19 +5,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:calendar_timeline/calendar_timeline.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+import 'package:path/path.dart' as Path;
 import 'package:provider/provider.dart';
 
-import 'package:path/path.dart' as Path;
-
 import '../Oauth/Ogoogle/googleSignInProvider.dart';
-
-import 'package:intl/intl.dart';
-
-import 'package:image_picker/image_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 class Profile extends StatefulWidget {
   const Profile({Key? key}) : super(key: key);

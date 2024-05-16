@@ -1,8 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:path/path.dart';
 import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'models.dart';
@@ -266,6 +265,7 @@ class WalletProvider extends ChangeNotifier {
   StreamSubscription<QuerySnapshot>? _transactionsSubscription;
 
   double get balance => _balance;
+
   List<Transactions> get transactions => _transactions;
 
   WalletProvider({required this.currentUser}) {
@@ -328,8 +328,11 @@ class UserProvider with ChangeNotifier {
 
   // Getters pour accéder aux valeurs
   double get coins => _coins;
+
   String get displayName => _displayName;
+
   String get email => _email;
+
   String get avatar => _avatar;
   bool _isDisposed = false; // Suivre si le provider est supprimé
   StreamSubscription<DocumentSnapshot>? _coinsSubscription;
@@ -367,6 +370,7 @@ class UserProvider with ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Map<String, dynamic> _currentUserData = {};
+
   Map<String, dynamic> get currentUserData => _currentUserData;
 
   Future<Map<String, dynamic>> fetchCurrentUserData() async {
@@ -388,6 +392,7 @@ class UserProvider with ChangeNotifier {
   }
 
   Map<String, dynamic> _scannedUserData = {};
+
   Map<String, dynamic> get scannedUserData => _scannedUserData;
 
   Future<Map<String, dynamic>> fetchScannedUserData(String scannedUser) async {

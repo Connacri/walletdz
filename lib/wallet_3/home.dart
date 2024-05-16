@@ -1,20 +1,15 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart' as intl;
 import 'package:walletdz/wallet_3/payment.dart';
+
 import '../MyListLotties.dart';
 import '../Profile.dart';
-import '../wallet_3/two_dimensional.dart';
-import '../open_food/JsonTest.dart';
-import '../open_food/MyAppFood.dart';
 import '../wallet_3/QrScanner.dart';
 import '../wallet_3/UserListPageCoins.dart';
-
-import 'QrCodePage.dart';
-import 'TotalCoinsWidget.dart';
 import 'mainLocal.dart';
 
 class h0me extends StatelessWidget {

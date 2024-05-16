@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -9,6 +10,7 @@ class VerifyEmailPage extends StatefulWidget {
     Key? key,
     // required this.email
   }) : super(key: key);
+
   //final String email;
   @override
   State<VerifyEmailPage> createState() => _VerifyEmailPageState();

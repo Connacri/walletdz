@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../about.dart';
 import '../utils/modal_channel_info.dart';
 

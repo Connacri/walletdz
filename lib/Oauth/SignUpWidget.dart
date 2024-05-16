@@ -99,8 +99,8 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                                     style: const TextStyle(
                                       fontSize: 25,
                                     ),
-                                    keyboardType: TextInputType
-                                        .emailAddress, //.emailAddress,
+                                    keyboardType: TextInputType.emailAddress,
+                                    //.emailAddress,
                                     controller: emailController,
                                     textInputAction: TextInputAction.next,
                                     decoration: InputDecoration(

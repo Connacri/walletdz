@@ -3,8 +3,9 @@ import 'package:calendar_timeline/calendar_timeline.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:lottie/lottie.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:lottie/lottie.dart';
+
 import 'Models.dart';
 
 class utilsFunctions {
@@ -79,7 +80,8 @@ class utilsFunctions {
                 ),
               ),
               Lottie.asset(
-                'assets/lotties/animation_lmqwf1by.json', // Chemin vers votre animation Lottie
+                'assets/lotties/animation_lmqwf1by.json',
+                // Chemin vers votre animation Lottie
                 width: 150,
                 height: 150,
                 repeat: true,
@@ -163,7 +165,8 @@ class utilsFunctions {
                 ),
               ),
               Lottie.asset(
-                'assets/lotties/animation_lmqwf1by.json', // Chemin vers votre animation Lottie
+                'assets/lotties/animation_lmqwf1by.json',
+                // Chemin vers votre animation Lottie
                 width: 150,
                 height: 150,
                 repeat: false,

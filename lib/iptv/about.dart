@@ -1,13 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
+
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
-import 'package:walletdz/iptv/utils/ads.dart';
-import 'dart:convert';
-
 import 'package:walletdz/iptv/utils/modal_channel_info.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
@@ -31,6 +29,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   late ChewieController _chewieController;
   List<ChannelInfo> favoriteChannels = [];
   bool isVideoPlaying = false;
+
   @override
   void initState() {
     super.initState();
@@ -59,6 +58,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     _videoPlayerController.dispose();
     super.dispose();
   }
+
 /*
   Future<void> _loadFavoriteChannels() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

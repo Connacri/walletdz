@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:firebase_core/firebase_core.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:walletdz/iptv/pages/favorite_page.dart';
@@ -11,7 +11,7 @@ import 'navbar/curved_navigation_bar.dart';
 
 class MyAppIptv extends StatelessWidget {
   String languageCode = Platform.localeName.split('_')[0];
-  static const String _title = 'IPTV Oran;
+  static const String _title = 'IPTV Oran';
 
   @override
   Widget build(BuildContext context) {
@@ -26,9 +26,9 @@ class MyAppIptv extends StatelessWidget {
       locale: const Locale('fr', 'CA'),
 
       //scaffoldMessengerKey: Utils.messengerKey,
-      navigatorKey: navigatorKey,
-      debugShowCheckedModeBanner: false,
-       title: _title,
+      // navigatorKey: navigatorKey,
+      // debugShowCheckedModeBanner: false,
+      title: _title,
       themeMode: ThemeMode.dark,
       home: Directionality(
         textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,

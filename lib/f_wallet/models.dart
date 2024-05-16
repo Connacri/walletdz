@@ -22,6 +22,7 @@ class ListFood2 {
     required this.createdAt,
     required this.user,
   });
+
   // factory ListFood2.fromSnapshot(
   //     DocumentSnapshot<Map<String, dynamic>> snapshot) {
   //   Map<String, dynamic> data = snapshot.data()!;
@@ -51,6 +52,7 @@ class ListFood2 {
       user: map['user'],
     );
   }
+
   Map<String, dynamic> toMap() {
     return {
       'docId': docId,

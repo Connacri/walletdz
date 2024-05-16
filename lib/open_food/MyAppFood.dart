@@ -1,12 +1,9 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:html/parser.dart' as htmlParser;
 import 'package:html/dom.dart' as dom;
-import 'package:openfoodfacts/openfoodfacts.dart';
+import 'package:http/http.dart' as http;
 
-import 'openfoodfacts .dart';
 import 'jsoncodescan.dart';
+import 'openfoodfacts .dart';
 
 class MyAppFood extends StatelessWidget {
   @override
@@ -29,6 +26,7 @@ class ProductList extends StatefulWidget {
 
 class _ProductListState extends State<ProductList> {
   String resultText = 'Initial Text';
+
   @override
   void initState() {
     // TODO: implement initState

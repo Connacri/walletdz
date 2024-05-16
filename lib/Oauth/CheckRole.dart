@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
-import 'package:walletdz/wallet_3/mainLocal.dart';
 
 import '../1/home1.dart';
 import '../DZWallet/home.dart';

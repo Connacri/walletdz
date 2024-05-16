@@ -1,13 +1,12 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
-
 class Localization {
   static Map<String, Map<String, String>> _localizedValues = {
     'en': {
       "IPTV_Channels": "IPTV Channels",
       "Providers": "Providers",
-      "You_haven_added_IPTV_provider": "You haven't added an IPTV provider yet ",
+      "You_haven_added_IPTV_provider":
+          "You haven't added an IPTV provider yet ",
       "Import_M3U_File": "Import M3U File",
       "Favorite_Channels": "Favorite Channels",
       "Remove": "Remove",
@@ -30,12 +29,14 @@ class Localization {
       "Remove": "Remove",
       "Username": "Username",
       "Password": "Password",
-      "Import_m3u_with_username_and_password": "Import M3U with username and password",
+      "Import_m3u_with_username_and_password":
+          "Import M3U with username and password",
     },
     'fr': {
       "IPTV_Channels": "Chaînes IPTV",
       "Providers": "Fournisseurs",
-      "You_haven_added_IPTV_provider": "Vous n'avez pas encore ajouté de fournisseur IPTV",
+      "You_haven_added_IPTV_provider":
+          "Vous n'avez pas encore ajouté de fournisseur IPTV",
       "Import_M3U_File": "Importer un fichier M3U",
       "Favorite_Channels": "Chaînes favorites",
       "Remove": "Supprimer",
@@ -50,7 +51,8 @@ class Localization {
       "Add_New_IPTV_from_URL": "Ajouter un nouveau IPTV depuis une URL",
       "IPTV_from_TEXT": "IPTV depuis un texte",
       "IPTV_from_Storage": "IPTV depuis le stockage",
-      "You_need_Update_App": "Vous avez besoin de mettre à jour l'application !",
+      "You_need_Update_App":
+          "Vous avez besoin de mettre à jour l'application !",
       "Name": "Nom",
       "Cancel": "Annuler",
       "Add": "Ajouter",
@@ -60,7 +62,8 @@ class Localization {
     'es': {
       "IPTV_Channels": "Canales de IPTV",
       "Providers": "Proveedores",
-      "You_haven_added_IPTV_provider": "Aún no has agregado un proveedor de IPTV",
+      "You_haven_added_IPTV_provider":
+          "Aún no has agregado un proveedor de IPTV",
       "Import_M3U_File": "Importar archivo M3U",
       "Favorite_Channels": "Canales favoritos",
       "Remove": "Eliminar",
@@ -85,7 +88,8 @@ class Localization {
     'de': {
       "IPTV_Channels": "IPTV-Kanäle",
       "Providers": "Anbieter",
-      "You_haven_added_IPTV_provider": "Du hast noch keinen IPTV-Anbieter hinzugefügt",
+      "You_haven_added_IPTV_provider":
+          "Du hast noch keinen IPTV-Anbieter hinzugefügt",
       "Import_M3U_File": "M3U-Datei importieren",
       "Favorite_Channels": "Lieblingskanäle",
       "Remove": "Entfernen",
@@ -185,7 +189,8 @@ class Localization {
     'it': {
       "IPTV_Channels": "Canali IPTV",
       "Providers": "Provider",
-      "You_haven_added_IPTV_provider": "Non hai ancora aggiunto un provider IPTV",
+      "You_haven_added_IPTV_provider":
+          "Non hai ancora aggiunto un provider IPTV",
       "Import_M3U_File": "Importa file M3U",
       "Favorite_Channels": "Canali preferiti",
       "Remove": "Rimuovi",
@@ -210,7 +215,8 @@ class Localization {
     'pt': {
       "IPTV_Channels": "Canais IPTV",
       "Providers": "Fornecedores",
-      "You_haven_added_IPTV_provider": "Você ainda não adicionou um fornecedor de IPTV",
+      "You_haven_added_IPTV_provider":
+          "Você ainda não adicionou um fornecedor de IPTV",
       "Import_M3U_File": "Importar Arquivo M3U",
       "Favorite_Channels": "Canais Favoritos",
       "Remove": "Remover",
@@ -257,7 +263,6 @@ class Localization {
       "IPTV_Text": "Текст IPTV",
       "Remove": "Удалить",
     }
-
   };
 
   static String _currentLanguageCode = 'en'; // Default language is English
@@ -269,6 +274,7 @@ class Localization {
       print('Language not supported: $languageCode');
     }
   }
+
   static void setInitialLanguage() {
     String localeName = Platform.localeName;
     String deviceLanguage = localeName.split('_')[0];
@@ -279,8 +285,6 @@ class Localization {
       print('Device language not supported: $deviceLanguage');
     }
   }
-
-
 
   static String get(String key) {
     return _localizedValues[_currentLanguageCode]?.containsKey(key) == true

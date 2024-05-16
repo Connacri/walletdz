@@ -1,16 +1,9 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:calendar_timeline/calendar_timeline.dart';
-import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:lottie/lottie.dart';
-import 'package:pretty_qr_code/pretty_qr_code.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../f_wallet/home.dart';
-import '../f_wallet/payment.dart';
-import '../f_wallet/qr_scanner.dart';
-import '../f_wallet/usersList.dart';
 
 // class UserClass {
 //   final String id;
@@ -43,6 +36,7 @@ class UserDataProvider extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Map<String, dynamic> _currentUserData = {};
+
   Map<String, dynamic> get currentUserData => _currentUserData;
 
   Future<Map<String, dynamic>> fetchCurrentUserData() async {
@@ -64,6 +58,7 @@ class UserDataProvider extends ChangeNotifier {
   }
 
   Map<String, dynamic> _scannedUserData = {};
+
   Map<String, dynamic> get scannedUserData => _scannedUserData;
 
   Future<Map<String, dynamic>> fetchScannedUserData(String scannedUser) async {

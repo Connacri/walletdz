@@ -1,7 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 import 'AuthPage.dart';
 import 'CheckRole.dart';
 import 'VerifyEmailPage.dart';
@@ -42,4 +41,3 @@ class _verifi_authState extends State<verifi_auth> {
         ),
       );
 }
-

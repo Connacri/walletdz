@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'models1.dart';
 
 // class UserProviderFire extends ChangeNotifier {
@@ -120,6 +122,7 @@ class UserProviderFire extends ChangeNotifier {
   UserModele? _currentUser; // Champ privé pour stocker l'utilisateur actuel
   // Getter public pour accéder au champ privé
   UserModele? get currentUser => _currentUser;
+
   UserProviderFire() {
     initializeSharedPreferences(); // Initialiser Shared Preferences
     loadUser(); // Charger les données utilisateur
@@ -203,6 +206,7 @@ class UserProviderFire extends ChangeNotifier {
   }
 
   UserModele? _scannedUserData;
+
   UserModele? get scannedUserData => _scannedUserData;
 
   Future<UserModele?> fetchScannedUserData(String scannedUser) async {

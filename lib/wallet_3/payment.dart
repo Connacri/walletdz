@@ -5,12 +5,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:lottie/lottie.dart';
-import 'package:provider/provider.dart';
 import 'package:intl/intl.dart' as intl;
-import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
 import 'Models.dart';
@@ -28,6 +25,7 @@ class TransactionPage extends StatefulWidget {
 
 class _TransactionPageState extends State<TransactionPage> {
   final TextEditingController amountController = TextEditingController();
+
   // Ajout de cette ligne
   final GlobalKey<FormState> _formCoinsMKey = GlobalKey<FormState>();
   bool _isSubmitting =
@@ -91,8 +89,8 @@ class _TransactionPageState extends State<TransactionPage> {
                               color: Colors.black54),
                         ),
                         subtitle: AnimatedFlipCounter(
-                          value: userData[
-                              'coins'], // Utilisez la partie entière de priceValue.
+                          value: userData['coins'],
+                          // Utilisez la partie entière de priceValue.
                           //prefix: "DZD ",
                           suffix: ' DZD',
                           fractionDigits: 2,
@@ -191,6 +189,7 @@ class _IncrementCoinsRowState extends State<IncrementCoinsRow> {
   double _amountToAdd = 0.0;
   final GlobalKey<FormState> _formCoinsLKey = GlobalKey<FormState>();
   bool _isSubmitting = false;
+
   @override
   void dispose() {
     _amountController.dispose();
@@ -293,7 +292,8 @@ class _IncrementCoinsRowState extends State<IncrementCoinsRow> {
                             size: 25,
                           ),
                   ),
-                  filled: _isSubmitting ? true : false, //<-- SEE HERE
+                  filled: _isSubmitting ? true : false,
+                  //<-- SEE HERE
                   fillColor: _isSubmitting ? Colors.grey.shade200 : null,
                   hintStyle: TextStyle(color: Colors.black38),
                   hintText: 'Alimentation Personnel',
@@ -634,7 +634,8 @@ class _TransactionSubmitButtonState extends State<TransactionSubmitButton> {
                       size: 25,
                     ),
             ),
-            filled: _isSubmitting ? true : false, //<-- SEE HERE
+            filled: _isSubmitting ? true : false,
+            //<-- SEE HERE
             fillColor: _isSubmitting ? Colors.grey.shade200 : null,
             hintStyle: TextStyle(
               fontSize: 35,
@@ -714,7 +715,8 @@ void showCongratulationsDialog(
               ),
             ),
             Lottie.asset(
-              'assets/lotties/animation_lmqwf1by.json', // Chemin vers votre animation Lottie
+              'assets/lotties/animation_lmqwf1by.json',
+              // Chemin vers votre animation Lottie
               width: 150,
               height: 150,
               repeat: true,
@@ -798,7 +800,8 @@ void showTransactionErrorDialog(BuildContext context, String errorMessage) {
               ),
             ),
             Lottie.asset(
-              'assets/lotties/animation_lmqwf1by.json', // Chemin vers votre animation Lottie
+              'assets/lotties/animation_lmqwf1by.json',
+              // Chemin vers votre animation Lottie
               width: 150,
               height: 150,
               repeat: false,
@@ -903,8 +906,8 @@ class TotalCoinsWidget extends StatelessWidget {
                 // Lottie.asset(
                 //     'assets/lotties/127466-glassmorphism-ellipse-lottie-animation.json'),
                 AnimatedFlipCounter(
-                  value:
-                      totalGaines, // Utilisez la partie entière de priceValue.
+                  value: totalGaines,
+                  // Utilisez la partie entière de priceValue.
                   prefix: "Gaines : ",
                   suffix: ' DZD',
                   fractionDigits: 2,

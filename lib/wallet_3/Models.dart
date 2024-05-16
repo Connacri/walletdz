@@ -17,7 +17,6 @@ class UserModel {
   final bool state;
   final String timeline;
   final int userItemsNbr;
-  
 
   UserModel({
     required this.id,
@@ -124,6 +123,7 @@ class ListFood2 {
     required this.createdAt,
     required this.user,
   });
+
   // factory ListFood2.fromSnapshot(
   //     DocumentSnapshot<Map<String, dynamic>> snapshot) {
   //   Map<String, dynamic> data = snapshot.data()!;
@@ -153,6 +153,7 @@ class ListFood2 {
       user: map['user'],
     );
   }
+
   Map<String, dynamic> toMap() {
     return {
       'docId': docId,
@@ -188,6 +189,7 @@ class TransactionModel {
   String receiverUserId;
   double amount;
   final Timestamp timestamp;
+
   // Utilisez Timestamp au lieu de DateTime
 
   TransactionModel({

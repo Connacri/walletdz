@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart'; // Importation pour le formatage
 import 'package:lottie/lottie.dart';
-import 'providers.dart';
+import 'package:provider/provider.dart';
 
 import '../Profile.dart';
+import 'providers.dart';
 
 class NetworkingPageHeader extends SliverPersistentHeaderDelegate {
   @override

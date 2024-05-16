@@ -1,20 +1,10 @@
-import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:flutterflow_paginate_firestore/bloc/pagination_listeners.dart';
 import 'package:flutterflow_paginate_firestore/paginate_firestore.dart';
-import 'package:flutterflow_paginate_firestore/widgets/bottom_loader.dart';
-import 'package:flutterflow_paginate_firestore/widgets/empty_display.dart';
-import 'package:flutterflow_paginate_firestore/widgets/empty_separator.dart';
-import 'package:flutterflow_paginate_firestore/widgets/initial_loader.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lottie/lottie.dart';
-import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
-import 'package:shimmer/shimmer.dart';
-import 'package:intl/intl.dart' as intl;
 
 import 'Historique.dart';
 
@@ -25,6 +15,7 @@ class UserListPageCoins extends StatelessWidget {
   });
 
   final String userId;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -195,6 +186,7 @@ class MyWidgetPaginateFirestore extends StatefulWidget {
   });
 
   final String userId;
+
   @override
   State<MyWidgetPaginateFirestore> createState() =>
       _MyWidgetPaginateFirestoreState();
@@ -203,6 +195,7 @@ class MyWidgetPaginateFirestore extends StatefulWidget {
 class _MyWidgetPaginateFirestoreState extends State<MyWidgetPaginateFirestore> {
   PaginateRefreshedChangeListener refreshChangeListener =
       PaginateRefreshedChangeListener();
+
   @override
   Widget build(BuildContext context) {
     return
@@ -274,6 +267,7 @@ class listhorizontal5 extends StatefulWidget {
   });
 
   final String userId;
+
   @override
   State<listhorizontal5> createState() => _listhorizontal5State();
 }
@@ -349,8 +343,8 @@ class _listhorizontal5State extends State<listhorizontal5> {
                           width: avatarSize + 20,
                           height: avatarSize + 20,
                           child: CircleAvatar(
-                            backgroundColor: Colors
-                                .transparent, // Permet à l'image de couvrir complètement le cercle
+                            backgroundColor: Colors.transparent,
+                            // Permet à l'image de couvrir complètement le cercle
                             child: CachedNetworkImage(
                               imageUrl: user['avatar'],
                               imageBuilder: (context, imageProvider) =>
@@ -361,9 +355,11 @@ class _listhorizontal5State extends State<listhorizontal5> {
                               placeholder: (context, url) =>
                                   CircularProgressIndicator(
                                 strokeWidth: 2,
-                              ), // Placeholder pendant le chargement de l'image
-                              errorWidget: (context, url, error) => Icon(Icons
-                                  .error), // Widget à afficher en cas d'erreur de chargement de l'image
+                              ),
+                              // Placeholder pendant le chargement de l'image
+                              errorWidget: (context, url, error) =>
+                                  Icon(Icons.error),
+                              // Widget à afficher en cas d'erreur de chargement de l'image
                               fit: BoxFit.cover,
                             ),
                           ),

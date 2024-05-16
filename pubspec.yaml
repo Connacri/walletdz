@@ -71,6 +71,7 @@ dependencies:
   chewie:
   flutter_easyloading:
   wakelock_plus:
+  postgres: ^3.2.0
 
 dev_dependencies:
   flutter_test:

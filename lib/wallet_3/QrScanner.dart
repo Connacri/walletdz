@@ -1,14 +1,14 @@
 import 'dart:developer';
 import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
-
-
 class QrScanner extends StatefulWidget {
   const QrScanner({Key? key}) : super(key: key);
+
   @override
   _QrScannerState createState() => _QrScannerState();
 }
@@ -412,15 +412,14 @@ class _FutureBuilderScannedItemSingleState
           }
           if (snapshot.connectionState == ConnectionState.done) {
             if (snapshot.hasData) {
-
-             // Future.delayed(Duration(milliseconds: 100), () {
+              // Future.delayed(Duration(milliseconds: 100), () {
               //  Navigator.of(context).pushReplacement(
-               //   MaterialPageRoute(
-                //    builder: (context) =>
-                       // TransactionPage(scannedUserId: dataid.toString()),
-                //  ),
-             //   );
-             // });
+              //   MaterialPageRoute(
+              //    builder: (context) =>
+              // TransactionPage(scannedUserId: dataid.toString()),
+              //  ),
+              //   );
+              // });
 
               // return Padding(
               //   padding: const EdgeInsets.symmetric(horizontal: 18.0),

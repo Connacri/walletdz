@@ -40,14 +40,18 @@ class UserModele {
     return UserModele(
       uid: uid,
       name: data['displayName'] ?? 'Nom Inconnu',
-      email: data['email'] as String? ?? '', // Default value if null
-      phone: data['phone'] as int? ?? 0, // Default value if null
+      email: data['email'] as String? ?? '',
+      // Default value if null
+      phone: data['phone'] as int? ?? 0,
+      // Default value if null
       avatar: data['avatar'] as String? ?? '',
       timeline: data['timeline'] as String? ?? '',
       state: data['state'] as bool? ?? false,
       role: data['role'] as String? ?? '',
-      plan: data['plan'] ?? 'free', // Default plan
-      coins: data['coins'] as double? ?? 0.0, // Default coins
+      plan: data['plan'] ?? 'free',
+      // Default plan
+      coins: data['coins'] as double? ?? 0.0,
+      // Default coins
       lastActive: data['lastActive'] as Timestamp,
       createdAt: data['createdAt'] as Timestamp,
       stars: data['stars'] as double? ?? 0.0,
@@ -192,7 +196,8 @@ class Transactionss {
 
   factory Transactionss.fromMap(Map<String, dynamic> map) {
     return Transactionss(
-      id: map['id'] ?? '', // Gestion des valeurs par défaut
+      id: map['id'] ?? '',
+      // Gestion des valeurs par défaut
       amount: map['amount'] ?? 0.0,
       avatar: map['avatar'] ?? '',
       description: map['description'] ?? '',

@@ -121,14 +121,18 @@ class UserModele {
     return UserModele(
       uid: uid,
       name: data['displayName'] ?? 'Nom Inconnu',
-      email: data['email'] as String? ?? '', // Default value if null
-      phone: data['phone'] as int? ?? 0, // Default value if null
+      email: data['email'] as String? ?? '',
+      // Default value if null
+      phone: data['phone'] as int? ?? 0,
+      // Default value if null
       avatar: data['avatar'] as String? ?? '',
       timeline: data['timeline'] as String? ?? '',
       state: data['state'] as bool? ?? false,
       role: data['role'] as String? ?? '',
-      plan: data['plan'] ?? 'free', // Default plan
-      balance: data['balance'] as double? ?? 0.0, // Default coins
+      plan: data['plan'] ?? 'free',
+      // Default plan
+      balance: data['balance'] as double? ?? 0.0,
+      // Default coins
       lastActive: data['lastActive'] as Timestamp,
       createdAt: data['createdAt'] as Timestamp,
       stars: data['stars'] as double? ?? 0.0,
@@ -187,13 +191,18 @@ class Transactions {
     }
 
     return Transactions(
-      id: doc.id, // Utilisation de l'ID du document
-      amount: (doc['amount'] as double?) ?? 0.0, // Valeur par défaut
+      id: doc.id,
+      // Utilisation de l'ID du document
+      amount: (doc['amount'] as double?) ?? 0.0,
+      // Valeur par défaut
       description: (doc['description'] as String?) ?? 'Pas de description',
       direction: (doc['direction'] as bool?) ?? false,
-      state: doc['state'] as String? ?? 'inconnu', // État par défaut
-      timestamp: doc['timestamp'] as Timestamp, // Vérifiez l'existence
-      avatar: doc['avatar'] as String?, // Champ optionnel
+      state: doc['state'] as String? ?? 'inconnu',
+      // État par défaut
+      timestamp: doc['timestamp'] as Timestamp,
+      // Vérifiez l'existence
+      avatar: doc['avatar'] as String?,
+      // Champ optionnel
       displayName: doc['displayName'] as String? ?? '', // Valeur par défaut
     );
   }
@@ -296,6 +305,7 @@ class TransactionModel {
   String receiverUserId;
   double amount;
   final Timestamp timestamp;
+
   // Utilisez Timestamp au lieu de DateTime
 
   TransactionModel({

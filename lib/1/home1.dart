@@ -1,14 +1,17 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:walletdz/1/providers.dart';
-import 'package:lottie/lottie.dart';
+import 'package:walletdz/1/test.dart';
 import 'package:walletdz/iptv/main.dart';
 
 import '../MyListLotties.dart';
 import 'NetworkingPageHeader.dart';
 import 'QrScanner.dart';
+import 'chat_supabase/main.dart';
+import 'gpt/home.dart';
 import 'models1.dart';
 
 class home1 extends StatelessWidget {
@@ -77,6 +80,39 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             _buildCard(
               context,
+              'assets/lotties/1 (106).json',
+              () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => gpt(),
+                  ),
+                );
+              },
+            ),
+            _buildCard(
+              context,
+              'assets/lotties/1 (20).json',
+              () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => Supabase(),
+                  ),
+                );
+              },
+            ),
+            _buildCard(
+              context,
+              'assets/lotties/1 (26).json',
+              () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => countries(),
+                  ),
+                );
+              },
+            ),
+            _buildCard(
+              context,
               'assets/lotties/1 (85).json',
               () {
                 Navigator.of(context).push(
@@ -88,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             _buildCard(
               context,
-              'assets/lotties/1 (17).json',
+              'assets/lotties/1 (32).json',
               () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
@@ -99,7 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             _buildCard(
               context,
-              'assets/lotties/1 (104).json',
+              'assets/lotties/1 (31).json',
               () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
@@ -169,8 +205,8 @@ class _MyHomePageState extends State<MyHomePage> {
             provider.allTransfers.length,
         builder: (context, isEndReached, child) {
           return Visibility(
-            visible:
-                !isEndReached, // Afficher le bouton si on peut encore charger plus de données
+            visible: !isEndReached,
+            // Afficher le bouton si on peut encore charger plus de données
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(

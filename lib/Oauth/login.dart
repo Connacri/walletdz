@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import '../Oauth/reset_password.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+
+import '../Oauth/reset_password.dart';
 import 'Ogoogle/googleSignInProvider.dart';
 import 'SignUpWidget.dart';
 
@@ -57,6 +58,7 @@ class _LoginWidgetState extends State<LoginWidget> {
   }
 
   bool _obscureText = true;
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -301,7 +303,8 @@ class _LoginWidgetState extends State<LoginWidget> {
                                   MaterialPageRoute(
                                       builder: (context) =>
                                           const reset_password())),
-                            ), //Forgot Password
+                            ),
+                            //Forgot Password
                             const SizedBox(
                               height: 10,
                             ),

@@ -1,8 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/localization.dart';
 import '../utils/modal_channel_info.dart';
@@ -88,6 +89,7 @@ class _AddNewIptvFormState extends State<AddNewIptvForm> {
 
     Navigator.pop(context);
   }
+
 /*
   Future<void> fetchChannels(String mUrl) async {
     final response = await http.get(Uri.parse(mUrl));
