@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
-import 'package:walletdz/1/providers.dart';
-import 'package:walletdz/1/test.dart';
-import 'package:walletdz/iptv/main.dart';
+import '../1/providers.dart';
+import '../1/sembast/1.dart';
+import '../1/test.dart';
+import '../iptv/main.dart';
 
 import '../MyListLotties.dart';
 import 'NetworkingPageHeader.dart';
@@ -78,6 +79,17 @@ class _MyHomePageState extends State<MyHomePage> {
 
           //mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            _buildCard(
+              context,
+              'assets/lotties/1 (45).json',
+              () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => MysembastApp(),
+                  ),
+                );
+              },
+            ),
             _buildCard(
               context,
               'assets/lotties/1 (106).json',

@@ -32,10 +32,10 @@
               "client_type": 3
             },
             {
-              "client_id": "330293988254-gfocd18j16kdnsvqhp1fk61ggr6ovp42.apps.googleusercontent.com",
+              "client_id": "330293988254-frodnvl7tr6nar8m0tq7fp1v057gs4vm.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.wallet.dz.walletdz"
+                "bundle_id": "com.wallet.dz.win"
               }
             }
           ]

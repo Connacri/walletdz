@@ -1,11 +1,13 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timeago/timeago.dart';
 
+import 'account_page.dart';
 import 'classes.dart';
 import 'constants.dart';
+import 'login_page.dart';
+import 'register_page.dart';
 
 /// Page to chat with someone.
 ///
@@ -32,7 +34,7 @@ class _ChatPageState extends State<ChatPage> {
     final myUserId = supabase.auth.currentUser!.id;
     _messagesStream = supabase
         .from('messages')
-        .stream(primaryKey: ['id'])
+        .stream(primaryKey: ['profile_id'])
         .order('created_at')
         .map((maps) => maps
             .map((map) => Message.fromMap(map: map, myUserId: myUserId))
@@ -44,8 +46,11 @@ class _ChatPageState extends State<ChatPage> {
     if (_profileCache[profileId] != null) {
       return;
     }
-    final data =
-        await supabase.from('profiles').select().eq('id', profileId).single();
+    final data = await supabase
+        .from('profiles')
+        .select()
+        .eq('profile_id', profileId)
+        .single();
     final profile = Profile.fromMap(data);
     setState(() {
       _profileCache[profileId] = profile;
@@ -55,7 +60,21 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Chat')),
+      appBar: AppBar(
+        title: const Text('Chat'),
+        actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => AccountPage(),
+                  ),
+                );
+              },
+              icon: Icon(Icons.account_circle_sharp)),
+          IconButton(onPressed: _signOut, icon: Icon(Icons.logout))
+        ],
+      ),
       body: StreamBuilder<List<Message>>(
         stream: _messagesStream,
         builder: (context, snapshot) {
@@ -95,6 +114,31 @@ class _ChatPageState extends State<ChatPage> {
         },
       ),
     );
+  }
+
+  Future<void> _signOut() async {
+    try {
+      await supabase.auth.signOut();
+    } on AuthException catch (error) {
+      if (mounted) {
+        SnackBar(
+          content: Text(error.message),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        );
+      }
+    } catch (error) {
+      if (mounted) {
+        SnackBar(
+          content: const Text('Unexpected error occurred'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        );
+      }
+    } finally {
+      if (mounted) {
+        Navigator.of(context)
+            .pushAndRemoveUntil(RegisterPage.route(), (route) => false);
+      }
+    }
   }
 }
 

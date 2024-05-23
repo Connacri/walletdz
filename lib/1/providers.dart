@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'models1.dart';
 
 // class UserProviderFire extends ChangeNotifier {
@@ -142,22 +140,23 @@ class UserProviderFire extends ChangeNotifier {
   }
 
   Future<void> loadUser() async {
-    if (_isDisposed) return; // Éviter des opérations inutiles
+    if (_isDisposed) return;
 
-    // Vérifier les données utilisateur dans Shared Preferences
     if (_prefs != null && _prefs!.containsKey('currentUser')) {
-      final userJson = _prefs!.getString(
-          'currentUser'); // Récupérer les données depuis Shared Preferences
+      final userJson = _prefs!.getString('currentUser');
       if (userJson != null) {
-        // Charger le modèle utilisateur depuis le JSON
-        final userMap = jsonDecode(userJson); // Convertir le JSON en carte
-        _currentUser = UserModele.fromMap(userMap, _user!.uid); // Créer l'objet
-        notifyListeners(); // Notifier les auditeurs
-        return; // Arrêter l'exécution
+        final userMap = jsonDecode(userJson);
+        // Convertir les `String` en `Timestamp` lors du chargement
+        userMap['lastActive'] =
+            Timestamp.fromDate(DateTime.parse(userMap['lastActive']));
+        userMap['createdAt'] =
+            Timestamp.fromDate(DateTime.parse(userMap['createdAt']));
+        _currentUser = UserModele.fromMap(userMap, _user!.uid);
+        notifyListeners();
+        return;
       }
     }
 
-    // Si pas de données dans Shared Preferences, charger depuis Firestore
     if (_user != null) {
       final userDoc = await FirebaseFirestore.instance
           .collection('Users')
@@ -165,10 +164,16 @@ class UserProviderFire extends ChangeNotifier {
           .get();
 
       if (userDoc.exists && userDoc.data() != null) {
-        _currentUser = UserModele.fromMap(userDoc.data()!, _user!.uid);
-        // Sauvegarder dans Shared Preferences
-        _prefs!.setString('currentUser', jsonEncode(userDoc.data()!));
-        notifyListeners(); // Notifier les auditeurs
+        final userData = userDoc.data()!;
+        _currentUser = UserModele.fromMap(userData, _user!.uid);
+
+        userData['lastActive'] =
+            (userData['lastActive'] as Timestamp).toDate().toIso8601String();
+        userData['createdAt'] =
+            (userData['createdAt'] as Timestamp).toDate().toIso8601String();
+
+        _prefs!.setString('currentUser', jsonEncode(userData));
+        notifyListeners();
       }
     }
   }
@@ -183,11 +188,16 @@ class UserProviderFire extends ChangeNotifier {
         if (_isDisposed) return; // Ne rien faire si l'objet est supprimé
 
         if (snapshot.exists && snapshot.data() != null) {
-          _currentUser = UserModele.fromMap(snapshot.data()!, _user!.uid);
-          _prefs!.setString(
-              'currentUser',
-              jsonEncode(
-                  snapshot.data()!)); // Mettre à jour dans Shared Preferences
+          final userData = snapshot.data()!;
+          _currentUser = UserModele.fromMap(userData, _user!.uid);
+
+          // Convertir les `Timestamp` en `String` avant de les enregistrer
+          userData['lastActive'] =
+              (userData['lastActive'] as Timestamp).toDate().toIso8601String();
+          userData['createdAt'] =
+              (userData['createdAt'] as Timestamp).toDate().toIso8601String();
+
+          _prefs!.setString('currentUser', jsonEncode(userData));
           notifyListeners(); // Notifier les auditeurs
         }
       });

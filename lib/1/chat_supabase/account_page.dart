@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'Avatar.dart';
 import 'constants.dart';
+import 'login_page.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
@@ -68,6 +69,7 @@ class _AccountPageState extends State<AccountPage> {
       'website': website,
       'updated_at': DateTime.now().toIso8601String(),
     };
+    // print(updates);
     try {
       await supabase.from('profiles').upsert(updates);
       if (mounted) {
@@ -117,7 +119,11 @@ class _AccountPageState extends State<AccountPage> {
       }
     } finally {
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/login');
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => LoginPage(),
+          ),
+        );
       }
     }
   }
