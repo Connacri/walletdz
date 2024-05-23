@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 import 'package:provider/provider.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
@@ -18,7 +20,9 @@ class _MysembastAppState extends State<MysembastApp> {
   }
 
   Future<void> _initializeDatabase() async {
-    _db = await databaseFactoryIo.openDatabase('example.db');
+    final dir = await getApplicationDocumentsDirectory();
+    final dbPath = path.join(dir.path, 'example.db');
+    _db = await databaseFactoryIo.openDatabase(dbPath);
     setState(() {});
   }
 
