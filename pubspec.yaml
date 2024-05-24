@@ -46,33 +46,31 @@ dependencies:
   email_validator: ^2.1.17
   flutter_islamic_icons: ^1.0.2
   supabase_flutter: ^2.5.2
-  side_menu_animation: ^1.1.0
   horizontal_calendar: any
   geocoding: ^2.1.1
-  geolocator: ^10.1.0
   map_launcher: ^2.4.0
   open_location_picker: ^1.1.0
   jiffy: any
   google_fonts: ^6.1.0
   googleapis_auth:
   firebase_in_app_messaging: ^0.7.3+2
-  sqflite:
-  path:
-  timelines:
+  sqflite: ^2.3.3+1
+  path: ^1.9.0
+  timelines: ^0.1.0
   animated_flip_counter: ^0.2.6
   pretty_qr_code: ^3.0.0
-  #  firebase_admin: any
   http: ^1.1.0
-  rive:
-  cupertino_icons: ^1.0.2
-  decimal:
+  decimal: ^2.3.3
   openfoodfacts: ^3.2.1
   video_player: ^2.8.6
-  chewie:
-  flutter_easyloading:
-  wakelock_plus:
+  chewie: ^1.8.1
+  flutter_easyloading: ^3.0.5
+  wakelock_plus: ^1.2.5
+  faker: ^2.0.0
   postgres: ^3.2.0
   sembast: ^3.7.1
+  sqflite_common_ffi: ^2.3.3
+
 
 dev_dependencies:
   flutter_test:

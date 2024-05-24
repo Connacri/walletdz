@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
+import 'package:walletdz/1/sqflite/home.dart';
 import '../1/providers.dart';
-import '../1/sembast/1.dart';
+import '../1/sembast/crud.dart';
 import '../1/test.dart';
 import '../iptv/main.dart';
-
 import '../MyListLotties.dart';
 import 'NetworkingPageHeader.dart';
 import 'QrScanner.dart';
@@ -76,9 +76,19 @@ class _MyHomePageState extends State<MyHomePage> {
         height: 120,
         child: ListView(
           shrinkWrap: true, scrollDirection: Axis.horizontal,
-
           //mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            _buildCard(
+              context,
+              'assets/lotties/1 (49).json',
+              () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => MySqfliteApp(),
+                  ),
+                );
+              },
+            ),
             _buildCard(
               context,
               'assets/lotties/1 (45).json',
@@ -147,7 +157,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             _buildCard(
               context,
-              'assets/lotties/1 (31).json',
+              'assets/lotties/1 (12).json',
               () {
                 Navigator.of(context).push(
                   MaterialPageRoute(

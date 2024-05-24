@@ -43,12 +43,12 @@ Future<void> main() async {
   );
 }
 
-Future<Database> initsembastDatabase() async {
-  final appDocumentDir = await getApplicationDocumentsDirectory();
-  final dbPath = p.join(appDocumentDir.path, 'my_sembast_database.db');
-  final database = await databaseFactoryIo.openDatabase(dbPath);
-  return database;
-}
+// Future<Database> initsembastDatabase() async {
+//   final appDocumentDir = await getApplicationDocumentsDirectory();
+//   final dbPath = p.join(appDocumentDir.path, 'my_sembast_database.db');
+//   final database = await databaseFactoryIo.openDatabase(dbPath);
+//   return database;
+// }
 //FlutterNativeSplash.remove();
 
 Future initialization(BuildContext? context) async {
