@@ -66,7 +66,6 @@ class DataGenerator {
       int factureId = await db.insert('factures', {
         'client_id': clientId,
         'date': DateTime.now().toIso8601String(),
-        'cree_a': DateTime.now().toIso8601String(),
       });
 
       // Générer un nombre aléatoire de produits à ajouter à la facture
