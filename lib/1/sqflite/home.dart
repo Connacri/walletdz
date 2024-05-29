@@ -222,15 +222,26 @@ class FacturesScreen extends StatelessWidget {
               itemCount: factures.length,
               itemBuilder: (context, index) {
                 final facture = factures[index];
-                return ListTile(
-                  title: Text('Facture #${facture.idFacture}'),
-                  subtitle: Text(
-                      'Prix Vente: ${facture.montant} - Date: ${facture.date}'),
-                  trailing: IconButton(
-                    icon: Icon(Icons.delete),
-                    onPressed: () {
-                      dbHelper.deleteFacture(facture.idFacture!);
-                    },
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            DetailFacturePage(idFacture: facture.idFacture!),
+                      ),
+                    );
+                  },
+                  child: ListTile(
+                    title: Text('Facture #${facture.idFacture}'),
+                    subtitle: Text(
+                        'Prix Vente: ${facture.idClient} - Date: ${facture.date}'),
+                    trailing: IconButton(
+                      icon: Icon(Icons.delete),
+                      onPressed: () {
+                        dbHelper.deleteFacture(facture.idFacture!);
+                      },
+                    ),
                   ),
                 );
               },
@@ -284,6 +295,64 @@ class _FournisseurListScreenState extends State<FournisseurListScreen> {
                   // Vous pouvez ajouter d'autres informations du fournisseur ici
                 );
               },
+            );
+          }
+        },
+      ),
+    );
+  }
+}
+
+class DetailFacturePage extends StatelessWidget {
+  final int idFacture;
+
+  const DetailFacturePage({Key? key, required this.idFacture})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Détails de la facture'),
+      ),
+      body: FutureBuilder<Map<Facture, List<Produit>>>(
+        future: DatabaseHelper().getDetailsFacture(idFacture),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            print(snapshot.error);
+            return Center(
+                child: Text('Une erreur s\'est produite : ${snapshot.error}'));
+          } else {
+            Facture facture = snapshot.data!.keys.first;
+            List<Produit> produits = snapshot.data!.values.first;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ListTile(
+                  title: Text('Numéro de facture: ${facture.numero}'),
+                  subtitle: Text('Date: ${facture.date}'),
+                ),
+                Divider(),
+                ListTile(
+                  title: Text('Produits associés à cette facture:'),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: produits.length,
+                    itemBuilder: (context, index) {
+                      Produit produit = produits[index];
+                      return ListTile(
+                        title: Text(produit.name),
+                        subtitle: Text('Prix de vente: ${produit.prixVente}'),
+                        // Ajoutez d'autres détails du produit selon vos besoins
+                      );
+                    },
+                  ),
+                ),
+              ],
             );
           }
         },

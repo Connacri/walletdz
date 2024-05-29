@@ -90,13 +90,19 @@ class Produit {
 class FournisseurProduit {
   int idFournisseur;
   int idProduit;
+  int quantity_produit;
 
-  FournisseurProduit({required this.idFournisseur, required this.idProduit});
+  FournisseurProduit({
+    required this.idFournisseur,
+    required this.idProduit,
+    required this.quantity_produit,
+  });
 
   Map<String, dynamic> toMap() {
     return {
       'id_fournisseur': idFournisseur,
       'id_produit': idProduit,
+      'quantity_produit': quantity_produit,
     };
   }
 
@@ -104,6 +110,7 @@ class FournisseurProduit {
     return FournisseurProduit(
       idFournisseur: map['id_fournisseur'],
       idProduit: map['id_produit'],
+      quantity_produit: map['quantity_produit'],
     );
   }
 }
@@ -136,22 +143,20 @@ class Facture {
   int? idFacture;
   String numero;
   DateTime date;
-  double montant;
   int idClient;
 
-  Facture(
-      {this.idFacture,
-      required this.numero,
-      required this.date,
-      required this.montant,
-      required this.idClient});
+  Facture({
+    this.idFacture,
+    required this.numero,
+    required this.date,
+    required this.idClient,
+  });
 
   Map<String, dynamic> toMap() {
     return {
       'id_facture': idFacture,
       'numero': numero,
       'date': date.toIso8601String(),
-      'montant': montant,
       'id_client': idClient,
     };
   }
@@ -161,7 +166,6 @@ class Facture {
       idFacture: map['id_facture'],
       numero: map['numero'],
       date: DateTime.parse(map['date']),
-      montant: map['montant'],
       idClient: map['id_client'],
     );
   }
@@ -171,17 +175,21 @@ class FactureProduit {
   int idFacture;
   int idProduit;
   double prixVente;
+  int quantity;
 
-  FactureProduit(
-      {required this.idFacture,
-      required this.idProduit,
-      required this.prixVente});
+  FactureProduit({
+    required this.idFacture,
+    required this.idProduit,
+    required this.prixVente,
+    required this.quantity,
+  });
 
   Map<String, dynamic> toMap() {
     return {
       'id_facture': idFacture,
       'id_produit': idProduit,
       'prixVente': prixVente,
+      'quantity': quantity,
     };
   }
 
@@ -190,6 +198,7 @@ class FactureProduit {
       idFacture: map['id_facture'],
       idProduit: map['id_produit'],
       prixVente: map['prixVente'],
+      quantity: map['quantity'],
     );
   }
 }

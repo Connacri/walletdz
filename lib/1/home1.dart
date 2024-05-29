@@ -14,6 +14,7 @@ import 'QrScanner.dart';
 import 'chat_supabase/main.dart';
 import 'gpt/home.dart';
 import 'models1.dart';
+import 'sqflite/facture/homeFact.dart';
 
 class home1 extends StatelessWidget {
   @override
@@ -78,6 +79,17 @@ class _MyHomePageState extends State<MyHomePage> {
           shrinkWrap: true, scrollDirection: Axis.horizontal,
           //mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            _buildCard(
+              context,
+              'assets/lotties/1 (99).json',
+              () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => homeFact(),
+                  ),
+                );
+              },
+            ),
             _buildCard(
               context,
               'assets/lotties/1 (49).json',

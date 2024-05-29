@@ -73,7 +73,6 @@ class DatabaseHelper {
       id_facture INTEGER PRIMARY KEY,
       numero TEXT,
       date DATE,
-      montant DECIMAL(10, 2),
       id_client INTEGER,
       FOREIGN KEY (id_client) REFERENCES client(id_client)
     )
@@ -83,6 +82,7 @@ class DatabaseHelper {
     CREATE TABLE fournisseur_produit (
       id_fournisseur INTEGER,
       id_produit INTEGER,
+      quantity_produit INTEGER,
       FOREIGN KEY (id_fournisseur) REFERENCES fournisseur(id_fournisseur),
       FOREIGN KEY (id_produit) REFERENCES produit(id_produit),
       PRIMARY KEY (id_fournisseur, id_produit)
@@ -94,6 +94,7 @@ class DatabaseHelper {
       id_facture INTEGER,
       id_produit INTEGER,
       prixVente REAL,
+      quantity INTEGER,
       PRIMARY KEY (id_facture, id_produit),
       FOREIGN KEY (id_facture) REFERENCES facture(id_facture),
       FOREIGN KEY (id_produit) REFERENCES produit(id_produit)
@@ -129,7 +130,6 @@ class DatabaseHelper {
       clientIds.add(clientId);
     }
     print('Fake clients inserted successfully');
-    print(clientIds);
 
     // Insertion des fournisseurs
     List<int> fournisseurIds = [];
@@ -141,9 +141,11 @@ class DatabaseHelper {
       int fournisseurId = await db.insert('fournisseur', fournisseur.toMap());
       fournisseurIds.add(fournisseurId);
     }
+    print('Fake suppliers inserted successfully');
 
     // Insertion des produits
-    for (int i = 0; i < 10000; i++) {
+    List<int> produitIds = [];
+    for (int i = 0; i < 100; i++) {
       int categoryId = faker.randomGenerator.element(categoryIds);
       int fournisseurId = faker.randomGenerator.element(fournisseurIds);
       Produit produit = Produit(
@@ -154,24 +156,26 @@ class DatabaseHelper {
         photo: faker.image.image(),
         idCategorie: categoryId,
       );
-      await db.insert('produit', produit.toMap());
+      int produitId = await db.insert('produit', produit.toMap());
+      produitIds.add(produitId);
 
       // Insertion des liens produit-fournisseur
       FournisseurProduit fournisseurProduit = FournisseurProduit(
         idFournisseur: fournisseurId,
-        idProduit: i + 1,
+        idProduit: produitId,
+        quantity_produit: faker.randomGenerator.integer(66),
       );
       await db.insert('fournisseur_produit', fournisseurProduit.toMap());
     }
+    print('Fake products inserted successfully');
 
     // Insertion des factures
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 100; i++) {
       int clientId = faker.randomGenerator.element(clientIds);
       int produitId = faker.randomGenerator.integer(10000, min: 1);
       Facture facture = Facture(
         numero: faker.guid.guid(),
         date: faker.date.dateTime(),
-        montant: faker.randomGenerator.decimal(min: 101),
         idClient: clientId,
       );
       await db.insert('facture', facture.toMap());
@@ -181,9 +185,12 @@ class DatabaseHelper {
         idFacture: i + 1,
         idProduit: produitId,
         prixVente: faker.randomGenerator.decimal(min: 101),
+        quantity: faker.randomGenerator.integer(50),
       );
       await db.insert('facture_produit', factureProduit.toMap());
+      print('Fake factureProduit inserted successfully');
     }
+    print('Fake invoices inserted successfully');
   }
 
   Future<List<Produit>> getProduits() async {
@@ -220,43 +227,6 @@ class DatabaseHelper {
     }
   }
 
-  Future<List<Facture>> getFactures() async {
-    Database db = await database;
-    final List<Map<String, dynamic>> factureMaps = await db.query('facture');
-    final List<Map<String, dynamic>> factureProduitMaps =
-        await db.query('facture_produit');
-
-    List<Facture> factures = [];
-
-    for (var factureMap in factureMaps) {
-      Facture facture = Facture.fromMap(factureMap);
-
-      // Récupérer les produits associés à cette facture
-      List<Map<String, dynamic>> produitsAssocies = factureProduitMaps
-          .where((element) => element['id_facture'] == facture.idFacture)
-          .toList();
-
-      for (var produitAssocie in produitsAssocies) {
-        Produit produit = await getProduitById(produitAssocie['id_produit']);
-        double prixVente = produitAssocie['prixVente'];
-
-        // Créer une instance de FactureProduit pour représenter la relation entre la facture et le produit
-        FactureProduit factureProduit = FactureProduit(
-          idFacture: facture.idFacture!,
-          idProduit: produit.idProduit!,
-          prixVente: prixVente,
-        );
-
-        // Ajouter l'objet FactureProduit à la liste des produits de la facture
-        facture.produits.add(factureProduit);
-      }
-
-      factures.add(facture);
-    }
-
-    return factures;
-  }
-
   Future<List<Fournisseur>> getAllFournisseurs() async {
     Database db = await database;
     final List<Map<String, dynamic>> maps = await db.query('fournisseur');
@@ -265,6 +235,93 @@ class DatabaseHelper {
     return List.generate(maps.length, (i) {
       return Fournisseur.fromMap(maps[i]);
     });
+  }
+
+  Future<List<Facture>> getFactures() async {
+    Database db = await database;
+
+    // Requête SQL pour récupérer les factures avec leurs détails
+    final String query = '''
+    SELECT 
+      f.id_facture, f.numero, f.date, f.id_client
+    FROM facture f
+  ''';
+
+    final List<Map<String, dynamic>> results = await db.rawQuery(query);
+
+    // Liste pour stocker les factures
+    List<Facture> factures = [];
+
+    // Parcourir les résultats de la requête
+    for (var row in results) {
+      // Créer une facture à partir des données récupérées
+      Facture facture = Facture(
+        idFacture: row['id_facture'],
+        numero: row['numero'],
+        date: DateTime.parse(row['date']),
+        idClient: row['id_client'],
+      );
+
+      // Ajouter la facture à la liste
+      factures.add(facture);
+    }
+
+    // Retourner la liste des factures
+    return factures;
+  }
+
+  Future<List<FactureProduit>> getFactureProduit(int idFacture) async {
+    Database db = await database;
+
+    final List<Map<String, dynamic>> results = await db.query(
+      'facture_produit',
+      where: 'id_facture = ?',
+      whereArgs: [idFacture],
+    );
+
+    // Convertir les résultats en liste d'objets FactureProduit
+    List<FactureProduit> factureProduits = results.map((row) {
+      return FactureProduit(
+        idFacture: row['id_facture'],
+        idProduit: row['id_produit'],
+        prixVente: row['prixVente'],
+        quantity: row['quantity'],
+      );
+    }).toList();
+
+    // Retourner la liste des FactureProduit associés à la facture spécifiée
+    return factureProduits;
+  }
+
+  Future<Map<Facture, List<Produit>>> getDetailsFacture(int idFacture) async {
+    Database db = await database;
+
+    // Récupérer les détails de la facture
+    final List<Map<String, dynamic>> factureMaps = await db.query(
+      'facture',
+      where: 'id_facture = ?',
+      whereArgs: [idFacture],
+    );
+
+    // Récupérer les produits associés à la facture
+    final List<Map<String, dynamic>> produitMaps = await db.query(
+      'facture_produit',
+      where: 'id_facture = ?',
+      whereArgs: [idFacture],
+    );
+
+    // Convertir les résultats en objets Facture et Produit
+    Facture facture = Facture.fromMap(factureMaps.first);
+    List<Produit> produits = [];
+
+    for (var produitMap in produitMaps) {
+      int idProduit = produitMap['id_produit'];
+      Produit produit = await getProduitById(idProduit);
+      produits.add(produit);
+    }
+
+    // Retourner une map contenant la facture et la liste des produits associés
+    return {facture: produits};
   }
 
   Future<int> deleteProduit(int id) async {
