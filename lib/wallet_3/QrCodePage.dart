@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:calendar_timeline/calendar_timeline.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
@@ -61,8 +60,7 @@ class QRCodePage extends StatelessWidget {
                     height: 10,
                   ),
                   Text(
-                    'Présentez Votre Code QR au Point de Vente Pour Recharge Rapide et Sécurisé CASH'
-                        .capitalize(),
+                    'Présentez Votre Code QR au Point de Vente Pour Recharge Rapide et Sécurisé CASH',
                     style: TextStyle(
                       fontSize: 18,
                     ),

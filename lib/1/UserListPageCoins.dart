@@ -1,8 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutterflow_paginate_firestore/bloc/pagination_listeners.dart';
-import 'package:flutterflow_paginate_firestore/paginate_firestore.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lottie/lottie.dart';
 
@@ -193,70 +191,9 @@ class MyWidgetPaginateFirestore extends StatefulWidget {
 }
 
 class _MyWidgetPaginateFirestoreState extends State<MyWidgetPaginateFirestore> {
-  PaginateRefreshedChangeListener refreshChangeListener =
-      PaginateRefreshedChangeListener();
-
   @override
   Widget build(BuildContext context) {
-    return
-        //RefreshIndicator(
-        //  child:
-        PaginateFirestore(
-      //onEmpty: const EmptyDisplay(),
-      //separator: const EmptySeparator(),
-      //initialLoader: const InitialLoader(),
-      //bottomLoader: const BottomLoader(),
-
-      //physics: ScrollPhysics(parent: BouncingScrollPhysics()),
-      scrollDirection: Axis.horizontal,
-      // isLive: true,
-      itemBuilderType: PaginateBuilderType.listView,
-      itemBuilder: (context, documentSnapshots, index) => Center(
-        child: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-          future: FirebaseFirestore.instance
-              .collection('Users')
-              .doc(documentSnapshots[index]['id'])
-              .get(),
-          builder: (BuildContext context,
-              AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
-            if (snapshot.hasData) {
-              return Container(
-                padding: EdgeInsets.all(5),
-                height: 60,
-                width: 60,
-                child: CircleAvatar(
-                  radius: 100,
-                  backgroundImage:
-                      CachedNetworkImageProvider(snapshot.data!['avatar']),
-                ),
-              );
-            } else {
-              return Center(
-                  child: Container(
-                      height: 2,
-                      width: MediaQuery.of(context).size.width,
-                      child: CircularProgressIndicator()));
-            }
-            //{
-            //  return CircleAvatar(child: Icon(Icons.person));
-            // }
-          },
-        ),
-      ),
-      // orderBy is compulsary to enable pagination
-      query: FirebaseFirestore.instance
-          .collection('Users')
-          .doc(widget.userId)
-          .collection('transactions'),
-      // listeners: [
-      //  refreshChangeListener,
-      //  ],
-    ) //,
-        //onRefresh: () async {
-        // refreshChangeListener.refreshed = true;
-        // },
-        // )
-        ;
+    return Container();
   }
 }
 

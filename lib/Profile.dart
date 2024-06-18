@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:calendar_timeline/calendar_timeline.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
@@ -328,7 +327,6 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                       children: [
                         AvatarGlow(
                           glowColor: Colors.black54,
-                          endRadius: 60.0,
                           child: Material(
                             elevation: 8.0,
                             shape: CircleBorder(),
@@ -399,7 +397,7 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          data['displayName'].toString().capitalize(),
+                          data['displayName'].toString(),
                           style: TextStyle(fontSize: 30),
                         ),
                         SizedBox(
@@ -460,7 +458,7 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                                   Icons.not_interested_outlined,
                                   color: Colors.red,
                                 ),
-                          Text(userGoo!.email.toString().capitalize()),
+                          Text(userGoo!.email.toString()),
                         ],
                       ),
                     ),
@@ -783,7 +781,7 @@ class NumbersWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             Text(
-              value.capitalize(),
+              value,
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
             ),
             SizedBox(height: 2),

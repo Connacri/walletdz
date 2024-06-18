@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -8,15 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart'; // Importez cette ligne
 import 'package:provider/provider.dart';
-import 'package:sembast/sembast.dart';
-import 'package:sembast/sembast_io.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
 import 'Oauth/Ogoogle/googleSignInProvider.dart';
 import 'Oauth/verifi_auth2.dart';
 import 'firebase_options.dart';
 
+//late ObjectBox objectbox;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   initializeDateFormatting(
@@ -25,11 +21,17 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  //final objectBox = await ObjectBox.create();
   await Supabase.initialize(
     url: 'https://wirxpjoeahuvjoocdnbk.supabase.co',
     anonKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indpcnhwam9lYWh1dmpvb2NkbmJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTYxNjI0MzAsImV4cCI6MjAzMTczODQzMH0.MQpp7i2TdH3Q5aPEbMq5qvUwbuYpIX8RccW_GH64r1U',
   );
+  // await Supabase.initialize(
+  //   url: 'https://wirxpjoeahuvjoocdnbk.supabase.co',
+  //   anonKey:
+  //       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indpcnhwam9lYWh1dmpvb2NkbmJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTYxNjI0MzAsImV4cCI6MjAzMTczODQzMH0.MQpp7i2TdH3Q5aPEbMq5qvUwbuYpIX8RccW_GH64r1U',
+  // );
 
   // splash.FlutterNativeSplash.removeAfter(initialization);
   //WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -38,8 +40,9 @@ Future<void> main() async {
       SystemUiMode.edgeToEdge, //.immersiveSticky,
       overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom]);
   runApp(
-    //MyMainTest(),
-    MyApp(),
+    MyApp(
+        // objectBox: objectBox,
+        ),
   );
 }
 
@@ -58,8 +61,11 @@ Future initialization(BuildContext? context) async {
 final navigatorKey = GlobalKey<NavigatorState>();
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key});
-
+  MyApp({
+    super.key,
+    /*required this.objectBox*/
+  });
+//  final ObjectBox objectBox;
   static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   static FirebaseInAppMessaging fiam = FirebaseInAppMessaging.instance;
 
@@ -88,8 +94,9 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: _title,
         themeMode: ThemeMode.dark,
-        home: //AuthPage(),
-            verifi_auth2(), //MyWalletApp(), //const MyHomePage(title: 'Flutter Demo Home Page'),
+        home: verifi_auth2(
+            // objectBox: objectBox,
+            ),
       ),
     );
   }

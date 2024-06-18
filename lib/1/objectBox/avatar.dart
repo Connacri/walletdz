@@ -2,17 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'constants.dart';
-
 class Avatar extends StatefulWidget {
   const Avatar({
     super.key,
     required this.imageUrl,
-    required this.onUpload,
   });
 
   final String? imageUrl;
-  final void Function(String) onUpload;
 
   @override
   State<Avatar> createState() => _AvatarState();
@@ -20,7 +16,7 @@ class Avatar extends StatefulWidget {
 
 class _AvatarState extends State<Avatar> {
   bool _isLoading = false;
-
+  final SupabaseClient supabase = Supabase.instance.client;
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -71,10 +67,10 @@ class _AvatarState extends State<Avatar> {
             bytes,
             fileOptions: FileOptions(contentType: imageFile.mimeType),
           );
-      final imageUrlResponse = await supabase.storage
+      await supabase.storage
           .from('avatars')
           .createSignedUrl(filePath, 60 * 60 * 24 * 365 * 10);
-      widget.onUpload(imageUrlResponse);
+      // widget.onUpload(imageUrlResponse);
     } on StorageException catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

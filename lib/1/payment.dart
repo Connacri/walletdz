@@ -1,6 +1,5 @@
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:avatar_glow/avatar_glow.dart';
-import 'package:calendar_timeline/calendar_timeline.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -753,11 +752,8 @@ void showCongratulationsDialog(
           children: [
             AvatarGlow(
               glowColor: Colors.blue,
-              endRadius: 90.0,
               duration: Duration(milliseconds: 2000),
               repeat: true,
-              showTwoGlows: true,
-              repeatPauseDuration: Duration(milliseconds: 100),
               child: Material(
                 // Replace this child with your own
                 elevation: 8.0,
@@ -800,7 +796,7 @@ void showCongratulationsDialog(
             ),
             SizedBox(height: 20),
             Text(
-              'Beneficier Solde : '.toString().capitalize(),
+              'Beneficier Solde : '.toString(),
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: Colors.blue,
@@ -821,7 +817,7 @@ void showCongratulationsDialog(
                 fontWeight: FontWeight.w400,
               ),
             ),
-            Text("La transaction a réussi !".toString().capitalize()),
+            Text("La transaction a réussi !".toString()),
           ],
         ),
         actions: [
@@ -855,11 +851,8 @@ void showTransactionErrorDialog(BuildContext context, String errorMessage) {
             ),
             AvatarGlow(
               glowColor: Colors.blue,
-              endRadius: 90.0,
               duration: Duration(milliseconds: 2000),
               repeat: true,
-              showTwoGlows: true,
-              repeatPauseDuration: Duration(milliseconds: 100),
               child: Material(
                 // Replace this child with your own
                 elevation: 8.0,
@@ -884,7 +877,7 @@ void showTransactionErrorDialog(BuildContext context, String errorMessage) {
               animate: true,
             ),
             SizedBox(height: 20),
-            Text("Erreur de la transaction!".toString().capitalize()),
+            Text("Erreur de la transaction!".toString()),
           ],
         ),
         actions: [

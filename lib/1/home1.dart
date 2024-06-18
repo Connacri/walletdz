@@ -3,26 +3,27 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
-import 'package:walletdz/1/sqflite/home.dart';
 import '../1/providers.dart';
-import '../1/sembast/crud.dart';
 import '../1/test.dart';
 import '../iptv/main.dart';
 import '../MyListLotties.dart';
 import 'NetworkingPageHeader.dart';
 import 'QrScanner.dart';
-import 'chat_supabase/main.dart';
-import 'gpt/home.dart';
 import 'models1.dart';
-import 'sqflite/facture/homeFact.dart';
+import 'objectBox/MyApp.dart';
+import 'objectBox/MyProviders.dart';
+import 'objectBox/classeObjectBox.dart';
 
 class home1 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
+    return //MyHomePage();
+
+        MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => UserProviderFire()),
         ChangeNotifierProvider(create: (context) => TransfersProvider()),
+        // ProduitModel ajouté ici
       ],
       child: MyHomePage(),
     );
@@ -81,70 +82,81 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             _buildCard(
               context,
-              'assets/lotties/1 (99).json',
+              'assets/lotties/1 (117).json',
               () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => homeFact(),
+                    builder: (context) => MyMain(),
                   ),
                 );
               },
             ),
-            _buildCard(
-              context,
-              'assets/lotties/1 (49).json',
-              () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => MySqfliteApp(),
-                  ),
-                );
-              },
-            ),
-            _buildCard(
-              context,
-              'assets/lotties/1 (45).json',
-              () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => MysembastApp(),
-                  ),
-                );
-              },
-            ),
-            _buildCard(
-              context,
-              'assets/lotties/1 (106).json',
-              () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => gpt(),
-                  ),
-                );
-              },
-            ),
-            _buildCard(
-              context,
-              'assets/lotties/1 (20).json',
-              () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => Supabase(),
-                  ),
-                );
-              },
-            ),
-            _buildCard(
-              context,
-              'assets/lotties/1 (26).json',
-              () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => countries(),
-                  ),
-                );
-              },
-            ),
+            // _buildCard(
+            //   context,
+            //   'assets/lotties/1 (99).json',
+            //   () {
+            //     Navigator.of(context).push(
+            //       MaterialPageRoute(
+            //         builder: (context) => homeFact(),
+            //       ),
+            //     );
+            //   },
+            // ),
+            // _buildCard(
+            //   context,
+            //   'assets/lotties/1 (49).json',
+            //   () {
+            //     Navigator.of(context).push(
+            //       MaterialPageRoute(
+            //         builder: (context) => MySqfliteApp(),
+            //       ),
+            //     );
+            //   },
+            // ),
+            // _buildCard(
+            //   context,
+            //   'assets/lotties/1 (45).json',
+            //   () {
+            //     Navigator.of(context).push(
+            //       MaterialPageRoute(
+            //         builder: (context) => MysembastApp(),
+            //       ),
+            //     );
+            //   },
+            // ),
+            // _buildCard(
+            //   context,
+            //   'assets/lotties/1 (106).json',
+            //   () {
+            //     Navigator.of(context).push(
+            //       MaterialPageRoute(
+            //         builder: (context) => gpt(),
+            //       ),
+            //     );
+            //   },
+            // ),
+            // _buildCard(
+            //   context,
+            //   'assets/lotties/1 (20).json',
+            //   () {
+            //     Navigator.of(context).push(
+            //       MaterialPageRoute(
+            //         builder: (context) => Supabase(),
+            //       ),
+            //     );
+            //   },
+            // ),
+            // _buildCard(
+            //   context,
+            //   'assets/lotties/1 (26).json',
+            //   () {
+            //     Navigator.of(context).push(
+            //       MaterialPageRoute(
+            //         builder: (context) => countries(),
+            //       ),
+            //     );
+            //   },
+            // ),
             _buildCard(
               context,
               'assets/lotties/1 (85).json',

@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:calendar_timeline/calendar_timeline.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -636,7 +635,7 @@ class MyDrawer extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 18),
                   child: Text(
-                    'What flavor do you want today?'.capitalize(),
+                    'What flavor do you want today?',
                     style: TextStyle(
                       fontSize: 16,
                     ),
@@ -820,8 +819,7 @@ class QRCodePage extends StatelessWidget {
                     height: 10,
                   ),
                   Text(
-                    'Présentez Votre Code QR au Point de Vente Pour Recharge Rapide et Sécurisé CASH'
-                        .capitalize(),
+                    'Présentez Votre Code QR au Point de Vente Pour Recharge Rapide et Sécurisé CASH',
                     style: TextStyle(
                       fontSize: 18,
                     ),
