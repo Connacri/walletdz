@@ -1,0 +1,107 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:1607491491677936871",
+      "lastPropertyId": "5:7832871292473157035",
+      "name": "Fournisseur",
+      "properties": [
+        {
+          "id": "1:4128254359789025437",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:8758188655905488373",
+          "name": "qr",
+          "type": 9
+        },
+        {
+          "id": "3:414205311028485250",
+          "name": "nom",
+          "type": 9
+        },
+        {
+          "id": "4:8919268741099517413",
+          "name": "phone",
+          "type": 9
+        },
+        {
+          "id": "5:7832871292473157035",
+          "name": "adresse",
+          "type": 9
+        }
+      ],
+      "relations": [
+        {
+          "id": "1:2832941486252609678",
+          "name": "produits",
+          "targetId": "2:8606136097133066204"
+        }
+      ]
+    },
+    {
+      "id": "2:8606136097133066204",
+      "lastPropertyId": "8:4773469945258199278",
+      "name": "Produit",
+      "properties": [
+        {
+          "id": "1:3899042760461107286",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:1144798314351403869",
+          "name": "qr",
+          "type": 9
+        },
+        {
+          "id": "3:257039154436617685",
+          "name": "image",
+          "type": 9
+        },
+        {
+          "id": "4:8034655794147681628",
+          "name": "nom",
+          "type": 9
+        },
+        {
+          "id": "5:9164585532905782971",
+          "name": "description",
+          "type": 9
+        },
+        {
+          "id": "6:6533552764826989296",
+          "name": "prixAchat",
+          "type": 8
+        },
+        {
+          "id": "7:8989117107807645988",
+          "name": "prixVente",
+          "type": 8
+        },
+        {
+          "id": "8:4773469945258199278",
+          "name": "stock",
+          "type": 6
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "2:8606136097133066204",
+  "lastIndexId": "0:0",
+  "lastRelationId": "1:2832941486252609678",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [],
+  "retiredRelationUids": [],
+  "version": 1
+}
