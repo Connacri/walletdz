@@ -1,6 +1,6 @@
 # walletdz
 
-A new Wallet project.
+A new Wallet project credit : Ramzi.
 
 ## Getting Started
 
