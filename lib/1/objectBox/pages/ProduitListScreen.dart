@@ -801,10 +801,15 @@ class ProduitSearchDelegateMain extends SearchDelegate {
 
   @override
   Widget buildResults(BuildContext context) {
-    final results = produits
-        .where((f) => f.nom.toLowerCase().contains(query.toLowerCase()))
-        .toList();
-
+    // final results = produits
+    //     .where((f) => f.nom.toLowerCase().contains(query.toLowerCase()))
+    //     .toList();
+    final results = produits.where((produit) {
+      final queryLower = query.toLowerCase();
+      final nomLower = produit.nom.toLowerCase();
+      return nomLower.contains(queryLower) ||
+          produit.id.toString().contains(query);
+    }).toList();
     return ListView.builder(
       itemCount: results.length,
       itemBuilder: (context, index) {
@@ -825,10 +830,15 @@ class ProduitSearchDelegateMain extends SearchDelegate {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    final suggestions = produits
-        .where((f) => f.nom.toLowerCase().contains(query.toLowerCase()))
-        .toList();
-
+    // final suggestions = produits
+    //     .where((f) => f.nom.toLowerCase().contains(query.toLowerCase()))
+    //     .toList();
+    final suggestions = produits.where((produit) {
+      final queryLower = query.toLowerCase();
+      final nomLower = produit.nom.toLowerCase();
+      return nomLower.contains(queryLower) ||
+          produit.id.toString().contains(query);
+    }).toList();
     return ListView.builder(
       itemCount: suggestions.length,
       itemBuilder: (context, index) {
