@@ -1,13 +1,1 @@
-{
-  "hosting": {
-    "source": ".",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "frameworksBackend": {
-      "region": "us-central1"
-    }
-  }
-}
+{"hosting":{"source":".","ignore":["firebase.json","**/.*","**/node_modules/**"],"frameworksBackend":{"region":"us-central1"}},"flutter":{"platforms":{"android":{"default":{"projectId":"walletdz-d12e0","appId":"1:330293988254:android:61adcf051c6c384c41648f","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"walletdz-d12e0","configurations":{"android":"1:330293988254:android:61adcf051c6c384c41648f","ios":"1:330293988254:ios:e03eaa1385b7e75741648f","macos":"1:330293988254:ios:e03eaa1385b7e75741648f","web":"1:330293988254:web:dc6a9fd6b5fed04f41648f","windows":"1:330293988254:web:6decef77298806bf41648f"}}}}}}

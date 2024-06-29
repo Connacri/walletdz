@@ -30,6 +30,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   if (!window.Create(L"walletdz", origin, size)) {
     return EXIT_FAILURE;
   }
+
+
   window.SetQuitOnClose(true);
 
   ::MSG msg;

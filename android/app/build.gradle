@@ -1,9 +1,3 @@
-//plugins {
-//    id "com.android.application"
-//    id "kotlin-android"
-//    id "dev.flutter.flutter-gradle-plugin"
-//    id 'com.google.gms.google-services'
-//}
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
@@ -65,9 +59,23 @@ android {
 flutter {
     source '../..'
 }
+
+//configurations {
+//    debugImplementation {
+//        exclude group: 'io.objectbox', module: 'objectbox-android'
+//    }
+//}
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation platform('com.google.firebase:firebase-bom:33.0.0')
+    implementation 'com.google.android.gms:play-services-base:18.5.0'
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.android.support:multidex:1.0.3'
+//    implementation 'io.objectbox:objectbox-android-objectbrowser:3.0.1'
+//    // Ajoutez la dépendance objectbox-android-objectbrowser pour les builds de debug
+//    debugImplementation "io.objectbox:objectbox-android-objectbrowser:3.0.1" // Remplacez par la version appropriée
+
 }
+
+
+

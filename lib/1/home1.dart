@@ -3,16 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
+import 'package:walletdz/1/objectBox/MyApp.dart';
 import '../1/providers.dart';
-import '../1/test.dart';
 import '../iptv/main.dart';
 import '../MyListLotties.dart';
 import 'NetworkingPageHeader.dart';
 import 'QrScanner.dart';
 import 'models1.dart';
-import 'objectBox/MyApp.dart';
-import 'objectBox/MyProviders.dart';
-import 'objectBox/classeObjectBox.dart';
 
 class home1 extends StatelessWidget {
   @override
@@ -86,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
               () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => MyMain(),
+                    builder: (context) => MyMainO(),
                   ),
                 );
               },

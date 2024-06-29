@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart'; // Importez cette ligne
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '1/objectBox/MyApp.dart';
 import 'Oauth/Ogoogle/googleSignInProvider.dart';
 import 'Oauth/verifi_auth2.dart';
 import 'firebase_options.dart';
@@ -83,21 +84,22 @@ class MyApp extends StatelessWidget {
       create: (context) => googleSignInProvider(),
       //lazy: true,
       child: MaterialApp(
-        theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-            useMaterial3: true,
-            fontFamily: 'OSWALD'),
-        locale: const Locale('fr', 'CA'),
+          theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+              useMaterial3: true,
+              fontFamily: 'OSWALD'),
+          locale: const Locale('fr', 'CA'),
 
-        //scaffoldMessengerKey: Utils.messengerKey,
-        navigatorKey: navigatorKey,
-        debugShowCheckedModeBanner: false,
-        title: _title,
-        themeMode: ThemeMode.dark,
-        home: verifi_auth2(
-            // objectBox: objectBox,
-            ),
-      ),
+          //scaffoldMessengerKey: Utils.messengerKey,
+          navigatorKey: navigatorKey,
+          debugShowCheckedModeBanner: false,
+          title: _title,
+          themeMode: ThemeMode.dark,
+          home: MyMainO()
+          // verifi_auth2(
+          //     // objectBox: objectBox,
+          //     ),
+          ),
     );
   }
 }

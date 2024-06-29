@@ -1,11 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import '../Entity.dart';
 import '../MyProviders.dart';
 import 'AddProduitScreen.dart';
 import 'ProduitListScreen.dart';
+import 'package:intl/intl.dart';
+import 'package:capitalize/capitalize.dart';
 
 class FournisseurListScreen extends StatelessWidget {
   final Produit? produit;
@@ -19,56 +22,69 @@ class FournisseurListScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: Icon(Icons.search),
-            onPressed: () async {},
+            onPressed: () async {
+              final fournisseurProvider =
+                  Provider.of<CommerceProvider>(context, listen: false);
+              showSearch(
+                context: context,
+                delegate: FournisseurSearchDelegateMain(
+                    fournisseurProvider.fournisseurs),
+              );
+            },
           )
         ],
       ),
-      body: Consumer<FournisseurProvider>(
+      body: Consumer<CommerceProvider>(
         builder: (context, fournisseurProvider, child) {
-          final fournisseurs = fournisseurProvider.fournisseurs;
-
           return ListView.builder(
-            itemCount: fournisseurs.length,
+            itemCount: fournisseurProvider.fournisseurs.length,
             itemBuilder: (context, index) {
-              // final fournisseur = fournisseurs[index];
-              //  final produitCount = fournisseurProvider
-              //     .countProduitsForFournisseur(fournisseur.id);
-              // Utiliser l'index inverse
-              final reversedIndex = fournisseurs.length - 1 - index;
-              final fournisseur = fournisseurs[reversedIndex];
-              // final produitCount = fournisseurProvider
-              //     .countProduitsForFournisseur(fournisseur.id);
-              final produits =
-                  fournisseurProvider.getProduitsByFournisseur(fournisseur);
-              return ListTile(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          ProduitsFournisseurPage(fournisseur: fournisseur),
-                    ),
-                  );
-                },
-                title: Text('${fournisseur.nom}'),
-                subtitle: Text('${produits.length} produits'),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        Icons.edit,
+              final fournisseur = fournisseurProvider.fournisseurs[index];
+              return Card(
+                child: ListTile(
+                  onLongPress: () {
+                    _deleteFournisseur(context, fournisseur);
+                  },
+                  onTap: () {
+                    print(fournisseur.produits);
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => ProduitsFournisseurPage(
+                          fournisseur: fournisseur,
+                          //   produits: fournisseur.produits,
+                        ),
                       ),
-                      onPressed: () {
-                        _editFournisseur(context, fournisseur);
-                      },
+                    );
+                  },
+                  leading: CircleAvatar(
+                    child: FittedBox(child: Text(fournisseur.id.toString())),
+                  ),
+                  title: Text(fournisseur.nom),
+                  subtitle: Text('Phone : ${fournisseur.phone}'),
+                  trailing: Container(
+                    width: 50,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            fournisseur.produits.length.toString(),
+                            style: TextStyle(fontSize: 20),
+                          ),
+                        ),
+                        Expanded(
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.edit,
+                            ),
+                            onPressed: () {
+                              _editFournisseur(context, fournisseur);
+                            },
+                          ),
+                        ),
+                      ],
                     ),
-                    IconButton(
-                      icon: Icon(Icons.delete, color: Colors.red),
-                      onPressed: () {
-                        _deleteFournisseur(context, fournisseur);
-                      },
-                    ),
-                  ],
+                  ),
                 ),
               );
             },
@@ -84,359 +100,187 @@ class FournisseurListScreen extends StatelessWidget {
             builder: (context) => _AddFournisseurForm(),
           );
         },
-
-        //     () {
-        //   Navigator.of(context).push(
-        //       MaterialPageRoute(builder: (ctx) => AddFournisseurWidget()));
-        // },
         child: Icon(Icons.add),
       ),
     );
   }
 }
 
-// class ProduitsFournisseurPage extends StatelessWidget {
-//   final Fournisseur fournisseur;
-//
-//   ProduitsFournisseurPage({required this.fournisseur});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: CustomScrollView(
-//         slivers: <Widget>[
-//           SliverAppBar(
-//             expandedHeight: 200.0,
-//             pinned: true,
-//             flexibleSpace: FlexibleSpaceBar(
-//               collapseMode: CollapseMode.parallax,
-//               background: Stack(
-//                 alignment: Alignment.bottomCenter,
-//                 fit: StackFit.expand,
-//                 children: [
-//                   Container(
-//                     decoration: BoxDecoration(
-//                       image: DecorationImage(
-//                         image: fournisseur.produits.isNotEmpty &&
-//                                 fournisseur.produits.first.image != null
-//                             ? CachedNetworkImageProvider(
-//                                 fournisseur.produits.first.image!)
-//                             : CachedNetworkImageProvider(
-//                                 'https://picsum.photos/200/300?random=${(fournisseur.id) + 5}',
-//                               ),
-//                         fit: BoxFit.cover,
-//                         filterQuality: FilterQuality.low,
-//                       ),
-//                     ),
-//                   ),
-//                   Container(
-//                     decoration: BoxDecoration(
-//                       gradient: LinearGradient(
-//                         begin: Alignment.topCenter,
-//                         end: Alignment.bottomCenter,
-//                         colors: [
-//                           Colors.transparent,
-//                           Colors.black.withOpacity(0.7),
-//                         ],
-//                         stops: [0.0, 1.0],
-//                       ),
-//                     ),
-//                   ),
-//                   Positioned(
-//                     bottom: 10,
-//                     left: 16,
-//                     right: 16,
-//                     child: Text(
-//                       fournisseur.nom,
-//                       overflow: TextOverflow.ellipsis,
-//                       style: TextStyle(
-//                         color: Colors.white,
-//                         fontSize: 24, // Taille du texte ajustée
-//                         fontWeight: FontWeight.bold,
-//                       ),
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//           ),
-//           SliverToBoxAdapter(
-//             child: Padding(
-//               padding: const EdgeInsets.all(18.0),
-//               child: Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 mainAxisAlignment: MainAxisAlignment.end,
-//                 children: [
-//                   SizedBox(height: 8),
-//                   Text(fournisseur.phone == null && fournisseur.phone == 0
-//                       ? ''
-//                       : 'Téléphone: ${fournisseur.phone ?? "N/A"}'),
-//                   Text(fournisseur.adresse == null && fournisseur.adresse == ''
-//                       ? ''
-//                       : 'Adresse: ${fournisseur.adresse ?? "N/A"}'),
-//                   SizedBox(
-//                     height: 10,
-//                   ),
-//                   Divider(),
-//                   SizedBox(
-//                     height: 20,
-//                   ),
-//                   Text(
-//                     'Liste Des Produits:',
-//                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//           ),
-//           SliverList(
-//             delegate: SliverChildBuilderDelegate(
-//               (BuildContext context, int index) {
-//                 return Consumer<FournisseurProvider>(
-//                   builder: (context, fournisseurProvider, child) {
-//                     final produits = fournisseurProvider
-//                         .getProduitsByFournisseur(fournisseur);
-//
-//                     if (index >= produits.length) {
-//                       return Container();
-//                     }
-//
-//                     final produit = produits[index];
-//                     return ListTile(
-//                       onTap: () {
-//                         Navigator.of(context).push(MaterialPageRoute(
-//                             builder: (ctx) => ProduitDetailPage(
-//                                   produit: produit,
-//                                 )));
-//                       },
-//                       leading: ClipRRect(
-//                         borderRadius: const BorderRadius.only(
-//                           topRight: Radius.circular(5),
-//                           topLeft: Radius.circular(5),
-//                           bottomLeft: Radius.circular(5),
-//                           bottomRight: Radius.circular(5),
-//                         ),
-//                         child: produit.image != null
-//                             ? CachedNetworkImage(
-//                                 imageUrl: produit.image!,
-//                                 height: 50,
-//                                 width: 50,
-//                                 fit: BoxFit.cover,
-//                                 // width: double.infinity,
-//                               )
-//                             : null,
-//                       ),
-//                       title: Text(produit.nom),
-//                       subtitle: Row(children: [
-//                         Icon(
-//                           Icons.factory,
-//                           size: 15,
-//                         ),
-//                         Text(
-//                           ' ${produit.prixAchat.toStringAsFixed(2)}',
-//                         ),
-//                         Spacer(),
-//                         Icon(
-//                           Icons.add_business,
-//                           size: 15,
-//                         ),
-//                         Text(
-//                           ' ${produit.prixVente.toStringAsFixed(2)}',
-//                         ),
-//                         Spacer(),
-//                         Icon(
-//                           Icons.egg_alt_rounded,
-//                           size: 15,
-//                         ),
-//                         Text(
-//                           ' ${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)}',
-//                         ),
-//                       ]),
-//                     );
-//                   },
-//                 );
-//               },
-//               childCount: fournisseur.produits.length,
-//             ),
-//           ),
-//           SliverToBoxAdapter(
-//             child: SizedBox(
-//               height: 50,
-//             ),
-//           ),
-//         ],
-//       ),
-//       floatingActionButton: FloatingActionButton(
-//         onPressed: () {
-//           Navigator.of(context).push(MaterialPageRoute(
-//               builder: (_) =>
-//                   EditProduitScreen(specifiquefournisseur: fournisseur)));
-//         },
-//         child: Icon(Icons.add),
-//       ),
-//     );
-//   }
-// }
-
 class ProduitsFournisseurPage extends StatelessWidget {
   final Fournisseur fournisseur;
+  //final List<Produit>? produits;
 
-  ProduitsFournisseurPage({required this.fournisseur});
+  ProduitsFournisseurPage({
+    required this.fournisseur, //this.produits
+  });
 
   @override
   Widget build(BuildContext context) {
+    // final produits = Provider.of<CommerceProvider>(context)
+    //     .getProduitsForFournisseur(fournisseur);
+    //.getFournisseurById(fournisseur.id);
+    // final produitProvider = Provider.of<CommerceProvider>(context);
+    final commerceProvider =
+        Provider.of<CommerceProvider>(context, listen: false);
     return Scaffold(
       body: CustomScrollView(
         slivers: <Widget>[
-          SliverAppBar(
-            expandedHeight: 200.0,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              collapseMode: CollapseMode.parallax,
-              background: Stack(
-                alignment: Alignment.bottomCenter,
-                fit: StackFit.expand,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: fournisseur.produits.isNotEmpty &&
-                                fournisseur.produits.first.image != null
-                            ? CachedNetworkImageProvider(
-                                fournisseur.produits.first.image!)
-                            : CachedNetworkImageProvider(
-                                'https://picsum.photos/200/300?random=${(fournisseur.id) + 5}',
-                              ),
-                        fit: BoxFit.cover,
-                        filterQuality: FilterQuality.low,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withOpacity(0.7),
-                        ],
-                        stops: [0.0, 1.0],
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 10,
-                    left: 16,
-                    right: 16,
-                    child: Text(
-                      fournisseur.nom,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(18.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  SizedBox(height: 8),
-                  Text(fournisseur.phone == null && fournisseur.phone == 0
-                      ? ''
-                      : 'Téléphone: ${fournisseur.phone ?? "N/A"}'),
-                  Text(fournisseur.adresse == null && fournisseur.adresse == ''
-                      ? ''
-                      : 'Adresse: ${fournisseur.adresse ?? "N/A"}'),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Divider(),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Text(
-                    'Liste Des Produits:',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
-                return Consumer<FournisseurProvider>(
-                  builder: (context, fournisseurProvider, child) {
-                    final produits = fournisseurProvider
-                        .getProduitsByFournisseur(fournisseur);
+          MySliverAppBar(fournisseur: fournisseur),
+          MySliverToBoxAdapter(fournisseur: fournisseur),
+          Consumer<CommerceProvider>(
+            builder: (context, commerceProvider, child) {
+              final produits =
+                  commerceProvider.getProduitsForFournisseur(fournisseur);
+              print(produits
+                  .length); // Vérifiez ce qui est retourné ici pour déboguer
 
-                    if (index >= produits.length) {
-                      return Container();
-                    }
-
+              return SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) {
                     final produit = produits[index];
-                    return ListTile(
-                      onTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (ctx) => ProduitDetailPage(
-                                  produit: produit,
-                                )));
-                      },
-                      leading: ClipRRect(
-                        borderRadius: const BorderRadius.only(
-                          topRight: Radius.circular(5),
-                          topLeft: Radius.circular(5),
-                          bottomLeft: Radius.circular(5),
-                          bottomRight: Radius.circular(5),
-                        ),
-                        child: produit.image != null
-                            ? CachedNetworkImage(
-                                imageUrl: produit.image!,
-                                height: 50,
-                                width: 50,
-                                fit: BoxFit.cover,
-                              )
-                            : null,
-                      ),
-                      title: Text(produit.nom),
-                      subtitle: Row(
-                        children: [
-                          Icon(
-                            Icons.factory,
-                            size: 15,
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Slidable(
+                          key: ValueKey(produit.id),
+                          startActionPane: ActionPane(
+                            motion: ScrollMotion(),
+                            children: [
+                              SlidableAction(
+                                onPressed: (BuildContext context) {
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (ctx) => EditProduitScreen(
+                                      produit: produit,
+                                      specifiquefournisseur: fournisseur,
+                                    ),
+                                  ));
+                                },
+                                backgroundColor: Colors.blue,
+                                icon: Icons.edit,
+                                label: 'Editer',
+                              ),
+                            ],
                           ),
-                          Text(' ${produit.prixAchat.toStringAsFixed(2)}'),
-                          Spacer(),
-                          Icon(
-                            Icons.add_business,
-                            size: 15,
-                          ),
-                          Text(' ${produit.prixVente.toStringAsFixed(2)}'),
-                          Spacer(),
-                          Icon(
-                            Icons.egg_alt_rounded,
-                            size: 15,
-                          ),
-                          Text(
-                              ' ${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)}'),
-                        ],
-                      ),
+                          child: Card(
+                            child: ListTile(
+                                onTap: () {
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (ctx) =>
+                                        ProduitDetailPage(produit: produit),
+                                  ));
+                                },
+                                onLongPress: () {
+                                  _deleteProduit(context, produit);
+                                },
+                                leading: produit.image == null ||
+                                        produit.image!.isEmpty
+                                    ? CircleAvatar(
+                                        child: Icon(
+                                        Icons.image_not_supported,
+                                      ))
+                                    : CircleAvatar(
+                                        backgroundImage:
+                                            CachedNetworkImageProvider(
+                                          produit.image!,
+                                          errorListener: (error) =>
+                                              Icon(Icons.error),
+                                        ),
+                                      ),
+                                title: Text(produit.nom),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'A: ${produit.prixAchat.toStringAsFixed(2)}\nB: ${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)} ',
+                                    ),
+                                    produit.fournisseurs.isEmpty
+                                        ? Container()
+                                        : Wrap(
+                                            spacing:
+                                                6.0, // Espace horizontal entre les éléments
+                                            runSpacing:
+                                                4.0, // Espace vertical entre les lignes
+                                            children: produit.fournisseurs
+                                                .map((fournisseurL) {
+                                              // print(fournisseurL.id);
+                                              // print(fournisseur.id);
+
+                                              return InkWell(
+                                                onTap: () {
+                                                  Navigator.of(context).push(
+                                                      MaterialPageRoute(
+                                                          builder: (ctx) =>
+                                                              ProduitsFournisseurPage(
+                                                                fournisseur:
+                                                                    fournisseur,
+                                                              )));
+                                                },
+                                                child: fournisseur.id ==
+                                                        fournisseurL.id
+                                                    ? Container()
+                                                    : Chip(
+                                                        shadowColor:
+                                                            Colors.black,
+                                                        backgroundColor: Theme
+                                                                .of(context)
+                                                            .chipTheme
+                                                            .backgroundColor,
+                                                        labelStyle: TextStyle(
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .chipTheme
+                                                                  .labelStyle
+                                                                  ?.color,
+                                                        ),
+                                                        side: BorderSide.none,
+                                                        shape: RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            10))),
+                                                        padding:
+                                                            EdgeInsets.zero,
+                                                        label: Text(
+                                                          fournisseurL.nom,
+                                                          style: TextStyle(
+                                                              fontSize: 10),
+                                                        ),
+                                                      ),
+                                              );
+                                            }).toList(),
+                                          ),
+                                  ],
+                                ),
+                                trailing: Text(
+                                  '${produit.prixVente.toStringAsFixed(2)}',
+                                  style: TextStyle(fontSize: 20),
+                                )),
+                          )),
                     );
+
+                    //   ListTile(
+                    //   onLongPress: () {
+                    //     _deleteProduit(context, produit);
+                    //   },
+                    //   onTap: () {
+                    //     Navigator.of(context).push(
+                    //       MaterialPageRoute(
+                    //         builder: (context) => ProduitsFournisseurPage(
+                    //           fournisseur: fournisseur,
+                    //         ),
+                    //       ),
+                    //     );
+                    //   },
+                    //   title: Text(produit.nom),
+                    //   subtitle: Text(
+                    //     'Prix: ${produit.prixVente.toStringAsFixed(2)} €',
+                    //   ),
+                    // );
                   },
-                );
-              },
-              childCount: fournisseur.produits.length,
-            ),
+                  childCount: produits.length,
+                ),
+              );
+            },
           ),
           SliverToBoxAdapter(
             child: SizedBox(
@@ -457,6 +301,156 @@ class ProduitsFournisseurPage extends StatelessWidget {
   }
 }
 
+class MySliverToBoxAdapter extends StatelessWidget {
+  const MySliverToBoxAdapter({
+    super.key,
+    required this.fournisseur,
+  });
+
+  final Fournisseur fournisseur;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.all(18.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            SizedBox(height: 8),
+            Text(fournisseur.phone == null && fournisseur.phone == 0
+                ? ''
+                : 'Téléphone: ${fournisseur.phone ?? "N/A"}'),
+            Text(fournisseur.adresse == null && fournisseur.adresse == ''
+                ? ''
+                : 'Adresse: ${fournisseur.adresse ?? "N/A"}'),
+            SizedBox(
+              height: 10,
+            ),
+            Divider(),
+            SizedBox(
+              height: 20,
+            ),
+            Text(
+              'Liste Des Produits:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final fournisseurProvider =
+                    Provider.of<CommerceProvider>(context, listen: false);
+                fournisseurProvider.ajouterProduitsAleatoiresPourFournisseur(
+                    fournisseur, 5); // Ajouter 5 produits aléatoires
+              },
+              child: Icon(Icons.add),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class MySliverAppBar extends StatelessWidget {
+  const MySliverAppBar({
+    super.key,
+    required this.fournisseur,
+  });
+
+  final Fournisseur fournisseur;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverAppBar(
+      expandedHeight: 200.0,
+      pinned: true,
+      flexibleSpace: FlexibleSpaceBar(
+        collapseMode: CollapseMode.parallax,
+        background: Stack(
+          alignment: Alignment.bottomCenter,
+          fit: StackFit.expand,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: fournisseur.produits.isNotEmpty &&
+                          fournisseur.produits.first.image != null
+                      ? CachedNetworkImageProvider(
+                          fournisseur.produits.first.image!)
+                      : CachedNetworkImageProvider(
+                          'https://picsum.photos/200/300?random=${(fournisseur.id) + 5}',
+                        ),
+                  fit: BoxFit.cover,
+                  filterQuality: FilterQuality.low,
+                ),
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withOpacity(0.7),
+                  ],
+                  stops: [0.0, 1.0],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Container(),
+                  ),
+                  Chip(
+                    label: Text('Fournisseur'),
+                  ),
+                  Text(
+                    //  'Produits du Fournisseur '
+                    'ID : ${fournisseur.id}\n' + fournisseur.nom,
+                    //overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24, // Taille du texte ajustée
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Positioned(
+            //     top: 20,
+            //     left: 10,
+            //     child: Chip(
+            //       label: Text('Fournisseur'),
+            //     )),
+            // Positioned(
+            //   bottom: 10,
+            //   left: 16,
+            //   right: 16,
+            //   child: Text(
+            //     //  'Produits du Fournisseur '
+            //     'ID : ${fournisseur.id}\n' + fournisseur.nom,
+            //     //overflow: TextOverflow.ellipsis,
+            //     style: TextStyle(
+            //       color: Colors.white,
+            //       fontSize: 24, // Taille du texte ajustée
+            //       fontWeight: FontWeight.bold,
+            //     ),
+            //   ),
+            // ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class AddFournisseurWidget extends StatefulWidget {
   @override
   _AddFournisseurWidgetState createState() => _AddFournisseurWidgetState();
@@ -467,6 +461,8 @@ class _AddFournisseurWidgetState extends State<AddFournisseurWidget> {
   final _nomController = TextEditingController();
   final _phoneController = TextEditingController();
   final _adresseController = TextEditingController();
+  final _creationController = TextEditingController();
+  final _modificationController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -521,11 +517,15 @@ class _AddFournisseurWidgetState extends State<AddFournisseurWidget> {
           onPressed: () {
             if (_formKey.currentState!.validate()) {
               final fournisseur = Fournisseur(
-                  nom: _nomController.text,
-                  phone: _phoneController.text,
-                  adresse: _adresseController.text,
-                  qr: '');
-              context.read<FournisseurProvider>().addFournisseur(fournisseur);
+                nom: _nomController.text,
+                phone: _phoneController.text,
+                adresse: _adresseController.text,
+                qr: '',
+                // dateCreation: DateTime.parse(_creationController.text),
+                // derniereModification:
+                //     DateTime.parse(_modificationController.text)
+              );
+              context.read<CommerceProvider>().addFournisseur(fournisseur);
               Navigator.of(context).pop();
             }
           },
@@ -538,6 +538,10 @@ class _AddFournisseurWidgetState extends State<AddFournisseurWidget> {
   @override
   void dispose() {
     _nomController.dispose();
+    _phoneController.dispose();
+    _adresseController.dispose();
+    _creationController.dispose();
+    _modificationController.dispose();
     super.dispose();
   }
 }
@@ -552,6 +556,8 @@ class __AddFournisseurFormState extends State<_AddFournisseurForm> {
   final _nomController = TextEditingController();
   final _phoneController = TextEditingController();
   final _adresseController = TextEditingController();
+  final _creationController = TextEditingController();
+  final _modificationController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -627,9 +633,12 @@ class __AddFournisseurFormState extends State<_AddFournisseurForm> {
                       nom: _nomController.text,
                       phone: _phoneController.text,
                       adresse: _adresseController.text,
+                      // dateCreation: DateTime.parse(_creationController.text),
+                      // derniereModification:
+                      //     DateTime.parse(_modificationController.text)
                     );
                     context
-                        .read<FournisseurProvider>()
+                        .read<CommerceProvider>()
                         .addFournisseur(fournisseur);
                     Navigator.of(context).pop();
                   }
@@ -649,6 +658,8 @@ class __AddFournisseurFormState extends State<_AddFournisseurForm> {
     _nomController.dispose();
     _phoneController.dispose();
     _adresseController.dispose();
+    _creationController.dispose();
+    _modificationController.dispose();
     super.dispose();
   }
 }
@@ -657,7 +668,10 @@ void _editFournisseur(BuildContext context, Fournisseur fournisseur) {
   final _nomController = TextEditingController(text: fournisseur.nom);
   final _phoneController = TextEditingController(text: fournisseur.phone);
   final _adresseController = TextEditingController(text: fournisseur.adresse);
-
+  // final _creationController =
+  //     TextEditingController(text: fournisseur.dateCreation.toString());
+  // final _modificationController =
+  //     TextEditingController(text: fournisseur.derniereModification.toString());
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -714,9 +728,12 @@ void _editFournisseur(BuildContext context, Fournisseur fournisseur) {
                       nom: _nomController.text,
                       phone: _phoneController.text,
                       adresse: _adresseController.text,
+                      // dateCreation: DateTime.parse(_creationController.text),
+                      // derniereModification:
+                      //     DateTime.parse(_modificationController.text),
                     );
                     context
-                        .read<FournisseurProvider>()
+                        .read<CommerceProvider>()
                         .updateFournisseur(fournisseur.id, updatedFournisseur);
                     Navigator.of(context).pop();
                   }
@@ -737,7 +754,6 @@ void _deleteFournisseur(BuildContext context, Fournisseur fournisseur) {
     context: context,
     builder: (BuildContext context) {
       return Container(
-        color: Colors.white,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -768,7 +784,7 @@ void _deleteFournisseur(BuildContext context, Fournisseur fournisseur) {
                 ElevatedButton.icon(
                     onPressed: () {
                       context
-                          .read<FournisseurProvider>()
+                          .read<CommerceProvider>()
                           .supprimerFournisseur(fournisseur);
                       Navigator.of(context).pop();
                     },
@@ -792,4 +808,215 @@ void _deleteFournisseur(BuildContext context, Fournisseur fournisseur) {
       );
     },
   );
+}
+
+void _deleteProduit(BuildContext context, Produit produit) {
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return Container(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text('Confirmer la suppression', style: TextStyle(fontSize: 20.0)),
+            SizedBox(height: 20.0),
+            Text('Êtes-vous sûr de vouloir supprimer ce produit ?'),
+            SizedBox(height: 20.0),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  label: Text('Annuler'),
+                  icon: Icon(Icons.cancel),
+                ),
+                ElevatedButton.icon(
+                    onPressed: () {
+                      // context
+                      //     .read<CommerceProvider>()
+                      //     .supprimerProduit(produit);
+                      print('deleted');
+                      final produitProvider =
+                          Provider.of<CommerceProvider>(context, listen: false);
+                      produitProvider.supprimerProduit(produit);
+                      Navigator.of(context).pop();
+                    },
+                    label: Text(
+                      'Supprimer',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    icon: Icon(Icons.delete),
+                    style: ButtonStyle(
+                      iconColor: WidgetStateProperty.all<Color>(Colors.white),
+                      backgroundColor:
+                          WidgetStateProperty.all<Color>(Colors.red),
+                    ))
+              ],
+            ),
+            SizedBox(
+              height: 60,
+            )
+          ],
+        ),
+      );
+    },
+  );
+}
+
+// class FournisseurSearchDelegateMain extends SearchDelegate {
+//   final List<Fournisseur> fournisseurs;
+//
+//   FournisseurSearchDelegateMain(this.fournisseurs);
+//
+//   @override
+//   List<Widget>? buildActions(BuildContext context) {
+//     return [
+//       IconButton(
+//         icon: Icon(Icons.clear),
+//         onPressed: () {
+//           query = '';
+//         },
+//       ),
+//     ];
+//   }
+//
+//   @override
+//   Widget? buildLeading(BuildContext context) {
+//     return IconButton(
+//       icon: Icon(Icons.arrow_back),
+//       onPressed: () {
+//         close(context, null);
+//       },
+//     );
+//   }
+//
+//   @override
+//   Widget buildResults(BuildContext context) {
+//     final results = fournisseurs
+//         .where((f) => f.nom.toLowerCase().contains(query.toLowerCase()))
+//         .toList();
+//
+//     return ListView.builder(
+//       itemCount: results.length,
+//       itemBuilder: (context, index) {
+//         final fournisseur = results[index];
+//         return ListTile(
+//           onTap: () {
+//             Navigator.of(context).push(
+//               MaterialPageRoute(
+//                 builder: (context) =>
+//                     ProduitsFournisseurPage(fournisseur: fournisseur),
+//               ),
+//             );
+//           },
+//           title: Text(fournisseur.nom),
+//           subtitle: Text('${fournisseur.produits.length} produits'),
+//         );
+//       },
+//     );
+//   }
+//
+//   @override
+//   Widget buildSuggestions(BuildContext context) {
+//     final suggestions = fournisseurs
+//         .where((f) => f.nom.toLowerCase().contains(query.toLowerCase()))
+//         .toList();
+//
+//     return ListView.builder(
+//       itemCount: suggestions.length,
+//       itemBuilder: (context, index) {
+//         final fournisseur = suggestions[index];
+//         return ListTile(
+//           onTap: () {
+//             query = fournisseur.nom;
+//             showResults(context);
+//           },
+//           title: Text(fournisseur.nom),
+//         );
+//       },
+//     );
+//   }
+// }
+class FournisseurSearchDelegateMain extends SearchDelegate {
+  final List<Fournisseur> fournisseurs;
+
+  FournisseurSearchDelegateMain(this.fournisseurs);
+
+  @override
+  List<Widget>? buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: Icon(Icons.clear),
+        onPressed: () {
+          query = '';
+        },
+      ),
+    ];
+  }
+
+  @override
+  Widget? buildLeading(BuildContext context) {
+    return IconButton(
+      icon: Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, null);
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    final results = fournisseurs
+        .where((f) => f.nom.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+
+    return ListView.builder(
+      itemCount: results.length,
+      itemBuilder: (context, index) {
+        final fournisseur = results[index];
+        return ListTile(
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) =>
+                    ProduitsFournisseurPage(fournisseur: fournisseur),
+              ),
+            );
+          },
+          title: Text(fournisseur.nom),
+          subtitle: Text('${fournisseur.produits.length} produits'),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    final suggestions = fournisseurs
+        .where((f) => f.nom.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+
+    return ListView.builder(
+      itemCount: suggestions.length,
+      itemBuilder: (context, index) {
+        final fournisseur = suggestions[index];
+        return ListTile(
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) =>
+                    ProduitsFournisseurPage(fournisseur: fournisseur),
+              ),
+            );
+          },
+          title: Text(fournisseur.nom),
+          trailing: Text('${fournisseur.produits.length}'),
+        );
+      },
+    );
+  }
 }

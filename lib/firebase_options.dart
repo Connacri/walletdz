@@ -25,15 +25,9 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -73,10 +67,32 @@ class DefaultFirebaseOptions {
     projectId: 'walletdz-d12e0',
     databaseURL: 'https://walletdz-d12e0-default-rtdb.firebaseio.com',
     storageBucket: 'walletdz-d12e0.appspot.com',
-    androidClientId:
-        '330293988254-oipcq87lmch78m131nauh2b6c2fb0875.apps.googleusercontent.com',
-    iosClientId:
-        '330293988254-gfocd18j16kdnsvqhp1fk61ggr6ovp42.apps.googleusercontent.com',
+    androidClientId: '330293988254-oipcq87lmch78m131nauh2b6c2fb0875.apps.googleusercontent.com',
+    iosClientId: '330293988254-gfocd18j16kdnsvqhp1fk61ggr6ovp42.apps.googleusercontent.com',
     iosBundleId: 'com.wallet.dz.walletdz',
   );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyAie3hehD-yr_4tOGx0u94JjZL-i16-ROA',
+    appId: '1:330293988254:ios:e03eaa1385b7e75741648f',
+    messagingSenderId: '330293988254',
+    projectId: 'walletdz-d12e0',
+    databaseURL: 'https://walletdz-d12e0-default-rtdb.firebaseio.com',
+    storageBucket: 'walletdz-d12e0.appspot.com',
+    androidClientId: '330293988254-oipcq87lmch78m131nauh2b6c2fb0875.apps.googleusercontent.com',
+    iosClientId: '330293988254-gfocd18j16kdnsvqhp1fk61ggr6ovp42.apps.googleusercontent.com',
+    iosBundleId: 'com.wallet.dz.walletdz',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyDxAY36yIKV40uJK2MPo8WhW_xi4DAFN0k',
+    appId: '1:330293988254:web:6decef77298806bf41648f',
+    messagingSenderId: '330293988254',
+    projectId: 'walletdz-d12e0',
+    authDomain: 'walletdz-d12e0.firebaseapp.com',
+    databaseURL: 'https://walletdz-d12e0-default-rtdb.firebaseio.com',
+    storageBucket: 'walletdz-d12e0.appspot.com',
+    measurementId: 'G-4N0BTDFDXS',
+  );
+
 }

@@ -1,15 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:provider/provider.dart';
-
-import '../1/home1.dart';
 import '../1/objectBox/MyApp.dart';
-import '../1/objectBox/classeObjectBox.dart';
-import '../DZWallet/home.dart';
 import '../MyListLotties.dart';
-import 'Ogoogle/googleSignInProvider.dart';
 
 class CheckRole extends StatelessWidget {
   final String userId;
@@ -72,7 +65,7 @@ class CheckRole extends StatelessWidget {
             //  if (userRole == "admin") {
             //   return adminLoggedPage(); // Normalement Tani Premium Page
             // } else {
-            return MyMain(); //home1();
+            return MyMainO(); //home1();
           } else
             return Scaffold(
               body: Center(child: CircularProgressIndicator()

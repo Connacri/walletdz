@@ -31,6 +31,9 @@ class _EditProduitScreenState extends State<EditProduitScreen> {
   final _prixVenteController = TextEditingController();
   final _stockController = TextEditingController();
   final _serialController = TextEditingController();
+  final _peremptionController = TextEditingController();
+  final _creationController = TextEditingController();
+  final _modificationController = TextEditingController();
   List<Fournisseur> _selectedFournisseurs = [];
 
   File? _image;
@@ -47,6 +50,10 @@ class _EditProduitScreenState extends State<EditProduitScreen> {
       _prixVenteController.text = widget.produit!.prixVente.toString();
       _stockController.text = widget.produit!.stock.toString();
       _existingImageUrl = widget.produit!.image;
+      // _peremptionController.text = widget.produit!.datePeremption.toString();
+      // _creationController.text = widget.produit!.dateCreation.toString();
+      // _modificationController.text =
+      //     widget.produit!.derniereModification.toString();
       _selectedFournisseurs = List.from(widget.produit!.fournisseurs);
     } else {
       _serialController.text = '';
@@ -55,6 +62,9 @@ class _EditProduitScreenState extends State<EditProduitScreen> {
       _prixAchatController.text = '';
       _prixVenteController.text = '';
       _stockController.text = '';
+      // _peremptionController.text = '';
+      // _creationController.text = '';
+      // _modificationController.text = '';
     }
     // Initialize with specific supplier if provided
     if (widget.specifiquefournisseur != null) {
@@ -70,21 +80,83 @@ class _EditProduitScreenState extends State<EditProduitScreen> {
     _prixAchatController.dispose();
     _prixVenteController.dispose();
     _stockController.dispose();
+    _peremptionController.dispose();
+    _creationController.dispose();
+    _modificationController.dispose();
     super.dispose();
   }
 
+  // Future<void> _pickImage() async {
+  //
+  //   final pickedFile = await ImagePicker().pickImage(
+  //     source: ImageSource.gallery,
+  //     maxHeight: 1080,
+  //     maxWidth: 1920,
+  //     imageQuality: 40,
+  //   );
+  //
+  //   if (pickedFile != null) {
+  //     setState(() {
+  //       _image = File(pickedFile.path);
+  //     });
+  //   }
+  // }
+
   Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-      maxHeight: 1080,
-      maxWidth: 1920,
-      imageQuality: 40,
+    final ImageSource? source = await showDialog<ImageSource>(
+      context: context,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          title: const Text('Choisir une source'),
+          children: <Widget>[
+            SimpleDialogOption(
+              padding: EdgeInsets.all(15),
+              onPressed: () {
+                Navigator.pop(context, ImageSource.gallery);
+              },
+              child: Row(
+                children: [
+                  Icon(Icons.photo),
+                  SizedBox(
+                    width: 5,
+                  ),
+                  const Text('Galerie'),
+                ],
+              ),
+            ),
+            SimpleDialogOption(
+              padding: EdgeInsets.all(15),
+              onPressed: () {
+                Navigator.pop(context, ImageSource.camera);
+              },
+              child: Row(
+                children: [
+                  Icon(Icons.camera_alt),
+                  SizedBox(
+                    width: 5,
+                  ),
+                  const Text('Caméra'),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
 
-    if (pickedFile != null) {
-      setState(() {
-        _image = File(pickedFile.path);
-      });
+    if (source != null) {
+      final pickedFile = await ImagePicker().pickImage(
+        source: source,
+        maxHeight: 1080,
+        maxWidth: 1920,
+        imageQuality: 40,
+      );
+
+      if (pickedFile != null) {
+        setState(() {
+          _image = File(pickedFile.path);
+        });
+      }
     }
   }
 
@@ -124,16 +196,10 @@ class _EditProduitScreenState extends State<EditProduitScreen> {
     }
   }
 
-  void _onSelectedFournisseursChanged(List<Fournisseur> fournisseurs) {
-    setState(() {
-      _selectedFournisseurs = fournisseurs;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final produitProvider =
-        Provider.of<ProduitProvider>(context, listen: false);
+        Provider.of<CommerceProvider>(context, listen: false);
 
     return Scaffold(
       appBar: AppBar(
@@ -326,8 +392,14 @@ class _EditProduitScreenState extends State<EditProduitScreen> {
     );
   }
 
+  void _onSelectedFournisseursChanged(List<Fournisseur> fournisseurs) {
+    setState(() {
+      _selectedFournisseurs = fournisseurs;
+    });
+  }
+
   ElevatedButton buildButton_Edit_Add(
-      BuildContext context, ProduitProvider produitProvider) {
+      BuildContext context, CommerceProvider produitProvider) {
     return ElevatedButton(
       onPressed: () async {
         if (_formKey.currentState!.validate()) {
@@ -349,13 +421,21 @@ class _EditProduitScreenState extends State<EditProduitScreen> {
               prixAchat: double.parse(_prixAchatController.text),
               prixVente: double.parse(_prixVenteController.text),
               stock: int.parse(_stockController.text),
+              // datePeremption: DateTime.parse(_peremptionController.text),
+              // dateCreation: DateTime.parse(_creationController.text),
+              // derniereModification:
+              //     DateTime.parse(_modificationController.text),
             );
 
             if (widget.produit == null) {
               produitProvider.ajouterProduit(produit, _selectedFournisseurs);
+              print('hadi ajouterProduit');
             } else {
               produitProvider.updateProduitById(widget.produit!.id, produit,
-                  fournisseurs: _selectedFournisseurs);
+                  fournisseurs: widget.specifiquefournisseur != null
+                      ? null
+                      : _selectedFournisseurs);
+              print('hadi updateProduitById');
             }
             _formKey.currentState!.save();
             Navigator.of(context).pop();
@@ -380,6 +460,8 @@ class __AddFournisseurFormState extends State<_AddFournisseurForm> {
   final _nomController = TextEditingController();
   final _phoneController = TextEditingController();
   final _adresseController = TextEditingController();
+  final _creationController = TextEditingController();
+  final _modificationController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -465,9 +547,12 @@ class __AddFournisseurFormState extends State<_AddFournisseurForm> {
                         nom: _nomController.text,
                         phone: _phoneController.text,
                         adresse: _adresseController.text,
+                        // dateCreation: DateTime.parse(_creationController.text),
+                        // derniereModification:
+                        //     DateTime.parse(_modificationController.text),
                       );
                       context
-                          .read<FournisseurProvider>()
+                          .read<CommerceProvider>()
                           .addFournisseur(fournisseur);
                       Navigator.of(context).pop();
                     }
@@ -491,93 +576,6 @@ class __AddFournisseurFormState extends State<_AddFournisseurForm> {
     super.dispose();
   }
 }
-
-// class FournisseurSelectionScreen extends StatefulWidget {
-//   final Produit? produit;
-//   final Function(List<Fournisseur>) onSelectedFournisseursChanged;
-//
-//   const FournisseurSelectionScreen({
-//     Key? key,
-//     this.produit,
-//     required this.onSelectedFournisseursChanged,
-//   }) : super(key: key);
-//
-//   @override
-//   _FournisseurSelectionScreenState createState() =>
-//       _FournisseurSelectionScreenState();
-// }
-// class _FournisseurSelectionScreenState
-//     extends State<FournisseurSelectionScreen> {
-//   String _searchQuery = '';
-//   List<Fournisseur> _selectedFournisseurs = [];
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     if (widget.produit != null) {
-//       _selectedFournisseurs = List.from(widget.produit!.fournisseurs);
-//     }
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     final fournisseurProvider = Provider.of<FournisseurProvider>(context);
-//     List<Fournisseur> filteredFournisseurs =
-//         fournisseurProvider.fournisseurs.where((fournisseur) {
-//       return fournisseur.nom.toLowerCase().contains(_searchQuery.toLowerCase());
-//     }).toList();
-//
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Sélectionner Fournisseurs'),
-//       ),
-//       body: Column(
-//         children: [
-//           TextField(
-//             decoration: InputDecoration(labelText: 'Rechercher'),
-//             onChanged: (value) {
-//               setState(() {
-//                 _searchQuery = value;
-//               });
-//             },
-//           ),
-//           ElevatedButton(
-//             onPressed: () {
-//               Navigator.of(context).pop();
-//             },
-//             child: Text('Sauvegarder Sélection'),
-//           ),
-//           Expanded(
-//             child: ListView.builder(
-//               itemCount: filteredFournisseurs.length,
-//               itemBuilder: (context, index) {
-//                 final fournisseur = filteredFournisseurs[index];
-//                 final isSelected = _selectedFournisseurs.contains(fournisseur);
-//                 return ListTile(
-//                   title: Text(fournisseur.nom),
-//                   trailing: Checkbox(
-//                     value: isSelected,
-//                     onChanged: (bool? selected) {
-//                       setState(() {
-//                         if (selected!) {
-//                           _selectedFournisseurs.add(fournisseur);
-//                         } else {
-//                           _selectedFournisseurs.remove(fournisseur);
-//                         }
-//                         widget.onSelectedFournisseursChanged(
-//                             _selectedFournisseurs);
-//                       });
-//                     },
-//                   ),
-//                 );
-//               },
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
 
 class FournisseurSelectionScreen extends StatefulWidget {
   final Produit? produit;
@@ -609,7 +607,7 @@ class _FournisseurSelectionScreenState
 
   @override
   Widget build(BuildContext context) {
-    final fournisseurProvider = Provider.of<FournisseurProvider>(context);
+    final fournisseurProvider = Provider.of<CommerceProvider>(context);
     List<Fournisseur> filteredFournisseurs =
         fournisseurProvider.fournisseurs.where((fournisseur) {
       return fournisseur.nom.toLowerCase().contains(_searchQuery.toLowerCase());
@@ -703,9 +701,9 @@ class FournisseurSearchDelegate extends SearchDelegate<Fournisseur> {
 
   Widget _buildSuggestions(BuildContext context) {
     final fournisseurProvider =
-        Provider.of<FournisseurProvider>(context, listen: false);
+        Provider.of<CommerceProvider>(context, listen: false);
     final produitProvider =
-        Provider.of<ProduitProvider>(context, listen: false);
+        Provider.of<CommerceProvider>(context, listen: false);
 
     final fournisseurs = fournisseurProvider.fournisseurs.where((fournisseur) {
       return fournisseur.nom.toLowerCase().contains(query.toLowerCase());

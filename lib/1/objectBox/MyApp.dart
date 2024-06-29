@@ -1,15 +1,14 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'Entity.dart';
 import 'MyProviders.dart';
 import 'classeObjectBox.dart';
-import 'pages/ClientListScreen.dart';
-import 'pages/FactureListScreen.dart';
 import 'pages/FournisseurListScreen.dart';
 import 'pages/ProduitListScreen.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'dart:io' show Platform;
 
-class MyMain extends StatelessWidget {
+class MyMainO extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureProvider<ObjectBox?>(
@@ -34,10 +33,6 @@ class MyMain extends StatelessWidget {
 }
 
 class MyApp9 extends StatelessWidget {
-  // final ObjectBox objectBox;
-  //
-  // MyApp99({required this.objectBox});
-
   @override
   Widget build(BuildContext context) {
     final objectBox = Provider.of<ObjectBox?>(context);
@@ -48,13 +43,11 @@ class MyApp9 extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => ProduitProvider(
+          create: (_) => CommerceProvider(
             objectBox,
           ),
         ),
-        ChangeNotifierProvider(
-          create: (_) => FournisseurProvider(objectBox),
-        ),
+
         // Ajoutez les autres providers ici de la même manière
       ],
       child: MaterialApp(
@@ -79,11 +72,34 @@ class MyApp9 extends StatelessWidget {
 
         //darkTheme: ThemeData.dark(),
 
-        home: HomeScreen(
+        home: showPlatform(
           objectBox: objectBox,
         ),
       ),
     );
+  }
+}
+
+class showPlatform extends StatelessWidget {
+  const showPlatform({super.key, required this.objectBox});
+
+  final ObjectBox objectBox;
+
+  @override
+  Widget build(BuildContext context) {
+    if (kIsWeb) {
+      return HomeScreenWide(objectBox: objectBox);
+    } else if (Platform.isIOS) {
+      return HomeScreen(objectBox: objectBox);
+    } else if (Platform.isAndroid) {
+      return HomeScreen(objectBox: objectBox);
+    } else if (Platform.isWindows) {
+      return HomeScreenWide(objectBox: objectBox);
+    } else if (Platform.isLinux) {
+      return HomeScreenWide(objectBox: objectBox);
+    } else {
+      return HomeScreen(objectBox: objectBox);
+    }
   }
 }
 
@@ -100,7 +116,7 @@ class HomeScreen extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () {
-              objectBox.fillWithFakeData(1000);
+              objectBox.fillWithFakeData(100000);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Données factices ajoutées !')),
               );
@@ -109,153 +125,242 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: ListView(
-        children: [
-          Card(
-            child: ListTile(
-              title: Text('Produits'),
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => ProduitListScreen()));
-              },
-            ),
-          ),
-          Card(
-            child: ListTile(
-              title: Text('Fournisseurs'),
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => FournisseurListScreen()));
-              },
-            ),
-          ),
-          Card(
-              // child: ListTile(
-              //   title: Text('Clients'),
-              //   onTap: () {
-              //     Navigator.push(
-              //         context,
-              //         MaterialPageRoute(
-              //             builder: (context) => ClientListScreen()));
-              //   },
-              // ),
+      body: Consumer<CommerceProvider>(
+          builder: (context, produitProvider, child) {
+        return ListView(
+          children: [
+            Card(
+              child: ListTile(
+                title: Text('${produitProvider.produits.length} Produits'),
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => ProduitListScreen()));
+                },
               ),
-          Card(
-              // child: ListTile(
-              //   title: Text('Factures'),
-              //   onTap: () {
-              //     Navigator.push(
-              //         context,
-              //         MaterialPageRoute(
-              //             builder: (context) => FactureListScreen()));
-              //   },
-              // ),
+            ),
+            Card(
+              child: ListTile(
+                title:
+                    Text('${produitProvider.fournisseurs.length} Fournisseurs'),
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => FournisseurListScreen()));
+                },
               ),
-          SizedBox(
-            height: 30,
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30),
-            child: ElevatedButton(
-              child: Text('Delete all'),
-              onPressed: () {
-                objectBox.deleteDatabase();
+            ),
+            Card(
+                // child: ListTile(
+                //   title: Text('Clients'),
+                //   onTap: () {
+                //     Navigator.push(
+                //         context,
+                //         MaterialPageRoute(
+                //             builder: (context) => ClientListScreen()));
+                //   },
+                // ),
+                ),
+            Card(
+                // child: ListTile(
+                //   title: Text('Factures'),
+                //   onTap: () {
+                //     Navigator.push(
+                //         context,
+                //         MaterialPageRoute(
+                //             builder: (context) => FactureListScreen()));
+                //   },
+                // ),
+                ),
+            SizedBox(
+              height: 30,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: ElevatedButton(
+                child: Text('Delete all'),
+                onPressed: () {
+                  objectBox.deleteDatabase();
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Base de Données Vider avec succes!')),
-                );
-              },
-              style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all<Color>(Colors.red),
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: Text('Base de Données Vider avec succes!')),
+                  );
+                },
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.all<Color>(Colors.red),
+                ),
               ),
             ),
-          ),
-        ],
-      ),
+          ],
+        );
+      }),
     );
   }
 }
 
-// class Reset extends StatelessWidget {
-//   final ObjectBox objectBox;
-//
-//   Reset({required this.objectBox});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Facturation'),
-//         actions: [
-//           IconButton(
-//             onPressed: () {
-//               objectBox.fillWithFakeData(
-//                   100); // Remplir avec 100 enregistrements factices
-//               ScaffoldMessenger.of(context).showSnackBar(
-//                 SnackBar(content: Text('Données factices ajoutées !')),
-//               );
-//             },
-//             icon: Icon(Icons.send),
-//           ),
-//         ],
-//       ),
-//       body: ListView(
-//         children: [
-//           Card(
-//             child: ListTile(
-//               title: Text('Produits'),
-//               onTap: () {
-//                 Navigator.of(context).push(MaterialPageRoute(
-//                     builder: (context) => ProduitListScreen()));
-//               },
-//             ),
-//           ),
-//           Card(
-//             child: ListTile(
-//               title: Text('Fournisseurs'),
-//               onTap: () {
-//                 Navigator.of(context).push(MaterialPageRoute(
-//                     builder: (context) => FournisseurListScreen()));
-//               },
-//             ),
-//           ),
-//           SizedBox(height: 30),
-//           Padding(
-//             padding: const EdgeInsets.symmetric(horizontal: 30),
-//             child: ElevatedButton(
-//               child: Text('Delete all'),
-//               onPressed: () {
-//                 objectBox.clearDatabase();
-//                 ScaffoldMessenger.of(context).showSnackBar(
-//                   SnackBar(content: Text('Base de Données Vidée avec succès!')),
-//                 );
-//               },
-//               style: ButtonStyle(
-//                 backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
-//               ),
-//             ),
-//           ),
-//           SizedBox(height: 10),
-//           Padding(
-//             padding: const EdgeInsets.symmetric(horizontal: 30),
-//             child: ElevatedButton(
-//               child: Text('Reset Database'),
-//               onPressed: () async {
-//                 await objectBox.resetDatabase();
-//                 ScaffoldMessenger.of(context).showSnackBar(
-//                   SnackBar(
-//                       content:
-//                           Text('Base de Données Réinitialisée avec succès!')),
-//                 );
-//               },
-//               style: ButtonStyle(
-//                 backgroundColor:
-//                     MaterialStateProperty.all<Color>(Colors.orange),
-//               ),
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
+class HomeScreenWide extends StatefulWidget {
+  final ObjectBox objectBox;
+
+  HomeScreenWide({required this.objectBox});
+
+  @override
+  State<HomeScreenWide> createState() => _HomeScreenWideState();
+}
+
+class _HomeScreenWideState extends State<HomeScreenWide> {
+  int _selectedIndex = 0;
+  List<Widget> _widgetOptions() {
+    return [
+      Center(child: Text('Home Screen')),
+      ProduitListScreen(),
+      FournisseurListScreen(),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Facturation'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              widget.objectBox.fillWithFakeData(100000);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Données factices ajoutées !')),
+              );
+            },
+            icon: Icon(Icons.send),
+          ),
+        ],
+      ),
+      body: Consumer<CommerceProvider>(
+        builder: (context, produitProvider, child) {
+          return Row(
+            children: [
+              NavigationRail(
+                selectedIndex: _selectedIndex,
+                onDestinationSelected: (int index) {
+                  setState(() {
+                    _selectedIndex = index;
+                  });
+                },
+                labelType: NavigationRailLabelType.selected,
+                destinations: [
+                  NavigationRailDestination(
+                    icon: Icon(Icons.home),
+                    selectedIcon: Icon(Icons.home_filled),
+                    label: Text('Home'),
+                  ),
+                  NavigationRailDestination(
+                    icon: Icon(Icons.business),
+                    selectedIcon: Icon(Icons.business_center),
+                    label: Text('Business'),
+                  ),
+                  NavigationRailDestination(
+                    icon: Icon(Icons.school),
+                    selectedIcon: Icon(Icons.school),
+                    label: Text('School'),
+                  ),
+                ],
+              ),
+              VerticalDivider(thickness: 1, width: 1),
+              Expanded(
+                child: ListView(
+                  children: [
+                    Center(
+                      child: Text(_selectedIndex.toString()),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Card(
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                    builder: (context) => ProduitListScreen()),
+                              );
+                            },
+                            child: Container(
+                                height: 100,
+                                width: 200,
+                                child: Center(
+                                  child: Text(
+                                      '${produitProvider.produits.length} Produits'),
+                                )),
+                          ),
+                        ),
+                        Card(
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        FournisseurListScreen()),
+                              );
+                            },
+                            child: Container(
+                                height: 100,
+                                width: 200,
+                                child: Center(
+                                  child: Text(
+                                      '${produitProvider.fournisseurs.length}  Fournisseurs'),
+                                )),
+                          ),
+                        ),
+                      ],
+                    ),
+                    // Card(
+                    //   child: ListTile(
+                    //     title:
+                    //         Text('${produitProvider.produits.length} Produits'),
+                    //     onTap: () {
+                    //       Navigator.of(context).push(
+                    //         MaterialPageRoute(
+                    //             builder: (context) => ProduitListScreen()),
+                    //       );
+                    //     },
+                    //   ),
+                    // ),
+                    // Card(
+                    //   child: ListTile(
+                    //     title: Text(
+                    //         '${produitProvider.fournisseurs.length}  Fournisseurs'),
+                    //     onTap: () {
+                    //       Navigator.of(context).push(
+                    //         MaterialPageRoute(
+                    //             builder: (context) => FournisseurListScreen()),
+                    //       );
+                    //     },
+                    //   ),
+                    // ),
+                    SizedBox(height: 30),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 30),
+                      child: ElevatedButton(
+                        child: Text('Delete all'),
+                        onPressed: () {
+                          widget.objectBox.deleteDatabase();
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content:
+                                    Text('Base de Données Vider avec succes!')),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: _widgetOptions()[_selectedIndex],
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
