@@ -941,6 +941,86 @@ void _deleteProduit(BuildContext context, Produit produit) {
 //     );
 //   }
 // }
+
+// class FournisseurSearchDelegateMain extends SearchDelegate {
+//   final List<Fournisseur> fournisseurs;
+//
+//   FournisseurSearchDelegateMain(this.fournisseurs);
+//
+//   @override
+//   List<Widget>? buildActions(BuildContext context) {
+//     return [
+//       IconButton(
+//         icon: Icon(Icons.clear),
+//         onPressed: () {
+//           query = '';
+//         },
+//       ),
+//     ];
+//   }
+//
+//   @override
+//   Widget? buildLeading(BuildContext context) {
+//     return IconButton(
+//       icon: Icon(Icons.arrow_back),
+//       onPressed: () {
+//         close(context, null);
+//       },
+//     );
+//   }
+//
+//   @override
+//   Widget buildResults(BuildContext context) {
+//     final results = fournisseurs
+//         .where((f) => f.nom.toLowerCase().contains(query.toLowerCase()))
+//         .toList();
+//
+//     return ListView.builder(
+//       itemCount: results.length,
+//       itemBuilder: (context, index) {
+//         final fournisseur = results[index];
+//         return ListTile(
+//           onTap: () {
+//             Navigator.of(context).push(
+//               MaterialPageRoute(
+//                 builder: (context) =>
+//                     ProduitsFournisseurPage(fournisseur: fournisseur),
+//               ),
+//             );
+//           },
+//           title: Text(fournisseur.nom),
+//           subtitle: Text('${fournisseur.produits.length} produits'),
+//         );
+//       },
+//     );
+//   }
+//
+//   @override
+//   Widget buildSuggestions(BuildContext context) {
+//     final suggestions = fournisseurs
+//         .where((f) => f.nom.toLowerCase().contains(query.toLowerCase()))
+//         .toList();
+//
+//     return ListView.builder(
+//       itemCount: suggestions.length,
+//       itemBuilder: (context, index) {
+//         final fournisseur = suggestions[index];
+//         return ListTile(
+//           onTap: () {
+//             Navigator.of(context).push(
+//               MaterialPageRoute(
+//                 builder: (context) =>
+//                     ProduitsFournisseurPage(fournisseur: fournisseur),
+//               ),
+//             );
+//           },
+//           title: Text(fournisseur.nom),
+//           trailing: Text('${fournisseur.produits.length}'),
+//         );
+//       },
+//     );
+//   }
+// }
 class FournisseurSearchDelegateMain extends SearchDelegate {
   final List<Fournisseur> fournisseurs;
 
@@ -970,9 +1050,12 @@ class FournisseurSearchDelegateMain extends SearchDelegate {
 
   @override
   Widget buildResults(BuildContext context) {
-    final results = fournisseurs
-        .where((f) => f.nom.toLowerCase().contains(query.toLowerCase()))
-        .toList();
+    final results = fournisseurs.where((fournisseur) {
+      final queryLower = query.toLowerCase();
+      final nomLower = fournisseur.nom.toLowerCase();
+      return nomLower.contains(queryLower) ||
+          fournisseur.id.toString().contains(query);
+    }).toList();
 
     return ListView.builder(
       itemCount: results.length,
@@ -996,9 +1079,12 @@ class FournisseurSearchDelegateMain extends SearchDelegate {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    final suggestions = fournisseurs
-        .where((f) => f.nom.toLowerCase().contains(query.toLowerCase()))
-        .toList();
+    final suggestions = fournisseurs.where((fournisseur) {
+      final queryLower = query.toLowerCase();
+      final nomLower = fournisseur.nom.toLowerCase();
+      return nomLower.contains(queryLower) ||
+          fournisseur.id.toString().contains(query);
+    }).toList();
 
     return ListView.builder(
       itemCount: suggestions.length,

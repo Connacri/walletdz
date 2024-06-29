@@ -201,7 +201,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                   Provider.of<CommerceProvider>(context, listen: false);
               showSearch(
                 context: context,
-                delegate: ProduitSearchDelegateMain(produitProvider.produitsP),
+                delegate: ProduitSearchDelegateMain(produitProvider.produits),
               );
             },
           )
@@ -772,6 +772,91 @@ class ProduitDetailPage extends StatelessWidget {
 //   }
 // }
 
+// class ProduitSearchDelegateMain extends SearchDelegate {
+//   final List<Produit> produits;
+//
+//   ProduitSearchDelegateMain(this.produits);
+//
+//   @override
+//   List<Widget>? buildActions(BuildContext context) {
+//     return [
+//       IconButton(
+//         icon: Icon(Icons.clear),
+//         onPressed: () {
+//           query = '';
+//         },
+//       ),
+//     ];
+//   }
+//
+//   @override
+//   Widget? buildLeading(BuildContext context) {
+//     return IconButton(
+//       icon: Icon(Icons.arrow_back),
+//       onPressed: () {
+//         close(context, null);
+//       },
+//     );
+//   }
+//
+//   @override
+//   Widget buildResults(BuildContext context) {
+//     // final results = produits
+//     //     .where((f) => f.nom.toLowerCase().contains(query.toLowerCase()))
+//     //     .toList();
+//     final results = produits.where((produit) {
+//       final queryLower = query.toLowerCase();
+//       final nomLower = produit.nom.toLowerCase();
+//       return nomLower.contains(queryLower) ||
+//           produit.id.toString().contains(query);
+//     }).toList();
+//     return ListView.builder(
+//       itemCount: results.length,
+//       itemBuilder: (context, index) {
+//         final produit = results[index];
+//         return ListTile(
+//           onTap: () {
+//             Navigator.of(context).push(
+//               MaterialPageRoute(
+//                 builder: (context) => ProduitDetailPage(produit: produit),
+//               ),
+//             );
+//           },
+//           title: Text('${produit.id}' + ' ' '${produit.nom}'),
+//         );
+//       },
+//     );
+//   }
+//
+//   @override
+//   Widget buildSuggestions(BuildContext context) {
+//     // final suggestions = produits
+//     //     .where((f) => f.nom.toLowerCase().contains(query.toLowerCase()))
+//     //     .toList();
+//     final suggestions = produits.where((produit) {
+//       final queryLower = query.toLowerCase();
+//       final nomLower = produit.nom.toLowerCase();
+//       return nomLower.contains(queryLower) ||
+//           produit.id.toString().contains(query);
+//     }).toList();
+//     return ListView.builder(
+//       itemCount: suggestions.length,
+//       itemBuilder: (context, index) {
+//         final produit = suggestions[index];
+//         return ListTile(
+//           onTap: () {
+//             Navigator.of(context).push(
+//               MaterialPageRoute(
+//                 builder: (context) => ProduitDetailPage(produit: produit),
+//               ),
+//             );
+//           },
+//           title: Text('${produit.id}' + ' ' '${produit.nom}'),
+//         );
+//       },
+//     );
+//   }
+// }
 class ProduitSearchDelegateMain extends SearchDelegate {
   final List<Produit> produits;
 
@@ -801,15 +886,13 @@ class ProduitSearchDelegateMain extends SearchDelegate {
 
   @override
   Widget buildResults(BuildContext context) {
-    // final results = produits
-    //     .where((f) => f.nom.toLowerCase().contains(query.toLowerCase()))
-    //     .toList();
     final results = produits.where((produit) {
       final queryLower = query.toLowerCase();
       final nomLower = produit.nom.toLowerCase();
       return nomLower.contains(queryLower) ||
           produit.id.toString().contains(query);
     }).toList();
+
     return ListView.builder(
       itemCount: results.length,
       itemBuilder: (context, index) {
@@ -822,7 +905,7 @@ class ProduitSearchDelegateMain extends SearchDelegate {
               ),
             );
           },
-          title: Text('${produit.id}' + ' ' '${produit.nom}'),
+          title: Text('${produit.id} ${produit.nom}'),
         );
       },
     );
@@ -830,15 +913,13 @@ class ProduitSearchDelegateMain extends SearchDelegate {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    // final suggestions = produits
-    //     .where((f) => f.nom.toLowerCase().contains(query.toLowerCase()))
-    //     .toList();
     final suggestions = produits.where((produit) {
       final queryLower = query.toLowerCase();
       final nomLower = produit.nom.toLowerCase();
       return nomLower.contains(queryLower) ||
           produit.id.toString().contains(query);
     }).toList();
+
     return ListView.builder(
       itemCount: suggestions.length,
       itemBuilder: (context, index) {
@@ -851,7 +932,7 @@ class ProduitSearchDelegateMain extends SearchDelegate {
               ),
             );
           },
-          title: Text('${produit.id}' + ' ' '${produit.nom}'),
+          title: Text('${produit.id} ${produit.nom}'),
         );
       },
     );
