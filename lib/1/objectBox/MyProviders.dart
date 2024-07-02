@@ -7,34 +7,63 @@ import 'classeObjectBox.dart';
 
 class CommerceProvider extends ChangeNotifier {
   final ObjectBox _objectBox;
-  List<Produit> _produits = [];
+  // List<Produit> _produits = [];
   List<Produit> _produitsP = [];
   List<Fournisseur> _fournisseurs = [];
   int _currentPage = 0;
-  final int _pageSize = 20;
+  final int _pageSize = 100;
   bool _hasMoreProduits = true;
-
-  CommerceProvider(this._objectBox) {
-    _chargerProduits();
-    _chargerProduits2();
-    _chargerFournisseurs();
-  }
-
-  List<Produit> get produits => _produits;
+  bool _isLoading = false;
+  // List<Produit> get produits => _produits;
   List<Produit> get produitsP => _produitsP;
   bool get hasMoreProduits => _hasMoreProduits;
   List<Fournisseur> get fournisseurs => _fournisseurs;
+  bool get isLoading => _isLoading;
 
-  // Méthodes pour charger les produits et fournisseurs
-  void _chargerProduits() {
-    _produits = _objectBox.produitBox.getAll().toList();
-    notifyListeners();
+  CommerceProvider(this._objectBox) {
+    chargerProduits();
+    //chargerProduitsS();
+    _chargerFournisseurs();
   }
 
-  Future<void> _chargerProduits2() async {
+  // Méthodes pour charger les produits et fournisseurs
+  // void chargerProduitsS() {
+  //   _produits = _objectBox.produitBox.getAll().toList();
+  //   notifyListeners();
+  // }
+
+  // Future<void> chargerProduits() async {
+  //   final query = _objectBox.produitBox.query()
+  //     ..order(Produit_.id, flags: Order.descending);
+  //   final allProduits = query.build().find();
+  //
+  //   final startIndex = _currentPage * _pageSize;
+  //   final endIndex = startIndex + _pageSize;
+  //
+  //   if (startIndex >= allProduits.length) {
+  //     _hasMoreProduits = false;
+  //   } else {
+  //     final newProduits = allProduits.sublist(startIndex,
+  //         endIndex > allProduits.length ? allProduits.length : endIndex);
+  //     _produitsP.addAll(newProduits);
+  //     _currentPage++;
+  //     _hasMoreProduits = endIndex < allProduits.length;
+  //   }
+  //   notifyListeners();
+  // }
+
+  Future<void> chargerProduits({bool reset = false}) async {
+    _isLoading = true;
+    notifyListeners();
+    if (reset) {
+      _currentPage = 0;
+      produitsP.clear();
+    }
+
     final query = _objectBox.produitBox.query()
       ..order(Produit_.id, flags: Order.descending);
-    final allProduits = query.build().find();
+
+    final allProduits = await query.build().find();
 
     final startIndex = _currentPage * _pageSize;
     final endIndex = startIndex + _pageSize;
@@ -42,26 +71,37 @@ class CommerceProvider extends ChangeNotifier {
     if (startIndex >= allProduits.length) {
       _hasMoreProduits = false;
     } else {
-      final newProduits = allProduits.sublist(startIndex,
-          endIndex > allProduits.length ? allProduits.length : endIndex);
+      final newProduits = allProduits.sublist(
+        startIndex,
+        endIndex > allProduits.length ? allProduits.length : endIndex,
+      );
+
       _produitsP.addAll(newProduits);
       _currentPage++;
       _hasMoreProduits = endIndex < allProduits.length;
     }
+
+    _isLoading = false;
     notifyListeners();
   }
 
-  Future<void> loadMoreProduits() async {
-    if (_hasMoreProduits) {
-      await _chargerProduits2();
-    }
+  Future<List<Produit>> rechercherProduits(String query,
+      {int limit = 20}) async {
+    final queryLower = query.toLowerCase();
+    final idQuery = int.tryParse(query);
+    final qBuilder = _objectBox.produitBox.query(idQuery != null
+        ? Produit_.id.equals(idQuery) |
+            Produit_.nom.contains(queryLower, caseSensitive: false)
+        : Produit_.nom.contains(queryLower, caseSensitive: false));
+    return qBuilder.build().find();
   }
 
   void resetProduits() {
     _produitsP.clear();
     _currentPage = 0;
     _hasMoreProduits = true;
-    _chargerProduits2();
+
+    chargerProduits(reset: true);
   }
 
   void _chargerFournisseurs() {
@@ -88,14 +128,14 @@ class CommerceProvider extends ChangeNotifier {
     _ajouterOuMettreAJourFournisseurs(fournisseurs);
     produit.fournisseurs.addAll(fournisseurs);
     _objectBox.produitBox.put(produit);
-    _chargerProduits();
+    chargerProduits(reset: true);
     _chargerFournisseurs();
     notifyListeners();
   }
 
   void updateProduit(Produit produit) {
     _objectBox.produitBox.put(produit);
-    _chargerProduits();
+    chargerProduits(reset: true);
   }
 
   void updateProduitById(int id, Produit updatedProduit,
@@ -117,7 +157,7 @@ class CommerceProvider extends ChangeNotifier {
       }
 
       _objectBox.produitBox.put(produit);
-      _chargerProduits();
+      chargerProduits(reset: true);
       _chargerFournisseurs();
       notifyListeners();
     }
@@ -125,7 +165,7 @@ class CommerceProvider extends ChangeNotifier {
 
   void supprimerProduit(Produit produit) {
     _objectBox.produitBox.remove(produit.id);
-    _chargerProduits();
+    chargerProduits(reset: true);
     _chargerFournisseurs();
     notifyListeners();
   }
@@ -135,9 +175,29 @@ class CommerceProvider extends ChangeNotifier {
   //   return _objectBox.fournisseurBox.get(id);
   // }
 
+  int getTotalProduits() {
+    return _objectBox.produitBox.count();
+  }
+
+  List<Produit> getProduitsBetweenPrices(double minPrice, double maxPrice) {
+    final query = _objectBox.produitBox
+        .query(Produit_.prixVente.between(minPrice, maxPrice));
+    return query.build().find();
+  }
+
+  Map<String, dynamic> getProduitsLowStock() {
+    final query = _objectBox.produitBox.query(Produit_.stock.lessThan(5));
+    final lowStockProduits = query.build().find();
+
+    return {
+      'count': lowStockProduits.length,
+      'produits': lowStockProduits,
+    };
+  }
+
   void addFournisseur(Fournisseur fournisseur) {
     _objectBox.fournisseurBox.put(fournisseur);
-    _chargerProduits();
+    chargerProduits(reset: true);
     _chargerFournisseurs();
     notifyListeners();
   }
@@ -148,7 +208,7 @@ class CommerceProvider extends ChangeNotifier {
       updatedFournisseur.id = id;
       _objectBox.fournisseurBox.put(updatedFournisseur);
       _fournisseurs[fournisseurIndex] = updatedFournisseur;
-      _chargerProduits();
+      chargerProduits(reset: true);
       _chargerFournisseurs();
       notifyListeners();
     }
@@ -156,7 +216,7 @@ class CommerceProvider extends ChangeNotifier {
 
   void supprimerFournisseur(Fournisseur fournisseur) {
     _objectBox.fournisseurBox.remove(fournisseur.id);
-    _chargerProduits();
+    chargerProduits(reset: true);
     _chargerFournisseurs();
     notifyListeners();
   }
@@ -166,7 +226,7 @@ class CommerceProvider extends ChangeNotifier {
     _ajouterOuMettreAJourProduits(produits);
     fournisseur.produits.addAll(produits);
     _objectBox.fournisseurBox.put(fournisseur);
-    _chargerProduits();
+    chargerProduits(reset: true);
     _chargerFournisseurs();
     notifyListeners();
   }

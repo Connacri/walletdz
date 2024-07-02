@@ -428,7 +428,11 @@ class _EditProduitScreenState extends State<EditProduitScreen> {
             );
 
             if (widget.produit == null) {
-              produitProvider.ajouterProduit(produit, _selectedFournisseurs);
+              //produitProvider.ajouterProduit(produit, _selectedFournisseurs);
+              context
+                  .read<CommerceProvider>()
+                  .ajouterProduit(produit, _selectedFournisseurs);
+
               print('hadi ajouterProduit');
             } else {
               produitProvider.updateProduitById(widget.produit!.id, produit,

@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:provider/provider.dart';
+import 'package:walletdz/1/objectBox/pages/ProduitListScreen.dart';
+import 'package:walletdz/1/objectBox/pages/test.dart';
+import 'Entity.dart';
 import 'MyProviders.dart';
 import 'classeObjectBox.dart';
 import 'pages/FournisseurListScreen.dart';
-import 'pages/ProduitListScreen.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'dart:io' show Platform;
+import 'dart:io';
+import 'dart:isolate';
+import 'package:percent_indicator/percent_indicator.dart';
+import 'package:faker/faker.dart';
+import 'package:path_provider/path_provider.dart'; // Importez le package path_provider
 
 class MyMainO extends StatelessWidget {
   @override
@@ -47,7 +54,11 @@ class MyApp9 extends StatelessWidget {
             objectBox,
           ),
         ),
-
+        ChangeNotifierProvider(
+          create: (_) => CommerceProviderTest(
+            objectBox,
+          ),
+        ),
         // Ajoutez les autres providers ici de la même manière
       ],
       child: MaterialApp(
@@ -108,15 +119,29 @@ class HomeScreen extends StatelessWidget {
 
   HomeScreen({required this.objectBox});
 
+  // void checkDiskSpace() {
+  //   var directory = Directory.current;
+  //   var stat = directory.statSync();
+  //   var availableSpace = stat..freeSpace;
+  //   print('Available space: $availableSpace bytes');
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Facturation'),
         actions: [
+          // IconButton(
+          //     onPressed: () async {
+          //   checkDiskSpace;
+          //
+          // },
+          // icon : Icon(Icons.dis),
+          // ),
           IconButton(
-            onPressed: () {
-              objectBox.fillWithFakeData(100000);
+            onPressed: () async {
+              objectBox.fillWithFakeData();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Données factices ajoutées !')),
               );
@@ -127,11 +152,53 @@ class HomeScreen extends StatelessWidget {
       ),
       body: Consumer<CommerceProvider>(
           builder: (context, produitProvider, child) {
+        int totalProduits = produitProvider.getTotalProduits();
+        print('Nombre total de produits : $totalProduits');
         return ListView(
           children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Card(
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) => ProduitListScreenTest()),
+                      );
+                    },
+                    child: Container(
+                        height: 100,
+                        width: MediaQuery.of(context).size.width / 2.5,
+                        child: Center(
+                          child: Text(
+                              '${produitProvider.produitsP.length} Produits'),
+                        )),
+                  ),
+                ),
+                Card(
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) => FournisseurListScreen()),
+                      );
+                    },
+                    child: Container(
+                        height: 100,
+                        width: MediaQuery.of(context).size.width / 2.5,
+                        child: Center(
+                          child: Text(
+                              '${produitProvider.fournisseurs.length}\nFournisseurs'),
+                        )),
+                  ),
+                ),
+              ],
+            ),
             Card(
               child: ListTile(
-                title: Text('${produitProvider.produits.length} Produits'),
+                title: Text('${totalProduits}\nProduits'),
+                //Text('${produitProvider.produitsP.length}\nProduits'),
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => ProduitListScreen()));
@@ -224,7 +291,7 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
         actions: [
           IconButton(
             onPressed: () {
-              widget.objectBox.fillWithFakeData(100000);
+              widget.objectBox.fillWithFakeData();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Données factices ajoutées !')),
               );
@@ -235,6 +302,8 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
       ),
       body: Consumer<CommerceProvider>(
         builder: (context, produitProvider, child) {
+          int totalProduits = produitProvider.getTotalProduits();
+          print('Nombre total de produits : $totalProduits');
           return Row(
             children: [
               NavigationRail(
@@ -285,8 +354,9 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                                 height: 100,
                                 width: 200,
                                 child: Center(
-                                  child: Text(
-                                      '${produitProvider.produits.length} Produits'),
+                                  child: Text('${totalProduits}\nProduits'
+                                      //'${produitProvider.produitsP.length}\nProduits'
+                                      ),
                                 )),
                           ),
                         ),
@@ -304,7 +374,7 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                                 width: 200,
                                 child: Center(
                                   child: Text(
-                                      '${produitProvider.fournisseurs.length}  Fournisseurs'),
+                                      '${produitProvider.fournisseurs.length}\nFournisseurs'),
                                 )),
                           ),
                         ),

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:math';
 import 'package:faker/faker.dart';
 import 'package:objectbox/objectbox.dart';
@@ -57,11 +58,11 @@ class ObjectBox {
     store.close();
   }
 
-  void fillWithFakeData(int count) {
+  void fillWithFakeData(/*int count, int fourInt*/) {
     final faker = Faker();
 
     // Créer des fournisseurs
-    List<Fournisseur> fournisseurs = List.generate(count, (index) {
+    List<Fournisseur> fournisseurs = List.generate(5000, (index) {
       return Fournisseur(
         nom: faker.company.name(),
         phone: faker.phoneNumber.us(),
@@ -75,7 +76,7 @@ class ObjectBox {
     fournisseurBox.putMany(fournisseurs);
 
     // Créer des produits et les associer à des fournisseurs
-    List<Produit> produits = List.generate(count, (index) {
+    List<Produit> produits = List.generate(10000, (index) {
       Produit produit = Produit(
         image: 'https://picsum.photos/200/300?random=${index}',
         nom: faker.food.dish(),
@@ -110,9 +111,9 @@ class ObjectBox {
     print(path);
     final dir = Directory(path);
     print(dir);
-    if (await dir.exists()) {
-      await dir.delete(recursive: true);
-    }
+    // if (await dir.exists()) {
+    //   await dir.delete(recursive: true);
+    // }
     produitBox.removeAll();
     fournisseurBox.removeAll();
     await deleteDatabase();

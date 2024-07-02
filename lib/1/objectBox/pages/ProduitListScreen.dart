@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:provider/provider.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
 import '../Entity.dart';
 import '../MyProviders.dart';
 import 'AddProduitScreen.dart';
@@ -184,7 +183,8 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
   void _onScroll() {
     if (_scrollController.position.pixels ==
         _scrollController.position.maxScrollExtent) {
-      Provider.of<CommerceProvider>(context, listen: false).loadMoreProduits();
+      // Charger plus de produits lorsque l'utilisateur atteint la fin de la liste
+      Provider.of<CommerceProvider>(context, listen: false).chargerProduits();
     }
   }
 
@@ -201,7 +201,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                   Provider.of<CommerceProvider>(context, listen: false);
               showSearch(
                 context: context,
-                delegate: ProduitSearchDelegateMain(produitProvider.produits),
+                delegate: ProduitSearchDelegateMain(produitProvider),
               );
             },
           )
@@ -216,115 +216,68 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
               if (index < produitProvider.produitsP.length) {
                 final produit = produitProvider.produitsP[index];
                 return Slidable(
-                    key: ValueKey(produit.id),
-                    startActionPane: ActionPane(
-                      motion: ScrollMotion(),
+                  key: ValueKey(produit.id),
+                  startActionPane: ActionPane(
+                    extentRatio: 0.1,
+                    motion: ScrollMotion(),
+                    children: [
+                      SlidableAction(
+                        onPressed: (BuildContext context) {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (ctx) =>
+                                EditProduitScreen(produit: produit),
+                          ));
+                        },
+                        backgroundColor: Colors.blue,
+                        icon: Icons.edit,
+                        label: 'Editer',
+                      ),
+                    ],
+                  ),
+                  child: Card(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SlidableAction(
-                          onPressed: (BuildContext context) {
+                        ListTile(
+                          onTap: () {
                             Navigator.of(context).push(MaterialPageRoute(
                               builder: (ctx) =>
-                                  EditProduitScreen(produit: produit),
+                                  ProduitDetailPage(produit: produit),
                             ));
                           },
-                          backgroundColor: Colors.blue,
-                          icon: Icons.edit,
-                          label: 'Editer',
+                          onLongPress: () {
+                            _deleteProduit(context, produit);
+                          },
+                          leading: produit.image == null ||
+                                  produit.image!.isEmpty
+                              ? CircleAvatar(
+                                  child: Icon(Icons.image_not_supported),
+                                )
+                              : CircleAvatar(
+                                  backgroundImage: CachedNetworkImageProvider(
+                                    produit.image!,
+                                    errorListener: (error) => Icon(Icons.error),
+                                  ),
+                                ),
+                          title: Text(produit.nom),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'A: ${produit.prixAchat.toStringAsFixed(2)}\nB: ${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)} ',
+                              ),
+                              _buildChipRow(context, produit)
+                            ],
+                          ),
+                          trailing: Text(
+                            '${produit.prixVente.toStringAsFixed(2)}',
+                            style: TextStyle(fontSize: 20),
+                          ),
                         ),
                       ],
                     ),
-                    child: Card(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ListTile(
-                              onTap: () {
-                                Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (ctx) =>
-                                      ProduitDetailPage(produit: produit),
-                                ));
-                              },
-                              onLongPress: () {
-                                _deleteProduit(context, produit);
-                              },
-                              leading: produit.image == null ||
-                                      produit.image!.isEmpty
-                                  ? CircleAvatar(
-                                      child: Icon(
-                                      Icons.image_not_supported,
-                                    ))
-                                  : CircleAvatar(
-                                      backgroundImage:
-                                          CachedNetworkImageProvider(
-                                        produit.image!,
-                                        errorListener: (error) =>
-                                            Icon(Icons.error),
-                                      ),
-                                    ),
-                              title: Text(produit.nom),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'A: ${produit.prixAchat.toStringAsFixed(2)}\nB: ${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)} ',
-                                  ),
-                                ],
-                              ),
-                              trailing: Text(
-                                '${produit.prixVente.toStringAsFixed(2)}',
-                                style: TextStyle(fontSize: 20),
-                              )),
-                          produit.fournisseurs.isEmpty
-                              ? Container()
-                              : Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 5),
-                                  child: _buildChipRow(
-                                      context, produit /*.fournisseurs*/),
-                                  // Wrap(
-                                  //   spacing:
-                                  //       4.0, // Espace horizontal entre les éléments
-                                  //   runSpacing:
-                                  //       0.0, // Espace vertical entre les lignes
-                                  //   children:
-                                  //       produit.fournisseurs.map((fournisseur) {
-                                  //     return InkWell(
-                                  //       onTap: () {
-                                  //         Navigator.of(context).push(
-                                  //             MaterialPageRoute(
-                                  //                 builder: (ctx) =>
-                                  //                     ProduitsFournisseurPage(
-                                  //                       fournisseur: fournisseur,
-                                  //                     )));
-                                  //       },
-                                  //       child: Chip(
-                                  //         shadowColor: Colors.black,
-                                  //         backgroundColor: Theme.of(context)
-                                  //             .chipTheme
-                                  //             .backgroundColor,
-                                  //         labelStyle: TextStyle(
-                                  //           color: Theme.of(context)
-                                  //               .chipTheme
-                                  //               .labelStyle
-                                  //               ?.color,
-                                  //         ),
-                                  //         side: BorderSide.none,
-                                  //         shape: RoundedRectangleBorder(
-                                  //             borderRadius: BorderRadius.all(
-                                  //                 Radius.circular(10))),
-                                  //         padding: EdgeInsets.zero,
-                                  //         label: Text(
-                                  //           fournisseur.nom,
-                                  //           style: TextStyle(fontSize: 10),
-                                  //         ),
-                                  //       ),
-                                  //     );
-                                  //   }).toList(),
-                                  // ),
-                                ),
-                        ],
-                      ),
-                    ));
+                  ),
+                );
               } else if (produitProvider.hasMoreProduits) {
                 return Center(child: CircularProgressIndicator());
               } else {
@@ -857,10 +810,92 @@ class ProduitDetailPage extends StatelessWidget {
 //     );
 //   }
 // }
-class ProduitSearchDelegateMain extends SearchDelegate {
-  final List<Produit> produits;
+// class ProduitSearchDelegateMain extends SearchDelegate {
+//   final List<Produit> produits;
+//
+//   ProduitSearchDelegateMain(this.produits);
+//
+//   @override
+//   List<Widget>? buildActions(BuildContext context) {
+//     return [
+//       IconButton(
+//         icon: Icon(Icons.clear),
+//         onPressed: () {
+//           query = '';
+//         },
+//       ),
+//     ];
+//   }
+//
+//   @override
+//   Widget? buildLeading(BuildContext context) {
+//     return IconButton(
+//       icon: Icon(Icons.arrow_back),
+//       onPressed: () {
+//         close(context, null);
+//       },
+//     );
+//   }
+//
+//   @override
+//   Widget buildResults(BuildContext context) {
+//     final results = produits.where((produit) {
+//       final queryLower = query.toLowerCase();
+//       final nomLower = produit.nom.toLowerCase();
+//       return nomLower.contains(queryLower) ||
+//           produit.id.toString().contains(query);
+//     }).toList();
+//
+//     return ListView.builder(
+//       itemCount: results.length,
+//       itemBuilder: (context, index) {
+//         final produit = results[index];
+//         return ListTile(
+//           onTap: () {
+//             Navigator.of(context).push(
+//               MaterialPageRoute(
+//                 builder: (context) => ProduitDetailPage(produit: produit),
+//               ),
+//             );
+//           },
+//           title: Text('${produit.id} ${produit.nom}'),
+//         );
+//       },
+//     );
+//   }
+//
+//   @override
+//   Widget buildSuggestions(BuildContext context) {
+//     final suggestions = produits.where((produit) {
+//       final queryLower = query.toLowerCase();
+//       final nomLower = produit.nom.toLowerCase();
+//       return nomLower.contains(queryLower) ||
+//           produit.id.toString().contains(query);
+//     }).toList();
+//
+//     return ListView.builder(
+//       itemCount: suggestions.length,
+//       itemBuilder: (context, index) {
+//         final produit = suggestions[index];
+//         return ListTile(
+//           onTap: () {
+//             Navigator.of(context).push(
+//               MaterialPageRoute(
+//                 builder: (context) => ProduitDetailPage(produit: produit),
+//               ),
+//             );
+//           },
+//           title: Text('${produit.id} ${produit.nom}'),
+//         );
+//       },
+//     );
+//   }
+// }
 
-  ProduitSearchDelegateMain(this.produits);
+class ProduitSearchDelegateMain extends SearchDelegate {
+  final CommerceProvider commerceProvider;
+
+  ProduitSearchDelegateMain(this.commerceProvider);
 
   @override
   List<Widget>? buildActions(BuildContext context) {
@@ -869,6 +904,7 @@ class ProduitSearchDelegateMain extends SearchDelegate {
         icon: Icon(Icons.clear),
         onPressed: () {
           query = '';
+          showSuggestions(context);
         },
       ),
     ];
@@ -886,54 +922,44 @@ class ProduitSearchDelegateMain extends SearchDelegate {
 
   @override
   Widget buildResults(BuildContext context) {
-    final results = produits.where((produit) {
-      final queryLower = query.toLowerCase();
-      final nomLower = produit.nom.toLowerCase();
-      return nomLower.contains(queryLower) ||
-          produit.id.toString().contains(query);
-    }).toList();
-
-    return ListView.builder(
-      itemCount: results.length,
-      itemBuilder: (context, index) {
-        final produit = results[index];
-        return ListTile(
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => ProduitDetailPage(produit: produit),
-              ),
-            );
-          },
-          title: Text('${produit.id} ${produit.nom}'),
-        );
-      },
-    );
+    return _buildSearchResults(context);
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    final suggestions = produits.where((produit) {
-      final queryLower = query.toLowerCase();
-      final nomLower = produit.nom.toLowerCase();
-      return nomLower.contains(queryLower) ||
-          produit.id.toString().contains(query);
-    }).toList();
+    return _buildSearchResults(context);
+  }
 
-    return ListView.builder(
-      itemCount: suggestions.length,
-      itemBuilder: (context, index) {
-        final produit = suggestions[index];
-        return ListTile(
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => ProduitDetailPage(produit: produit),
-              ),
-            );
-          },
-          title: Text('${produit.id} ${produit.nom}'),
-        );
+  Widget _buildSearchResults(BuildContext context) {
+    return FutureBuilder<List<Produit>>(
+      future: commerceProvider.rechercherProduits(query),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Erreur: ${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(child: Text('Aucun résultat trouvé'));
+        } else {
+          final results = snapshot.data!;
+          return ListView.builder(
+            itemCount: results.length,
+            itemBuilder: (context, index) {
+              final produit = results[index];
+              return ListTile(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => ProduitDetailPage(produit: produit),
+                    ),
+                  );
+                },
+                title: Text('${produit.id} ${produit.nom}'),
+                subtitle: Text('Prix: ${produit.prixVente}€'),
+              );
+            },
+          );
+        }
       },
     );
   }
