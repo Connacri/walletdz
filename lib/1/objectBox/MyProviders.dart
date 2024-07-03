@@ -195,6 +195,8 @@ class CommerceProvider extends ChangeNotifier {
     };
   }
 
+//////////////////////////////////// Fournisseur ///////////////////////////////////////////
+
   void addFournisseur(Fournisseur fournisseur) {
     _objectBox.fournisseurBox.put(fournisseur);
     chargerProduits(reset: true);

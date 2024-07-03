@@ -1099,8 +1099,8 @@ class FournisseurSearchDelegateMain extends SearchDelegate {
               ),
             );
           },
-          title: Text(fournisseur.nom),
-          trailing: Text('${fournisseur.produits.length}'),
+          title: Text('${fournisseur.id} ${fournisseur.nom}'),
+          trailing: Text('${fournisseur.produits.length} Produits'),
         );
       },
     );

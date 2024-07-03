@@ -955,7 +955,8 @@ class ProduitSearchDelegateMain extends SearchDelegate {
                   );
                 },
                 title: Text('${produit.id} ${produit.nom}'),
-                subtitle: Text('Prix: ${produit.prixVente}€'),
+                subtitle:
+                    Text('Prix: ${produit.prixVente.toStringAsFixed(2)} DZD'),
               );
             },
           );
