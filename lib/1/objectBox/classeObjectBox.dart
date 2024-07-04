@@ -80,8 +80,8 @@ class ObjectBox {
       Produit produit = Produit(
         image: 'https://picsum.photos/200/300?random=${index}',
         nom: faker.food.dish(),
-        prixAchat: faker.randomGenerator.decimal(min: 10),
-        prixVente: faker.randomGenerator.decimal(min: 50),
+        prixAchat: faker.randomGenerator.decimal(min: 60, scale: 20),
+        prixVente: faker.randomGenerator.decimal(min: 500, scale: 50),
         stock: faker.randomGenerator.integer(100, min: 1),
         description: faker.lorem.sentence(),
         qr: faker.randomGenerator.integer(999999).toString(),

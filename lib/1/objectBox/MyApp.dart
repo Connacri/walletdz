@@ -437,18 +437,34 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                                   text:
                                       '${produitsFiltres.length} Produits\nentre ${prixMin.toStringAsFixed(2)} DZD et ${prixMax.toStringAsFixed(2)} DZD',
                                   provider: produitProvider,
-                                  button: ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  ProduitListInterval(
-                                                    produitsFiltres:
-                                                        produitsFiltres,
-                                                  )),
-                                        );
-                                      },
-                                      child: Text(('Voire La List')))),
+                                  button: produitsFiltres.length == 0
+                                      ? ElevatedButton(
+                                          onPressed: null,
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.grey[
+                                                300], // Couleur de fond grise
+                                            foregroundColor: Colors.grey[
+                                                600], // Couleur du texte grise
+                                            disabledBackgroundColor: Colors
+                                                    .grey[
+                                                300], // Assure que la couleur reste grise même désactivé
+                                            disabledForegroundColor: Colors
+                                                    .grey[
+                                                600], // Assure que la couleur du texte reste grise même désactivé
+                                          ),
+                                          child: Text(('Liste Vide')))
+                                      : ElevatedButton.icon(
+                                          onPressed: () {
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      ProduitListInterval(
+                                                        produitsFiltres:
+                                                            produitsFiltres,
+                                                      )),
+                                            );
+                                          },
+                                          label: Text(('Voire La List')))),
                             ),
                           ),
                           Expanded(
