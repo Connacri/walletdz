@@ -185,11 +185,12 @@ class CommerceProvider extends ChangeNotifier {
     return query.build().find();
   }
 
-  Map<String, dynamic> getProduitsLowStock() {
-    final query = _objectBox.produitBox.query(Produit_.stock.lessThan(5));
+  Map<String, dynamic> getProduitsLowStock(qtt) {
+    final query = _objectBox.produitBox.query(Produit_.stock.lessThan(qtt));
     final lowStockProduits = query.build().find();
 
-    return {
+    return //lowStockProduits.length;
+        {
       'count': lowStockProduits.length,
       'produits': lowStockProduits,
     };
