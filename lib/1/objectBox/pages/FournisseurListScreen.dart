@@ -57,7 +57,11 @@ class FournisseurListScreen extends StatelessWidget {
                     );
                   },
                   leading: CircleAvatar(
-                    child: FittedBox(child: Text(fournisseur.id.toString())),
+                    child: FittedBox(
+                        child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(fournisseur.id.toString()),
+                    )),
                   ),
                   title: Text(fournisseur.nom),
                   subtitle: Text('Phone : ${fournisseur.phone}'),
@@ -97,7 +101,7 @@ class FournisseurListScreen extends StatelessWidget {
             context: context,
             isScrollControlled:
                 true, // Permet de redimensionner en fonction de la hauteur du contenu
-            builder: (context) => _AddFournisseurForm(),
+            builder: (context) => AddFournisseurForm(),
           );
         },
         child: Icon(Icons.add),
@@ -289,17 +293,465 @@ class ProduitsFournisseurPage extends StatelessWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) =>
-                  EditProduitScreen(specifiquefournisseur: fournisseur)));
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     Navigator.of(context).push(MaterialPageRoute(
+      //         builder: (_) =>
+      //             EditProduitScreen(specifiquefournisseur: fournisseur)));
+      //   },
+      //   child: Icon(Icons.add),
+      // ),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: () {
+              _selectExistingProducts(context, commerceProvider);
+            },
+            child: Icon(Icons.add_shopping_cart),
+            heroTag: 'selectExisting',
+          ),
+          SizedBox(width: 16),
+          FloatingActionButton(
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) =>
+                      EditProduitScreen(specifiquefournisseur: fournisseur)));
+            },
+            child: Icon(Icons.add),
+            heroTag: 'addNew',
+          ),
+        ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+    );
+  }
+
+  void _selectExistingProducts(
+      BuildContext context, CommerceProvider provider) async {
+    final List<Produit> allProduits = await provider.rechercherProduits('');
+    final List<Produit>? selectedProduits = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => SelectProductsPage(
+          allProduits: allProduits,
+          initiallySelectedProduits: fournisseur.produits.toList(),
+          fournisseur: fournisseur,
+        ),
+      ),
+    );
+
+    if (selectedProduits != null) {
+      provider.ajouterProduitsExistantsAuFournisseur(
+          fournisseur, selectedProduits);
+    }
+  }
+
+  void _deleteProduit(BuildContext context, Produit produit) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('Confirmer la suppression',
+                  style: TextStyle(fontSize: 20.0)),
+              SizedBox(height: 20.0),
+              Text('Êtes-vous sûr de vouloir supprimer ce produit ?'),
+              SizedBox(height: 20.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    label: Text('Annuler'),
+                    icon: Icon(Icons.cancel),
+                  ),
+                  ElevatedButton.icon(
+                      onPressed: () {
+                        // context
+                        //     .read<CommerceProvider>()
+                        //     .supprimerProduit(produit);
+
+                        final produitProvider = Provider.of<CommerceProvider>(
+                            context,
+                            listen: false);
+                        // produitProvider.supprimerProduit(produit);
+                        produitProvider.supprimerProduitDuFournisseur(
+                            fournisseur, produit);
+                        print(fournisseur.id);
+                        print(produit.id);
+                        print('deleted');
+                        Navigator.of(context).pop();
+                      },
+                      label: Text(
+                        'Supprimer',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      icon: Icon(Icons.delete),
+                      style: ButtonStyle(
+                        iconColor: WidgetStateProperty.all<Color>(Colors.white),
+                        backgroundColor:
+                            WidgetStateProperty.all<Color>(Colors.red),
+                      ))
+                ],
+              ),
+              SizedBox(
+                height: 60,
+              )
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class SelectProductsPage extends StatefulWidget {
+  final List<Produit> allProduits;
+  final List<Produit> initiallySelectedProduits;
+  final Fournisseur fournisseur;
+
+  SelectProductsPage({
+    required this.allProduits,
+    required this.initiallySelectedProduits,
+    required this.fournisseur,
+  });
+
+  @override
+  _SelectProductsPageState createState() => _SelectProductsPageState();
+}
+
+class _SelectProductsPageState extends State<SelectProductsPage> {
+  late Set<int> selectedProductIds;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedProductIds =
+        Set.from(widget.initiallySelectedProduits.map((p) => p.id));
+  }
+
+  void updateSelection(Produit produit, bool? isSelected) {
+    setState(() {
+      if (isSelected == true) {
+        selectedProductIds.add(produit.id);
+      } else {
+        selectedProductIds.remove(produit.id);
+      }
+    });
+  }
+
+  void supprimerProduit(Produit produit) {
+    final provider = Provider.of<CommerceProvider>(context, listen: false);
+    provider.supprimerProduitDuFournisseur(widget.fournisseur, produit);
+    setState(() {
+      selectedProductIds.remove(produit.id);
+      print(widget.fournisseur.id);
+      print(produit.id);
+
+      print('setState(() {selectedProductIds.remove(produit.id)}');
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Sélectionner des produits'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () async {
+              final result = await showSearch(
+                context: context,
+                delegate: ProductSearch(
+                  allProduits: widget.allProduits,
+                  selectedProductIds: selectedProductIds,
+                  onSelectionChanged: updateSelection,
+                  fournisseur: widget.fournisseur,
+                ),
+              );
+              if (result != null) {
+                setState(() {
+                  selectedProductIds = result;
+                });
+              }
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.check),
+            onPressed: () {
+              Navigator.of(context).pop(widget.allProduits
+                  .where((p) => selectedProductIds.contains(p.id))
+                  .toList());
+            },
+          ),
+        ],
+      ),
+      body: ListView.builder(
+        itemCount: widget.allProduits.length,
+        itemBuilder: (context, index) {
+          final produit = widget.allProduits[index];
+          final isSelected = selectedProductIds.contains(produit.id);
+          return ListTile(
+            title: Text(produit.nom),
+            subtitle: Text('Prix: ${produit.prixVente.toStringAsFixed(2)} €'),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Checkbox(
+                  value: isSelected,
+                  onChanged: (bool? value) => updateSelection(produit, value),
+                ),
+                IconButton(
+                  icon: Icon(Icons.delete),
+                  onPressed: () => supprimerProduit(produit),
+                ),
+              ],
+            ),
+          );
         },
-        child: Icon(Icons.add),
       ),
     );
   }
 }
+
+class ProductSearch extends SearchDelegate<Set<int>> {
+  final List<Produit> allProduits;
+  final Set<int> selectedProductIds;
+  final Function(Produit, bool?) onSelectionChanged;
+  final Fournisseur fournisseur;
+
+  ProductSearch({
+    required this.allProduits,
+    required this.selectedProductIds,
+    required this.onSelectionChanged,
+    required this.fournisseur,
+  });
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: Icon(Icons.clear),
+        onPressed: () {
+          query = '';
+        },
+      ),
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      icon: Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, selectedProductIds);
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    return buildSuggestions(context);
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    final suggestions = query.isEmpty
+        ? allProduits
+        : allProduits
+            .where((produit) =>
+                produit.nom.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+
+    return ListView.builder(
+      itemCount: suggestions.length,
+      itemBuilder: (context, index) {
+        final produit = suggestions[index];
+        final isSelected = selectedProductIds.contains(produit.id);
+        return ListTile(
+          title: Text(produit.nom),
+          subtitle: Text('Prix: ${produit.prixVente.toStringAsFixed(2)} €'),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Checkbox(
+                value: isSelected,
+                onChanged: (bool? value) {
+                  onSelectionChanged(produit, value);
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.delete),
+                onPressed: () {
+                  onSelectionChanged(produit, false);
+                  final provider =
+                      Provider.of<CommerceProvider>(context, listen: false);
+                  provider.supprimerProduitDuFournisseur(fournisseur, produit);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+// class SelectProductsPage extends StatefulWidget {
+//   final List<Produit> allProduits;
+//   final List<Produit> initiallySelectedProduits;
+//
+//   SelectProductsPage({
+//     required this.allProduits,
+//     required this.initiallySelectedProduits,
+//   });
+//
+//   @override
+//   _SelectProductsPageState createState() => _SelectProductsPageState();
+// }
+//
+// class _SelectProductsPageState extends State<SelectProductsPage> {
+//   late Set<int> selectedProductIds;
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//     selectedProductIds =
+//         Set.from(widget.initiallySelectedProduits.map((p) => p.id));
+//   }
+//
+//   void updateSelection(Produit produit, bool? isSelected) {
+//     setState(() {
+//       if (isSelected == true) {
+//         selectedProductIds.add(produit.id);
+//       } else {
+//         selectedProductIds.remove(produit.id);
+//       }
+//     });
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text('Sélectionner des produits'),
+//         actions: [
+//           IconButton(
+//             icon: Icon(Icons.search),
+//             onPressed: () async {
+//               final result = await showSearch(
+//                 context: context,
+//                 delegate: ProductSearch(
+//                   allProduits: widget.allProduits,
+//                   selectedProductIds: selectedProductIds,
+//                   onSelectionChanged: updateSelection,
+//                 ),
+//               );
+//               if (result != null) {
+//                 setState(() {
+//                   selectedProductIds = result;
+//                 });
+//               }
+//             },
+//           ),
+//           IconButton(
+//             icon: Icon(Icons.check),
+//             onPressed: () {
+//               Navigator.of(context).pop(widget.allProduits
+//                   .where((p) => selectedProductIds.contains(p.id))
+//                   .toList());
+//             },
+//           ),
+//         ],
+//       ),
+//       body: ListView.builder(
+//         itemCount: widget.allProduits.length,
+//         itemBuilder: (context, index) {
+//           final produit = widget.allProduits[index];
+//           final isSelected = selectedProductIds.contains(produit.id);
+//           return CheckboxListTile(
+//             title: Text(produit.nom),
+//             subtitle: Text('Prix: ${produit.prixVente.toStringAsFixed(2)} €'),
+//             value: isSelected,
+//             onChanged: (bool? value) => updateSelection(produit, value),
+//           );
+//         },
+//       ),
+//     );
+//   }
+// }
+//
+// class ProductSearch extends SearchDelegate<Set<int>> {
+//   final List<Produit> allProduits;
+//   final Set<int> selectedProductIds;
+//   final Function(Produit, bool?) onSelectionChanged;
+//
+//   ProductSearch({
+//     required this.allProduits,
+//     required this.selectedProductIds,
+//     required this.onSelectionChanged,
+//   });
+//
+//   @override
+//   List<Widget> buildActions(BuildContext context) {
+//     return [
+//       IconButton(
+//         icon: Icon(Icons.clear),
+//         onPressed: () {
+//           query = '';
+//         },
+//       ),
+//     ];
+//   }
+//
+//   @override
+//   Widget buildLeading(BuildContext context) {
+//     return IconButton(
+//       icon: Icon(Icons.arrow_back),
+//       onPressed: () {
+//         close(context, selectedProductIds);
+//       },
+//     );
+//   }
+//
+//   @override
+//   Widget buildResults(BuildContext context) {
+//     return buildSuggestions(context);
+//   }
+//
+//   @override
+//   Widget buildSuggestions(BuildContext context) {
+//     final suggestions = query.isEmpty
+//         ? allProduits
+//         : allProduits
+//             .where((produit) =>
+//                 produit.nom.toLowerCase().contains(query.toLowerCase()))
+//             .toList();
+//
+//     return ListView.builder(
+//       itemCount: suggestions.length,
+//       itemBuilder: (context, index) {
+//         final produit = suggestions[index];
+//         final isSelected = selectedProductIds.contains(produit.id);
+//         return CheckboxListTile(
+//           title: Text(produit.nom),
+//           subtitle: Text('Prix: ${produit.prixVente.toStringAsFixed(2)} €'),
+//           value: isSelected,
+//           onChanged: (bool? value) {
+//             onSelectionChanged(produit, value);
+//           },
+//         );
+//       },
+//     );
+//   }
+// }
 
 class MySliverToBoxAdapter extends StatelessWidget {
   const MySliverToBoxAdapter({
@@ -451,107 +903,107 @@ class MySliverAppBar extends StatelessWidget {
   }
 }
 
-class AddFournisseurWidget extends StatefulWidget {
+// class AddFournisseurWidget extends StatefulWidget {
+//   @override
+//   _AddFournisseurWidgetState createState() => _AddFournisseurWidgetState();
+// }
+//
+// class _AddFournisseurWidgetState extends State<AddFournisseurWidget> {
+//   final _formKey = GlobalKey<FormState>();
+//   final _nomController = TextEditingController();
+//   final _phoneController = TextEditingController();
+//   final _adresseController = TextEditingController();
+//   final _creationController = TextEditingController();
+//   final _modificationController = TextEditingController();
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return AlertDialog(
+//       title: Text('Ajouter un Fournisseur'),
+//       content: Form(
+//         key: _formKey,
+//         child: Column(
+//           children: [
+//             TextFormField(
+//               controller: _nomController,
+//               decoration: InputDecoration(labelText: 'Nom'),
+//               validator: (value) {
+//                 if (value == null || value.isEmpty) {
+//                   return 'Veuillez entrer un nom';
+//                 }
+//                 return null;
+//               },
+//             ),
+//             TextFormField(
+//               controller: _phoneController,
+//               keyboardType: TextInputType.phone,
+//               decoration: InputDecoration(labelText: 'Phone'),
+//               validator: (value) {
+//                 if (value == null || value.isEmpty) {
+//                   return 'Veuillez entrer un Tel';
+//                 }
+//                 return null;
+//               },
+//             ),
+//             TextFormField(
+//               controller: _adresseController,
+//               decoration: InputDecoration(labelText: 'Nom'),
+//               validator: (value) {
+//                 if (value == null || value.isEmpty) {
+//                   return 'Veuillez entrer un nom';
+//                 }
+//                 return null;
+//               },
+//             ),
+//           ],
+//         ),
+//       ),
+//       actions: [
+//         TextButton(
+//           onPressed: () {
+//             Navigator.of(context).pop();
+//           },
+//           child: Text('Annuler'),
+//         ),
+//         TextButton(
+//           onPressed: () {
+//             if (_formKey.currentState!.validate()) {
+//               final fournisseur = Fournisseur(
+//                 nom: _nomController.text,
+//                 phone: _phoneController.text,
+//                 adresse: _adresseController.text,
+//                 qr: '',
+//                 // dateCreation: DateTime.parse(_creationController.text),
+//                 // derniereModification:
+//                 //     DateTime.parse(_modificationController.text)
+//               );
+//               context.read<CommerceProvider>().addFournisseur(fournisseur);
+//               Navigator.of(context).pop();
+//             }
+//           },
+//           child: Text('Ajouter'),
+//         ),
+//       ],
+//     );
+//   }
+//
+//   @override
+//   void dispose() {
+//     _nomController.dispose();
+//     _phoneController.dispose();
+//     _adresseController.dispose();
+//     _creationController.dispose();
+//     _modificationController.dispose();
+//     super.dispose();
+//   }
+// }
+
+class AddFournisseurForm extends StatefulWidget {
   @override
-  _AddFournisseurWidgetState createState() => _AddFournisseurWidgetState();
+  _AddFournisseurFormState createState() => _AddFournisseurFormState();
 }
 
-class _AddFournisseurWidgetState extends State<AddFournisseurWidget> {
-  final _formKey = GlobalKey<FormState>();
-  final _nomController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _adresseController = TextEditingController();
-  final _creationController = TextEditingController();
-  final _modificationController = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('Ajouter un Fournisseur'),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            TextFormField(
-              controller: _nomController,
-              decoration: InputDecoration(labelText: 'Nom'),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Veuillez entrer un nom';
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: _phoneController,
-              keyboardType: TextInputType.phone,
-              decoration: InputDecoration(labelText: 'Phone'),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Veuillez entrer un Tel';
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: _adresseController,
-              decoration: InputDecoration(labelText: 'Nom'),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Veuillez entrer un nom';
-                }
-                return null;
-              },
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: Text('Annuler'),
-        ),
-        TextButton(
-          onPressed: () {
-            if (_formKey.currentState!.validate()) {
-              final fournisseur = Fournisseur(
-                nom: _nomController.text,
-                phone: _phoneController.text,
-                adresse: _adresseController.text,
-                qr: '',
-                // dateCreation: DateTime.parse(_creationController.text),
-                // derniereModification:
-                //     DateTime.parse(_modificationController.text)
-              );
-              context.read<CommerceProvider>().addFournisseur(fournisseur);
-              Navigator.of(context).pop();
-            }
-          },
-          child: Text('Ajouter'),
-        ),
-      ],
-    );
-  }
-
-  @override
-  void dispose() {
-    _nomController.dispose();
-    _phoneController.dispose();
-    _adresseController.dispose();
-    _creationController.dispose();
-    _modificationController.dispose();
-    super.dispose();
-  }
-}
-
-class _AddFournisseurForm extends StatefulWidget {
-  @override
-  __AddFournisseurFormState createState() => __AddFournisseurFormState();
-}
-
-class __AddFournisseurFormState extends State<_AddFournisseurForm> {
+class _AddFournisseurFormState extends State<AddFournisseurForm> {
   final _formKey = GlobalKey<FormState>();
   final _nomController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -786,63 +1238,6 @@ void _deleteFournisseur(BuildContext context, Fournisseur fournisseur) {
                       context
                           .read<CommerceProvider>()
                           .supprimerFournisseur(fournisseur);
-                      Navigator.of(context).pop();
-                    },
-                    label: Text(
-                      'Supprimer',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    icon: Icon(Icons.delete),
-                    style: ButtonStyle(
-                      iconColor: WidgetStateProperty.all<Color>(Colors.white),
-                      backgroundColor:
-                          WidgetStateProperty.all<Color>(Colors.red),
-                    ))
-              ],
-            ),
-            SizedBox(
-              height: 60,
-            )
-          ],
-        ),
-      );
-    },
-  );
-}
-
-void _deleteProduit(BuildContext context, Produit produit) {
-  showModalBottomSheet(
-    context: context,
-    builder: (BuildContext context) {
-      return Container(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('Confirmer la suppression', style: TextStyle(fontSize: 20.0)),
-            SizedBox(height: 20.0),
-            Text('Êtes-vous sûr de vouloir supprimer ce produit ?'),
-            SizedBox(height: 20.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  label: Text('Annuler'),
-                  icon: Icon(Icons.cancel),
-                ),
-                ElevatedButton.icon(
-                    onPressed: () {
-                      // context
-                      //     .read<CommerceProvider>()
-                      //     .supprimerProduit(produit);
-                      print('deleted');
-                      final produitProvider =
-                          Provider.of<CommerceProvider>(context, listen: false);
-                      produitProvider.supprimerProduit(produit);
                       Navigator.of(context).pop();
                     },
                     label: Text(

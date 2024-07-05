@@ -7,6 +7,7 @@ import '../Entity.dart';
 import '../MyProviders.dart';
 import 'AddProduitScreen.dart';
 import 'FournisseurListScreen.dart';
+import 'dart:io' show Platform;
 
 class ProduitListScreen extends StatefulWidget {
   @override
@@ -66,7 +67,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                 return Slidable(
                   key: ValueKey(produit.id),
                   startActionPane: ActionPane(
-                    extentRatio: 0.1,
+                    extentRatio: 0.5,
                     motion: ScrollMotion(),
                     children: [
                       SlidableAction(

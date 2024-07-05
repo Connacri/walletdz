@@ -22,37 +22,11 @@ class CommerceProvider extends ChangeNotifier {
 
   CommerceProvider(this._objectBox) {
     chargerProduits();
-    //chargerProduitsS();
     _chargerFournisseurs();
   }
 
-  // Méthodes pour charger les produits et fournisseurs
-  // void chargerProduitsS() {
-  //   _produits = _objectBox.produitBox.getAll().toList();
-  //   notifyListeners();
-  // }
-
-  // Future<void> chargerProduits() async {
-  //   final query = _objectBox.produitBox.query()
-  //     ..order(Produit_.id, flags: Order.descending);
-  //   final allProduits = query.build().find();
-  //
-  //   final startIndex = _currentPage * _pageSize;
-  //   final endIndex = startIndex + _pageSize;
-  //
-  //   if (startIndex >= allProduits.length) {
-  //     _hasMoreProduits = false;
-  //   } else {
-  //     final newProduits = allProduits.sublist(startIndex,
-  //         endIndex > allProduits.length ? allProduits.length : endIndex);
-  //     _produitsP.addAll(newProduits);
-  //     _currentPage++;
-  //     _hasMoreProduits = endIndex < allProduits.length;
-  //   }
-  //   notifyListeners();
-  // }
-
   Future<void> chargerProduits({bool reset = false}) async {
+    if (_isLoading) return; // Empêche les appels multiples simultanés
     _isLoading = true;
     notifyListeners();
     if (reset) {
@@ -130,7 +104,6 @@ class CommerceProvider extends ChangeNotifier {
     _objectBox.produitBox.put(produit);
     chargerProduits(reset: true);
     _chargerFournisseurs();
-    notifyListeners();
   }
 
   void updateProduit(Produit produit) {
@@ -142,13 +115,14 @@ class CommerceProvider extends ChangeNotifier {
       {List<Fournisseur>? fournisseurs}) {
     final produit = getProduitById(id);
     if (produit != null) {
-      produit.nom = updatedProduit.nom;
-      produit.description = updatedProduit.description;
-      produit.prixAchat = updatedProduit.prixAchat;
-      produit.prixVente = updatedProduit.prixVente;
-      produit.stock = updatedProduit.stock;
-      produit.qr = updatedProduit.qr;
-      produit.image = updatedProduit.image;
+      produit
+        ..nom = updatedProduit.nom
+        ..description = updatedProduit.description
+        ..prixAchat = updatedProduit.prixAchat
+        ..prixVente = updatedProduit.prixVente
+        ..stock = updatedProduit.stock
+        ..qr = updatedProduit.qr
+        ..image = updatedProduit.image;
 
       if (fournisseurs != null) {
         _ajouterOuMettreAJourFournisseurs(fournisseurs);
@@ -167,13 +141,7 @@ class CommerceProvider extends ChangeNotifier {
     _objectBox.produitBox.remove(produit.id);
     chargerProduits(reset: true);
     _chargerFournisseurs();
-    notifyListeners();
   }
-
-  // Méthodes pour les fournisseurs
-  // Fournisseur? getFournisseurById(int id) {
-  //   return _objectBox.fournisseurBox.get(id);
-  // }
 
   int getTotalProduits() {
     return _objectBox.produitBox.count();
@@ -273,5 +241,34 @@ class CommerceProvider extends ChangeNotifier {
     for (var produit in produits) {
       _objectBox.produitBox.put(produit);
     }
+  }
+
+  void ajouterProduitsExistantsAuFournisseur(
+      Fournisseur fournisseur, List<Produit> produits) {
+    for (var produit in produits) {
+      if (!fournisseur.produits.contains(produit)) {
+        fournisseur.produits.add(produit);
+        produit.fournisseurs.add(fournisseur);
+      }
+    }
+    _objectBox.fournisseurBox.put(fournisseur);
+    _objectBox.produitBox.putMany(produits);
+    chargerProduits(reset: true);
+    _chargerFournisseurs();
+    notifyListeners();
+  }
+
+  void supprimerProduitDuFournisseur(Fournisseur fournisseur, Produit produit) {
+    fournisseur.produits.remove(produit);
+    produit.fournisseurs.remove(fournisseur);
+
+    // Mise à jour dans la base de données
+    _objectBox.fournisseurBox.put(fournisseur);
+    _objectBox.produitBox.put(produit);
+
+    // Rechargement des données
+    chargerProduits(reset: true);
+    _chargerFournisseurs();
+    notifyListeners();
   }
 }

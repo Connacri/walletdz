@@ -9,6 +9,8 @@ import '../Entity.dart';
 import '../MyProviders.dart';
 import '../Utils/QRViewExample.dart';
 import 'FournisseurListScreen.dart';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class EditProduitScreen extends StatefulWidget {
   final Produit? produit;
@@ -200,7 +202,17 @@ class _EditProduitScreenState extends State<EditProduitScreen> {
   Widget build(BuildContext context) {
     final produitProvider =
         Provider.of<CommerceProvider>(context, listen: false);
-
+    final double largeur;
+    if (kIsWeb || Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      // Pour le web
+      largeur = MediaQuery.of(context).size.width / 3;
+    } else if (Platform.isAndroid || Platform.isIOS) {
+      // Pour Android et iOS
+      largeur = MediaQuery.of(context).size.width;
+    } else {
+      // Pour les autres plateformes (Desktop)
+      largeur = MediaQuery.of(context).size.width / 3;
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.produit == null
@@ -222,62 +234,233 @@ class _EditProduitScreenState extends State<EditProduitScreen> {
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ),
-              TextFormField(
-                controller: _nomController,
-                decoration: InputDecoration(labelText: 'Nom'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Veuillez entrer un nom';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: InputDecoration(labelText: 'Description'),
-              ),
-              TextFormField(
-                controller: _prixAchatController,
-                decoration: InputDecoration(labelText: 'Prix d\'achat'),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Veuillez entrer le prix d\'achat';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _prixVenteController,
-                decoration: InputDecoration(labelText: 'Prix de vente'),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Veuillez entrer le prix de vente';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _stockController,
-                decoration: InputDecoration(labelText: 'Stock'),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Veuillez entrer le stock';
-                  }
-                  return null;
-                },
+              Container(
+                width: largeur,
+                child: TextFormField(
+                  controller: _serialController,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 18,
+                  ),
+                  decoration: InputDecoration(
+                    hintStyle: TextStyle(color: Colors.black38),
+                    // labelText: 'Numéro de série',
+                    hintText: 'Numéro de série',
+
+                    suffixIcon: IconButton(
+                      icon: Icon(Icons.qr_code_scanner),
+                      onPressed: _scanQRCode,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide.none, // Supprime le contour
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide:
+                          BorderSide.none, // Supprime le contour en état normal
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide:
+                          BorderSide.none, // Supprime le contour en état focus
+                    ),
+                    filled: true,
+                    contentPadding: EdgeInsets.all(15),
+                  ),
+                ),
               ),
               SizedBox(height: 10),
-              TextFormField(
-                controller: _serialController,
-                decoration: InputDecoration(
-                  labelText: 'Numéro de série',
-                  suffixIcon: IconButton(
-                    icon: Icon(Icons.qr_code_scanner),
-                    onPressed: _scanQRCode,
+              Container(
+                width: largeur,
+                child: TextFormField(
+                  controller: _nomController,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 18,
                   ),
+                  keyboardType: TextInputType.text,
+                  decoration: InputDecoration(
+                    hintStyle: TextStyle(color: Colors.black38),
+                    fillColor: Colors.blue.shade50,
+                    hintText: 'Nom',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide.none, // Supprime le contour
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide:
+                          BorderSide.none, // Supprime le contour en état normal
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide:
+                          BorderSide.none, // Supprime le contour en état focus
+                    ),
+                    filled: true,
+                    contentPadding: EdgeInsets.all(15),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez entrer un nom';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              SizedBox(height: 10),
+              Container(
+                width: largeur,
+                child: TextFormField(
+                  controller: _descriptionController,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 18,
+                  ),
+                  keyboardType: TextInputType.text,
+                  decoration: InputDecoration(
+                    hintStyle: TextStyle(color: Colors.black38),
+                    //fillColor: Colors.blue.shade50,
+                    hintText: 'Description',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide.none, // Supprime le contour
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide:
+                          BorderSide.none, // Supprime le contour en état normal
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide:
+                          BorderSide.none, // Supprime le contour en état focus
+                    ),
+                    //border: InputBorder.none,
+                    filled: true,
+                    contentPadding: EdgeInsets.all(15),
+                  ),
+                ),
+              ),
+              SizedBox(height: 10),
+              Container(
+                width: largeur,
+                child: TextFormField(
+                  controller: _prixAchatController,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 18,
+                  ),
+                  decoration: InputDecoration(
+                    hintStyle: TextStyle(color: Colors.black38),
+                    //fillColor: Colors.blue.shade50,
+                    hintText: 'Prix d\'achat',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide.none, // Supprime le contour
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide:
+                          BorderSide.none, // Supprime le contour en état normal
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide:
+                          BorderSide.none, // Supprime le contour en état focus
+                    ),
+                    //border: InputBorder.none,
+                    filled: true,
+                    contentPadding: EdgeInsets.all(15),
+                  ),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez entrer le prix d\'achat';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              SizedBox(height: 10),
+              Container(
+                width: largeur,
+                child: TextFormField(
+                  controller: _prixVenteController,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 18,
+                  ),
+                  decoration: InputDecoration(
+                    hintStyle: TextStyle(color: Colors.black38),
+                    //fillColor: Colors.blue.shade50,
+                    hintText: 'Prix de vente',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide.none, // Supprime le contour
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide:
+                          BorderSide.none, // Supprime le contour en état normal
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide:
+                          BorderSide.none, // Supprime le contour en état focus
+                    ),
+                    //border: InputBorder.none,
+                    filled: true,
+                    contentPadding: EdgeInsets.all(15),
+                  ),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez entrer le prix de vente';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              SizedBox(height: 10),
+              Container(
+                width: largeur,
+                child: TextFormField(
+                  controller: _stockController,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 18,
+                  ),
+                  decoration: InputDecoration(
+                    hintStyle: TextStyle(color: Colors.black38),
+                    //fillColor: Colors.blue.shade50,
+                    hintText: 'Stock',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide.none, // Supprime le contour
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide:
+                          BorderSide.none, // Supprime le contour en état normal
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide:
+                          BorderSide.none, // Supprime le contour en état focus
+                    ),
+                    //border: InputBorder.none,
+                    filled: true,
+                    contentPadding: EdgeInsets.all(15),
+                  ),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez entrer le stock';
+                    }
+                    return null;
+                  },
                 ),
               ),
               SizedBox(height: 20),

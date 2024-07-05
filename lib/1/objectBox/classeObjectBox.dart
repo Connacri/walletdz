@@ -62,7 +62,7 @@ class ObjectBox {
     final faker = Faker();
 
     // Créer des fournisseurs
-    List<Fournisseur> fournisseurs = List.generate(5000, (index) {
+    List<Fournisseur> fournisseurs = List.generate(50000, (index) {
       return Fournisseur(
         nom: faker.company.name(),
         phone: faker.phoneNumber.us(),
@@ -76,7 +76,7 @@ class ObjectBox {
     fournisseurBox.putMany(fournisseurs);
 
     // Créer des produits et les associer à des fournisseurs
-    List<Produit> produits = List.generate(10000, (index) {
+    List<Produit> produits = List.generate(100000, (index) {
       Produit produit = Produit(
         image: 'https://picsum.photos/200/300?random=${index}',
         nom: faker.food.dish(),

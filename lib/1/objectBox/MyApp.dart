@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:provider/provider.dart';
+import 'package:walletdz/1/objectBox/pages/AddProduitScreen.dart';
 import 'package:walletdz/1/objectBox/pages/ProduitListScreen.dart';
 import 'package:walletdz/1/objectBox/pages/test.dart';
 import 'Entity.dart';
@@ -380,12 +381,12 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                   NavigationRailDestination(
                     icon: Icon(Icons.business),
                     selectedIcon: Icon(Icons.business_center),
-                    label: Text('Business'),
+                    label: Text('Produits'),
                   ),
                   NavigationRailDestination(
-                    icon: Icon(Icons.school),
-                    selectedIcon: Icon(Icons.school),
-                    label: Text('School'),
+                    icon: Icon(Icons.factory),
+                    selectedIcon: Icon(Icons.factory),
+                    label: Text('Fournisseurs'),
                   ),
                 ],
               ),
@@ -400,6 +401,34 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                           // Expanded(
                           //     child: _buildTotalProductsCard(
                           //         context, produitProvider)),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          FournisseurListScreen()),
+                                );
+                              },
+                              child: CardTop(
+                                image:
+                                    'https://picsum.photos/seed/${randomId + 8}/200/100',
+                                text:
+                                    '${produitProvider.fournisseurs.length} Fournisseurs',
+                                provider: produitProvider,
+                                button: ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              FournisseurListScreen()),
+                                    );
+                                  },
+                                  child: Text('Voir plus'),
+                                ),
+                              ),
+                            ),
+                          ),
                           Expanded(
                             child: GestureDetector(
                               onTap: () {
@@ -472,9 +501,9 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                               onTap: () {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                      builder: (context) => ProduitListInterval(
-                                            produitsFiltres: produitsFiltres,
-                                          )),
+                                    builder: (context) => LowStockList(
+                                        produitsLowStock: produitsLowStock),
+                                  ),
                                 );
                               },
                               child: CardAlert(
@@ -509,56 +538,89 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 16),
+                    SizedBox(height: 18),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        ElevatedButton.icon(
+                            onPressed: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (_) => EditProduitScreen()));
+                            },
+                            label: Text('Ajouter Un Nouveau Produit'),
+                            icon: Icon(Icons.add)),
+                        ElevatedButton.icon(
+                            onPressed: () {
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled:
+                                    true, // Permet de redimensionner en fonction de la hauteur du contenu
+                                builder: (context) => AddFournisseurForm(),
+                              );
+                            },
+                            label: Text('Ajouter Un Nouveau Fournisseur'),
+                            icon: Icon(Icons.add)),
+                      ],
+                    ),
                     //_buildLowStockProductsCard(produitProvider),
                     // Center(
                     //   child: Text(_selectedIndex.toString()),
                     // ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Card(
-                          child: InkWell(
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                    builder: (context) => ProduitListScreen()),
-                              );
-                            },
-                            child: Container(
-                                height: 100,
-                                width: 200,
-                                child: Center(
-                                  child: Text('${totalProduits}\nProduits'
-                                      //'${produitProvider.produitsP.length}\nProduits'
-                                      ),
-                                )),
-                          ),
-                        ),
-                        Card(
-                          child: InkWell(
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        FournisseurListScreen()),
-                              );
-                            },
-                            child: Container(
-                                height: 100,
-                                width: 200,
-                                child: Center(
-                                  child: Text(
-                                      '${produitProvider.fournisseurs.length}\nFournisseurs'),
-                                )),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 30),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 30),
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.center,
+                    //   children: [
+                    //     Card(
+                    //       child: InkWell(
+                    //         onTap: () {
+                    //           Navigator.of(context).push(
+                    //             MaterialPageRoute(
+                    //                 builder: (context) => ProduitListScreen()),
+                    //           );
+                    //         },
+                    //         child: Container(
+                    //             height: 100,
+                    //             width: 200,
+                    //             child: Center(
+                    //               child: Text('${totalProduits}\nProduits'
+                    //                   //'${produitProvider.produitsP.length}\nProduits'
+                    //                   ),
+                    //             )),
+                    //       ),
+                    //     ),
+                    // Card(
+                    //   child: InkWell(
+                    //     onTap: () {
+                    //       Navigator.of(context).push(
+                    //         MaterialPageRoute(
+                    //             builder: (context) => FournisseurListScreen()),
+                    //       );
+                    //     },
+                    //     child: Container(
+                    //         height: 100,
+                    //         width: 200,
+                    //         child: Center(
+                    //           child: Text(
+                    //             '${produitProvider.fournisseurs.length}\nFournisseurs',
+                    //             textAlign: TextAlign.center,
+                    //           ),
+                    //         )),
+                    //   ),
+                    // ),
+                    //   ],
+                    // ),
+                    SizedBox(height: 18),
+                    Container(
+                      width: MediaQuery.of(context).size.width / 5,
                       child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red, // Couleur de fond grise
+                          foregroundColor:
+                              Colors.grey[300], // Couleur du texte grise
+                          disabledBackgroundColor: Colors.grey[
+                              300], // Assure que la couleur reste grise même désactivé
+                          disabledForegroundColor: Colors.grey[
+                              600], // Assure que la couleur du texte reste grise même désactivé
+                        ),
                         child: Text('Delete all'),
                         onPressed: () {
                           widget.objectBox.deleteDatabase();
@@ -569,7 +631,6 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                                     Text('Base de Données Vider avec succes!')),
                           );
                         },
-                        style: ElevatedButton.styleFrom(),
                       ),
                     ),
                   ],
