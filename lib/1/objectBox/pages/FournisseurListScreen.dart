@@ -470,11 +470,15 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
   }
 
   List<Produit> get filteredProduits {
-    return widget.allProduits.where((produit) {
-      final lowercaseQuery = searchQuery.toLowerCase();
-      return produit.nom.toLowerCase().contains(lowercaseQuery) ||
-          produit.id.toString().contains(lowercaseQuery);
-    }).toList();
+    return widget.allProduits
+        .where((produit) {
+          final lowercaseQuery = searchQuery.toLowerCase();
+          return produit.nom.toLowerCase().contains(lowercaseQuery) ||
+              produit.id.toString().contains(lowercaseQuery);
+        })
+        .toList()
+        .reversed
+        .toList();
   }
 
   @override
