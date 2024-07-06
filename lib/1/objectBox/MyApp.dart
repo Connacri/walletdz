@@ -118,34 +118,76 @@ class showPlatform extends StatelessWidget {
   }
 }
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   final ObjectBox objectBox;
 
   HomeScreen({required this.objectBox});
 
-  // void checkDiskSpace() {
-  //   var directory = Directory.current;
-  //   var stat = directory.statSync();
-  //   var availableSpace = stat..freeSpace;
-  //   print('Available space: $availableSpace bytes');
-  // }
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  double prixMin = 50.0;
+  double prixMax = 50.15;
+
+  void _ouvrirDialogAjustementPrix(BuildContext context) {
+    double nouveauPrixMin = prixMin;
+    double nouveauPrixMax = prixMax;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Ajuster les prix'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                decoration: InputDecoration(labelText: 'Prix minimum'),
+                keyboardType: TextInputType.number,
+                onChanged: (value) =>
+                    nouveauPrixMin = double.tryParse(value) ?? nouveauPrixMin,
+              ),
+              TextField(
+                decoration: InputDecoration(labelText: 'Prix maximum'),
+                keyboardType: TextInputType.number,
+                onChanged: (value) =>
+                    nouveauPrixMax = double.tryParse(value) ?? nouveauPrixMax,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: Text('Annuler'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: Text('Valider'),
+              onPressed: () {
+                setState(() {
+                  prixMin = nouveauPrixMin;
+                  prixMax = nouveauPrixMax;
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final randomId = Random().nextInt(100);
     return Scaffold(
       appBar: AppBar(
         title: Text('Facturation'),
         actions: [
-          // IconButton(
-          //     onPressed: () async {
-          //   checkDiskSpace;
-          //
-          // },
-          // icon : Icon(Icons.dis),
-          // ),
           IconButton(
-            onPressed: () async {
-              objectBox.fillWithFakeData();
+            onPressed: () {
+              widget.objectBox.fillWithFakeData();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Données factices ajoutées !')),
               );
@@ -157,109 +199,156 @@ class HomeScreen extends StatelessWidget {
       body: Consumer<CommerceProvider>(
           builder: (context, produitProvider, child) {
         int totalProduits = produitProvider.getTotalProduits();
-        print('Nombre total de produits : $totalProduits');
+        List<Produit> produitsFiltres =
+            produitProvider.getProduitsBetweenPrices(prixMin, prixMax);
+        var produitsLowStock = produitProvider.getProduitsLowStock(5);
+        print(produitsLowStock.length);
         return ListView(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Card(
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                            builder: (context) => ProduitListScreenTest()),
-                      );
-                    },
-                    child: Container(
-                        height: 100,
-                        width: MediaQuery.of(context).size.width / 2.5,
-                        child: Center(
-                          child: Text(
-                              '${produitProvider.produitsP.length} Produits'),
-                        )),
-                  ),
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                      builder: (context) => FournisseurListScreen()),
+                );
+              },
+              child: CardTop(
+                image: 'https://picsum.photos/seed/${randomId + 8}/200/100',
+                text: '${produitProvider.fournisseurs.length} Fournisseurs',
+                provider: produitProvider,
+                button: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (context) => FournisseurListScreen()),
+                    );
+                  },
+                  child: Text('Voir plus'),
                 ),
-                Card(
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                            builder: (context) => FournisseurListScreen()),
-                      );
-                    },
-                    child: Container(
-                        height: 100,
-                        width: MediaQuery.of(context).size.width / 2.5,
-                        child: Center(
-                          child: Text(
-                              '${produitProvider.fournisseurs.length}\nFournisseurs'),
-                        )),
-                  ),
-                ),
-              ],
-            ),
-            Card(
-              child: ListTile(
-                title: Text('${totalProduits}\nProduits'),
-                //Text('${produitProvider.produitsP.length}\nProduits'),
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => ProduitListScreen()));
-                },
               ),
             ),
-            Card(
-              child: ListTile(
-                title:
-                    Text('${produitProvider.fournisseurs.length} Fournisseurs'),
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => FournisseurListScreen()));
-                },
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => ProduitListScreen()),
+                );
+              },
+              child: CardTop(
+                image: 'https://picsum.photos/seed/$randomId/200/100',
+                text: '${produitProvider.getTotalProduits()} Produits',
+                provider: produitProvider,
+                button: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (context) => ProduitListScreen()),
+                    );
+                  },
+                  child: Text('Voir plus'),
+                ),
               ),
             ),
-            Card(
-                // child: ListTile(
-                //   title: Text('Clients'),
-                //   onTap: () {
-                //     Navigator.push(
-                //         context,
-                //         MaterialPageRoute(
-                //             builder: (context) => ClientListScreen()));
-                //   },
-                // ),
-                ),
-            Card(
-                // child: ListTile(
-                //   title: Text('Factures'),
-                //   onTap: () {
-                //     Navigator.push(
-                //         context,
-                //         MaterialPageRoute(
-                //             builder: (context) => FactureListScreen()));
-                //   },
-                // ),
-                ),
-            SizedBox(
-              height: 30,
+            GestureDetector(
+              onTap: () => _ouvrirDialogAjustementPrix(context),
+              child: CardTop(
+                  image: 'https://picsum.photos/seed/${randomId + 1}/200/100',
+                  text:
+                      '${produitsFiltres.length} Produits\nentre ${prixMin.toStringAsFixed(2)} DZD et ${prixMax.toStringAsFixed(2)} DZD',
+                  provider: produitProvider,
+                  button: produitsFiltres.length == 0
+                      ? ElevatedButton(
+                          onPressed: null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                Colors.grey[300], // Couleur de fond grise
+                            foregroundColor:
+                                Colors.grey[600], // Couleur du texte grise
+                            disabledBackgroundColor: Colors.grey[
+                                300], // Assure que la couleur reste grise même désactivé
+                            disabledForegroundColor: Colors.grey[
+                                600], // Assure que la couleur du texte reste grise même désactivé
+                          ),
+                          child: Text(('Liste Vide')))
+                      : ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                  builder: (context) => ProduitListInterval(
+                                        produitsFiltres: produitsFiltres,
+                                      )),
+                            );
+                          },
+                          label: Text(('Voire La List')))),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30),
-              child: ElevatedButton(
-                child: Text('Delete all'),
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        LowStockList(produitsLowStock: produitsLowStock),
+                  ),
+                );
+              },
+              child: CardAlert(
+                image: 'https://picsum.photos/seed/${randomId + 2}/200/100',
+                text: //'${produitsLowStock.length} Low Stock',
+                    'Alert stock < 5\n${produitsLowStock['count']}',
+                provider: produitProvider,
+                button: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              LowStockList(produitsLowStock: produitsLowStock),
+                          // ProduitListInterval(
+                          //   produitsFiltres:
+                          //       produitsFiltres,
+                          // ),
+                        ),
+                      );
+                    },
+                    child: Text(('Voire La List'))),
+                Color1: Colors.red,
+                Color2: Colors.black,
+              ),
+            ),
+            SizedBox(height: 18),
+            ElevatedButton.icon(
                 onPressed: () {
-                  objectBox.deleteDatabase();
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                        content: Text('Base de Données Vider avec succes!')),
+                  Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => EditProduitScreen()));
+                },
+                label: Text('Ajouter Un Nouveau Produit'),
+                icon: Icon(Icons.add)),
+            ElevatedButton.icon(
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled:
+                        true, // Permet de redimensionner en fonction de la hauteur du contenu
+                    builder: (context) => AddFournisseurForm(),
                   );
                 },
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all<Color>(Colors.red),
-                ),
+                label: Text('Ajouter Un Nouveau Fournisseur'),
+                icon: Icon(Icons.add)),
+            SizedBox(height: 18),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, // Couleur de fond grise
+                foregroundColor: Colors.grey[300], // Couleur du texte grise
+                disabledBackgroundColor: Colors.grey[
+                    300], // Assure que la couleur reste grise même désactivé
+                disabledForegroundColor: Colors.grey[
+                    600], // Assure que la couleur du texte reste grise même désactivé
               ),
+              child: Text('Delete all'),
+              onPressed: () {
+                widget.objectBox.deleteDatabase();
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Base de Données Vider avec succes!')),
+                );
+              },
             ),
           ],
         );
@@ -390,7 +479,6 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                   ),
                 ],
               ),
-              //VerticalDivider(thickness: 1, width: 1),
               Expanded(
                 child: ListView(
                   children: [
@@ -562,52 +650,6 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                             icon: Icon(Icons.add)),
                       ],
                     ),
-                    //_buildLowStockProductsCard(produitProvider),
-                    // Center(
-                    //   child: Text(_selectedIndex.toString()),
-                    // ),
-                    // Row(
-                    //   mainAxisAlignment: MainAxisAlignment.center,
-                    //   children: [
-                    //     Card(
-                    //       child: InkWell(
-                    //         onTap: () {
-                    //           Navigator.of(context).push(
-                    //             MaterialPageRoute(
-                    //                 builder: (context) => ProduitListScreen()),
-                    //           );
-                    //         },
-                    //         child: Container(
-                    //             height: 100,
-                    //             width: 200,
-                    //             child: Center(
-                    //               child: Text('${totalProduits}\nProduits'
-                    //                   //'${produitProvider.produitsP.length}\nProduits'
-                    //                   ),
-                    //             )),
-                    //       ),
-                    //     ),
-                    // Card(
-                    //   child: InkWell(
-                    //     onTap: () {
-                    //       Navigator.of(context).push(
-                    //         MaterialPageRoute(
-                    //             builder: (context) => FournisseurListScreen()),
-                    //       );
-                    //     },
-                    //     child: Container(
-                    //         height: 100,
-                    //         width: 200,
-                    //         child: Center(
-                    //           child: Text(
-                    //             '${produitProvider.fournisseurs.length}\nFournisseurs',
-                    //             textAlign: TextAlign.center,
-                    //           ),
-                    //         )),
-                    //   ),
-                    // ),
-                    //   ],
-                    // ),
                     SizedBox(height: 18),
                     Container(
                       width: MediaQuery.of(context).size.width / 5,
@@ -743,7 +785,9 @@ class CardTop extends StatelessWidget {
       semanticContainer: true,
       color: Colors.white70,
       child: SizedBox(
-        height: MediaQuery.of(context).size.width * 0.15,
+        height: Platform.isWindows || Platform.isMacOS || Platform.isLinux
+            ? MediaQuery.of(context).size.width * 0.15
+            : MediaQuery.of(context).size.width * 0.55,
         width: MediaQuery.of(context).size.width * 0.30,
         child: Stack(
           fit: StackFit.passthrough,
@@ -838,7 +882,9 @@ class CardAlert extends StatelessWidget {
       semanticContainer: true,
       color: Colors.white70,
       child: SizedBox(
-        height: MediaQuery.of(context).size.width * 0.15,
+        height: Platform.isWindows || Platform.isMacOS || Platform.isLinux
+            ? MediaQuery.of(context).size.width * 0.15
+            : MediaQuery.of(context).size.width * 0.55,
         width: MediaQuery.of(context).size.width * 0.30,
         child: Stack(
           fit: StackFit.passthrough,

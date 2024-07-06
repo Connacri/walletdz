@@ -190,14 +190,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
-  capitalize:
-    dependency: "direct main"
-    description:
-      name: capitalize
-      sha256: "146d114cd493f1ce796e86fe364676f15b27614e7fd1258cf755b005c2889146"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.2"
   carousel_slider:
     dependency: "direct main"
     description:

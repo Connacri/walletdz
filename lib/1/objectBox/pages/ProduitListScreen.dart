@@ -131,47 +131,92 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                children: [
-                                  Center(
-                                    child: Text(
-                                      'A : ${produit.prixAchat.toStringAsFixed(2)} ',
+                              Platform.isWindows ||
+                                      Platform.isMacOS ||
+                                      Platform.isLinux
+                                  ? Row(
+                                      children: [
+                                        Center(
+                                          child: Text(
+                                            'A : ${produit.prixAchat.toStringAsFixed(2)} ',
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 5, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              colors: [
+                                                Colors.lightGreen,
+                                                Colors.black45
+                                              ], // Couleurs du dégradé
+                                              begin: Alignment
+                                                  .topLeft, // Début du dégradé
+                                              end: Alignment
+                                                  .bottomRight, // Fin du dégradé
+                                            ), // Couleur de fond
+                                            borderRadius: BorderRadius.circular(
+                                                10), // Coins arrondis
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              'B : ${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)}',
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : Column(
+                                      children: [
+                                        Center(
+                                          child: Text(
+                                            'A : ${produit.prixAchat.toStringAsFixed(2)} ',
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 5, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              colors: [
+                                                Colors.lightGreen,
+                                                Colors.black45
+                                              ], // Couleurs du dégradé
+                                              begin: Alignment
+                                                  .topLeft, // Début du dégradé
+                                              end: Alignment
+                                                  .bottomRight, // Fin du dégradé
+                                            ), // Couleur de fond
+                                            borderRadius: BorderRadius.circular(
+                                                10), // Coins arrondis
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              'B : ${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)}',
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 5, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          Colors.lightGreen,
-                                          Colors.black45
-                                        ], // Couleurs du dégradé
-                                        begin: Alignment
-                                            .topLeft, // Début du dégradé
-                                        end: Alignment
-                                            .bottomRight, // Fin du dégradé
-                                      ), // Couleur de fond
-                                      borderRadius: BorderRadius.circular(
-                                          10), // Coins arrondis
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        'B : ${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)}',
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
                               _buildChipRow(context, produit)
                             ],
                           ),
                           trailing: Container(
-                            width: 200,
+                            width: Platform.isWindows ||
+                                    Platform.isMacOS ||
+                                    Platform.isLinux
+                                ? 200
+                                : 120,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
