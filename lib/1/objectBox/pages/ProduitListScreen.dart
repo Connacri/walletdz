@@ -8,6 +8,7 @@ import '../MyProviders.dart';
 import 'AddProduitScreen.dart';
 import 'FournisseurListScreen.dart';
 import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ProduitListScreen extends StatefulWidget {
   @override
@@ -39,6 +40,17 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double largeur;
+    if (kIsWeb || Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      // Pour le web
+      largeur = 1 / 10;
+    } else if (Platform.isAndroid || Platform.isIOS) {
+      // Pour Android et iOS
+      largeur = 0.5;
+    } else {
+      // Pour les autres plateformes (Desktop)
+      largeur = 1 / 10;
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text('Produits'),
@@ -67,7 +79,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                 return Slidable(
                   key: ValueKey(produit.id),
                   startActionPane: ActionPane(
-                    extentRatio: 0.5,
+                    extentRatio: largeur,
                     motion: ScrollMotion(),
                     children: [
                       SlidableAction(

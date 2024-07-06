@@ -9,6 +9,8 @@ import 'AddProduitScreen.dart';
 import 'ProduitListScreen.dart';
 import 'package:intl/intl.dart';
 import 'package:capitalize/capitalize.dart';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class FournisseurListScreen extends StatelessWidget {
   final Produit? produit;
@@ -126,6 +128,17 @@ class ProduitsFournisseurPage extends StatelessWidget {
     // final produitProvider = Provider.of<CommerceProvider>(context);
     final commerceProvider =
         Provider.of<CommerceProvider>(context, listen: false);
+    final double largeur;
+    if (kIsWeb || Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      // Pour le web
+      largeur = 1 / 10;
+    } else if (Platform.isAndroid || Platform.isIOS) {
+      // Pour Android et iOS
+      largeur = 0.5;
+    } else {
+      // Pour les autres plateformes (Desktop)
+      largeur = 1 / 10;
+    }
     return Scaffold(
       body: CustomScrollView(
         slivers: <Widget>[
@@ -147,6 +160,7 @@ class ProduitsFournisseurPage extends StatelessWidget {
                       child: Slidable(
                           key: ValueKey(produit.id),
                           startActionPane: ActionPane(
+                            extentRatio: largeur,
                             motion: ScrollMotion(),
                             children: [
                               SlidableAction(
@@ -428,6 +442,8 @@ class SelectProductsPage extends StatefulWidget {
 
 class _SelectProductsPageState extends State<SelectProductsPage> {
   late Set<int> selectedProductIds;
+  String searchQuery = '';
+  TextEditingController searchController = TextEditingController();
 
   @override
   void initState() {
@@ -442,6 +458,7 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
         selectedProductIds.add(produit.id);
       } else {
         selectedProductIds.remove(produit.id);
+        supprimerProduit(produit);
       }
     });
   }
@@ -449,13 +466,15 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
   void supprimerProduit(Produit produit) {
     final provider = Provider.of<CommerceProvider>(context, listen: false);
     provider.supprimerProduitDuFournisseur(widget.fournisseur, produit);
-    setState(() {
-      selectedProductIds.remove(produit.id);
-      print(widget.fournisseur.id);
-      print(produit.id);
+    print(
+        'Produit supprimé - Fournisseur ID: ${widget.fournisseur.id}, Produit ID: ${produit.id}');
+  }
 
-      print('setState(() {selectedProductIds.remove(produit.id)}');
-    });
+  List<Produit> get filteredProduits {
+    return widget.allProduits
+        .where((produit) =>
+            produit.nom.toLowerCase().contains(searchQuery.toLowerCase()))
+        .toList();
   }
 
   @override
@@ -464,25 +483,6 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
       appBar: AppBar(
         title: Text('Sélectionner des produits'),
         actions: [
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () async {
-              final result = await showSearch(
-                context: context,
-                delegate: ProductSearch(
-                  allProduits: widget.allProduits,
-                  selectedProductIds: selectedProductIds,
-                  onSelectionChanged: updateSelection,
-                  fournisseur: widget.fournisseur,
-                ),
-              );
-              if (result != null) {
-                setState(() {
-                  selectedProductIds = result;
-                });
-              }
-            },
-          ),
           IconButton(
             icon: Icon(Icons.check),
             onPressed: () {
@@ -493,124 +493,56 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
           ),
         ],
       ),
-      body: ListView.builder(
-        itemCount: widget.allProduits.length,
-        itemBuilder: (context, index) {
-          final produit = widget.allProduits[index];
-          final isSelected = selectedProductIds.contains(produit.id);
-          return ListTile(
-            title: Text(produit.nom),
-            subtitle: Text('Prix: ${produit.prixVente.toStringAsFixed(2)} €'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Checkbox(
-                  value: isSelected,
-                  onChanged: (bool? value) => updateSelection(produit, value),
-                ),
-                IconButton(
-                  icon: Icon(Icons.delete),
-                  onPressed: () => supprimerProduit(produit),
-                ),
-              ],
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: searchController,
+              decoration: InputDecoration(
+                labelText: 'Rechercher des produits',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value;
+                });
+              },
             ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class ProductSearch extends SearchDelegate<Set<int>> {
-  final List<Produit> allProduits;
-  final Set<int> selectedProductIds;
-  final Function(Produit, bool?) onSelectionChanged;
-  final Fournisseur fournisseur;
-
-  ProductSearch({
-    required this.allProduits,
-    required this.selectedProductIds,
-    required this.onSelectionChanged,
-    required this.fournisseur,
-  });
-
-  @override
-  List<Widget> buildActions(BuildContext context) {
-    return [
-      IconButton(
-        icon: Icon(Icons.clear),
-        onPressed: () {
-          query = '';
-        },
-      ),
-    ];
-  }
-
-  @override
-  Widget buildLeading(BuildContext context) {
-    return IconButton(
-      icon: Icon(Icons.arrow_back),
-      onPressed: () {
-        close(context, selectedProductIds);
-      },
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    return buildSuggestions(context);
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    final suggestions = query.isEmpty
-        ? allProduits
-        : allProduits
-            .where((produit) =>
-                produit.nom.toLowerCase().contains(query.toLowerCase()))
-            .toList();
-
-    return ListView.builder(
-      itemCount: suggestions.length,
-      itemBuilder: (context, index) {
-        final produit = suggestions[index];
-        final isSelected = selectedProductIds.contains(produit.id);
-        return ListTile(
-          title: Text(produit.nom),
-          subtitle: Text('Prix: ${produit.prixVente.toStringAsFixed(2)} €'),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Checkbox(
-                value: isSelected,
-                onChanged: (bool? value) {
-                  onSelectionChanged(produit, value);
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.delete),
-                onPressed: () {
-                  onSelectionChanged(produit, false);
-                  final provider =
-                      Provider.of<CommerceProvider>(context, listen: false);
-                  provider.supprimerProduitDuFournisseur(fournisseur, produit);
-                },
-              ),
-            ],
           ),
-        );
-      },
+          Expanded(
+            child: ListView.builder(
+              itemCount: filteredProduits.length,
+              itemBuilder: (context, index) {
+                final produit = filteredProduits[index];
+                final isSelected = selectedProductIds.contains(produit.id);
+                return ListTile(
+                  title: Text(produit.nom),
+                  subtitle:
+                      Text('Prix: ${produit.prixVente.toStringAsFixed(2)} €'),
+                  trailing: Checkbox(
+                    value: isSelected,
+                    onChanged: (bool? value) => updateSelection(produit, value),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
-
 // class SelectProductsPage extends StatefulWidget {
 //   final List<Produit> allProduits;
 //   final List<Produit> initiallySelectedProduits;
+//   final Fournisseur fournisseur;
 //
 //   SelectProductsPage({
 //     required this.allProduits,
 //     required this.initiallySelectedProduits,
+//     required this.fournisseur,
 //   });
 //
 //   @override
@@ -637,6 +569,16 @@ class ProductSearch extends SearchDelegate<Set<int>> {
 //     });
 //   }
 //
+//   void supprimerProduit(Produit produit) {
+//     final provider = Provider.of<CommerceProvider>(context, listen: false);
+//     provider.supprimerProduitDuFournisseur(widget.fournisseur, produit);
+//     setState(() {
+//       selectedProductIds.remove(produit.id);
+//       print(widget.fournisseur.id);
+//       print(produit.id);
+//     });
+//   }
+//
 //   @override
 //   Widget build(BuildContext context) {
 //     return Scaffold(
@@ -652,6 +594,7 @@ class ProductSearch extends SearchDelegate<Set<int>> {
 //                   allProduits: widget.allProduits,
 //                   selectedProductIds: selectedProductIds,
 //                   onSelectionChanged: updateSelection,
+//                   fournisseur: widget.fournisseur,
 //                 ),
 //               );
 //               if (result != null) {
@@ -676,11 +619,22 @@ class ProductSearch extends SearchDelegate<Set<int>> {
 //         itemBuilder: (context, index) {
 //           final produit = widget.allProduits[index];
 //           final isSelected = selectedProductIds.contains(produit.id);
-//           return CheckboxListTile(
+//           return ListTile(
 //             title: Text(produit.nom),
 //             subtitle: Text('Prix: ${produit.prixVente.toStringAsFixed(2)} €'),
-//             value: isSelected,
-//             onChanged: (bool? value) => updateSelection(produit, value),
+//             trailing: Row(
+//               mainAxisSize: MainAxisSize.min,
+//               children: [
+//                 Checkbox(
+//                   value: isSelected,
+//                   onChanged: (bool? value) => updateSelection(produit, value),
+//                 ),
+//                 // IconButton(
+//                 //   icon: Icon(Icons.delete),
+//                 //   onPressed: () => supprimerProduit(produit),
+//                 // ),
+//               ],
+//             ),
 //           );
 //         },
 //       ),
@@ -692,11 +646,13 @@ class ProductSearch extends SearchDelegate<Set<int>> {
 //   final List<Produit> allProduits;
 //   final Set<int> selectedProductIds;
 //   final Function(Produit, bool?) onSelectionChanged;
+//   final Fournisseur fournisseur;
 //
 //   ProductSearch({
 //     required this.allProduits,
 //     required this.selectedProductIds,
 //     required this.onSelectionChanged,
+//     required this.fournisseur,
 //   });
 //
 //   @override
@@ -740,13 +696,29 @@ class ProductSearch extends SearchDelegate<Set<int>> {
 //       itemBuilder: (context, index) {
 //         final produit = suggestions[index];
 //         final isSelected = selectedProductIds.contains(produit.id);
-//         return CheckboxListTile(
+//         return ListTile(
 //           title: Text(produit.nom),
 //           subtitle: Text('Prix: ${produit.prixVente.toStringAsFixed(2)} €'),
-//           value: isSelected,
-//           onChanged: (bool? value) {
-//             onSelectionChanged(produit, value);
-//           },
+//           trailing: Row(
+//             mainAxisSize: MainAxisSize.min,
+//             children: [
+//               Checkbox(
+//                 value: isSelected,
+//                 onChanged: (bool? value) {
+//                   onSelectionChanged(produit, value);
+//                 },
+//               ),
+//               IconButton(
+//                 icon: Icon(Icons.delete),
+//                 onPressed: () {
+//                   onSelectionChanged(produit, false);
+//                   final provider =
+//                       Provider.of<CommerceProvider>(context, listen: false);
+//                   provider.supprimerProduitDuFournisseur(fournisseur, produit);
+//                 },
+//               ),
+//             ],
+//           ),
 //         );
 //       },
 //     );
@@ -902,101 +874,6 @@ class MySliverAppBar extends StatelessWidget {
     );
   }
 }
-
-// class AddFournisseurWidget extends StatefulWidget {
-//   @override
-//   _AddFournisseurWidgetState createState() => _AddFournisseurWidgetState();
-// }
-//
-// class _AddFournisseurWidgetState extends State<AddFournisseurWidget> {
-//   final _formKey = GlobalKey<FormState>();
-//   final _nomController = TextEditingController();
-//   final _phoneController = TextEditingController();
-//   final _adresseController = TextEditingController();
-//   final _creationController = TextEditingController();
-//   final _modificationController = TextEditingController();
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return AlertDialog(
-//       title: Text('Ajouter un Fournisseur'),
-//       content: Form(
-//         key: _formKey,
-//         child: Column(
-//           children: [
-//             TextFormField(
-//               controller: _nomController,
-//               decoration: InputDecoration(labelText: 'Nom'),
-//               validator: (value) {
-//                 if (value == null || value.isEmpty) {
-//                   return 'Veuillez entrer un nom';
-//                 }
-//                 return null;
-//               },
-//             ),
-//             TextFormField(
-//               controller: _phoneController,
-//               keyboardType: TextInputType.phone,
-//               decoration: InputDecoration(labelText: 'Phone'),
-//               validator: (value) {
-//                 if (value == null || value.isEmpty) {
-//                   return 'Veuillez entrer un Tel';
-//                 }
-//                 return null;
-//               },
-//             ),
-//             TextFormField(
-//               controller: _adresseController,
-//               decoration: InputDecoration(labelText: 'Nom'),
-//               validator: (value) {
-//                 if (value == null || value.isEmpty) {
-//                   return 'Veuillez entrer un nom';
-//                 }
-//                 return null;
-//               },
-//             ),
-//           ],
-//         ),
-//       ),
-//       actions: [
-//         TextButton(
-//           onPressed: () {
-//             Navigator.of(context).pop();
-//           },
-//           child: Text('Annuler'),
-//         ),
-//         TextButton(
-//           onPressed: () {
-//             if (_formKey.currentState!.validate()) {
-//               final fournisseur = Fournisseur(
-//                 nom: _nomController.text,
-//                 phone: _phoneController.text,
-//                 adresse: _adresseController.text,
-//                 qr: '',
-//                 // dateCreation: DateTime.parse(_creationController.text),
-//                 // derniereModification:
-//                 //     DateTime.parse(_modificationController.text)
-//               );
-//               context.read<CommerceProvider>().addFournisseur(fournisseur);
-//               Navigator.of(context).pop();
-//             }
-//           },
-//           child: Text('Ajouter'),
-//         ),
-//       ],
-//     );
-//   }
-//
-//   @override
-//   void dispose() {
-//     _nomController.dispose();
-//     _phoneController.dispose();
-//     _adresseController.dispose();
-//     _creationController.dispose();
-//     _modificationController.dispose();
-//     super.dispose();
-//   }
-// }
 
 class AddFournisseurForm extends StatefulWidget {
   @override
@@ -1262,160 +1139,6 @@ void _deleteFournisseur(BuildContext context, Fournisseur fournisseur) {
   );
 }
 
-// class FournisseurSearchDelegateMain extends SearchDelegate {
-//   final List<Fournisseur> fournisseurs;
-//
-//   FournisseurSearchDelegateMain(this.fournisseurs);
-//
-//   @override
-//   List<Widget>? buildActions(BuildContext context) {
-//     return [
-//       IconButton(
-//         icon: Icon(Icons.clear),
-//         onPressed: () {
-//           query = '';
-//         },
-//       ),
-//     ];
-//   }
-//
-//   @override
-//   Widget? buildLeading(BuildContext context) {
-//     return IconButton(
-//       icon: Icon(Icons.arrow_back),
-//       onPressed: () {
-//         close(context, null);
-//       },
-//     );
-//   }
-//
-//   @override
-//   Widget buildResults(BuildContext context) {
-//     final results = fournisseurs
-//         .where((f) => f.nom.toLowerCase().contains(query.toLowerCase()))
-//         .toList();
-//
-//     return ListView.builder(
-//       itemCount: results.length,
-//       itemBuilder: (context, index) {
-//         final fournisseur = results[index];
-//         return ListTile(
-//           onTap: () {
-//             Navigator.of(context).push(
-//               MaterialPageRoute(
-//                 builder: (context) =>
-//                     ProduitsFournisseurPage(fournisseur: fournisseur),
-//               ),
-//             );
-//           },
-//           title: Text(fournisseur.nom),
-//           subtitle: Text('${fournisseur.produits.length} produits'),
-//         );
-//       },
-//     );
-//   }
-//
-//   @override
-//   Widget buildSuggestions(BuildContext context) {
-//     final suggestions = fournisseurs
-//         .where((f) => f.nom.toLowerCase().contains(query.toLowerCase()))
-//         .toList();
-//
-//     return ListView.builder(
-//       itemCount: suggestions.length,
-//       itemBuilder: (context, index) {
-//         final fournisseur = suggestions[index];
-//         return ListTile(
-//           onTap: () {
-//             query = fournisseur.nom;
-//             showResults(context);
-//           },
-//           title: Text(fournisseur.nom),
-//         );
-//       },
-//     );
-//   }
-// }
-
-// class FournisseurSearchDelegateMain extends SearchDelegate {
-//   final List<Fournisseur> fournisseurs;
-//
-//   FournisseurSearchDelegateMain(this.fournisseurs);
-//
-//   @override
-//   List<Widget>? buildActions(BuildContext context) {
-//     return [
-//       IconButton(
-//         icon: Icon(Icons.clear),
-//         onPressed: () {
-//           query = '';
-//         },
-//       ),
-//     ];
-//   }
-//
-//   @override
-//   Widget? buildLeading(BuildContext context) {
-//     return IconButton(
-//       icon: Icon(Icons.arrow_back),
-//       onPressed: () {
-//         close(context, null);
-//       },
-//     );
-//   }
-//
-//   @override
-//   Widget buildResults(BuildContext context) {
-//     final results = fournisseurs
-//         .where((f) => f.nom.toLowerCase().contains(query.toLowerCase()))
-//         .toList();
-//
-//     return ListView.builder(
-//       itemCount: results.length,
-//       itemBuilder: (context, index) {
-//         final fournisseur = results[index];
-//         return ListTile(
-//           onTap: () {
-//             Navigator.of(context).push(
-//               MaterialPageRoute(
-//                 builder: (context) =>
-//                     ProduitsFournisseurPage(fournisseur: fournisseur),
-//               ),
-//             );
-//           },
-//           title: Text(fournisseur.nom),
-//           subtitle: Text('${fournisseur.produits.length} produits'),
-//         );
-//       },
-//     );
-//   }
-//
-//   @override
-//   Widget buildSuggestions(BuildContext context) {
-//     final suggestions = fournisseurs
-//         .where((f) => f.nom.toLowerCase().contains(query.toLowerCase()))
-//         .toList();
-//
-//     return ListView.builder(
-//       itemCount: suggestions.length,
-//       itemBuilder: (context, index) {
-//         final fournisseur = suggestions[index];
-//         return ListTile(
-//           onTap: () {
-//             Navigator.of(context).push(
-//               MaterialPageRoute(
-//                 builder: (context) =>
-//                     ProduitsFournisseurPage(fournisseur: fournisseur),
-//               ),
-//             );
-//           },
-//           title: Text(fournisseur.nom),
-//           trailing: Text('${fournisseur.produits.length}'),
-//         );
-//       },
-//     );
-//   }
-// }
 class FournisseurSearchDelegateMain extends SearchDelegate {
   final List<Fournisseur> fournisseurs;
 
