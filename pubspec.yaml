@@ -73,7 +73,6 @@ dependencies:
   objectbox: ^4.0.1
   objectbox_flutter_libs: ^4.0.1
   flutter_slidable: ^3.1.0
-  capitalize: ^0.0.2
   network_info_plus: ^5.0.3
   multicast_dns: ^0.3.2+7
   percent_indicator: ^4.2.3

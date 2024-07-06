@@ -8,7 +8,6 @@ import '../MyProviders.dart';
 import 'AddProduitScreen.dart';
 import 'ProduitListScreen.dart';
 import 'package:intl/intl.dart';
-import 'package:capitalize/capitalize.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 
@@ -471,10 +470,11 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
   }
 
   List<Produit> get filteredProduits {
-    return widget.allProduits
-        .where((produit) =>
-            produit.nom.toLowerCase().contains(searchQuery.toLowerCase()))
-        .toList();
+    return widget.allProduits.where((produit) {
+      final lowercaseQuery = searchQuery.toLowerCase();
+      return produit.nom.toLowerCase().contains(lowercaseQuery) ||
+          produit.id.toString().contains(lowercaseQuery);
+    }).toList();
   }
 
   @override
@@ -500,7 +500,7 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
             child: TextField(
               controller: searchController,
               decoration: InputDecoration(
-                labelText: 'Rechercher des produits',
+                labelText: 'Rechercher par Nom de Produit ou ID',
                 prefixIcon: Icon(Icons.search),
                 border: OutlineInputBorder(),
               ),
@@ -519,8 +519,8 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
                 final isSelected = selectedProductIds.contains(produit.id);
                 return ListTile(
                   title: Text(produit.nom),
-                  subtitle:
-                      Text('Prix: ${produit.prixVente.toStringAsFixed(2)} €'),
+                  subtitle: Text(
+                      'ID: ${produit.id} - Prix: ${produit.prixVente.toStringAsFixed(2)} DZD'),
                   trailing: Checkbox(
                     value: isSelected,
                     onChanged: (bool? value) => updateSelection(produit, value),
@@ -534,196 +534,6 @@ class _SelectProductsPageState extends State<SelectProductsPage> {
     );
   }
 }
-// class SelectProductsPage extends StatefulWidget {
-//   final List<Produit> allProduits;
-//   final List<Produit> initiallySelectedProduits;
-//   final Fournisseur fournisseur;
-//
-//   SelectProductsPage({
-//     required this.allProduits,
-//     required this.initiallySelectedProduits,
-//     required this.fournisseur,
-//   });
-//
-//   @override
-//   _SelectProductsPageState createState() => _SelectProductsPageState();
-// }
-//
-// class _SelectProductsPageState extends State<SelectProductsPage> {
-//   late Set<int> selectedProductIds;
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     selectedProductIds =
-//         Set.from(widget.initiallySelectedProduits.map((p) => p.id));
-//   }
-//
-//   void updateSelection(Produit produit, bool? isSelected) {
-//     setState(() {
-//       if (isSelected == true) {
-//         selectedProductIds.add(produit.id);
-//       } else {
-//         selectedProductIds.remove(produit.id);
-//       }
-//     });
-//   }
-//
-//   void supprimerProduit(Produit produit) {
-//     final provider = Provider.of<CommerceProvider>(context, listen: false);
-//     provider.supprimerProduitDuFournisseur(widget.fournisseur, produit);
-//     setState(() {
-//       selectedProductIds.remove(produit.id);
-//       print(widget.fournisseur.id);
-//       print(produit.id);
-//     });
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Sélectionner des produits'),
-//         actions: [
-//           IconButton(
-//             icon: Icon(Icons.search),
-//             onPressed: () async {
-//               final result = await showSearch(
-//                 context: context,
-//                 delegate: ProductSearch(
-//                   allProduits: widget.allProduits,
-//                   selectedProductIds: selectedProductIds,
-//                   onSelectionChanged: updateSelection,
-//                   fournisseur: widget.fournisseur,
-//                 ),
-//               );
-//               if (result != null) {
-//                 setState(() {
-//                   selectedProductIds = result;
-//                 });
-//               }
-//             },
-//           ),
-//           IconButton(
-//             icon: Icon(Icons.check),
-//             onPressed: () {
-//               Navigator.of(context).pop(widget.allProduits
-//                   .where((p) => selectedProductIds.contains(p.id))
-//                   .toList());
-//             },
-//           ),
-//         ],
-//       ),
-//       body: ListView.builder(
-//         itemCount: widget.allProduits.length,
-//         itemBuilder: (context, index) {
-//           final produit = widget.allProduits[index];
-//           final isSelected = selectedProductIds.contains(produit.id);
-//           return ListTile(
-//             title: Text(produit.nom),
-//             subtitle: Text('Prix: ${produit.prixVente.toStringAsFixed(2)} €'),
-//             trailing: Row(
-//               mainAxisSize: MainAxisSize.min,
-//               children: [
-//                 Checkbox(
-//                   value: isSelected,
-//                   onChanged: (bool? value) => updateSelection(produit, value),
-//                 ),
-//                 // IconButton(
-//                 //   icon: Icon(Icons.delete),
-//                 //   onPressed: () => supprimerProduit(produit),
-//                 // ),
-//               ],
-//             ),
-//           );
-//         },
-//       ),
-//     );
-//   }
-// }
-//
-// class ProductSearch extends SearchDelegate<Set<int>> {
-//   final List<Produit> allProduits;
-//   final Set<int> selectedProductIds;
-//   final Function(Produit, bool?) onSelectionChanged;
-//   final Fournisseur fournisseur;
-//
-//   ProductSearch({
-//     required this.allProduits,
-//     required this.selectedProductIds,
-//     required this.onSelectionChanged,
-//     required this.fournisseur,
-//   });
-//
-//   @override
-//   List<Widget> buildActions(BuildContext context) {
-//     return [
-//       IconButton(
-//         icon: Icon(Icons.clear),
-//         onPressed: () {
-//           query = '';
-//         },
-//       ),
-//     ];
-//   }
-//
-//   @override
-//   Widget buildLeading(BuildContext context) {
-//     return IconButton(
-//       icon: Icon(Icons.arrow_back),
-//       onPressed: () {
-//         close(context, selectedProductIds);
-//       },
-//     );
-//   }
-//
-//   @override
-//   Widget buildResults(BuildContext context) {
-//     return buildSuggestions(context);
-//   }
-//
-//   @override
-//   Widget buildSuggestions(BuildContext context) {
-//     final suggestions = query.isEmpty
-//         ? allProduits
-//         : allProduits
-//             .where((produit) =>
-//                 produit.nom.toLowerCase().contains(query.toLowerCase()))
-//             .toList();
-//
-//     return ListView.builder(
-//       itemCount: suggestions.length,
-//       itemBuilder: (context, index) {
-//         final produit = suggestions[index];
-//         final isSelected = selectedProductIds.contains(produit.id);
-//         return ListTile(
-//           title: Text(produit.nom),
-//           subtitle: Text('Prix: ${produit.prixVente.toStringAsFixed(2)} €'),
-//           trailing: Row(
-//             mainAxisSize: MainAxisSize.min,
-//             children: [
-//               Checkbox(
-//                 value: isSelected,
-//                 onChanged: (bool? value) {
-//                   onSelectionChanged(produit, value);
-//                 },
-//               ),
-//               IconButton(
-//                 icon: Icon(Icons.delete),
-//                 onPressed: () {
-//                   onSelectionChanged(produit, false);
-//                   final provider =
-//                       Provider.of<CommerceProvider>(context, listen: false);
-//                   provider.supprimerProduitDuFournisseur(fournisseur, produit);
-//                 },
-//               ),
-//             ],
-//           ),
-//         );
-//       },
-//     );
-//   }
-// }
 
 class MySliverToBoxAdapter extends StatelessWidget {
   const MySliverToBoxAdapter({

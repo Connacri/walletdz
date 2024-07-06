@@ -109,37 +109,83 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                           onLongPress: () {
                             _deleteProduit(context, produit);
                           },
-                          leading: produit.image == null ||
-                                  produit.image!.isEmpty
-                              ? CircleAvatar(
-                                  child: Icon(Icons.image_not_supported),
-                                )
-                              : CircleAvatar(
-                                  backgroundImage: CachedNetworkImageProvider(
-                                    produit.image!,
-                                    errorListener: (error) => Icon(Icons.error),
+                          leading: Tooltip(
+                            message: 'ID : ${produit.id}',
+                            child: produit.image == null ||
+                                    produit.image!.isEmpty
+                                ? CircleAvatar(
+                                    child: Icon(Icons.image_not_supported),
+                                  )
+                                : CircleAvatar(
+                                    backgroundImage: CachedNetworkImageProvider(
+                                      produit.image!,
+                                      errorListener: (error) =>
+                                          Icon(Icons.error),
+                                    ),
                                   ),
-                                ),
-                          title: Text(produit.nom),
+                          ),
+                          title: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Text(produit.nom),
+                          ),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
                                 children: [
-                                  Text(
-                                    'A : ${produit.prixAchat.toStringAsFixed(2)} ',
+                                  Center(
+                                    child: Text(
+                                      'A : ${produit.prixAchat.toStringAsFixed(2)} ',
+                                    ),
                                   ),
-                                  Text(
-                                    'B : ${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)} ',
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 5, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          Colors.lightGreen,
+                                          Colors.black45
+                                        ], // Couleurs du dégradé
+                                        begin: Alignment
+                                            .topLeft, // Début du dégradé
+                                        end: Alignment
+                                            .bottomRight, // Fin du dégradé
+                                      ), // Couleur de fond
+                                      borderRadius: BorderRadius.circular(
+                                          10), // Coins arrondis
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        'B : ${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)}',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
                               _buildChipRow(context, produit)
                             ],
                           ),
-                          trailing: Text(
-                            '${produit.prixVente.toStringAsFixed(2)}',
-                            style: TextStyle(fontSize: 20),
+                          trailing: Container(
+                            width: 200,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                CircleAvatar(
+                                    child: Text(produit.stock.toString())),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 15),
+                                  child: Text(
+                                    '${produit.prixVente.toStringAsFixed(2)}',
+                                    style: TextStyle(fontSize: 20),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -251,7 +297,6 @@ Widget _buildChipRow(
 void _showAllFournisseursDialog(
   BuildContext context,
   produit,
-  /* List<Fournisseur> fournisseurs*/
 ) {
   final List<Fournisseur> fournisseurs = produit.fournisseurs;
   showDialog(
@@ -521,244 +566,6 @@ class ProduitDetailPage extends StatelessWidget {
     ));
   }
 }
-
-// class ProduitSearchDelegateMain extends SearchDelegate {
-//   final List<Produit> produits;
-//
-//   ProduitSearchDelegateMain(this.produits);
-//
-//   @override
-//   List<Widget>? buildActions(BuildContext context) {
-//     return [
-//       IconButton(
-//         icon: Icon(Icons.clear),
-//         onPressed: () {
-//           query = '';
-//         },
-//       ),
-//     ];
-//   }
-//
-//   @override
-//   Widget? buildLeading(BuildContext context) {
-//     return IconButton(
-//       icon: Icon(Icons.arrow_back),
-//       onPressed: () {
-//         close(context, null);
-//       },
-//     );
-//   }
-//
-//   @override
-//   Widget buildResults(BuildContext context) {
-//     final results = produits
-//         .where((f) => f.nom.toLowerCase().contains(query.toLowerCase()))
-//         .toList();
-//
-//     return ListView.builder(
-//       itemCount: results.length,
-//       itemBuilder: (context, index) {
-//         final produit = results[index];
-//         return ListTile(
-//           onTap: () {
-//             Navigator.of(context).push(MaterialPageRoute(
-//               builder: (ctx) => ProduitDetailPage(produit: produit),
-//             ));
-//           },
-//           title: Text(produit.nom),
-//         );
-//       },
-//     );
-//   }
-//
-//   @override
-//   Widget buildSuggestions(BuildContext context) {
-//     final suggestions = produits
-//         .where((f) => f.nom.toLowerCase().contains(query.toLowerCase()))
-//         .toList();
-//
-//     return ListView.builder(
-//       itemCount: suggestions.length,
-//       itemBuilder: (context, index) {
-//         final produit = suggestions[index];
-//         return ListTile(
-//           onTap: () {
-//             query = produit.nom;
-//             showResults(context);
-//           },
-//           title: Text(produit.nom),
-//         );
-//       },
-//     );
-//   }
-// }
-
-// class ProduitSearchDelegateMain extends SearchDelegate {
-//   final List<Produit> produits;
-//
-//   ProduitSearchDelegateMain(this.produits);
-//
-//   @override
-//   List<Widget>? buildActions(BuildContext context) {
-//     return [
-//       IconButton(
-//         icon: Icon(Icons.clear),
-//         onPressed: () {
-//           query = '';
-//         },
-//       ),
-//     ];
-//   }
-//
-//   @override
-//   Widget? buildLeading(BuildContext context) {
-//     return IconButton(
-//       icon: Icon(Icons.arrow_back),
-//       onPressed: () {
-//         close(context, null);
-//       },
-//     );
-//   }
-//
-//   @override
-//   Widget buildResults(BuildContext context) {
-//     // final results = produits
-//     //     .where((f) => f.nom.toLowerCase().contains(query.toLowerCase()))
-//     //     .toList();
-//     final results = produits.where((produit) {
-//       final queryLower = query.toLowerCase();
-//       final nomLower = produit.nom.toLowerCase();
-//       return nomLower.contains(queryLower) ||
-//           produit.id.toString().contains(query);
-//     }).toList();
-//     return ListView.builder(
-//       itemCount: results.length,
-//       itemBuilder: (context, index) {
-//         final produit = results[index];
-//         return ListTile(
-//           onTap: () {
-//             Navigator.of(context).push(
-//               MaterialPageRoute(
-//                 builder: (context) => ProduitDetailPage(produit: produit),
-//               ),
-//             );
-//           },
-//           title: Text('${produit.id}' + ' ' '${produit.nom}'),
-//         );
-//       },
-//     );
-//   }
-//
-//   @override
-//   Widget buildSuggestions(BuildContext context) {
-//     // final suggestions = produits
-//     //     .where((f) => f.nom.toLowerCase().contains(query.toLowerCase()))
-//     //     .toList();
-//     final suggestions = produits.where((produit) {
-//       final queryLower = query.toLowerCase();
-//       final nomLower = produit.nom.toLowerCase();
-//       return nomLower.contains(queryLower) ||
-//           produit.id.toString().contains(query);
-//     }).toList();
-//     return ListView.builder(
-//       itemCount: suggestions.length,
-//       itemBuilder: (context, index) {
-//         final produit = suggestions[index];
-//         return ListTile(
-//           onTap: () {
-//             Navigator.of(context).push(
-//               MaterialPageRoute(
-//                 builder: (context) => ProduitDetailPage(produit: produit),
-//               ),
-//             );
-//           },
-//           title: Text('${produit.id}' + ' ' '${produit.nom}'),
-//         );
-//       },
-//     );
-//   }
-// }
-// class ProduitSearchDelegateMain extends SearchDelegate {
-//   final List<Produit> produits;
-//
-//   ProduitSearchDelegateMain(this.produits);
-//
-//   @override
-//   List<Widget>? buildActions(BuildContext context) {
-//     return [
-//       IconButton(
-//         icon: Icon(Icons.clear),
-//         onPressed: () {
-//           query = '';
-//         },
-//       ),
-//     ];
-//   }
-//
-//   @override
-//   Widget? buildLeading(BuildContext context) {
-//     return IconButton(
-//       icon: Icon(Icons.arrow_back),
-//       onPressed: () {
-//         close(context, null);
-//       },
-//     );
-//   }
-//
-//   @override
-//   Widget buildResults(BuildContext context) {
-//     final results = produits.where((produit) {
-//       final queryLower = query.toLowerCase();
-//       final nomLower = produit.nom.toLowerCase();
-//       return nomLower.contains(queryLower) ||
-//           produit.id.toString().contains(query);
-//     }).toList();
-//
-//     return ListView.builder(
-//       itemCount: results.length,
-//       itemBuilder: (context, index) {
-//         final produit = results[index];
-//         return ListTile(
-//           onTap: () {
-//             Navigator.of(context).push(
-//               MaterialPageRoute(
-//                 builder: (context) => ProduitDetailPage(produit: produit),
-//               ),
-//             );
-//           },
-//           title: Text('${produit.id} ${produit.nom}'),
-//         );
-//       },
-//     );
-//   }
-//
-//   @override
-//   Widget buildSuggestions(BuildContext context) {
-//     final suggestions = produits.where((produit) {
-//       final queryLower = query.toLowerCase();
-//       final nomLower = produit.nom.toLowerCase();
-//       return nomLower.contains(queryLower) ||
-//           produit.id.toString().contains(query);
-//     }).toList();
-//
-//     return ListView.builder(
-//       itemCount: suggestions.length,
-//       itemBuilder: (context, index) {
-//         final produit = suggestions[index];
-//         return ListTile(
-//           onTap: () {
-//             Navigator.of(context).push(
-//               MaterialPageRoute(
-//                 builder: (context) => ProduitDetailPage(produit: produit),
-//               ),
-//             );
-//           },
-//           title: Text('${produit.id} ${produit.nom}'),
-//         );
-//       },
-//     );
-//   }
-// }
 
 class ProduitSearchDelegateMain extends SearchDelegate {
   final CommerceProvider commerceProvider;
