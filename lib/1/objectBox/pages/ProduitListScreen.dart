@@ -124,8 +124,15 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                'A: ${produit.prixAchat.toStringAsFixed(2)}\nB: ${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)} ',
+                              Row(
+                                children: [
+                                  Text(
+                                    'A : ${produit.prixAchat.toStringAsFixed(2)} ',
+                                  ),
+                                  Text(
+                                    'B : ${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)} ',
+                                  ),
+                                ],
                               ),
                               _buildChipRow(context, produit)
                             ],
