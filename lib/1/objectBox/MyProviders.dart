@@ -259,16 +259,62 @@ class CommerceProvider extends ChangeNotifier {
   }
 
   void supprimerProduitDuFournisseur(Fournisseur fournisseur, Produit produit) {
-    fournisseur.produits.remove(produit);
-    produit.fournisseurs.remove(fournisseur);
+    // print('Tentative de suppression du produit du fournisseur');
+    // print('Fournisseur: ${fournisseur.nom}, Produit: ${produit.nom}');
 
-    // Mise à jour dans la base de données
-    _objectBox.fournisseurBox.put(fournisseur);
-    _objectBox.produitBox.put(produit);
+    try {
+      // Charger les instances actuelles de la base de données
+      Fournisseur? fournisseurActuel =
+          _objectBox.fournisseurBox.get(fournisseur.id);
+      Produit? produitActuel = _objectBox.produitBox.get(produit.id);
 
-    // Rechargement des données
-    chargerProduits(reset: true);
-    _chargerFournisseurs();
-    notifyListeners();
+      if (fournisseurActuel == null) {
+        //  print('Fournisseur non trouvé dans la base de données.');
+        return;
+      }
+      if (produitActuel == null) {
+        // print('Produit non trouvé dans la base de données.');
+        return;
+      }
+
+      _objectBox.store.runInTransaction(TxMode.write, () {
+        // Vérifier si le produit est dans la liste des produits du fournisseur et vice versa
+        bool produitDansFournisseur =
+            fournisseurActuel.produits.any((p) => p.id == produitActuel.id);
+        bool fournisseurDansProduit =
+            produitActuel.fournisseurs.any((f) => f.id == fournisseurActuel.id);
+
+        if (produitDansFournisseur && fournisseurDansProduit) {
+          // print(
+          //     'Produit trouvé dans le fournisseur et fournisseur trouvé dans le produit.');
+
+          // Supprimer les relations
+          fournisseurActuel.produits
+              .removeWhere((p) => p.id == produitActuel.id);
+          produitActuel.fournisseurs
+              .removeWhere((f) => f.id == fournisseurActuel.id);
+          // print(fournisseurActuel.produits);
+          // print(produitActuel.fournisseurs);
+
+          //  print('Relations supprimées. Mise à jour des objets.');
+
+          // Mise à jour dans la base de données
+          _objectBox.fournisseurBox.put(fournisseurActuel);
+          // print('Fournisseur mis à jour dans la base de données.');
+        } else {
+          // print(
+          //     'Le produit n\'est pas dans la liste du fournisseur ou le fournisseur n\'est pas dans la liste du produit.');
+        }
+      });
+
+      // Rechargement des données en dehors de la transaction
+      //  print('Rechargement des produits et des fournisseurs.');
+      chargerProduits(reset: true);
+      _chargerFournisseurs();
+      notifyListeners();
+      //  print('Notifications envoyées aux auditeurs.');
+    } catch (e) {
+      print('Erreur lors de la suppression du produit du fournisseur : $e');
+    }
   }
 }

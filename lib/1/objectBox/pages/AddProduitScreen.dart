@@ -88,22 +88,6 @@ class _EditProduitScreenState extends State<EditProduitScreen> {
     super.dispose();
   }
 
-  // Future<void> _pickImage() async {
-  //
-  //   final pickedFile = await ImagePicker().pickImage(
-  //     source: ImageSource.gallery,
-  //     maxHeight: 1080,
-  //     maxWidth: 1920,
-  //     imageQuality: 40,
-  //   );
-  //
-  //   if (pickedFile != null) {
-  //     setState(() {
-  //       _image = File(pickedFile.path);
-  //     });
-  //   }
-  // }
-
   Future<void> _pickImage() async {
     final ImageSource? source = await showDialog<ImageSource>(
       context: context,
@@ -228,12 +212,13 @@ class _EditProduitScreenState extends State<EditProduitScreen> {
           child: Column(
             children: [
               if (widget.produit != null)
-                Center(
-                  child: Text(
-                    widget.produit!.id.toString(),
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                Text(
+                  'ID : ${widget.produit!.id}',
+                  style: TextStyle(
+                    fontSize: 20,
                   ),
                 ),
+              SizedBox(height: 10),
               Container(
                 width: largeur,
                 child: TextFormField(
@@ -465,51 +450,50 @@ class _EditProduitScreenState extends State<EditProduitScreen> {
               ),
               SizedBox(height: 20),
               Center(
-                child: _image == null
-                    ? Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          _existingImageUrl != null &&
-                                  _existingImageUrl!.isNotEmpty
-                              ? AspectRatio(
-                                  aspectRatio: 2.0,
-                                  child: Image.network(
-                                    _existingImageUrl!,
-                                    fit: BoxFit.contain,
-                                  ))
-                              : Text(''),
-                          IconButton(
-                            onPressed: _pickImage,
-                            icon: Icon(
-                              Icons.add_a_photo,
-                              color: Colors.blue,
-                            ),
-                          ),
-                        ],
-                      )
-                    : InkWell(
-                        onTap: () {
-                          setState(() {
-                            _image = null;
-                          });
-                        },
-                        child: Stack(
+                child: Container(
+                  width: largeur,
+                  height: 150,
+                  child: _image == null
+                      ? Stack(
                           alignment: Alignment.center,
                           children: [
-                            AspectRatio(
-                              aspectRatio: 2,
-                              child: Image.file(
-                                _image!,
-                                fit: BoxFit.contain,
+                            _existingImageUrl != null &&
+                                    _existingImageUrl!.isNotEmpty
+                                ? Image.network(
+                                    _existingImageUrl!,
+                                    fit: BoxFit.cover,
+                                  )
+                                : Text(''),
+                            IconButton(
+                              onPressed: _pickImage,
+                              icon: Icon(
+                                Icons.add_a_photo,
+                                color: Colors.blue,
                               ),
                             ),
-                            Icon(
-                              Icons.delete,
-                              color: Colors.red,
-                            ),
                           ],
+                        )
+                      : InkWell(
+                          onTap: () {
+                            setState(() {
+                              _image = null;
+                            });
+                          },
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Image.file(
+                                _image!,
+                                fit: BoxFit.cover,
+                              ),
+                              Icon(
+                                Icons.delete,
+                                color: Colors.red,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                ),
               ),
               SizedBox(height: 20),
               Row(
