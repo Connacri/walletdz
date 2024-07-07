@@ -12,20 +12,20 @@ import 'FournisseurListScreen.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 
-class EditProduitScreen extends StatefulWidget {
+class Add_Edit_ProduitScreen extends StatefulWidget {
   final Produit? produit;
   final Fournisseur? specifiquefournisseur;
 
-  EditProduitScreen(
+  Add_Edit_ProduitScreen(
       {Key? key, this.produit, this.qrCode, this.specifiquefournisseur})
       : super(key: key);
   final String? qrCode;
 
   @override
-  _EditProduitScreenState createState() => _EditProduitScreenState();
+  _Add_Edit_ProduitScreenState createState() => _Add_Edit_ProduitScreenState();
 }
 
-class _EditProduitScreenState extends State<EditProduitScreen> {
+class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nomController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -40,10 +40,12 @@ class _EditProduitScreenState extends State<EditProduitScreen> {
 
   File? _image;
   String? _existingImageUrl;
+  bool _isFinded = false;
 
   @override
   void initState() {
     super.initState();
+    _serialController.addListener(_onSerialChanged);
     if (widget.produit != null) {
       _serialController.text = widget.produit!.qr ?? '';
       _nomController.text = widget.produit!.nom ?? '';
@@ -76,6 +78,7 @@ class _EditProduitScreenState extends State<EditProduitScreen> {
 
   @override
   void dispose() {
+    _serialController.removeListener(_onSerialChanged);
     _serialController.dispose();
     _nomController.dispose();
     _descriptionController.dispose();
@@ -169,6 +172,18 @@ class _EditProduitScreenState extends State<EditProduitScreen> {
     }
   }
 
+  // Future<void> _scanQRCode() async {
+  //   final code = await Navigator.of(context).push<String>(
+  //     MaterialPageRoute(
+  //       builder: (context) => QRViewExample(),
+  //     ),
+  //   );
+  //   if (code != null) {
+  //     setState(() {
+  //       _serialController.text = code;
+  //     });
+  //   }
+  // }
   Future<void> _scanQRCode() async {
     final code = await Navigator.of(context).push<String>(
       MaterialPageRoute(
@@ -179,7 +194,69 @@ class _EditProduitScreenState extends State<EditProduitScreen> {
       setState(() {
         _serialController.text = code;
       });
+
+      final provider = Provider.of<CommerceProvider>(context, listen: false);
+      //final produit = await provider.getProduitById(int.parse(code));
+      final produit = await provider.getProduitByQr(code);
+      if (produit != null) {
+        setState(() {
+          _nomController.text = produit.nom;
+          _descriptionController.text = produit.description ?? '';
+          _prixAchatController.text = produit.prixAchat.toString();
+          _prixVenteController.text = produit.prixVente.toString();
+          _stockController.text = produit.stock.toString();
+          _isFinded = true;
+        });
+      } else {
+        setState(() {
+          _nomController.clear();
+          _descriptionController.clear();
+          _prixAchatController.clear();
+          _prixVenteController.clear();
+          _stockController.clear();
+          _isFinded = false;
+        });
+      }
+      print(_isFinded);
     }
+  }
+
+  void _onSerialChanged() {
+    final code = _serialController.text;
+    if (code.isNotEmpty) {
+      _updateProductInfo(code);
+    }
+  }
+
+  Future<void> _updateProductInfo(String code) async {
+    final provider = Provider.of<CommerceProvider>(context, listen: false);
+    final produit = await provider.getProduitByQr(code);
+    //.getProduitById(int.parse(code));
+
+    if (produit != null) {
+      setState(() {
+        _nomController.text = produit.nom;
+        _descriptionController.text = produit.description ?? '';
+        _prixAchatController.text = produit.prixAchat.toString();
+        _prixVenteController.text = produit.prixVente.toString();
+        _stockController.text = produit.stock.toString();
+        _selectedFournisseurs = List.from(produit.fournisseurs);
+        _existingImageUrl = produit.image;
+        _isFinded = true;
+      });
+    } else {
+      setState(() {
+        _nomController.clear();
+        _descriptionController.clear();
+        _prixAchatController.clear();
+        _prixVenteController.clear();
+        _stockController.clear();
+        _selectedFournisseurs.clear();
+        _existingImageUrl = '';
+        _isFinded = false;
+      });
+    }
+    print(_isFinded);
   }
 
   @override
@@ -199,7 +276,7 @@ class _EditProduitScreenState extends State<EditProduitScreen> {
     }
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.produit == null
+        title: Text(widget.produit == null || _isFinded == false
             ? widget.specifiquefournisseur == null
                 ? 'Ajouter Produit'
                 : 'Ajouter Produit ${' à \n' + widget.specifiquefournisseur!.nom}'
@@ -222,6 +299,7 @@ class _EditProduitScreenState extends State<EditProduitScreen> {
               Container(
                 width: largeur,
                 child: TextFormField(
+                  focusNode: FocusNode(),
                   controller: _serialController,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
@@ -232,10 +310,14 @@ class _EditProduitScreenState extends State<EditProduitScreen> {
                     // labelText: 'Numéro de série',
                     hintText: 'Numéro de série',
 
-                    suffixIcon: IconButton(
-                      icon: Icon(Icons.qr_code_scanner),
-                      onPressed: _scanQRCode,
-                    ),
+                    suffixIcon: Platform.isWindows ||
+                            Platform.isLinux ||
+                            Platform.isMacOS
+                        ? null
+                        : IconButton(
+                            icon: Icon(Icons.qr_code_scanner),
+                            onPressed: _scanQRCode,
+                          ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
                       borderSide: BorderSide.none, // Supprime le contour
@@ -261,9 +343,7 @@ class _EditProduitScreenState extends State<EditProduitScreen> {
                 child: TextFormField(
                   controller: _nomController,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 18,
-                  ),
+                  style: const TextStyle(fontSize: 18, color: Colors.black),
                   keyboardType: TextInputType.text,
                   decoration: InputDecoration(
                     hintStyle: TextStyle(color: Colors.black38),
@@ -548,7 +628,7 @@ class _EditProduitScreenState extends State<EditProduitScreen> {
                 ],
               ),
               SizedBox(height: 20),
-              buildButton_Edit_Add(context, produitProvider),
+              buildButton_Edit_Add(context, produitProvider, _isFinded),
               SizedBox(
                 height: 50,
               ),
@@ -566,9 +646,10 @@ class _EditProduitScreenState extends State<EditProduitScreen> {
   }
 
   ElevatedButton buildButton_Edit_Add(
-      BuildContext context, CommerceProvider produitProvider) {
+      BuildContext context, CommerceProvider produitProvider, _isFinded) {
     return ElevatedButton(
       onPressed: () async {
+        print(_isFinded);
         if (_formKey.currentState!.validate()) {
           String imageUrl = '';
           if (_image != null) {
@@ -594,7 +675,7 @@ class _EditProduitScreenState extends State<EditProduitScreen> {
               //     DateTime.parse(_modificationController.text),
             );
 
-            if (widget.produit == null) {
+            if (widget.produit == null || _isFinded == false) {
               //produitProvider.ajouterProduit(produit, _selectedFournisseurs);
               context
                   .read<CommerceProvider>()
@@ -613,20 +694,31 @@ class _EditProduitScreenState extends State<EditProduitScreen> {
           }
         }
       },
-      child: Text(widget.produit == null ? 'Ajouter' : 'Modifier'),
+
+      ///*************************************************************************************///
+      // on doit regler le probleme de (|| _isFinded == false )
+      // car si une condition se realise la 2eme ne sera pas prise en compte
+      ///*************************************************************************************///
+
+      child: Text(widget.produit == null || _isFinded == false
+          ? 'Ajouter'
+          : 'Modifier'),
     );
   }
 }
 
-class _AddFournisseurForm extends StatefulWidget {
+class AddFournisseurFormFromProduit extends StatefulWidget {
   final Produit produit;
 
-  _AddFournisseurForm({Key? key, required this.produit}) : super(key: key);
+  AddFournisseurFormFromProduit({Key? key, required this.produit})
+      : super(key: key);
   @override
-  __AddFournisseurFormState createState() => __AddFournisseurFormState();
+  _AddFournisseurFormFromProduitState createState() =>
+      _AddFournisseurFormFromProduitState();
 }
 
-class __AddFournisseurFormState extends State<_AddFournisseurForm> {
+class _AddFournisseurFormFromProduitState
+    extends State<AddFournisseurFormFromProduit> {
   final _formKey = GlobalKey<FormState>();
   final _nomController = TextEditingController();
   final _phoneController = TextEditingController();

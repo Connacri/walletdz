@@ -5,7 +5,7 @@ import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:provider/provider.dart';
 import '../Entity.dart';
 import '../MyProviders.dart';
-import 'AddProduitScreen.dart';
+import 'Add_Edit_ProduitScreen.dart';
 import 'FournisseurListScreen.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -86,7 +86,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                         onPressed: (BuildContext context) {
                           Navigator.of(context).push(MaterialPageRoute(
                             builder: (ctx) =>
-                                EditProduitScreen(produit: produit),
+                                Add_Edit_ProduitScreen(produit: produit),
                           ));
                         },
                         backgroundColor: Colors.blue,
@@ -138,7 +138,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                       children: [
                                         Center(
                                           child: Text(
-                                            'A : ${produit.prixAchat.toStringAsFixed(2)} ',
+                                            'A: ${produit.prixAchat.toStringAsFixed(2)} ',
                                           ),
                                         ),
                                         SizedBox(
@@ -163,7 +163,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                           ),
                                           child: Center(
                                             child: Text(
-                                              'B : ${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)}',
+                                              '${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)}',
                                               style: TextStyle(
                                                   color: Colors.white),
                                             ),
@@ -200,7 +200,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                           ),
                                           child: Center(
                                             child: Text(
-                                              'B : ${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)}',
+                                              '${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)}',
                                               style: TextStyle(
                                                   color: Colors.white),
                                             ),
@@ -216,9 +216,9 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                     Platform.isMacOS ||
                                     Platform.isLinux
                                 ? 200
-                                : 120,
+                                : 150,
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 CircleAvatar(
                                     child: Text(produit.stock.toString())),
@@ -248,8 +248,8 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (_) => EditProduitScreen()));
+          Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => Add_Edit_ProduitScreen()));
         },
         child: Icon(Icons.add),
       ),

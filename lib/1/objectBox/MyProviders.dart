@@ -88,6 +88,17 @@ class CommerceProvider extends ChangeNotifier {
     return _objectBox.produitBox.get(id);
   }
 
+  Future<Produit?> getProduitByQr(String qrCode) async {
+    final query = _objectBox.produitBox.query(Produit_.qr.equals(qrCode));
+    final produits = await query.build().find();
+
+    if (produits.isNotEmpty) {
+      return produits.first;
+    } else {
+      return null;
+    }
+  }
+
   List<Produit> getProduitsForFournisseur(Fournisseur fournisseur) {
     // Récupérer les données directement depuis la base de données
     return _objectBox.fournisseurBox

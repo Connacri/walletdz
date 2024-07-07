@@ -4,7 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:provider/provider.dart';
-import 'package:walletdz/1/objectBox/pages/AddProduitScreen.dart';
+import 'package:walletdz/1/objectBox/pages/Add_Edit_ProduitScreen.dart';
 import 'package:walletdz/1/objectBox/pages/ProduitListScreen.dart';
 import 'package:walletdz/1/objectBox/pages/test.dart';
 import 'Entity.dart';
@@ -315,8 +315,8 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(height: 18),
             ElevatedButton.icon(
                 onPressed: () {
-                  Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => EditProduitScreen()));
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => Add_Edit_ProduitScreen()));
                 },
                 label: Text('Ajouter Un Nouveau Produit'),
                 icon: Icon(Icons.add)),
@@ -633,7 +633,7 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                         ElevatedButton.icon(
                             onPressed: () {
                               Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (_) => EditProduitScreen()));
+                                  builder: (_) => Add_Edit_ProduitScreen()));
                             },
                             label: Text('Ajouter Un Nouveau Produit'),
                             icon: Icon(Icons.add)),

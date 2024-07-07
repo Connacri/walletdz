@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../objectbox.g.dart';
 import '../Entity.dart';
 import '../classeObjectBox.dart';
-import 'AddProduitScreen.dart';
+import 'Add_Edit_ProduitScreen.dart';
 import 'ProduitListScreen.dart';
 import 'package:objectbox/objectbox.dart';
 
@@ -162,8 +162,8 @@ class _ProduitListScreenTestState extends State<ProduitListScreenTest> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (_) => EditProduitScreen()));
+          Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => Add_Edit_ProduitScreen()));
         },
         child: Icon(Icons.add),
       ),
@@ -186,7 +186,7 @@ class ProduitListItem extends StatelessWidget {
             SlidableAction(
               onPressed: (BuildContext context) {
                 Navigator.of(context).push(MaterialPageRoute(
-                  builder: (ctx) => EditProduitScreen(produit: produit),
+                  builder: (ctx) => Add_Edit_ProduitScreen(produit: produit),
                 ));
               },
               backgroundColor: Colors.blue,

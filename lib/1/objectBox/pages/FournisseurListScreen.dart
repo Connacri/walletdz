@@ -5,7 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import '../Entity.dart';
 import '../MyProviders.dart';
-import 'AddProduitScreen.dart';
+import 'Add_Edit_ProduitScreen.dart';
 import 'ProduitListScreen.dart';
 import 'package:intl/intl.dart';
 import 'dart:io' show Platform;
@@ -165,7 +165,7 @@ class ProduitsFournisseurPage extends StatelessWidget {
                               SlidableAction(
                                 onPressed: (BuildContext context) {
                                   Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (ctx) => EditProduitScreen(
+                                    builder: (ctx) => Add_Edit_ProduitScreen(
                                       produit: produit,
                                       specifiquefournisseur: fournisseur,
                                     ),
@@ -328,8 +328,8 @@ class ProduitsFournisseurPage extends StatelessWidget {
           FloatingActionButton(
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(
-                  builder: (_) =>
-                      EditProduitScreen(specifiquefournisseur: fournisseur)));
+                  builder: (_) => Add_Edit_ProduitScreen(
+                      specifiquefournisseur: fournisseur)));
             },
             child: Icon(Icons.add),
             heroTag: 'addNew',
