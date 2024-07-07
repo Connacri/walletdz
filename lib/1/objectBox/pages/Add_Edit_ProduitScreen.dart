@@ -299,7 +299,7 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
               Container(
                 width: largeur,
                 child: TextFormField(
-                  focusNode: FocusNode(),
+                  //focusNode: FocusNode(),
                   controller: _serialController,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
