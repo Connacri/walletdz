@@ -41,6 +41,7 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
   File? _image;
   String? _existingImageUrl;
   bool _isFinded = false;
+  String _tempProduitId = '';
 
   @override
   void initState() {
@@ -235,6 +236,7 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
 
     if (produit != null) {
       setState(() {
+        _tempProduitId = produit.id.toString() ?? '';
         _nomController.text = produit.nom;
         _descriptionController.text = produit.description ?? '';
         _prixAchatController.text = produit.prixAchat.toString();
@@ -246,6 +248,7 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
       });
     } else {
       setState(() {
+        _tempProduitId = '';
         _nomController.clear();
         _descriptionController.clear();
         _prixAchatController.clear();
@@ -276,11 +279,11 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
     }
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.produit == null || _isFinded == false
-            ? widget.specifiquefournisseur == null
-                ? 'Ajouter Produit'
-                : 'Ajouter Produit ${' à \n' + widget.specifiquefournisseur!.nom}'
-            : 'Modifier Produit'),
+        title: Text(widget.produit != null
+            ? 'Modifier ${widget.produit}'
+            : widget.specifiquefournisseur == null
+                ? (_isFinded ? 'Modifier' : 'Ajouter')
+                : 'Ajouter Produit ${' à \n' + widget.specifiquefournisseur!.nom}'),
       ),
       body: Form(
         key: _formKey,
@@ -288,13 +291,19 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
           padding: EdgeInsets.all(16.0),
           child: Column(
             children: [
-              if (widget.produit != null)
-                Text(
-                  'ID : ${widget.produit!.id}',
-                  style: TextStyle(
-                    fontSize: 20,
-                  ),
-                ),
+              widget.produit != null
+                  ? Text(
+                      'ID : ${widget.produit!.id}',
+                      style: TextStyle(
+                        fontSize: 20,
+                      ),
+                    )
+                  : _tempProduitId != null
+                      ? Text('ID : ${_tempProduitId}',
+                          style: TextStyle(
+                            fontSize: 20,
+                          ))
+                      : Text(''),
               SizedBox(height: 10),
               Container(
                 width: largeur,
@@ -661,7 +670,13 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
 
           if (mounted) {
             final produit = Produit(
-              id: widget.produit?.id ?? 0,
+              //id: widget.produit!.id ,
+
+              // widget.produit != null
+              //     ? widget.produit!.id
+              //     : _isFinded
+              //         ? _tempProduitId
+              //         : null,
               qr: _serialController.text,
               image: imageUrl,
               nom: _nomController.text,
@@ -675,19 +690,50 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
               //     DateTime.parse(_modificationController.text),
             );
 
-            if (widget.produit == null || _isFinded == false) {
-              //produitProvider.ajouterProduit(produit, _selectedFournisseurs);
-              context
-                  .read<CommerceProvider>()
-                  .ajouterProduit(produit, _selectedFournisseurs);
-
-              print('hadi ajouterProduit');
-            } else {
+            // if (widget.produit != null) {
+            //   produitProvider.updateProduitById(widget.produit!.id, produit,
+            //       fournisseurs: widget.specifiquefournisseur != null
+            //           ? null
+            //           : _selectedFournisseurs);
+            //   print('hadi updateProduitById');
+            // } else {
+            //   if (_isFinded) {
+            //     produitProvider.updateProduitById(widget.produit!.id, produit,
+            //         fournisseurs: widget.specifiquefournisseur != null
+            //             ? null
+            //             : _selectedFournisseurs);
+            //     print('hadi updateProduitById');
+            //   } else {
+            //     //produitProvider.ajouterProduit(produit, _selectedFournisseurs);
+            //     context
+            //         .read<CommerceProvider>()
+            //         .ajouterProduit(produit, _selectedFournisseurs);
+            //
+            //     print('hadi ajouterProduit');
+            //   }
+            // }
+            if (widget.produit != null) {
+              // Mise à jour d'un produit existant
               produitProvider.updateProduitById(widget.produit!.id, produit,
                   fournisseurs: widget.specifiquefournisseur != null
                       ? null
                       : _selectedFournisseurs);
-              print('hadi updateProduitById');
+              print('Produit existant mis à jour');
+            } else if (_isFinded) {
+              // Mise à jour d'un produit trouvé
+              produitProvider.updateProduitById(
+                  int.parse(_tempProduitId) /*produit.id*/, produit,
+                  fournisseurs: widget.specifiquefournisseur != null
+                      ? null
+                      : _selectedFournisseurs);
+              print('Produit trouvé mis à jour');
+            } else {
+              // Ajout d'un nouveau produit
+              //produitProvider.ajouterProduit(produit, _selectedFournisseurs);
+              context
+                  .read<CommerceProvider>()
+                  .ajouterProduit(produit, _selectedFournisseurs);
+              print('Nouveau produit ajouté');
             }
             _formKey.currentState!.save();
             Navigator.of(context).pop();
@@ -700,9 +746,9 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
       // car si une condition se realise la 2eme ne sera pas prise en compte
       ///*************************************************************************************///
 
-      child: Text(widget.produit == null || _isFinded == false
-          ? 'Ajouter'
-          : 'Modifier'),
+      child: Text(widget.produit != null
+          ? 'Modifier'
+          : (_isFinded ? 'Modifier' : 'Ajouter')),
     );
   }
 }

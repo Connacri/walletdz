@@ -233,6 +233,12 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                             ),
                           ),
                         ),
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Text(produit.qr.toString()),
+                          ),
+                        )
                       ],
                     ),
                   ),
