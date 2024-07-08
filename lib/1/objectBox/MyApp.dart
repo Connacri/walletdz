@@ -203,7 +203,8 @@ class _HomeScreenState extends State<HomeScreen> {
             produitProvider.getProduitsBetweenPrices(prixMin, prixMax);
         var produitsLowStock = produitProvider.getProduitsLowStock(5);
         var produitsLowStock0 = produitProvider.getProduitsLowStock(0);
-        return ListView(
+        return  Padding(
+            padding: const EdgeInsets.all(5.0), child :  ListView(
           children: [
             GestureDetector(
               onTap: () {
@@ -355,7 +356,7 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
           ],
-        );
+        ));
       }),
     );
   }

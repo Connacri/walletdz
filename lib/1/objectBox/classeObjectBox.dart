@@ -60,8 +60,8 @@ class ObjectBox {
 
   void fillWithFakeData(/*int count, int fourInt*/) {
     final faker = Faker();
-    int count = 100;
-    int fourInt = 30;
+    int count = 20;
+    int fourInt = 5;
     // Créer des fournisseurs
     List<Fournisseur> fournisseurs = List.generate(fourInt, (index) {
       return Fournisseur(
@@ -77,15 +77,16 @@ class ObjectBox {
     fournisseurBox.putMany(fournisseurs);
 
     // Créer des produits et les associer à des fournisseurs
-    List<Produit> produits = List.generate(count, (index) {
+    List<Produit> produits = List.generate(count, (indx) {
       Produit produit = Produit(
-        image: 'https://picsum.photos/200/300?random=${index}',
+        image: 'https://picsum.photos/200/300?random=${indx}',
         nom: faker.food.dish(),
         prixAchat: faker.randomGenerator.decimal(min: 60, scale: 20),
         prixVente: faker.randomGenerator.decimal(min: 500, scale: 50),
         stock: faker.randomGenerator.integer(100, min: 1),
         description: faker.lorem.sentence(),
-        qr: faker.randomGenerator.integer(count).toString(),
+        qr: (indx + 1)
+            .toString(), // faker.randomGenerator.integer(count).toString(),
         // datePeremption:
         //     faker.date.dateTime(minYear: 2010, maxYear: DateTime.now().year),
         // dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),

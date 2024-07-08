@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
@@ -42,11 +43,14 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
   String? _existingImageUrl;
   bool _isFinded = false;
   String _tempProduitId = '';
+  bool _editQr = true;
 
   @override
   void initState() {
     super.initState();
+
     _serialController.addListener(_onSerialChanged);
+
     if (widget.produit != null) {
       _serialController.text = widget.produit!.qr ?? '';
       _nomController.text = widget.produit!.nom ?? '';
@@ -93,46 +97,52 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
   }
 
   Future<void> _pickImage() async {
-    final ImageSource? source = await showDialog<ImageSource>(
-      context: context,
-      builder: (BuildContext context) {
-        return SimpleDialog(
-          title: const Text('Choisir une source'),
-          children: <Widget>[
-            SimpleDialogOption(
-              padding: EdgeInsets.all(15),
-              onPressed: () {
-                Navigator.pop(context, ImageSource.gallery);
-              },
-              child: Row(
-                children: [
-                  Icon(Icons.photo),
-                  SizedBox(
-                    width: 5,
+    final ImageSource? source = Platform.isAndroid || Platform.isIOS
+        ? await showDialog<ImageSource>(
+            context: context,
+            builder: (BuildContext context) {
+              return SimpleDialog(
+                title: const Text('Choisir une source'),
+                children: <Widget>[
+                  SimpleDialogOption(
+                    padding: EdgeInsets.all(15),
+                    onPressed: () {
+                      Navigator.pop(context, ImageSource.gallery);
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.photo),
+                        SizedBox(
+                          width: 5,
+                        ),
+                        const Text('Galerie'),
+                      ],
+                    ),
                   ),
-                  const Text('Galerie'),
+                  // Platform.isAndroid || Platform.isIOS
+                  //     ?
+                  SimpleDialogOption(
+                    padding: EdgeInsets.all(15),
+                    onPressed: () {
+                      Navigator.pop(context, ImageSource.camera);
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.camera_alt),
+                        SizedBox(
+                          width: 5,
+                        ),
+                        const Text('Caméra'),
+                      ],
+                    ),
+                  )
+                  // : Container()
+                  ,
                 ],
-              ),
-            ),
-            SimpleDialogOption(
-              padding: EdgeInsets.all(15),
-              onPressed: () {
-                Navigator.pop(context, ImageSource.camera);
-              },
-              child: Row(
-                children: [
-                  Icon(Icons.camera_alt),
-                  SizedBox(
-                    width: 5,
-                  ),
-                  const Text('Caméra'),
-                ],
-              ),
-            ),
-          ],
-        );
-      },
-    );
+              );
+            },
+          )
+        : ImageSource.gallery;
 
     if (source != null) {
       final pickedFile = await ImagePicker().pickImage(
@@ -225,7 +235,9 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
   void _onSerialChanged() {
     final code = _serialController.text;
     if (code.isNotEmpty) {
-      _updateProductInfo(code);
+      if (_editQr) {
+        _updateProductInfo(code);
+      }
     }
   }
 
@@ -280,7 +292,7 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.produit != null
-            ? 'Modifier ${widget.produit}'
+            ? 'Modifier ${widget.produit!.nom}'
             : widget.specifiquefournisseur == null
                 ? (_isFinded ? 'Modifier' : 'Ajouter')
                 : 'Ajouter Produit ${' à \n' + widget.specifiquefournisseur!.nom}'),
@@ -291,19 +303,54 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
           padding: EdgeInsets.all(16.0),
           child: Column(
             children: [
-              widget.produit != null
-                  ? Text(
-                      'ID : ${widget.produit!.id}',
-                      style: TextStyle(
-                        fontSize: 20,
+              Container(
+                height: 30,
+                child: widget.produit != null
+                    ? Text(
+                        'ID : ${widget.produit!.id}',
+                        style: TextStyle(
+                          fontSize: 20,
+                        ),
+                      )
+                    : _tempProduitId.isNotEmpty
+                        ? Text('ID : ${_tempProduitId}',
+                            style: TextStyle(
+                              fontSize: 20,
+                            ))
+                        : Text(
+                            'L\'ID du Produit n\'a pas encore été créer',
+                            style: TextStyle(fontSize: 20),
+                          ),
+              ),
+              Container(
+                height: 30,
+                child: _tempProduitId.isNotEmpty
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Switch(
+                            value: _editQr,
+                            onChanged: (bool newValue) {
+                              setState(() {
+                                _editQr = newValue;
+                              });
+                            },
+                          ),
+                          SizedBox(width: 10),
+                          Text(
+                              _editQr
+                                  ? 'Recherche par Code QR Activé'
+                                  : 'Recherche par Code QR Désactivé',
+                              style: TextStyle(
+                                fontSize: 20,
+                              )),
+                        ],
+                      )
+                    : Text(
+                        'Creation d\'un Nouveau Produit',
+                        style: TextStyle(fontSize: 20),
                       ),
-                    )
-                  : _tempProduitId != null
-                      ? Text('ID : ${_tempProduitId}',
-                          style: TextStyle(
-                            fontSize: 20,
-                          ))
-                      : Text(''),
+              ),
               SizedBox(height: 10),
               Container(
                 width: largeur,
@@ -317,7 +364,7 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
                   decoration: InputDecoration(
                     hintStyle: TextStyle(color: Colors.black38),
                     // labelText: 'Numéro de série',
-                    hintText: 'Numéro de série',
+                    hintText: 'Code Barre',
 
                     suffixIcon: Platform.isWindows ||
                             Platform.isLinux ||
@@ -357,7 +404,7 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
                   decoration: InputDecoration(
                     hintStyle: TextStyle(color: Colors.black38),
                     fillColor: Colors.blue.shade50,
-                    hintText: 'Nom',
+                    hintText: 'Nom Du Produit',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
                       borderSide: BorderSide.none, // Supprime le contour
@@ -377,7 +424,7 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Veuillez entrer un nom';
+                      return 'Veuillez entrer un nom du Produit';
                     }
                     return null;
                   },
@@ -448,10 +495,37 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
                     filled: true,
                     contentPadding: EdgeInsets.all(15),
                   ),
-                  keyboardType: TextInputType.number,
+                  // keyboardType: TextInputType.number,
+                  //  validator: (value) {
+                  //    if (value == null || value.isEmpty) {
+                  //      return 'Veuillez entrer le prix d\'achat';
+                  //    }
+                  //    return null;
+                  //  },
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(
+                        RegExp(r'^\d+\.?\d{0,2}')),
+                  ],
+                  onChanged: (value) {
+                    if (value.isNotEmpty) {
+                      double? parsed = double.tryParse(value);
+                      if (parsed != null) {
+                        _prixAchatController.text = parsed.toStringAsFixed(2);
+                        _prixAchatController.selection =
+                            TextSelection.fromPosition(
+                          TextPosition(
+                              offset: _prixAchatController.text.length),
+                        );
+                      }
+                    }
+                  },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Veuillez entrer le prix d\'achat';
+                    }
+                    if (double.tryParse(value) == null) {
+                      return 'Veuillez entrer un prix valide';
                     }
                     return null;
                   },
@@ -488,10 +562,37 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
                     filled: true,
                     contentPadding: EdgeInsets.all(15),
                   ),
-                  keyboardType: TextInputType.number,
+                  // keyboardType: TextInputType.number,
+                  // validator: (value) {
+                  //   if (value == null || value.isEmpty) {
+                  //     return 'Veuillez entrer le prix de vente';
+                  //   }
+                  //   return null;
+                  // },
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(
+                        RegExp(r'^\d+\.?\d{0,2}')),
+                  ],
+                  onChanged: (value) {
+                    if (value.isNotEmpty) {
+                      double? parsed = double.tryParse(value);
+                      if (parsed != null) {
+                        _prixAchatController.text = parsed.toStringAsFixed(2);
+                        _prixAchatController.selection =
+                            TextSelection.fromPosition(
+                          TextPosition(
+                              offset: _prixAchatController.text.length),
+                        );
+                      }
+                    }
+                  },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Veuillez entrer le prix de vente';
+                      return 'Veuillez entrer le prix d\'achat';
+                    }
+                    if (double.tryParse(value) == null) {
+                      return 'Veuillez entrer un prix valide';
                     }
                     return null;
                   },
@@ -658,9 +759,10 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
       BuildContext context, CommerceProvider produitProvider, _isFinded) {
     return ElevatedButton(
       onPressed: () async {
-        print(_isFinded);
         if (_formKey.currentState!.validate()) {
           String imageUrl = '';
+          final produitDejaExist =
+              await produitProvider.getProduitByQr(_serialController.text);
           if (_image != null) {
             imageUrl = await uploadImageToSupabase(_image!, _existingImageUrl);
           } else if (_existingImageUrl != null &&
@@ -670,13 +772,6 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
 
           if (mounted) {
             final produit = Produit(
-              //id: widget.produit!.id ,
-
-              // widget.produit != null
-              //     ? widget.produit!.id
-              //     : _isFinded
-              //         ? _tempProduitId
-              //         : null,
               qr: _serialController.text,
               image: imageUrl,
               nom: _nomController.text,
@@ -690,62 +785,47 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
               //     DateTime.parse(_modificationController.text),
             );
 
-            // if (widget.produit != null) {
-            //   produitProvider.updateProduitById(widget.produit!.id, produit,
-            //       fournisseurs: widget.specifiquefournisseur != null
-            //           ? null
-            //           : _selectedFournisseurs);
-            //   print('hadi updateProduitById');
-            // } else {
-            //   if (_isFinded) {
-            //     produitProvider.updateProduitById(widget.produit!.id, produit,
-            //         fournisseurs: widget.specifiquefournisseur != null
-            //             ? null
-            //             : _selectedFournisseurs);
-            //     print('hadi updateProduitById');
-            //   } else {
-            //     //produitProvider.ajouterProduit(produit, _selectedFournisseurs);
-            //     context
-            //         .read<CommerceProvider>()
-            //         .ajouterProduit(produit, _selectedFournisseurs);
-            //
-            //     print('hadi ajouterProduit');
-            //   }
-            // }
-            if (widget.produit != null) {
-              // Mise à jour d'un produit existant
-              produitProvider.updateProduitById(widget.produit!.id, produit,
-                  fournisseurs: widget.specifiquefournisseur != null
-                      ? null
-                      : _selectedFournisseurs);
-              print('Produit existant mis à jour');
-            } else if (_isFinded) {
-              // Mise à jour d'un produit trouvé
-              produitProvider.updateProduitById(
-                  int.parse(_tempProduitId) /*produit.id*/, produit,
-                  fournisseurs: widget.specifiquefournisseur != null
-                      ? null
-                      : _selectedFournisseurs);
-              print('Produit trouvé mis à jour');
+            if (produitDejaExist == null) {
+              if (widget.produit != null) {
+                // Mise à jour d'un produit existant
+                produitProvider.updateProduitById(widget.produit!.id, produit,
+                    fournisseurs: widget.specifiquefournisseur != null
+                        ? null
+                        : _selectedFournisseurs);
+
+                print('Produit existant mis à jour');
+              } else if (_isFinded) {
+                produitProvider.updateProduitById(
+                    int.parse(_tempProduitId), produit,
+                    fournisseurs: widget.specifiquefournisseur != null
+                        ? null
+                        : _selectedFournisseurs);
+
+                print('Produit trouvé mis à jour');
+              } else {
+                // Ajout d'un nouveau produit
+                //produitProvider.ajouterProduit(produit, _selectedFournisseurs);
+                context
+                    .read<CommerceProvider>()
+                    .ajouterProduit(produit, _selectedFournisseurs);
+                print('Nouveau produit ajouté');
+              }
             } else {
-              // Ajout d'un nouveau produit
-              //produitProvider.ajouterProduit(produit, _selectedFournisseurs);
-              context
-                  .read<CommerceProvider>()
-                  .ajouterProduit(produit, _selectedFournisseurs);
-              print('Nouveau produit ajouté');
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'QR / Code Barre Produit existe déja !',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  backgroundColor: Colors.red,
+                ),
+              );
             }
             _formKey.currentState!.save();
-            Navigator.of(context).pop();
+            produitDejaExist != null ? null : Navigator.of(context).pop();
           }
         }
       },
-
-      ///*************************************************************************************///
-      // on doit regler le probleme de (|| _isFinded == false )
-      // car si une condition se realise la 2eme ne sera pas prise en compte
-      ///*************************************************************************************///
-
       child: Text(widget.produit != null
           ? 'Modifier'
           : (_isFinded ? 'Modifier' : 'Ajouter')),
