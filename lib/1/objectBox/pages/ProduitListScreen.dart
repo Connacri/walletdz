@@ -55,6 +55,17 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
       appBar: AppBar(
         title: Text('Produits'),
         actions: [
+          Consumer<CommerceProvider>(
+              builder: (context, produitProvider, child) {
+            int totalProduits = produitProvider.getTotalProduits();
+
+            return Text(
+              '${totalProduits} Produits',
+            );
+          }),
+          SizedBox(
+            width: 50,
+          ),
           IconButton(
             icon: Icon(Icons.search),
             onPressed: () async {
@@ -236,7 +247,11 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                         Center(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: Text(produit.qr.toString()),
+                            child: Text('Id : ' +
+                                produit.id.toString() +
+                                ' - ' +
+                                'QR : ' +
+                                produit.qr.toString()),
                           ),
                         )
                       ],

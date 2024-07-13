@@ -10,19 +10,30 @@ class Produit {
   double prixAchat;
   double prixVente;
   int stock;
+  DateTime dateCreation;
+  DateTime datePeremption;
+  DateTime stockUpdate;
+  DateTime derniereModification;
+  int stockinit;
 
   @Backlink()
   final fournisseurs = ToMany<Fournisseur>();
 
-  Produit(
-      {this.id = 0,
-      this.qr,
-      this.image,
-      required this.nom,
-      this.description,
-      required this.prixAchat,
-      required this.prixVente,
-      required this.stock});
+  Produit({
+    this.id = 0,
+    this.qr,
+    this.image,
+    required this.nom,
+    this.description,
+    required this.prixAchat,
+    required this.prixVente,
+    required this.stock,
+    required this.dateCreation,
+    required this.datePeremption,
+    required this.stockUpdate,
+    required this.derniereModification,
+    required this.stockinit,
+  });
 }
 
 @Entity()
@@ -32,11 +43,20 @@ class Fournisseur {
   String nom;
   String? phone;
   String? adresse;
+  DateTime dateCreation;
+  DateTime? derniereModification;
 
   final produits = ToMany<Produit>();
 
   Fournisseur(
-      {this.id = 0, this.qr, required this.nom, this.phone, this.adresse});
+      {this.id = 0,
+        this.qr,
+        required this.nom,
+        this.phone,
+        this.adresse,
+        required this.dateCreation,
+        required this.derniereModification,
+      });
 }
 // @Entity()
 // class Produit {

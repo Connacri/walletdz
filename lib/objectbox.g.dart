@@ -22,7 +22,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(1, 1607491491677936871),
       name: 'Fournisseur',
-      lastPropertyId: const obx_int.IdUid(5, 7832871292473157035),
+      lastPropertyId: const obx_int.IdUid(7, 9088776954073551638),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -49,6 +49,16 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(5, 7832871292473157035),
             name: 'adresse',
             type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(6, 4341932180325338788),
+            name: 'dateCreation',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(7, 9088776954073551638),
+            name: 'derniereModification',
+            type: 10,
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[
@@ -61,7 +71,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(2, 8606136097133066204),
       name: 'Produit',
-      lastPropertyId: const obx_int.IdUid(8, 4773469945258199278),
+      lastPropertyId: const obx_int.IdUid(14, 5607971647867899978),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -103,6 +113,31 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(8, 4773469945258199278),
             name: 'stock',
             type: 6,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(9, 3618662337063473621),
+            name: 'stockUpdate',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(11, 7598222863889683261),
+            name: 'stockinit',
+            type: 6,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(12, 1827255615047715957),
+            name: 'dateCreation',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(13, 5341105790295986650),
+            name: 'datePeremption',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(14, 5607971647867899978),
+            name: 'derniereModification',
+            type: 10,
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
@@ -153,7 +188,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
       lastSequenceId: const obx_int.IdUid(0, 0),
       retiredEntityUids: const [],
       retiredIndexUids: const [],
-      retiredPropertyUids: const [],
+      retiredPropertyUids: const [8976483595831028651],
       retiredRelationUids: const [],
       modelVersion: 5,
       modelVersionParserMinimum: 5,
@@ -178,18 +213,22 @@ obx_int.ModelDefinition getObjectBoxModel() {
               object.phone == null ? null : fbb.writeString(object.phone!);
           final adresseOffset =
               object.adresse == null ? null : fbb.writeString(object.adresse!);
-          fbb.startTable(6);
+          fbb.startTable(8);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, qrOffset);
           fbb.addOffset(2, nomOffset);
           fbb.addOffset(3, phoneOffset);
           fbb.addOffset(4, adresseOffset);
+          fbb.addInt64(5, object.dateCreation.millisecondsSinceEpoch);
+          fbb.addInt64(6, object.derniereModification?.millisecondsSinceEpoch);
           fbb.finish(fbb.endTable());
           return object.id;
         },
         objectFromFB: (obx.Store store, ByteData fbData) {
           final buffer = fb.BufferContext(fbData);
           final rootOffset = buffer.derefObject(0);
+          final derniereModificationValue =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 16);
           final idParam =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
           final qrParam = const fb.StringReader(asciiOptimization: true)
@@ -200,12 +239,19 @@ obx_int.ModelDefinition getObjectBoxModel() {
               .vTableGetNullable(buffer, rootOffset, 10);
           final adresseParam = const fb.StringReader(asciiOptimization: true)
               .vTableGetNullable(buffer, rootOffset, 12);
+          final dateCreationParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 14, 0));
+          final derniereModificationParam = derniereModificationValue == null
+              ? null
+              : DateTime.fromMillisecondsSinceEpoch(derniereModificationValue);
           final object = Fournisseur(
               id: idParam,
               qr: qrParam,
               nom: nomParam,
               phone: phoneParam,
-              adresse: adresseParam);
+              adresse: adresseParam,
+              dateCreation: dateCreationParam,
+              derniereModification: derniereModificationParam);
           obx_int.InternalToManyAccess.setRelInfo<Fournisseur>(object.produits,
               store, obx_int.RelInfo<Fournisseur>.toMany(1, object.id));
           return object;
@@ -230,7 +276,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final descriptionOffset = object.description == null
               ? null
               : fbb.writeString(object.description!);
-          fbb.startTable(9);
+          fbb.startTable(15);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, qrOffset);
           fbb.addOffset(2, imageOffset);
@@ -239,6 +285,11 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addFloat64(5, object.prixAchat);
           fbb.addFloat64(6, object.prixVente);
           fbb.addInt64(7, object.stock);
+          fbb.addInt64(8, object.stockUpdate.millisecondsSinceEpoch);
+          fbb.addInt64(10, object.stockinit);
+          fbb.addInt64(11, object.dateCreation.millisecondsSinceEpoch);
+          fbb.addInt64(12, object.datePeremption.millisecondsSinceEpoch);
+          fbb.addInt64(13, object.derniereModification.millisecondsSinceEpoch);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -262,6 +313,16 @@ obx_int.ModelDefinition getObjectBoxModel() {
               const fb.Float64Reader().vTableGet(buffer, rootOffset, 16, 0);
           final stockParam =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 18, 0);
+          final dateCreationParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 26, 0));
+          final datePeremptionParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 28, 0));
+          final stockUpdateParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 20, 0));
+          final derniereModificationParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 30, 0));
+          final stockinitParam =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 24, 0);
           final object = Produit(
               id: idParam,
               qr: qrParam,
@@ -270,7 +331,12 @@ obx_int.ModelDefinition getObjectBoxModel() {
               description: descriptionParam,
               prixAchat: prixAchatParam,
               prixVente: prixVenteParam,
-              stock: stockParam);
+              stock: stockParam,
+              dateCreation: dateCreationParam,
+              datePeremption: datePeremptionParam,
+              stockUpdate: stockUpdateParam,
+              derniereModification: derniereModificationParam,
+              stockinit: stockinitParam);
           obx_int.InternalToManyAccess.setRelInfo<Produit>(object.fournisseurs,
               store, obx_int.RelInfo<Fournisseur>.toManyBacklink(1, object.id));
           return object;
@@ -301,6 +367,14 @@ class Fournisseur_ {
   /// See [Fournisseur.adresse].
   static final adresse =
       obx.QueryStringProperty<Fournisseur>(_entities[0].properties[4]);
+
+  /// See [Fournisseur.dateCreation].
+  static final dateCreation =
+      obx.QueryDateProperty<Fournisseur>(_entities[0].properties[5]);
+
+  /// See [Fournisseur.derniereModification].
+  static final derniereModification =
+      obx.QueryDateProperty<Fournisseur>(_entities[0].properties[6]);
 
   /// see [Fournisseur.produits]
   static final produits =
@@ -340,4 +414,24 @@ class Produit_ {
   /// See [Produit.stock].
   static final stock =
       obx.QueryIntegerProperty<Produit>(_entities[1].properties[7]);
+
+  /// See [Produit.stockUpdate].
+  static final stockUpdate =
+      obx.QueryDateProperty<Produit>(_entities[1].properties[8]);
+
+  /// See [Produit.stockinit].
+  static final stockinit =
+      obx.QueryIntegerProperty<Produit>(_entities[1].properties[9]);
+
+  /// See [Produit.dateCreation].
+  static final dateCreation =
+      obx.QueryDateProperty<Produit>(_entities[1].properties[10]);
+
+  /// See [Produit.datePeremption].
+  static final datePeremption =
+      obx.QueryDateProperty<Produit>(_entities[1].properties[11]);
+
+  /// See [Produit.derniereModification].
+  static final derniereModification =
+      obx.QueryDateProperty<Produit>(_entities[1].properties[12]);
 }

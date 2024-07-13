@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:1607491491677936871",
-      "lastPropertyId": "5:7832871292473157035",
+      "lastPropertyId": "7:9088776954073551638",
       "name": "Fournisseur",
       "properties": [
         {
@@ -33,6 +33,16 @@
           "id": "5:7832871292473157035",
           "name": "adresse",
           "type": 9
+        },
+        {
+          "id": "6:4341932180325338788",
+          "name": "dateCreation",
+          "type": 10
+        },
+        {
+          "id": "7:9088776954073551638",
+          "name": "derniereModification",
+          "type": 10
         }
       ],
       "relations": [
@@ -45,7 +55,7 @@
     },
     {
       "id": "2:8606136097133066204",
-      "lastPropertyId": "8:4773469945258199278",
+      "lastPropertyId": "14:5607971647867899978",
       "name": "Produit",
       "properties": [
         {
@@ -88,6 +98,31 @@
           "id": "8:4773469945258199278",
           "name": "stock",
           "type": 6
+        },
+        {
+          "id": "9:3618662337063473621",
+          "name": "stockUpdate",
+          "type": 10
+        },
+        {
+          "id": "11:7598222863889683261",
+          "name": "stockinit",
+          "type": 6
+        },
+        {
+          "id": "12:1827255615047715957",
+          "name": "dateCreation",
+          "type": 10
+        },
+        {
+          "id": "13:5341105790295986650",
+          "name": "datePeremption",
+          "type": 10
+        },
+        {
+          "id": "14:5607971647867899978",
+          "name": "derniereModification",
+          "type": 10
         }
       ],
       "relations": []
@@ -101,7 +136,9 @@
   "modelVersionParserMinimum": 5,
   "retiredEntityUids": [],
   "retiredIndexUids": [],
-  "retiredPropertyUids": [],
+  "retiredPropertyUids": [
+    8976483595831028651
+  ],
   "retiredRelationUids": [],
   "version": 1
 }

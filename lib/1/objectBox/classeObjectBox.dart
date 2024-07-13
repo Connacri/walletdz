@@ -69,9 +69,9 @@ class ObjectBox {
         phone: faker.phoneNumber.us(),
         adresse: faker.address.streetAddress(),
         qr: faker.randomGenerator.integer(999999).toString(),
-        // dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
-        // derniereModification:
-        // faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
+        dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
+        derniereModification:
+        faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
       );
     });
     fournisseurBox.putMany(fournisseurs);
@@ -87,11 +87,13 @@ class ObjectBox {
         description: faker.lorem.sentence(),
         qr: (indx + 1)
             .toString(), // faker.randomGenerator.integer(count).toString(),
-        // datePeremption:
-        //     faker.date.dateTime(minYear: 2010, maxYear: DateTime.now().year),
-        // dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
-        // derniereModification:
-        //     faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
+        datePeremption:
+            faker.date.dateTime(minYear: 2010, maxYear: DateTime.now().year),
+        dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
+        derniereModification:
+            faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
+        stockinit: faker.randomGenerator.integer(100, min: 1),
+        stockUpdate: faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
       );
 
       // Associer entre 1 et 10 fournisseurs aléatoires au produit

@@ -44,19 +44,21 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
   bool _isFinded = false;
   String _tempProduitId = '';
   bool _editQr = true;
+  bool _isFirstFieldFilled = false;
 
   @override
   void initState() {
     super.initState();
 
     _serialController.addListener(_onSerialChanged);
+    _serialController.addListener(_checkFirstField);
 
     if (widget.produit != null) {
       _serialController.text = widget.produit!.qr ?? '';
       _nomController.text = widget.produit!.nom ?? '';
       _descriptionController.text = widget.produit!.description ?? '';
-      _prixAchatController.text = widget.produit!.prixAchat.toString();
-      _prixVenteController.text = widget.produit!.prixVente.toString();
+      _prixAchatController.text = widget.produit!.prixAchat.toStringAsFixed(2);
+      _prixVenteController.text = widget.produit!.prixVente.toStringAsFixed(2);
       _stockController.text = widget.produit!.stock.toString();
       _existingImageUrl = widget.produit!.image;
       // _peremptionController.text = widget.produit!.datePeremption.toString();
@@ -65,12 +67,7 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
       //     widget.produit!.derniereModification.toString();
       _selectedFournisseurs = List.from(widget.produit!.fournisseurs);
     } else {
-      _serialController.text = '';
-      _nomController.text = '';
-      _descriptionController.text = '';
-      _prixAchatController.text = '';
-      _prixVenteController.text = '';
-      _stockController.text = '';
+      _clearAllFields();
       // _peremptionController.text = '';
       // _creationController.text = '';
       // _modificationController.text = '';
@@ -183,18 +180,6 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
     }
   }
 
-  // Future<void> _scanQRCode() async {
-  //   final code = await Navigator.of(context).push<String>(
-  //     MaterialPageRoute(
-  //       builder: (context) => QRViewExample(),
-  //     ),
-  //   );
-  //   if (code != null) {
-  //     setState(() {
-  //       _serialController.text = code;
-  //     });
-  //   }
-  // }
   Future<void> _scanQRCode() async {
     final code = await Navigator.of(context).push<String>(
       MaterialPageRoute(
@@ -213,20 +198,13 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
         setState(() {
           _nomController.text = produit.nom;
           _descriptionController.text = produit.description ?? '';
-          _prixAchatController.text = produit.prixAchat.toString();
-          _prixVenteController.text = produit.prixVente.toString();
+          _prixAchatController.text = produit.prixAchat.toStringAsFixed(2);
+          _prixVenteController.text = produit.prixVente.toStringAsFixed(2);
           _stockController.text = produit.stock.toString();
           _isFinded = true;
         });
       } else {
-        setState(() {
-          _nomController.clear();
-          _descriptionController.clear();
-          _prixAchatController.clear();
-          _prixVenteController.clear();
-          _stockController.clear();
-          _isFinded = false;
-        });
+        _clearAllFields();
       }
       print(_isFinded);
     }
@@ -234,10 +212,16 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
 
   void _onSerialChanged() {
     final code = _serialController.text;
-    if (code.isNotEmpty) {
-      if (_editQr) {
-        _updateProductInfo(code);
-      }
+
+    // Vérifie si le champ est vide en premier lieu pour éviter des opérations inutiles.
+    if (code.isEmpty) return;
+    // if (code.isEmpty) {
+    //   _clearAllFields();
+    // }
+
+    // Vérifie si le produit est null et que l'édition via QR est active.
+    if (widget.produit == null && _editQr) {
+      _updateProductInfo(code);
     }
   }
 
@@ -251,27 +235,186 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
         _tempProduitId = produit.id.toString() ?? '';
         _nomController.text = produit.nom;
         _descriptionController.text = produit.description ?? '';
-        _prixAchatController.text = produit.prixAchat.toString();
-        _prixVenteController.text = produit.prixVente.toString();
+        _prixAchatController.text = produit.prixAchat.toStringAsFixed(2);
+        _prixVenteController.text = produit.prixVente.toStringAsFixed(2);
         _stockController.text = produit.stock.toString();
         _selectedFournisseurs = List.from(produit.fournisseurs);
         _existingImageUrl = produit.image;
         _isFinded = true;
+        _image = null;
       });
     } else {
-      setState(() {
-        _tempProduitId = '';
-        _nomController.clear();
-        _descriptionController.clear();
-        _prixAchatController.clear();
-        _prixVenteController.clear();
-        _stockController.clear();
-        _selectedFournisseurs.clear();
-        _existingImageUrl = '';
-        _isFinded = false;
-      });
+      _clearAllFields();
     }
     print(_isFinded);
+  }
+
+  void _checkFirstField() {
+    setState(() {
+      _isFirstFieldFilled =
+          widget.produit == null ? _serialController.text.isNotEmpty : true;
+    });
+  }
+
+  void _clearAllFields() {
+    setState(() {
+      _tempProduitId = '';
+      _serialController.clear();
+      _nomController.clear();
+      _descriptionController.clear();
+      _prixAchatController.clear();
+      _prixVenteController.clear();
+      _stockController.clear();
+      _selectedFournisseurs.clear();
+      _existingImageUrl = '';
+      _isFinded = false;
+      _isFirstFieldFilled = false;
+      _image = null;
+    });
+  }
+
+  void _onSelectedFournisseursChanged(List<Fournisseur> fournisseurs) {
+    setState(() {
+      _selectedFournisseurs = fournisseurs;
+    });
+  }
+
+  IconButton buildButton_Edit_Add(
+      BuildContext context, CommerceProvider produitProvider, _isFinded) {
+    return IconButton(
+      onPressed: () async {
+        final produitDejaExist =
+            await produitProvider.getProduitByQr(_serialController.text);
+        if (_formKey.currentState!.validate()) {
+          String imageUrl = '';
+//******************************************************************************//
+          if (produitDejaExist != null &&
+              _serialController.text != widget.produit!.qr) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'QR / Code Barre Produit existe déja !',
+                  style: TextStyle(color: Colors.white),
+                ),
+                backgroundColor: Colors.red,
+              ),
+            );
+            print('hadi produitDejaExist != null 111111111111111111');
+          } else {
+            if (_image != null) {
+              imageUrl =
+                  await uploadImageToSupabase(_image!, _existingImageUrl);
+            } else if (_existingImageUrl != null &&
+                _existingImageUrl!.isNotEmpty) {
+              imageUrl = _existingImageUrl!;
+            }
+            print('hadi produitDejaExist == null 2222222222222222222');
+          }
+////////////////////////////////////////////////////////////////////////////////
+          if (mounted) {
+            final produit = Produit(
+              qr: _serialController.text,
+              image: imageUrl,
+              nom: _nomController.text,
+              description: _descriptionController.text,
+              prixAchat: double.parse(_prixAchatController.text),
+              prixVente: double.parse(_prixVenteController.text),
+              stock: int.parse(_stockController.text),
+              datePeremption: DateTime.parse(_peremptionController.text),
+              dateCreation: DateTime.parse(_creationController.text),
+              derniereModification:
+                  DateTime.parse(_modificationController.text),
+              stockUpdate: DateTime.parse(_peremptionController.text),
+              stockinit: int.parse(_stockController.text),
+            );
+            if (produitDejaExist != null &&
+                _serialController.text != widget.produit!.qr) {
+              return;
+            } else if (widget.produit != null) {
+              //update
+
+              produitProvider.updateProduitById(widget.produit!.id, produit,
+                  fournisseurs: widget.specifiquefournisseur != null
+                      ? null
+                      : _selectedFournisseurs);
+
+              print('Produit existant mis à jour');
+            } else {
+              //add new
+              produitProvider.ajouterProduit(produit, _selectedFournisseurs);
+              context.read<CommerceProvider>().ajouterProduit(
+                  produit,
+                  _selectedFournisseurs.isEmpty
+                      ? [widget.specifiquefournisseur!]
+                      : _selectedFournisseurs);
+
+              print('Nouveau produit ajouté');
+            }
+////////////////////////////////////////////////////////////////////////////////
+//             if (produitDejaExist == null) {
+//               if (widget.produit != null) {
+//                 if (_serialController.text == produitDejaExist.qr)
+//                   // Mise à jour d'un produit existant
+//                   produitProvider.updateProduitById(widget.produit!.id, produit,
+//                       fournisseurs: widget.specifiquefournisseur != null
+//                           ? null
+//                           : _selectedFournisseurs);
+//
+//                 print('Produit existant mis à jour');
+//               } else if (_isFinded) {
+//                 produitProvider.updateProduitById(
+//                     int.parse(_tempProduitId), produit,
+//                     fournisseurs: widget.specifiquefournisseur != null
+//                         ? null
+//                         : _selectedFournisseurs);
+//
+//                 print('Produit trouvé mis à jour');
+//               } else {
+//                 // Ajout d'un nouveau produit
+//                 produitProvider.ajouterProduit(produit, _selectedFournisseurs);
+//                 context.read<CommerceProvider>().ajouterProduit(
+//                     produit,
+//                     _selectedFournisseurs.isEmpty
+//                         ? [widget.specifiquefournisseur!]
+//                         : _selectedFournisseurs);
+//
+//                 print('Nouveau produit ajouté');
+//               }
+//             }
+//             // else if (
+//             // produitDejaExist.qr != _serialController) {
+//             //
+//             // }
+//             else {
+//               ScaffoldMessenger.of(context).showSnackBar(
+//                 SnackBar(
+//                   content: Text(
+//                     'QR / Code Barre Produit existe déja !',
+//                     style: TextStyle(color: Colors.white),
+//                   ),
+//                   backgroundColor: Colors.red,
+//                 ),
+//               );
+//             }
+            ///////////////////////////////////////////////////////////////////
+
+            _formKey.currentState!.save();
+            produitDejaExist != null &&
+                    _serialController.text != widget.produit!.qr
+                ? null
+                : Navigator.of(context).pop();
+          }
+        }
+      },
+      icon: Icon(
+        widget.produit != null
+            ? Icons.edit
+            : (_isFinded ? Icons.edit : Icons.check),
+        // child: Text(widget.produit != null
+        //     ? 'Modifier'
+        //     : (_isFinded ? 'Modifier' : 'Ajouter')
+      ),
+    );
   }
 
   @override
@@ -290,318 +433,399 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
       largeur = MediaQuery.of(context).size.width / 3;
     }
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.produit != null
-            ? 'Modifier ${widget.produit!.nom}'
-            : widget.specifiquefournisseur == null
-                ? (_isFinded ? 'Modifier' : 'Ajouter')
-                : 'Ajouter Produit ${' à \n' + widget.specifiquefournisseur!.nom}'),
-      ),
+      appBar: buildAppBar(context, produitProvider),
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              Container(
-                height: 30,
-                child: widget.produit != null
-                    ? Text(
-                        'ID : ${widget.produit!.id}',
-                        style: TextStyle(
-                          fontSize: 20,
+          padding: EdgeInsets.symmetric(
+            horizontal: 15,
+          ),
+          child: Platform.isAndroid || Platform.isIOS
+              ? Column(
+                  children: [
+                    buildColumnForm(largeur),
+                    buildColumnPicSuplyers(largeur, context),
+                  ],
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: buildColumnForm(largeur)),
+                    Expanded(child: buildColumnPicSuplyers(largeur, context)),
+                  ],
+                ),
+        ),
+      ),
+    );
+  }
+
+  AppBar buildAppBar(BuildContext context, CommerceProvider produitProvider) {
+    return AppBar(
+      title: Text(widget.produit != null
+          ? 'Modifier ${widget.produit!.nom}'
+          : widget.specifiquefournisseur == null
+              ? (_isFinded ? 'Modifier' : 'Ajouter')
+              : 'Ajouter Produit ${' à \n' + widget.specifiquefournisseur!.nom}'),
+      actions: [
+        IconButton(
+          icon: Icon(Icons.clear_all),
+          onPressed: _clearAllFields,
+          tooltip: 'Effacer tous les champs',
+        ),
+        buildButton_Edit_Add(context, produitProvider, _isFinded),
+      ],
+    );
+  }
+
+  Column buildColumnForm(double largeur) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Container(
+          height: 30,
+          child: widget.produit != null
+              ? Text(
+                  'ID : ${widget.produit!.id}',
+                  style: TextStyle(
+                    fontSize: 20,
+                  ),
+                )
+              : _tempProduitId.isNotEmpty
+                  ? Text('ID : ${_tempProduitId}',
+                      style: TextStyle(
+                        fontSize: 20,
+                      ))
+                  : Text(
+                      'L\'ID du Produit n\'a pas encore été créer',
+                      style: TextStyle(fontSize: 20),
+                    ),
+        ),
+        Container(
+          height: 30,
+          child: _tempProduitId.isNotEmpty
+              ? widget.produit == null
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Switch(
+                          value: _editQr,
+                          onChanged: (bool newValue) {
+                            setState(() {
+                              _editQr = newValue;
+                            });
+                          },
                         ),
-                      )
-                    : _tempProduitId.isNotEmpty
-                        ? Text('ID : ${_tempProduitId}',
+                        SizedBox(width: 10),
+                        Text(
+                            _editQr
+                                ? 'Recherche par Code QR Activé'
+                                : 'Recherche par Code QR Désactivé',
                             style: TextStyle(
                               fontSize: 20,
-                            ))
-                        : Text(
-                            'L\'ID du Produit n\'a pas encore été créer',
-                            style: TextStyle(fontSize: 20),
-                          ),
+                            )),
+                      ],
+                    )
+                  : Container()
+              : Text(
+                  '', //'Creation d\'un Nouveau Produit',
+                  style: TextStyle(fontSize: 20),
+                ),
+        ),
+        SizedBox(height: 10),
+        Container(
+          width: largeur,
+          child: TextFormField(
+            //focusNode: FocusNode(),
+            controller: _serialController,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 18,
+            ),
+            decoration: InputDecoration(
+              hintStyle: TextStyle(color: Colors.black38),
+              // labelText: 'Numéro de série',
+              hintText: 'Code Barre / QrCode',
+              prefix: Text(
+                'Code Barre / QrCode',
               ),
-              Container(
-                height: 30,
-                child: _tempProduitId.isNotEmpty
-                    ? Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Switch(
-                            value: _editQr,
-                            onChanged: (bool newValue) {
-                              setState(() {
-                                _editQr = newValue;
-                              });
-                            },
-                          ),
-                          SizedBox(width: 10),
-                          Text(
-                              _editQr
-                                  ? 'Recherche par Code QR Activé'
-                                  : 'Recherche par Code QR Désactivé',
-                              style: TextStyle(
-                                fontSize: 20,
-                              )),
-                        ],
-                      )
-                    : Text(
-                        'Creation d\'un Nouveau Produit',
-                        style: TextStyle(fontSize: 20),
-                      ),
-              ),
-              SizedBox(height: 10),
-              Container(
-                width: largeur,
-                child: TextFormField(
-                  //focusNode: FocusNode(),
-                  controller: _serialController,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 18,
-                  ),
-                  decoration: InputDecoration(
-                    hintStyle: TextStyle(color: Colors.black38),
-                    // labelText: 'Numéro de série',
-                    hintText: 'Code Barre',
+              prefixIcon: _isFirstFieldFilled != true
+                  ? IconButton(
+                      icon: Icon(Icons.clear),
+                      onPressed: _clearAllFields,
+                      tooltip: 'Effacer tous les champs',
+                    )
+                  : null,
 
-                    suffixIcon: Platform.isWindows ||
-                            Platform.isLinux ||
-                            Platform.isMacOS
-                        ? null
-                        : IconButton(
-                            icon: Icon(Icons.qr_code_scanner),
-                            onPressed: _scanQRCode,
-                          ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide: BorderSide.none, // Supprime le contour
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide:
-                          BorderSide.none, // Supprime le contour en état normal
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide:
-                          BorderSide.none, // Supprime le contour en état focus
-                    ),
-                    filled: true,
-                    contentPadding: EdgeInsets.all(15),
-                  ),
-                ),
+              suffixIcon: Platform.isIOS || Platform.isAndroid
+                  ? IconButton(
+                      icon: Icon(Icons.qr_code_scanner),
+                      onPressed: _scanQRCode,
+                    )
+                  : null,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: BorderSide.none, // Supprime le contour
               ),
-              SizedBox(height: 10),
-              Container(
-                width: largeur,
-                child: TextFormField(
-                  controller: _nomController,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 18, color: Colors.black),
-                  keyboardType: TextInputType.text,
-                  decoration: InputDecoration(
-                    hintStyle: TextStyle(color: Colors.black38),
-                    fillColor: Colors.blue.shade50,
-                    hintText: 'Nom Du Produit',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide: BorderSide.none, // Supprime le contour
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide:
-                          BorderSide.none, // Supprime le contour en état normal
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide:
-                          BorderSide.none, // Supprime le contour en état focus
-                    ),
-                    filled: true,
-                    contentPadding: EdgeInsets.all(15),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez entrer un nom du Produit';
-                    }
-                    return null;
-                  },
-                ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide:
+                    BorderSide.none, // Supprime le contour en état normal
               ),
-              SizedBox(height: 10),
-              Container(
-                width: largeur,
-                child: TextFormField(
-                  controller: _descriptionController,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 18,
-                  ),
-                  keyboardType: TextInputType.text,
-                  decoration: InputDecoration(
-                    hintStyle: TextStyle(color: Colors.black38),
-                    //fillColor: Colors.blue.shade50,
-                    hintText: 'Description',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide: BorderSide.none, // Supprime le contour
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide:
-                          BorderSide.none, // Supprime le contour en état normal
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide:
-                          BorderSide.none, // Supprime le contour en état focus
-                    ),
-                    //border: InputBorder.none,
-                    filled: true,
-                    contentPadding: EdgeInsets.all(15),
-                  ),
-                ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide:
+                    BorderSide.none, // Supprime le contour en état focus
               ),
-              SizedBox(height: 10),
-              Container(
-                width: largeur,
-                child: TextFormField(
-                  controller: _prixAchatController,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 18,
-                  ),
-                  decoration: InputDecoration(
-                    hintStyle: TextStyle(color: Colors.black38),
-                    //fillColor: Colors.blue.shade50,
-                    hintText: 'Prix d\'achat',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide: BorderSide.none, // Supprime le contour
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide:
-                          BorderSide.none, // Supprime le contour en état normal
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide:
-                          BorderSide.none, // Supprime le contour en état focus
-                    ),
-                    //border: InputBorder.none,
-                    filled: true,
-                    contentPadding: EdgeInsets.all(15),
-                  ),
-                  // keyboardType: TextInputType.number,
-                  //  validator: (value) {
-                  //    if (value == null || value.isEmpty) {
-                  //      return 'Veuillez entrer le prix d\'achat';
-                  //    }
-                  //    return null;
-                  //  },
-                  keyboardType: TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(
-                        RegExp(r'^\d+\.?\d{0,2}')),
-                  ],
-                  onChanged: (value) {
-                    if (value.isNotEmpty) {
-                      double? parsed = double.tryParse(value);
-                      if (parsed != null) {
-                        _prixAchatController.text = parsed.toStringAsFixed(2);
-                        _prixAchatController.selection =
-                            TextSelection.fromPosition(
-                          TextPosition(
-                              offset: _prixAchatController.text.length),
-                        );
-                      }
-                    }
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez entrer le prix d\'achat';
-                    }
-                    if (double.tryParse(value) == null) {
-                      return 'Veuillez entrer un prix valide';
-                    }
-                    return null;
-                  },
-                ),
+              filled: true,
+              contentPadding: EdgeInsets.all(15),
+            ),
+          ),
+        ),
+        SizedBox(height: 10),
+        Container(
+          width: largeur,
+          child: TextFormField(
+            enabled: _isFirstFieldFilled,
+            controller: _nomController,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 18, color: Colors.black),
+            keyboardType: TextInputType.text,
+            decoration: InputDecoration(
+              hintStyle: TextStyle(color: Colors.black38),
+              fillColor: _isFirstFieldFilled ? Colors.green.shade100 : null,
+              hintText: 'Nom Du Produit',
+              prefix: Text(
+                'Nom Du Produit',
               ),
-              SizedBox(height: 10),
-              Container(
-                width: largeur,
-                child: TextFormField(
-                  controller: _prixVenteController,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 18,
-                  ),
-                  decoration: InputDecoration(
-                    hintStyle: TextStyle(color: Colors.black38),
-                    //fillColor: Colors.blue.shade50,
-                    hintText: 'Prix de vente',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide: BorderSide.none, // Supprime le contour
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide:
-                          BorderSide.none, // Supprime le contour en état normal
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide:
-                          BorderSide.none, // Supprime le contour en état focus
-                    ),
-                    //border: InputBorder.none,
-                    filled: true,
-                    contentPadding: EdgeInsets.all(15),
-                  ),
-                  // keyboardType: TextInputType.number,
-                  // validator: (value) {
-                  //   if (value == null || value.isEmpty) {
-                  //     return 'Veuillez entrer le prix de vente';
-                  //   }
-                  //   return null;
-                  // },
-                  keyboardType: TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(
-                        RegExp(r'^\d+\.?\d{0,2}')),
-                  ],
-                  onChanged: (value) {
-                    if (value.isNotEmpty) {
-                      double? parsed = double.tryParse(value);
-                      if (parsed != null) {
-                        _prixAchatController.text = parsed.toStringAsFixed(2);
-                        _prixAchatController.selection =
-                            TextSelection.fromPosition(
-                          TextPosition(
-                              offset: _prixAchatController.text.length),
-                        );
-                      }
-                    }
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez entrer le prix d\'achat';
-                    }
-                    if (double.tryParse(value) == null) {
-                      return 'Veuillez entrer un prix valide';
-                    }
-                    return null;
-                  },
-                ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: BorderSide.none, // Supprime le contour
               ),
-              SizedBox(height: 10),
-              Container(
-                width: largeur,
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide:
+                    BorderSide.none, // Supprime le contour en état normal
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide:
+                    BorderSide.none, // Supprime le contour en état focus
+              ),
+              filled: true,
+              contentPadding: EdgeInsets.all(15),
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Veuillez entrer un nom du Produit';
+              }
+              return null;
+            },
+          ),
+        ),
+        SizedBox(height: 10),
+        Container(
+          width: largeur,
+          child: TextFormField(
+            enabled: _isFirstFieldFilled,
+            controller: _descriptionController,
+            textAlign: TextAlign.center,
+            maxLines: 5, // Permet un nombre illimité de lignes
+
+            style: const TextStyle(
+              fontSize: 18,
+            ),
+            keyboardType: TextInputType.text,
+            decoration: InputDecoration(
+              hintStyle: TextStyle(color: Colors.black38),
+              //fillColor: Colors.blue.shade50,
+              prefix: Text(
+                'Déscription',
+              ),
+              hintText: 'Déscription',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: BorderSide.none, // Supprime le contour
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide:
+                    BorderSide.none, // Supprime le contour en état normal
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide:
+                    BorderSide.none, // Supprime le contour en état focus
+              ),
+              //border: InputBorder.none,
+              filled: true,
+              contentPadding: EdgeInsets.all(15),
+            ),
+          ),
+        ),
+        SizedBox(height: 10),
+        Container(
+          width: largeur,
+          child: TextFormField(
+            enabled: _isFirstFieldFilled,
+            controller: _prixAchatController,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 18,
+            ),
+            decoration: InputDecoration(
+              hintStyle: TextStyle(color: Colors.black38),
+              //fillColor: Colors.blue.shade50,
+              hintText: 'Prix d\'achat',
+              prefix: Text(
+                'Prix d\'achat',
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: BorderSide.none, // Supprime le contour
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide:
+                    BorderSide.none, // Supprime le contour en état normal
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide:
+                    BorderSide.none, // Supprime le contour en état focus
+              ),
+              //border: InputBorder.none,
+              filled: true,
+              contentPadding: EdgeInsets.all(15),
+            ),
+            // keyboardType: TextInputType.number,
+            //  validator: (value) {
+            //    if (value == null || value.isEmpty) {
+            //      return 'Veuillez entrer le prix d\'achat';
+            //    }
+            //    return null;
+            //  },
+            keyboardType: TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+            ],
+            // onChanged: (value) {
+            //   if (value.isNotEmpty) {
+            //     double? parsed = double.tryParse(value);
+            //     if (parsed != null) {
+            //       _prixAchatController.text = parsed.toStringAsFixed(2);
+            //       _prixAchatController.selection =
+            //           TextSelection.fromPosition(
+            //         TextPosition(
+            //             offset: _prixAchatController.text.length),
+            //       );
+            //     }
+            //   }
+            // },
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Veuillez entrer le prix d\'achat';
+              }
+              // if (double.tryParse(value) == null) {
+              //   return 'Veuillez entrer un prix valide';
+              // }
+              // return null;
+            },
+          ),
+        ),
+        SizedBox(height: 10),
+        Container(
+          width: largeur,
+          child: TextFormField(
+            enabled: _isFirstFieldFilled,
+            controller: _prixVenteController,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 18,
+            ),
+            decoration: InputDecoration(
+              hintStyle: TextStyle(color: Colors.black38),
+              //fillColor: Colors.blue.shade50,
+              hintText: 'Prix de vente',
+              prefix: Text(
+                'Prix de vente',
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: BorderSide.none, // Supprime le contour
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide:
+                    BorderSide.none, // Supprime le contour en état normal
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide:
+                    BorderSide.none, // Supprime le contour en état focus
+              ),
+              //border: InputBorder.none,
+              filled: true,
+              contentPadding: EdgeInsets.all(15),
+            ),
+            // keyboardType: TextInputType.number,
+            // validator: (value) {
+            //   if (value == null || value.isEmpty) {
+            //     return 'Veuillez entrer le prix de vente';
+            //   }
+            //   return null;
+            // },
+            keyboardType: TextInputType.numberWithOptions(decimal: true),
+            // inputFormatters: [
+            //   FilteringTextInputFormatter.allow(
+            //       RegExp(r'^\d+\.?\d{0,2}')),
+            // ],
+            // onChanged: (value) {
+            //   if (value.isNotEmpty) {
+            //     double? parsed = double.tryParse(value);
+            //     if (parsed != null) {
+            //       _prixVenteController.text = parsed.toStringAsFixed(2);
+            //       _prixVenteController.selection =
+            //           TextSelection.fromPosition(
+            //         TextPosition(
+            //             offset: _prixVenteController.text.length),
+            //       );
+            //     }
+            //   }
+            // },
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Veuillez entrer le prix d\'achat';
+              }
+              // if (double.tryParse(value) == null) {
+              //   return 'Veuillez entrer un prix valide';
+              // }
+              // return null;
+            },
+          ),
+        ),
+        SizedBox(height: 10),
+        Container(
+          width: largeur,
+          child: Row(
+            children: [
+              widget.produit == null
+                  ? Container()
+                  : GestureDetector(
+                      onTap: () {
+                        _stockController.text =
+                            widget.produit!.stock.toString();
+                      },
+                      child: CircleAvatar(
+                          child: Text(
+                        widget.produit!.stock.toString() ?? '0',
+                      )),
+                    ),
+              SizedBox(
+                width: 10,
+              ),
+              Expanded(
                 child: TextFormField(
+                  enabled: _isFirstFieldFilled,
                   controller: _stockController,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
@@ -610,7 +834,14 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
                   decoration: InputDecoration(
                     hintStyle: TextStyle(color: Colors.black38),
                     //fillColor: Colors.blue.shade50,
+                    // prefixIcon: IconButton(
+                    //   onPressed: _showAddQuantityDialog,
+                    //   icon: const Icon(Icons.add),
+                    // ),
                     hintText: 'Stock',
+                    prefix: Text(
+                      'Stock',
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
                       borderSide: BorderSide.none, // Supprime le contour
@@ -638,11 +869,83 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
                   },
                 ),
               ),
-              SizedBox(height: 20),
-              Center(
+              SizedBox(
+                width: 10,
+              ),
+              CircleAvatar(
+                child: IconButton(
+                  onPressed: _showAddQuantityDialog,
+                  icon: const Icon(Icons.add),
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 20),
+      ],
+    );
+  }
+
+  Future<void> _showAddQuantityDialog() async {
+    int currentValue = int.tryParse(_stockController.text) ?? 0;
+    int newQuantity = currentValue;
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Ajouter une quantité'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Quantité actuelle : $currentValue'),
+                const SizedBox(height: 16.0),
+                TextField(
+                  controller: TextEditingController(),
+                  keyboardType: TextInputType.number,
+                  onChanged: (value) {
+                    newQuantity = int.tryParse(value) ?? 0;
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Annuler'),
+              onPressed: () {
+                // _stockController.text = widget.produit!.stock.toString();
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Ajouter'),
+              onPressed: () {
+                _stockController.text = (currentValue + newQuantity).toString();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Column buildColumnPicSuplyers(double largeur, BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Platform.isAndroid || Platform.isIOS
+            ? SizedBox()
+            : SizedBox(
+                height: 70,
+              ),
+        _isFirstFieldFilled
+            ? Center(
                 child: Container(
                   width: largeur,
-                  height: 150,
+                  height: Platform.isAndroid || Platform.isIOS ? 150 : 300,
                   child: _image == null
                       ? Stack(
                           alignment: Alignment.center,
@@ -684,9 +987,11 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
                           ),
                         ),
                 ),
-              ),
-              SizedBox(height: 20),
-              Row(
+              )
+            : Container(),
+        SizedBox(height: 20),
+        _isFirstFieldFilled
+            ? Row(
                 children: [
                   Expanded(
                     child: Wrap(
@@ -736,99 +1041,14 @@ class _Add_Edit_ProduitScreenState extends State<Add_Edit_ProduitScreen> {
                         )
                       : Container(),
                 ],
-              ),
-              SizedBox(height: 20),
-              buildButton_Edit_Add(context, produitProvider, _isFinded),
-              SizedBox(
-                height: 50,
-              ),
-            ],
-          ),
+              )
+            : Container(),
+        SizedBox(height: 20),
+        //buildButton_Edit_Add(context, produitProvider, _isFinded),
+        SizedBox(
+          height: 50,
         ),
-      ),
-    );
-  }
-
-  void _onSelectedFournisseursChanged(List<Fournisseur> fournisseurs) {
-    setState(() {
-      _selectedFournisseurs = fournisseurs;
-    });
-  }
-
-  ElevatedButton buildButton_Edit_Add(
-      BuildContext context, CommerceProvider produitProvider, _isFinded) {
-    return ElevatedButton(
-      onPressed: () async {
-        if (_formKey.currentState!.validate()) {
-          String imageUrl = '';
-          final produitDejaExist =
-              await produitProvider.getProduitByQr(_serialController.text);
-          if (_image != null) {
-            imageUrl = await uploadImageToSupabase(_image!, _existingImageUrl);
-          } else if (_existingImageUrl != null &&
-              _existingImageUrl!.isNotEmpty) {
-            imageUrl = _existingImageUrl!;
-          }
-
-          if (mounted) {
-            final produit = Produit(
-              qr: _serialController.text,
-              image: imageUrl,
-              nom: _nomController.text,
-              description: _descriptionController.text,
-              prixAchat: double.parse(_prixAchatController.text),
-              prixVente: double.parse(_prixVenteController.text),
-              stock: int.parse(_stockController.text),
-              // datePeremption: DateTime.parse(_peremptionController.text),
-              // dateCreation: DateTime.parse(_creationController.text),
-              // derniereModification:
-              //     DateTime.parse(_modificationController.text),
-            );
-
-            if (produitDejaExist == null) {
-              if (widget.produit != null) {
-                // Mise à jour d'un produit existant
-                produitProvider.updateProduitById(widget.produit!.id, produit,
-                    fournisseurs: widget.specifiquefournisseur != null
-                        ? null
-                        : _selectedFournisseurs);
-
-                print('Produit existant mis à jour');
-              } else if (_isFinded) {
-                produitProvider.updateProduitById(
-                    int.parse(_tempProduitId), produit,
-                    fournisseurs: widget.specifiquefournisseur != null
-                        ? null
-                        : _selectedFournisseurs);
-
-                print('Produit trouvé mis à jour');
-              } else {
-                // Ajout d'un nouveau produit
-                //produitProvider.ajouterProduit(produit, _selectedFournisseurs);
-                context
-                    .read<CommerceProvider>()
-                    .ajouterProduit(produit, _selectedFournisseurs);
-                print('Nouveau produit ajouté');
-              }
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'QR / Code Barre Produit existe déja !',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-            _formKey.currentState!.save();
-            produitDejaExist != null ? null : Navigator.of(context).pop();
-          }
-        }
-      },
-      child: Text(widget.produit != null
-          ? 'Modifier'
-          : (_isFinded ? 'Modifier' : 'Ajouter')),
+      ],
     );
   }
 }
@@ -936,9 +1156,9 @@ class _AddFournisseurFormFromProduitState
                         nom: _nomController.text,
                         phone: _phoneController.text,
                         adresse: _adresseController.text,
-                        // dateCreation: DateTime.parse(_creationController.text),
-                        // derniereModification:
-                        //     DateTime.parse(_modificationController.text),
+                        dateCreation: DateTime.parse(_creationController.text),
+                        derniereModification:
+                            DateTime.parse(_modificationController.text),
                       );
                       context
                           .read<CommerceProvider>()

@@ -776,9 +776,9 @@ class _AddFournisseurFormState extends State<AddFournisseurForm> {
                       nom: _nomController.text,
                       phone: _phoneController.text,
                       adresse: _adresseController.text,
-                      // dateCreation: DateTime.parse(_creationController.text),
-                      // derniereModification:
-                      //     DateTime.parse(_modificationController.text)
+                      dateCreation: DateTime.parse(_creationController.text),
+                      derniereModification:
+                          DateTime.parse(_modificationController.text)
                     );
                     context
                         .read<CommerceProvider>()
@@ -811,10 +811,10 @@ void _editFournisseur(BuildContext context, Fournisseur fournisseur) {
   final _nomController = TextEditingController(text: fournisseur.nom);
   final _phoneController = TextEditingController(text: fournisseur.phone);
   final _adresseController = TextEditingController(text: fournisseur.adresse);
-  // final _creationController =
-  //     TextEditingController(text: fournisseur.dateCreation.toString());
-  // final _modificationController =
-  //     TextEditingController(text: fournisseur.derniereModification.toString());
+  final _creationController =
+      TextEditingController(text: fournisseur.dateCreation.toString());
+  final _modificationController =
+      TextEditingController(text: fournisseur.derniereModification.toString());
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -871,9 +871,9 @@ void _editFournisseur(BuildContext context, Fournisseur fournisseur) {
                       nom: _nomController.text,
                       phone: _phoneController.text,
                       adresse: _adresseController.text,
-                      // dateCreation: DateTime.parse(_creationController.text),
-                      // derniereModification:
-                      //     DateTime.parse(_modificationController.text),
+                      dateCreation: DateTime.parse(_creationController.text),
+                      derniereModification:
+                          DateTime.parse(_modificationController.text),
                     );
                     context
                         .read<CommerceProvider>()

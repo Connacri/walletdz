@@ -227,11 +227,13 @@ class CommerceProvider extends ChangeNotifier {
         stock: faker.randomGenerator.integer(100, min: 1),
         description: faker.lorem.sentence(),
         qr: faker.randomGenerator.integer(999999).toString(),
-        // datePeremption:
-        //     faker.date.dateTime(minYear: 2010, maxYear: DateTime.now().year),
-        // dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
-        // derniereModification:
-        //     faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
+        datePeremption:
+            faker.date.dateTime(minYear: 2010, maxYear: DateTime.now().year),
+        dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
+        derniereModification:
+            faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
+          stockUpdate: faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
+          stockinit: faker.randomGenerator.integer(100, min: 1),
       );
     });
 
