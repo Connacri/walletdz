@@ -12,6 +12,7 @@ import '1/objectBox/MyApp.dart';
 import 'Oauth/Ogoogle/googleSignInProvider.dart';
 import 'Oauth/verifi_auth2.dart';
 import 'firebase_options.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 //late ObjectBox objectbox;
 Future<void> main() async {
@@ -37,6 +38,9 @@ Future<void> main() async {
   // splash.FlutterNativeSplash.removeAfter(initialization);
   //WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   //splash.FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  timeago.setLocaleMessages('fr', timeago.FrMessages());
+  timeago.setLocaleMessages('fr_short', timeago.FrShortMessages());
+
   SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.edgeToEdge, //.immersiveSticky,
       overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom]);

@@ -6,6 +6,8 @@ import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:walletdz/1/objectBox/pages/Add_Edit_ProduitScreen.dart';
 import 'package:walletdz/1/objectBox/pages/ProduitListScreen.dart';
+import 'package:walletdz/1/objectBox/pages/add_Produit.dart';
+import 'package:walletdz/1/objectBox/pages/add_edit_Product.dart';
 import 'package:walletdz/1/objectBox/pages/test.dart';
 import 'Entity.dart';
 import 'MyProviders.dart';
@@ -58,17 +60,17 @@ class MyApp9 extends StatelessWidget {
             objectBox,
           ),
         ),
-        ChangeNotifierProvider(
-          create: (_) => CommerceProviderTest(
-            objectBox,
-          ),
-        ),
+        // ChangeNotifierProvider(
+        //   create: (_) => CommerceProviderTest(
+        //     objectBox,
+        //   ),
+        // ),
         // Ajoutez les autres providers ici de la même manière
       ],
       child: MaterialApp(
         title: 'POS',
         theme: ThemeData(
-          fontFamily: 'OSWALD',
+          fontFamily: 'oswald',
           brightness: Brightness.light,
           primarySwatch: Colors.blue,
           chipTheme: ChipThemeData(
@@ -77,6 +79,7 @@ class MyApp9 extends StatelessWidget {
           ),
         ),
         darkTheme: ThemeData(
+          fontFamily: 'oswald',
           brightness: Brightness.dark,
           chipTheme: ChipThemeData(
             backgroundColor: Colors.grey[800]!,
@@ -104,16 +107,10 @@ class showPlatform extends StatelessWidget {
   Widget build(BuildContext context) {
     if (kIsWeb) {
       return HomeScreenWide(objectBox: objectBox);
-    } else if (Platform.isIOS) {
+    } else if (Platform.isIOS || Platform.isAndroid) {
       return HomeScreen(objectBox: objectBox);
-    } else if (Platform.isAndroid) {
-      return HomeScreen(objectBox: objectBox);
-    } else if (Platform.isWindows) {
-      return HomeScreenWide(objectBox: objectBox);
-    } else if (Platform.isLinux) {
-      return HomeScreenWide(objectBox: objectBox);
     } else {
-      return HomeScreen(objectBox: objectBox);
+      return HomeScreenWide(objectBox: objectBox);
     }
   }
 }
@@ -194,6 +191,13 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             icon: Icon(Icons.send),
           ),
+          IconButton(
+            onPressed: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (ctx) => add_Produit()));
+            },
+            icon: Icon(Icons.safety_check_rounded),
+          ),
         ],
       ),
       body: Consumer<CommerceProvider>(
@@ -203,160 +207,171 @@ class _HomeScreenState extends State<HomeScreen> {
             produitProvider.getProduitsBetweenPrices(prixMin, prixMax);
         var produitsLowStock = produitProvider.getProduitsLowStock(5);
         var produitsLowStock0 = produitProvider.getProduitsLowStock(0);
-        return  Padding(
-            padding: const EdgeInsets.all(5.0), child :  ListView(
-          children: [
-            GestureDetector(
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (context) => FournisseurListScreen()),
-                );
-              },
-              child: CardTop(
-                image: 'https://picsum.photos/seed/${randomId + 8}/200/100',
-                text: '${produitProvider.fournisseurs.length} Fournisseurs',
-                provider: produitProvider,
-                // button: ElevatedButton(
-                //   onPressed: () {
-                //     Navigator.of(context).push(
-                //       MaterialPageRoute(
-                //           builder: (context) => FournisseurListScreen()),
-                //     );
-                //   },
-                //   child: Text('Voir plus'),
-                // ),
-                SmallBanner: true,
-              ),
-            ),
-            GestureDetector(
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => ProduitListScreen()),
-                );
-              },
-              child: CardTop(
-                image: 'https://picsum.photos/seed/$randomId/200/100',
-                text: '${produitProvider.getTotalProduits()} Produits',
-                provider: produitProvider,
-                // button: ElevatedButton(
-                //   onPressed: () {
-                //     Navigator.of(context).push(
-                //       MaterialPageRoute(
-                //           builder: (context) => ProduitListScreen()),
-                //     );
-                //   },
-                //   child: Text('Voir plus'),
-                // ),
-                SmallBanner: false,
-              ),
-            ),
-            GestureDetector(
-              onTap: () => _ouvrirDialogAjustementPrix(context),
-              child: CardTop(
-                image: 'https://picsum.photos/seed/${randomId + 1}/200/100',
-                text:
-                    '${produitsFiltres.length} Produits\nentre ${prixMin.toStringAsFixed(2)} DZD et ${prixMax.toStringAsFixed(2)} DZD',
-                provider: produitProvider,
-                button: produitsFiltres.length == 0
-                    ? ElevatedButton(
-                        onPressed: null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Colors.grey[300], // Couleur de fond grise
-                          foregroundColor:
-                              Colors.grey[600], // Couleur du texte grise
-                          disabledBackgroundColor: Colors.grey[
-                              300], // Assure que la couleur reste grise même désactivé
-                          disabledForegroundColor: Colors.grey[
-                              600], // Assure que la couleur du texte reste grise même désactivé
-                        ),
-                        child: Text(('Liste Vide')))
-                    : ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (context) => ProduitListInterval(
-                                      produitsFiltres: produitsFiltres,
-                                    )),
-                          );
-                        },
-                        label: Text(('Voire La List'))),
-                SmallBanner: false,
-              ),
-            ),
-            GestureDetector(
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        LowStockList(produitsLowStock: produitsLowStock),
+        return Padding(
+            padding: const EdgeInsets.all(5.0),
+            child: ListView(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (context) => FournisseurListScreen()),
+                    );
+                  },
+                  child: CardTop(
+                    image: 'https://picsum.photos/seed/${randomId + 8}/200/100',
+                    text: '${produitProvider.fournisseurs.length} Fournisseurs',
+                    provider: produitProvider,
+                    // button: ElevatedButton(
+                    //   onPressed: () {
+                    //     Navigator.of(context).push(
+                    //       MaterialPageRoute(
+                    //           builder: (context) => FournisseurListScreen()),
+                    //     );
+                    //   },
+                    //   child: Text('Voir plus'),
+                    // ),
+                    SmallBanner: true,
                   ),
-                );
-              },
-              child: CardAlert(
-                image: 'https://picsum.photos/seed/${randomId + 2}/200/100',
-                text:
-                    'Alert stock < 5\n${produitsLowStock['count']} Produits\n\nRupture de stock\n${produitsLowStock0['count']} Produits',
-                provider: produitProvider,
-                // button: ElevatedButton(
-                //     onPressed: () {
-                //       Navigator.of(context).push(
-                //         MaterialPageRoute(
-                //           builder: (context) =>
-                //               LowStockList(produitsLowStock: produitsLowStock),
-                //           // ProduitListInterval(
-                //           //   produitsFiltres:
-                //           //       produitsFiltres,
-                //           // ),
-                //         ),
-                //       );
-                //     },
-                //     child: Text(('Voire La List'))),
-                Color1: Colors.red,
-                Color2: Colors.black,
-              ),
-            ),
-            SizedBox(height: 18),
-            ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => Add_Edit_ProduitScreen()));
-                },
-                label: Text('Ajouter Un Nouveau Produit'),
-                icon: Icon(Icons.add)),
-            ElevatedButton.icon(
-                onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled:
-                        true, // Permet de redimensionner en fonction de la hauteur du contenu
-                    builder: (context) => AddFournisseurForm(),
-                  );
-                },
-                label: Text('Ajouter Un Nouveau Fournisseur'),
-                icon: Icon(Icons.add)),
-            SizedBox(height: 18),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red, // Couleur de fond grise
-                foregroundColor: Colors.grey[300], // Couleur du texte grise
-                disabledBackgroundColor: Colors.grey[
-                    300], // Assure que la couleur reste grise même désactivé
-                disabledForegroundColor: Colors.grey[
-                    600], // Assure que la couleur du texte reste grise même désactivé
-              ),
-              child: Text('Delete all'),
-              onPressed: () {
-                widget.objectBox.deleteDatabase();
+                ),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (context) => ProduitListScreen()),
+                    );
+                  },
+                  child: CardTop(
+                    image: 'https://picsum.photos/seed/$randomId/200/100',
+                    text: '${produitProvider.getTotalProduits()} Produits',
+                    provider: produitProvider,
+                    // button: ElevatedButton(
+                    //   onPressed: () {
+                    //     Navigator.of(context).push(
+                    //       MaterialPageRoute(
+                    //           builder: (context) => ProduitListScreen()),
+                    //     );
+                    //   },
+                    //   child: Text('Voir plus'),
+                    // ),
+                    SmallBanner: false,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => _ouvrirDialogAjustementPrix(context),
+                  child: CardTop(
+                    image: 'https://picsum.photos/seed/${randomId + 1}/200/100',
+                    text:
+                        '${produitsFiltres.length} Produits\nentre ${prixMin.toStringAsFixed(2)} DZD et ${prixMax.toStringAsFixed(2)} DZD',
+                    provider: produitProvider,
+                    button: produitsFiltres.length == 0
+                        ? ElevatedButton(
+                            onPressed: null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  Colors.grey[300], // Couleur de fond grise
+                              foregroundColor:
+                                  Colors.grey[600], // Couleur du texte grise
+                              disabledBackgroundColor: Colors.grey[
+                                  300], // Assure que la couleur reste grise même désactivé
+                              disabledForegroundColor: Colors.grey[
+                                  600], // Assure que la couleur du texte reste grise même désactivé
+                            ),
+                            child: Text(('Liste Vide')))
+                        : ElevatedButton.icon(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                    builder: (context) => ProduitListInterval(
+                                          produitsFiltres: produitsFiltres,
+                                        )),
+                              );
+                            },
+                            label: Text(('Voire La List'))),
+                    SmallBanner: false,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            LowStockList(produitsLowStock: produitsLowStock),
+                      ),
+                    );
+                  },
+                  child: CardAlert(
+                    image: 'https://picsum.photos/seed/${randomId + 2}/200/100',
+                    text:
+                        'Alert stock < 5\n${produitsLowStock['count']} Produits\n\nRupture de stock\n${produitsLowStock0['count']} Produits',
+                    provider: produitProvider,
+                    // button: ElevatedButton(
+                    //     onPressed: () {
+                    //       Navigator.of(context).push(
+                    //         MaterialPageRoute(
+                    //           builder: (context) =>
+                    //               LowStockList(produitsLowStock: produitsLowStock),
+                    //           // ProduitListInterval(
+                    //           //   produitsFiltres:
+                    //           //       produitsFiltres,
+                    //           // ),
+                    //         ),
+                    //       );
+                    //     },
+                    //     child: Text(('Voire La List'))),
+                    Color1: Colors.red,
+                    Color2: Colors.black,
+                  ),
+                ),
+                SizedBox(height: 18),
+                ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => add_Product()));
+                    },
+                    label: Text('Ajouter Un Nouveau Produit'),
+                    icon: Icon(Icons.add)),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (ctx) => add_Produit()));
+                  },
+                  label: Text('Ajouter Un Nouveau Produit 2'),
+                  icon: Icon(Icons.safety_check_rounded),
+                ),
+                ElevatedButton.icon(
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled:
+                            true, // Permet de redimensionner en fonction de la hauteur du contenu
+                        builder: (context) => AddFournisseurForm(),
+                      );
+                    },
+                    label: Text('Ajouter Un Nouveau Fournisseur'),
+                    icon: Icon(Icons.send)),
+                SizedBox(height: 18),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red, // Couleur de fond grise
+                    foregroundColor: Colors.grey[300], // Couleur du texte grise
+                    disabledBackgroundColor: Colors.grey[
+                        300], // Assure que la couleur reste grise même désactivé
+                    disabledForegroundColor: Colors.grey[
+                        600], // Assure que la couleur du texte reste grise même désactivé
+                  ),
+                  child: Text('Delete all'),
+                  onPressed: () {
+                    widget.objectBox.deleteDatabase();
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Base de Données Vider avec succes!')),
-                );
-              },
-            ),
-          ],
-        ));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text('Base de Données Vider avec succes!')),
+                    );
+                  },
+                ),
+              ],
+            ));
       }),
     );
   }
@@ -375,7 +390,7 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
   int _selectedIndex = 0;
   List<Widget> _widgetOptions() {
     return [
-      Center(child: Text('Home Screen')),
+      homeRail(),
       ProduitListScreen(),
       FournisseurListScreen(),
     ];
@@ -447,6 +462,16 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
             },
             icon: Icon(Icons.send),
           ),
+          IconButton(
+            onPressed: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (ctx) => add_Produit()));
+            },
+            icon: Icon(Icons.safety_check_rounded),
+          ),
+          SizedBox(
+            width: 50,
+          )
         ],
       ),
       body: Consumer<CommerceProvider>(
@@ -638,7 +663,7 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                         ElevatedButton.icon(
                             onPressed: () {
                               Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (_) => Add_Edit_ProduitScreen()));
+                                  builder: (_) => add_Product()));
                             },
                             label: Text('Ajouter Un Nouveau Produit'),
                             icon: Icon(Icons.add)),
@@ -653,6 +678,15 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                             },
                             label: Text('Ajouter Un Nouveau Fournisseur'),
                             icon: Icon(Icons.add)),
+                        SizedBox(height: 18),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (ctx) => add_Produit()));
+                          },
+                          label: Text('Ajouter Produit 2'),
+                          icon: Icon(Icons.safety_check_rounded),
+                        ),
                       ],
                     ),
                     SizedBox(height: 18),
@@ -959,6 +993,40 @@ class CardAlert extends StatelessWidget {
             )
           ],
         ),
+      ),
+    );
+  }
+}
+
+class homeRail extends StatefulWidget {
+  const homeRail({super.key});
+
+  @override
+  State<homeRail> createState() => _homeRailState();
+}
+
+class _homeRailState extends State<homeRail> {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (ctx) => add_Product()));
+            },
+            icon: Icon(Icons.add),
+          ),
+          // IconButton(
+          //   onPressed: () {
+          //     Navigator.of(context)
+          //         .push(MaterialPageRoute(builder: (ctx) => edit_Product()));
+          //   },
+          //   icon: Icon(Icons.edit),
+          // ),
+        ],
       ),
     );
   }

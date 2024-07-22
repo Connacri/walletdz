@@ -1,5 +1,5 @@
 name: walletdz
-description: "A new Wallet project."
+description: "A new Wallet project For Ain EL Turck."
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
@@ -11,21 +11,21 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cloud_firestore: ^5.0.1
-  firebase_messaging: ^15.0.1
-  firebase_database: ^11.0.1
-  firebase_core: ^3.1.0
-  firebase_auth: ^5.1.0
+  cloud_firestore: ^5.1.0
+  firebase_messaging: ^15.0.3
+  firebase_database: ^11.0.3
+  firebase_core: ^3.2.0
+  firebase_auth: ^5.1.2
   firebase_storage: any
-  firebase_in_app_messaging: ^0.8.0+1
+  firebase_in_app_messaging: ^0.8.0+3
   firebase_analytics: any
   google_sign_in: ^6.2.1
   cached_network_image: ^3.3.1
-  lottie: ^3.1.2
+  lottie: any
   provider: ^6.1.2
   fluttertoast:
   font_awesome_flutter: ^10.7.0
-  flutter_native_splash: ^2.4.0
+#  flutter_native_splash: any
   shared_preferences: ^2.2.3
   avatar_glow: ^3.0.1
   url_launcher: ^6.3.0
@@ -44,9 +44,9 @@ dependencies:
   rename: ^3.0.2
   marquee: ^2.2.3
   screenshot: ^3.0.0
-  email_validator: ^2.1.17
+  email_validator: ^3.0.0
   flutter_islamic_icons: ^1.0.2
-  supabase_flutter: ^2.5.5
+  supabase_flutter: ^2.5.8
   #  horizontal_calendar: any
   geocoding: ^3.0.0
   map_launcher: ^3.3.1
@@ -61,21 +61,22 @@ dependencies:
   pretty_qr_code: ^3.3.0
   http: ^1.2.1
   decimal: ^3.0.2
-  openfoodfacts: ^3.11.0
-  video_player: ^2.8.7
+  openfoodfacts: ^3.12.0
+  video_player: ^2.9.1
   chewie: ^1.8.1
   flutter_easyloading: ^3.0.5
   wakelock_plus: ^1.2.5
   faker: ^2.1.0
   postgres: ^3.2.1
-  sembast: ^3.7.1+2
+  timeago: ^3.7.0
   sqflite_common_ffi: ^2.3.3
   objectbox: ^4.0.1
   objectbox_flutter_libs: ^4.0.1
-  flutter_slidable: ^3.1.0
+  flutter_slidable: ^3.1.1
   network_info_plus: ^5.0.3
   multicast_dns: ^0.3.2+7
   percent_indicator: ^4.2.3
+#  archive:
 
 dev_dependencies:
   flutter_test:

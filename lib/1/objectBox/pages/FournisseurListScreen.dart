@@ -10,6 +10,8 @@ import 'ProduitListScreen.dart';
 import 'package:intl/intl.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:timeago/timeago.dart' as timeago;
+import 'add_edit_Product.dart';
 
 class FournisseurListScreen extends StatelessWidget {
   final Produit? produit;
@@ -65,7 +67,17 @@ class FournisseurListScreen extends StatelessWidget {
                     )),
                   ),
                   title: Text(fournisseur.nom),
-                  subtitle: Text('Phone : ${fournisseur.phone}'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Phone : ${fournisseur.phone}'),
+                      Text(
+                        'Créer le ${fournisseur.dateCreation.day}-${fournisseur.dateCreation.month}-${fournisseur.dateCreation.year}  Modifié ${timeago.format(fournisseur.derniereModification!, locale: 'fr')}',
+                        style: TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.w300),
+                      ),
+                    ],
+                  ),
                   trailing: Container(
                     width: 50,
                     child: Row(
@@ -164,12 +176,12 @@ class ProduitsFournisseurPage extends StatelessWidget {
                             children: [
                               SlidableAction(
                                 onPressed: (BuildContext context) {
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (ctx) => Add_Edit_ProduitScreen(
-                                      produit: produit,
-                                      specifiquefournisseur: fournisseur,
-                                    ),
-                                  ));
+                                  // Navigator.of(context).push(MaterialPageRoute(
+                                  //   builder: (ctx) => Edit_Product(
+                                  //     produit: produit,
+                                  //     specifiquefournisseur: fournisseur,
+                                  //   ),
+                                  // ));
                                 },
                                 backgroundColor: Colors.blue,
                                 icon: Icons.edit,
@@ -208,6 +220,14 @@ class ProduitsFournisseurPage extends StatelessWidget {
                                   children: [
                                     Text(
                                       'A: ${produit.prixAchat.toStringAsFixed(2)}\nB: ${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)} ',
+                                    ),
+                                    Text(
+                                        'ID : ${produit.id} QR : ${produit.qr}'),
+                                    Text(
+                                      'Créer le ${produit.dateCreation.day}-${produit.dateCreation.month}-${produit.dateCreation.year}  Modifié ${timeago.format(produit.derniereModification!, locale: 'fr')}',
+                                      style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w300),
                                     ),
                                     produit.fournisseurs.isEmpty
                                         ? Container()
@@ -328,8 +348,8 @@ class ProduitsFournisseurPage extends StatelessWidget {
           FloatingActionButton(
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(
-                  builder: (_) => Add_Edit_ProduitScreen(
-                      specifiquefournisseur: fournisseur)));
+                  builder: (_) =>
+                      add_Product(specifiquefournisseur: fournisseur)));
             },
             child: Icon(Icons.add),
             heroTag: 'addNew',
@@ -776,9 +796,8 @@ class _AddFournisseurFormState extends State<AddFournisseurForm> {
                       nom: _nomController.text,
                       phone: _phoneController.text,
                       adresse: _adresseController.text,
-                      dateCreation: DateTime.parse(_creationController.text),
-                      derniereModification:
-                          DateTime.parse(_modificationController.text)
+                      dateCreation: DateTime.now(),
+                      derniereModification: DateTime.now(),
                     );
                     context
                         .read<CommerceProvider>()
@@ -813,8 +832,7 @@ void _editFournisseur(BuildContext context, Fournisseur fournisseur) {
   final _adresseController = TextEditingController(text: fournisseur.adresse);
   final _creationController =
       TextEditingController(text: fournisseur.dateCreation.toString());
-  final _modificationController =
-      TextEditingController(text: fournisseur.derniereModification.toString());
+
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -872,8 +890,7 @@ void _editFournisseur(BuildContext context, Fournisseur fournisseur) {
                       phone: _phoneController.text,
                       adresse: _adresseController.text,
                       dateCreation: DateTime.parse(_creationController.text),
-                      derniereModification:
-                          DateTime.parse(_modificationController.text),
+                      derniereModification: DateTime.now(),
                     );
                     context
                         .read<CommerceProvider>()

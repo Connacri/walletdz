@@ -1,8 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:provider/provider.dart';
+import 'package:walletdz/1/objectBox/pages/add_edit_Product.dart';
 import '../Entity.dart';
 import '../MyProviders.dart';
 import 'Add_Edit_ProduitScreen.dart';
@@ -51,6 +53,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
       // Pour les autres plateformes (Desktop)
       largeur = 1 / 10;
     }
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Produits'),
@@ -87,6 +90,8 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
             itemBuilder: (context, index) {
               if (index < produitProvider.produitsP.length) {
                 final produit = produitProvider.produitsP[index];
+                final peremption =
+                    produit.datePeremption.difference(DateTime.now()).inDays;
                 return Slidable(
                   key: ValueKey(produit.id),
                   startActionPane: ActionPane(
@@ -95,10 +100,10 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                     children: [
                       SlidableAction(
                         onPressed: (BuildContext context) {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (ctx) =>
-                                Add_Edit_ProduitScreen(produit: produit),
-                          ));
+                          // Navigator.of(context).push(MaterialPageRoute(
+                          //   builder: (ctx) =>
+                          //       Add_Edit_ProduitScreen(produit: produit),
+                          // ));
                         },
                         backgroundColor: Colors.blue,
                         icon: Icons.edit,
@@ -142,47 +147,8 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Platform.isWindows ||
-                                      Platform.isMacOS ||
-                                      Platform.isLinux
-                                  ? Row(
-                                      children: [
-                                        Center(
-                                          child: Text(
-                                            'A: ${produit.prixAchat.toStringAsFixed(2)} ',
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: 10,
-                                        ),
-                                        Container(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 5, vertical: 2),
-                                          decoration: BoxDecoration(
-                                            gradient: LinearGradient(
-                                              colors: [
-                                                Colors.lightGreen,
-                                                Colors.black45
-                                              ], // Couleurs du dégradé
-                                              begin: Alignment
-                                                  .topLeft, // Début du dégradé
-                                              end: Alignment
-                                                  .bottomRight, // Fin du dégradé
-                                            ), // Couleur de fond
-                                            borderRadius: BorderRadius.circular(
-                                                10), // Coins arrondis
-                                          ),
-                                          child: Center(
-                                            child: Text(
-                                              '${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)}',
-                                              style: TextStyle(
-                                                  color: Colors.white),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                  : Column(
+                              Platform.isAndroid || Platform.isIOS
+                                  ? Column(
                                       children: [
                                         Center(
                                           child: Text(
@@ -217,8 +183,103 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                             ),
                                           ),
                                         ),
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 5, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              colors: [
+                                                Colors.red,
+                                                Colors.black45
+                                              ], // Couleurs du dégradé
+                                              begin: Alignment
+                                                  .topLeft, // Début du dégradé
+                                              end: Alignment
+                                                  .bottomRight, // Fin du dégradé
+                                            ), // Couleur de fond
+                                            borderRadius: BorderRadius.circular(
+                                                10), // Coins arrondis
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              'Péremption : ${produit.datePeremption.day}/${produit.datePeremption.month}/${produit.datePeremption.year}  Reste : ${produit.datePeremption.difference(DateTime.now()).inDays} Jours ',
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : Row(
+                                      children: [
+                                        Center(
+                                          child: Text(
+                                            'A: ${produit.prixAchat.toStringAsFixed(2)} ',
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 5, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              colors: [
+                                                Colors.lightGreen,
+                                                Colors.black45
+                                              ], // Couleurs du dégradé
+                                              begin: Alignment
+                                                  .topLeft, // Début du dégradé
+                                              end: Alignment
+                                                  .bottomRight, // Fin du dégradé
+                                            ), // Couleur de fond
+                                            borderRadius: BorderRadius.circular(
+                                                10), // Coins arrondis
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              '${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)}',
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 5, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              colors: [
+                                                peremption > 0
+                                                    ? Colors.orange
+                                                    : Colors.red,
+                                                Colors.black45
+                                              ], // Couleurs du dégradé
+                                              begin: Alignment
+                                                  .topLeft, // Début du dégradé
+                                              end: Alignment
+                                                  .bottomRight, // Fin du dégradé
+                                            ), // Couleur de fond
+                                            borderRadius: BorderRadius.circular(
+                                                10), // Coins arrondis
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              'Péremption : ${produit.datePeremption.day}/${produit.datePeremption.month}/${produit.datePeremption.year}  Reste : ${peremption} Jours ',
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                          ),
+                                        ),
                                       ],
                                     ),
+                              SizedBox(
+                                height: 5,
+                              ),
                               _buildChipRow(context, produit)
                             ],
                           ),
@@ -269,8 +330,8 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => Add_Edit_ProduitScreen()));
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (_) => add_Product()));
         },
         child: Icon(Icons.add),
       ),

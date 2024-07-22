@@ -120,7 +120,7 @@ class ObjectBox {
     // }
     produitBox.removeAll();
     fournisseurBox.removeAll();
-    await deleteDatabase();
+   // await deleteDatabase();
     await init();
   }
 }
