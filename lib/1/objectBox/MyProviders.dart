@@ -233,7 +233,7 @@ class CommerceProvider extends ChangeNotifier {
         derniereModification:
             faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
           stockUpdate: faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
-          stockinit: faker.randomGenerator.integer(100, min: 1),
+          stockinit: faker.randomGenerator.integer(100, min: 1), minimStock: faker.randomGenerator.integer(10, min: 1),
       );
     });
 

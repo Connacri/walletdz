@@ -71,7 +71,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(2, 8606136097133066204),
       name: 'Produit',
-      lastPropertyId: const obx_int.IdUid(14, 5607971647867899978),
+      lastPropertyId: const obx_int.IdUid(15, 8209867430423604798),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -138,6 +138,11 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(14, 5607971647867899978),
             name: 'derniereModification',
             type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(15, 8209867430423604798),
+            name: 'minimStock',
+            type: 6,
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
@@ -276,7 +281,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final descriptionOffset = object.description == null
               ? null
               : fbb.writeString(object.description!);
-          fbb.startTable(15);
+          fbb.startTable(16);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, qrOffset);
           fbb.addOffset(2, imageOffset);
@@ -290,6 +295,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addInt64(11, object.dateCreation.millisecondsSinceEpoch);
           fbb.addInt64(12, object.datePeremption.millisecondsSinceEpoch);
           fbb.addInt64(13, object.derniereModification.millisecondsSinceEpoch);
+          fbb.addInt64(14, object.minimStock);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -313,6 +319,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
               const fb.Float64Reader().vTableGet(buffer, rootOffset, 16, 0);
           final stockParam =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 18, 0);
+          final minimStockParam =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 32, 0);
           final dateCreationParam = DateTime.fromMillisecondsSinceEpoch(
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 26, 0));
           final datePeremptionParam = DateTime.fromMillisecondsSinceEpoch(
@@ -332,6 +340,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
               prixAchat: prixAchatParam,
               prixVente: prixVenteParam,
               stock: stockParam,
+              minimStock: minimStockParam,
               dateCreation: dateCreationParam,
               datePeremption: datePeremptionParam,
               stockUpdate: stockUpdateParam,
@@ -434,4 +443,8 @@ class Produit_ {
   /// See [Produit.derniereModification].
   static final derniereModification =
       obx.QueryDateProperty<Produit>(_entities[1].properties[12]);
+
+  /// See [Produit.minimStock].
+  static final minimStock =
+      obx.QueryIntegerProperty<Produit>(_entities[1].properties[13]);
 }

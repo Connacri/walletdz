@@ -327,18 +327,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 ElevatedButton.icon(
                     onPressed: () {
                       Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => add_Product()));
+                          MaterialPageRoute(builder: (_) => add_Produit()));
                     },
-                    label: Text('Ajouter Un Nouveau Produit'),
+                    label: Text('Ajouter  Produit'),
                     icon: Icon(Icons.add)),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                        MaterialPageRoute(builder: (ctx) => add_Produit()));
-                  },
-                  label: Text('Ajouter Un Nouveau Produit 2'),
-                  icon: Icon(Icons.safety_check_rounded),
-                ),
                 ElevatedButton.icon(
                     onPressed: () {
                       showModalBottomSheet(
@@ -348,7 +340,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         builder: (context) => AddFournisseurForm(),
                       );
                     },
-                    label: Text('Ajouter Un Nouveau Fournisseur'),
+                    label: Text('Ajouter Fournisseur'),
                     icon: Icon(Icons.send)),
                 SizedBox(height: 18),
                 ElevatedButton(
@@ -662,13 +654,6 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                       children: [
                         ElevatedButton.icon(
                             onPressed: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (_) => add_Product()));
-                            },
-                            label: Text('Ajouter Un Nouveau Produit'),
-                            icon: Icon(Icons.add)),
-                        ElevatedButton.icon(
-                            onPressed: () {
                               showModalBottomSheet(
                                 context: context,
                                 isScrollControlled:
@@ -676,15 +661,15 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                                 builder: (context) => AddFournisseurForm(),
                               );
                             },
-                            label: Text('Ajouter Un Nouveau Fournisseur'),
+                            label: Text('Ajouter Un Fournisseur'),
                             icon: Icon(Icons.add)),
-                        SizedBox(height: 18),
+                        SizedBox(width: 18),
                         ElevatedButton.icon(
                           onPressed: () {
                             Navigator.of(context).push(MaterialPageRoute(
                                 builder: (ctx) => add_Produit()));
                           },
-                          label: Text('Ajouter Produit 2'),
+                          label: Text('Ajouter Produit'),
                           icon: Icon(Icons.safety_check_rounded),
                         ),
                       ],
@@ -1015,7 +1000,7 @@ class _homeRailState extends State<homeRail> {
           IconButton(
             onPressed: () {
               Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (ctx) => add_Product()));
+                  .push(MaterialPageRoute(builder: (ctx) => add_Produit()));
             },
             icon: Icon(Icons.add),
           ),

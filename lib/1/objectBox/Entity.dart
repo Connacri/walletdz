@@ -10,6 +10,7 @@ class Produit {
   double prixAchat;
   double prixVente;
   int stock;
+  int minimStock;
   DateTime dateCreation;
   DateTime datePeremption;
   DateTime stockUpdate;
@@ -28,6 +29,7 @@ class Produit {
     required this.prixAchat,
     required this.prixVente,
     required this.stock,
+    required this.minimStock,
     required this.dateCreation,
     required this.datePeremption,
     required this.stockUpdate,
@@ -48,15 +50,15 @@ class Fournisseur {
 
   final produits = ToMany<Produit>();
 
-  Fournisseur(
-      {this.id = 0,
-        this.qr,
-        required this.nom,
-        this.phone,
-        this.adresse,
-        required this.dateCreation,
-        required this.derniereModification,
-      });
+  Fournisseur({
+    this.id = 0,
+    this.qr,
+    required this.nom,
+    this.phone,
+    this.adresse,
+    required this.dateCreation,
+    required this.derniereModification,
+  });
 }
 // @Entity()
 // class Produit {

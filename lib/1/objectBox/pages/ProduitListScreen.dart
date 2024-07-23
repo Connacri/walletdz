@@ -12,6 +12,8 @@ import 'FournisseurListScreen.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 
+import 'add_Produit.dart';
+
 class ProduitListScreen extends StatefulWidget {
   @override
   _ProduitListScreenState createState() => _ProduitListScreenState();
@@ -53,6 +55,15 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
       // Pour les autres plateformes (Desktop)
       largeur = 1 / 10;
     }
+    Color getColorBasedOnPeremption(int peremption) {
+      if (peremption <= 0) {
+        return Colors.red;
+      } else if (peremption > 0 && peremption <= 5) {
+        return Colors.orange;
+      } else {
+        return Colors.green;
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -92,6 +103,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                 final produit = produitProvider.produitsP[index];
                 final peremption =
                     produit.datePeremption.difference(DateTime.now()).inDays;
+                Color colorPeremption = getColorBasedOnPeremption(peremption);
                 return Slidable(
                   key: ValueKey(produit.id),
                   startActionPane: ActionPane(
@@ -254,10 +266,8 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                           decoration: BoxDecoration(
                                             gradient: LinearGradient(
                                               colors: [
-                                                peremption > 0
-                                                    ? Colors.orange
-                                                    : Colors.red,
-                                                Colors.black45
+                                                Colors.black45,
+                                                colorPeremption,
                                               ], // Couleurs du dégradé
                                               begin: Alignment
                                                   .topLeft, // Début du dégradé
@@ -269,7 +279,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                           ),
                                           child: Center(
                                             child: Text(
-                                              'Péremption : ${produit.datePeremption.day}/${produit.datePeremption.month}/${produit.datePeremption.year}  Reste : ${peremption} Jours ',
+                                              'Péremption : ${produit.datePeremption.day}/${produit.datePeremption.month}/${produit.datePeremption.year}  Reste : ${peremption + 1} Jours ',
                                               style: TextStyle(
                                                   color: Colors.white),
                                             ),
@@ -331,7 +341,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context)
-              .push(MaterialPageRoute(builder: (_) => add_Product()));
+              .push(MaterialPageRoute(builder: (_) => add_Produit()));
         },
         child: Icon(Icons.add),
       ),

@@ -41,6 +41,7 @@ class _Add_Edit_ProduitScreen2State extends State<Add_Edit_ProduitScreen2> {
   final _derniereModificationController = TextEditingController();
   final _stockUpdateController = TextEditingController();
   final _stockinitController = TextEditingController();
+  final _minimStockController = TextEditingController();
 
   List<Fournisseur> _selectedFournisseurs = [];
 
@@ -371,6 +372,7 @@ class _Add_Edit_ProduitScreen2State extends State<Add_Edit_ProduitScreen2> {
                   DateTime.parse(_derniereModificationController.text),
               stockUpdate: DateTime.parse(_stockUpdateController.text),
               stockinit: int.parse(_stockinitController.text),
+              minimStock: int.parse(_minimStockController.text),
             );
             if (produitDejaExist != null &&
                 _serialController.text != widget.produit!.qr) {
@@ -1108,6 +1110,55 @@ class _Add_Edit_ProduitScreen2State extends State<Add_Edit_ProduitScreen2> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Veuillez entrer le stock';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Expanded(
+                child: TextFormField(
+                  enabled: _isFirstFieldFilled,
+                  controller: _minimStockController,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 18,
+                  ),
+                  decoration: InputDecoration(
+                    hintStyle: TextStyle(color: Colors.black38),
+                    //fillColor: Colors.blue.shade50,
+                    // prefixIcon: IconButton(
+                    //   onPressed: _showAddQuantityDialog,
+                    //   icon: const Icon(Icons.add),
+                    // ),
+                    hintText: 'Stock Minimum',
+                    prefix: Text(
+                      'Stock Minimum',
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide.none, // Supprime le contour
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide:
+                          BorderSide.none, // Supprime le contour en état normal
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide:
+                          BorderSide.none, // Supprime le contour en état focus
+                    ),
+                    //border: InputBorder.none,
+                    filled: true,
+                    contentPadding: EdgeInsets.all(15),
+                  ),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez entrer le stock Minimum';
                     }
                     return null;
                   },

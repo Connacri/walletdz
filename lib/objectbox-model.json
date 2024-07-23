@@ -55,7 +55,7 @@
     },
     {
       "id": "2:8606136097133066204",
-      "lastPropertyId": "14:5607971647867899978",
+      "lastPropertyId": "15:8209867430423604798",
       "name": "Produit",
       "properties": [
         {
@@ -123,6 +123,11 @@
           "id": "14:5607971647867899978",
           "name": "derniereModification",
           "type": 10
+        },
+        {
+          "id": "15:8209867430423604798",
+          "name": "minimStock",
+          "type": 6
         }
       ],
       "relations": []

@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:timeago/timeago.dart' as timeago;
+import 'add_Produit.dart';
 import 'add_edit_Product.dart';
 
 class FournisseurListScreen extends StatelessWidget {
@@ -349,7 +350,7 @@ class ProduitsFournisseurPage extends StatelessWidget {
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (_) =>
-                      add_Product(specifiquefournisseur: fournisseur)));
+                      add_Produit(specifiquefournisseur: fournisseur)));
             },
             child: Icon(Icons.add),
             heroTag: 'addNew',
