@@ -232,8 +232,10 @@ class CommerceProvider extends ChangeNotifier {
         dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
         derniereModification:
             faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
-          stockUpdate: faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
-          stockinit: faker.randomGenerator.integer(100, min: 1), minimStock: faker.randomGenerator.integer(10, min: 1),
+        stockUpdate:
+            faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
+        stockinit: faker.randomGenerator.integer(100, min: 1),
+        minimStock: faker.randomGenerator.integer(10, min: 1),
       );
     });
 
@@ -286,6 +288,63 @@ class CommerceProvider extends ChangeNotifier {
         return;
       }
       if (produitActuel == null) {
+        // print('Produit non trouvé dans la base de données.');
+        return;
+      }
+
+      _objectBox.store.runInTransaction(TxMode.write, () {
+        // Vérifier si le produit est dans la liste des produits du fournisseur et vice versa
+        bool produitDansFournisseur =
+            fournisseurActuel.produits.any((p) => p.id == produitActuel.id);
+        bool fournisseurDansProduit =
+            produitActuel.fournisseurs.any((f) => f.id == fournisseurActuel.id);
+
+        if (produitDansFournisseur && fournisseurDansProduit) {
+          // print(
+          //     'Produit trouvé dans le fournisseur et fournisseur trouvé dans le produit.');
+
+          // Supprimer les relations
+          fournisseurActuel.produits
+              .removeWhere((p) => p.id == produitActuel.id);
+          produitActuel.fournisseurs
+              .removeWhere((f) => f.id == fournisseurActuel.id);
+          // print(fournisseurActuel.produits);
+          // print(produitActuel.fournisseurs);
+
+          //  print('Relations supprimées. Mise à jour des objets.');
+
+          // Mise à jour dans la base de données
+          _objectBox.fournisseurBox.put(fournisseurActuel);
+          // print('Fournisseur mis à jour dans la base de données.');
+        } else {
+          // print(
+          //     'Le produit n\'est pas dans la liste du fournisseur ou le fournisseur n\'est pas dans la liste du produit.');
+        }
+      });
+
+      // Rechargement des données en dehors de la transaction
+      //  print('Rechargement des produits et des fournisseurs.');
+      chargerProduits(reset: true);
+      _chargerFournisseurs();
+      notifyListeners();
+      //  print('Notifications envoyées aux auditeurs.');
+    } catch (e) {
+      print('Erreur lors de la suppression du produit du fournisseur : $e');
+    }
+  }
+
+  void supprimerFournisseurDuProduit(Produit produit, Fournisseur fournisseur) {
+    try {
+      // Charger les instances actuelles de la base de données
+      Produit? produitActuel = _objectBox.produitBox.get(produit.id);
+      Fournisseur? fournisseurActuel =
+          _objectBox.fournisseurBox.get(fournisseur.id);
+
+      if (produitActuel == null) {
+        //  print('Fournisseur non trouvé dans la base de données.');
+        return;
+      }
+      if (fournisseurActuel == null) {
         // print('Produit non trouvé dans la base de données.');
         return;
       }

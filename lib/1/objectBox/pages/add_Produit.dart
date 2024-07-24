@@ -163,16 +163,40 @@ class _add_ProduitState extends State<add_Produit> {
       final produit = await provider.getProduitByQr(code);
       if (produit != null) {
         setState(() {
+          // _nomController.text = produit.nom;
+          // _descriptionController.text = produit.description!;
+          // _prixAchatController.text = produit.prixAchat.toStringAsFixed(2);
+          // _prixVenteController.text = produit.prixVente.toStringAsFixed(2);
+          // _stockController.text = produit.stock.toString();
+          // _datePeremptionController.text = produit.datePeremption.toString();
+          _tempProduitId = produit.id.toString() ?? '';
           _nomController.text = produit.nom;
-          _descriptionController.text = produit.description!;
+          _descriptionController.text = produit.description ?? '';
           _prixAchatController.text = produit.prixAchat.toStringAsFixed(2);
           _prixVenteController.text = produit.prixVente.toStringAsFixed(2);
           _stockController.text = produit.stock.toString();
-          _datePeremptionController.text = produit.datePeremption.toString();
+          _minimStockController.text = produit.minimStock.toString();
+          _datePeremptionController.text =
+              produit.datePeremption.format('yMMMMd', 'fr_FR');
+          _selectedFournisseurs = List.from(produit.fournisseurs);
+          _existingImageUrl = produit.image;
+          _isFinded = true;
+          _image = null;
         });
       } else {
         setState(() {
-          // _serialController.text = code;
+          // // _serialController.text = code;
+          // _nomController.clear();
+          // _descriptionController.clear();
+          // _prixAchatController.clear();
+          // _prixVenteController.clear();
+          // _stockController.clear();
+          // _selectedFournisseurs.clear();
+          // _datePeremptionController.clear();
+          // _existingImageUrl = '';
+          // _isFirstFieldFilled = false;
+          // _image = null;
+          _tempProduitId = '';
           _nomController.clear();
           _descriptionController.clear();
           _prixAchatController.clear();
@@ -180,8 +204,9 @@ class _add_ProduitState extends State<add_Produit> {
           _stockController.clear();
           _selectedFournisseurs.clear();
           _datePeremptionController.clear();
+          _minimStockController.clear();
           _existingImageUrl = '';
-          _isFirstFieldFilled = false;
+          _isFinded = false;
           _image = null;
         });
       }

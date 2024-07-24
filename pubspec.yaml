@@ -76,7 +76,11 @@ dependencies:
   network_info_plus: ^5.0.3
   multicast_dns: ^0.3.2+7
   percent_indicator: ^4.2.3
-#  archive:
+  icons_plus: ^5.0.0
+  feedback: ^3.1.0
+  win32: ^5.5.1
+  msix: ^3.16.7
+
 
 dev_dependencies:
   flutter_test:

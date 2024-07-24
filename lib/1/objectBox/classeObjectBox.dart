@@ -83,7 +83,7 @@ class ObjectBox {
         nom: faker.food.dish(),
         prixAchat: faker.randomGenerator.decimal(min: 60, scale: 20),
         prixVente: faker.randomGenerator.decimal(min: 500, scale: 50),
-        stock: faker.randomGenerator.integer(100, min: 1),
+        stock: faker.randomGenerator.integer(50, min: 0),
         description: faker.lorem.sentence(),
         qr: (indx + 1)
             .toString(), // faker.randomGenerator.integer(count).toString(),
@@ -92,10 +92,10 @@ class ObjectBox {
         dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
         derniereModification:
             faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
-        stockinit: faker.randomGenerator.integer(100, min: 1),
+        stockinit: faker.randomGenerator.integer(200, min: 50),
         stockUpdate:
             faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
-        minimStock: faker.randomGenerator.integer(5, min: 1),
+        minimStock: faker.randomGenerator.integer(30, min: 1),
       );
 
       // Associer entre 1 et 10 fournisseurs aléatoires au produit
