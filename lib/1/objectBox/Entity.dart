@@ -11,9 +11,9 @@ class Produit {
   double prixVente;
   int stock;
   int minimStock;
-  DateTime dateCreation;
-  DateTime datePeremption;
-  DateTime stockUpdate;
+  DateTime? dateCreation;
+  DateTime? datePeremption;
+  DateTime? stockUpdate;
   DateTime derniereModification;
   int stockinit;
 
@@ -30,9 +30,9 @@ class Produit {
     required this.prixVente,
     required this.stock,
     required this.minimStock,
-    required this.dateCreation,
-    required this.datePeremption,
-    required this.stockUpdate,
+    this.dateCreation,
+    this.datePeremption,
+    this.stockUpdate,
     required this.derniereModification,
     required this.stockinit,
   });

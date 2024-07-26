@@ -225,7 +225,7 @@ class ProduitsFournisseurPage extends StatelessWidget {
                                     Text(
                                         'ID : ${produit.id} QR : ${produit.qr}'),
                                     Text(
-                                      'Créer le ${produit.dateCreation.day}-${produit.dateCreation.month}-${produit.dateCreation.year}  Modifié ${timeago.format(produit.derniereModification!, locale: 'fr')}',
+                                      'Créer le ${produit.dateCreation!.day}-${produit.dateCreation!.month}-${produit.dateCreation!.year}  Modifié ${timeago.format(produit.derniereModification!, locale: 'fr')}',
                                       style: TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.w300),

@@ -173,7 +173,7 @@ class _add_ProduitState extends State<add_Produit> {
           stockTemp = int.parse(produit.stock.toString());
           _minimStockController.text = produit.minimStock.toString();
           _datePeremptionController.text =
-              produit.datePeremption.format('yMMMMd', 'fr_FR');
+              produit.datePeremption!.format('yMMMMd', 'fr_FR');
           _selectedFournisseurs = List.from(produit.fournisseurs);
           _existingImageUrl = produit.image;
           _isFinded = true;
@@ -279,7 +279,7 @@ class _add_ProduitState extends State<add_Produit> {
         _minimStockController.text = produit.minimStock.toString();
         stockTemp = int.parse(produit.stock.toString());
         _datePeremptionController.text =
-            produit.datePeremption.format('yMMMMd', 'fr_FR');
+            produit.datePeremption!.format('yMMMMd', 'fr_FR');
         _selectedFournisseurs = List.from(produit.fournisseurs);
         _existingImageUrl = produit.image;
         _isFinded = true;
@@ -337,7 +337,6 @@ class _add_ProduitState extends State<add_Produit> {
         final dateFormat = DateFormat('dd MMM yyyy', 'fr');
         final datePeremption =
             dateFormat.parseLoose(_datePeremptionController.text);
-
         final produitDejaExist =
             await produitProvider.getProduitByQr(_serialController.text);
         if (_formKey.currentState!.validate()) {

@@ -133,7 +133,13 @@ class CommerceProvider extends ChangeNotifier {
         ..prixVente = updatedProduit.prixVente
         ..stock = updatedProduit.stock
         ..qr = updatedProduit.qr
-        ..image = updatedProduit.image;
+        ..image = updatedProduit.image
+        ..minimStock = updatedProduit.minimStock
+        // ..dateCreation = updatedProduit.dateCreation
+        ..datePeremption = updatedProduit.datePeremption
+        ..stockUpdate = updatedProduit.stockUpdate
+        ..derniereModification = updatedProduit.derniereModification
+        ..stockinit = updatedProduit.stockinit;
 
       if (fournisseurs != null) {
         _ajouterOuMettreAJourFournisseurs(fournisseurs);

@@ -13,6 +13,8 @@ import 'Oauth/Ogoogle/googleSignInProvider.dart';
 import 'Oauth/verifi_auth2.dart';
 import 'firebase_options.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'dart:io';
+import 'dart:convert';
 
 //late ObjectBox objectbox;
 Future<void> main() async {
@@ -29,12 +31,34 @@ Future<void> main() async {
     anonKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indpcnhwam9lYWh1dmpvb2NkbmJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTYxNjI0MzAsImV4cCI6MjAzMTczODQzMH0.MQpp7i2TdH3Q5aPEbMq5qvUwbuYpIX8RccW_GH64r1U',
   );
-  // await Supabase.initialize(
-  //   url: 'https://wirxpjoeahuvjoocdnbk.supabase.co',
-  //   anonKey:
-  //       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indpcnhwam9lYWh1dmpvb2NkbmJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTYxNjI0MzAsImV4cCI6MjAzMTczODQzMH0.MQpp7i2TdH3Q5aPEbMq5qvUwbuYpIX8RccW_GH64r1U',
-  // );
-
+///////////////////////////////////////////////////////////////////////////////////////////
+//   final String message = 'objectbox-desktop-service';
+//   final List<int> data = utf8.encode(message);
+//
+//   // Create a UDP socket
+//   final socket = await RawDatagramSocket.bind(InternetAddress.anyIPv4, 8081);
+//   print('UDP server listening on port ${socket.port}');
+//
+//   socket.listen((RawSocketEvent event) {
+//     if (event == RawSocketEvent.read) {
+//       Datagram? dg = socket.receive();
+//       if (dg != null) {
+//         print(
+//             'Received from ${dg.address.address}:${dg.port}: ${utf8.decode(dg.data)}');
+//       }
+//     }
+//   });
+//
+//   // Broadcast the presence of the desktop application
+//   Timer.periodic(Duration(seconds: 5), (Timer t) {
+//     try {
+//       socket.send(data, InternetAddress('255.255.255.255'), 8081);
+//       print('Broadcast message sent');
+//     } catch (e) {
+//       print('Error sending broadcast: $e');
+//     }
+//   });
+///////////////////////////////////////////////////////////////////////////////////////////////////////
   // splash.FlutterNativeSplash.removeAfter(initialization);
   //WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   //splash.FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);

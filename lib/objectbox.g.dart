@@ -290,10 +290,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addFloat64(5, object.prixAchat);
           fbb.addFloat64(6, object.prixVente);
           fbb.addInt64(7, object.stock);
-          fbb.addInt64(8, object.stockUpdate.millisecondsSinceEpoch);
+          fbb.addInt64(8, object.stockUpdate?.millisecondsSinceEpoch);
           fbb.addInt64(10, object.stockinit);
-          fbb.addInt64(11, object.dateCreation.millisecondsSinceEpoch);
-          fbb.addInt64(12, object.datePeremption.millisecondsSinceEpoch);
+          fbb.addInt64(11, object.dateCreation?.millisecondsSinceEpoch);
+          fbb.addInt64(12, object.datePeremption?.millisecondsSinceEpoch);
           fbb.addInt64(13, object.derniereModification.millisecondsSinceEpoch);
           fbb.addInt64(14, object.minimStock);
           fbb.finish(fbb.endTable());
@@ -302,6 +302,12 @@ obx_int.ModelDefinition getObjectBoxModel() {
         objectFromFB: (obx.Store store, ByteData fbData) {
           final buffer = fb.BufferContext(fbData);
           final rootOffset = buffer.derefObject(0);
+          final stockUpdateValue =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 20);
+          final dateCreationValue =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 26);
+          final datePeremptionValue =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 28);
           final idParam =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
           final qrParam = const fb.StringReader(asciiOptimization: true)
@@ -321,12 +327,15 @@ obx_int.ModelDefinition getObjectBoxModel() {
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 18, 0);
           final minimStockParam =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 32, 0);
-          final dateCreationParam = DateTime.fromMillisecondsSinceEpoch(
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 26, 0));
-          final datePeremptionParam = DateTime.fromMillisecondsSinceEpoch(
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 28, 0));
-          final stockUpdateParam = DateTime.fromMillisecondsSinceEpoch(
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 20, 0));
+          final dateCreationParam = dateCreationValue == null
+              ? null
+              : DateTime.fromMillisecondsSinceEpoch(dateCreationValue);
+          final datePeremptionParam = datePeremptionValue == null
+              ? null
+              : DateTime.fromMillisecondsSinceEpoch(datePeremptionValue);
+          final stockUpdateParam = stockUpdateValue == null
+              ? null
+              : DateTime.fromMillisecondsSinceEpoch(stockUpdateValue);
           final derniereModificationParam = DateTime.fromMillisecondsSinceEpoch(
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 30, 0));
           final stockinitParam =
