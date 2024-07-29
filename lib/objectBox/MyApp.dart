@@ -1,14 +1,9 @@
 import 'dart:math';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:provider/provider.dart';
-import 'package:walletdz/1/objectBox/pages/Add_Edit_ProduitScreen.dart';
-import 'package:walletdz/1/objectBox/pages/ProduitListScreen.dart';
-import 'package:walletdz/1/objectBox/pages/add_Produit.dart';
-import 'package:walletdz/1/objectBox/pages/add_edit_Product.dart';
-import 'package:walletdz/1/objectBox/pages/test.dart';
+import '../../MyListLotties.dart';
 import 'Entity.dart';
 import 'MyProviders.dart';
 import 'classeObjectBox.dart';
@@ -19,7 +14,10 @@ import 'dart:io';
 import 'dart:isolate';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:faker/faker.dart';
-import 'package:path_provider/path_provider.dart'; // Importez le package path_provider
+import 'package:path_provider/path_provider.dart';
+
+import 'pages/ProduitListScreen.dart';
+import 'pages/add_Produit.dart'; // Importez le package path_provider
 
 class MyMainO extends StatelessWidget {
   @override
@@ -192,6 +190,13 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             icon: Icon(Icons.safety_check_rounded),
           ),
+          IconButton(
+            onPressed: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (ctx) => LottieListPage()));
+            },
+            icon: Icon(Icons.local_bar_outlined),
+          ),
         ],
       ),
       body: Consumer<CommerceProvider>(
@@ -199,8 +204,8 @@ class _HomeScreenState extends State<HomeScreen> {
         int totalProduits = produitProvider.getTotalProduits();
         List<Produit> produitsFiltres =
             produitProvider.getProduitsBetweenPrices(prixMin, prixMax);
-        var produitsLowStock = produitProvider.getProduitsLowStock(5);
-        var produitsLowStock0 = produitProvider.getProduitsLowStock(0);
+        var produitsLowStock = produitProvider.getProduitsLowStock(5.0);
+        var produitsLowStock0 = produitProvider.getProduitsLowStock(0.0);
         return Padding(
             padding: const EdgeInsets.all(5.0),
             child: ListView(
@@ -439,6 +444,13 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
       appBar: AppBar(
         title: Text('Facturation'),
         actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (ctx) => LottieListPage()));
+            },
+            icon: Icon(Icons.local_bar_outlined),
+          ),
           IconButton(
             onPressed: () {
               widget.objectBox.fillWithFakeData();

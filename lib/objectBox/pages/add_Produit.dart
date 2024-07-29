@@ -48,7 +48,7 @@ class _add_ProduitState extends State<add_Produit> {
   DateTime selectedDate = DateTime.now();
   String _lastScannedCode = '';
   bool _isFinded = false;
-  int stockTemp = 0;
+  double stockTemp = 0;
 
   @override
   void initState() {
@@ -169,9 +169,9 @@ class _add_ProduitState extends State<add_Produit> {
           _descriptionController.text = produit.description ?? '';
           _prixAchatController.text = produit.prixAchat.toStringAsFixed(2);
           _prixVenteController.text = produit.prixVente.toStringAsFixed(2);
-          _stockController.text = produit.stock.toString();
-          stockTemp = int.parse(produit.stock.toString());
-          _minimStockController.text = produit.minimStock.toString();
+          _stockController.text = produit.stock.toStringAsFixed(2);
+          stockTemp = double.parse(produit.stock.toStringAsFixed(2));
+          _minimStockController.text = produit.minimStock.toStringAsFixed(2);
           _datePeremptionController.text =
               produit.datePeremption!.format('yMMMMd', 'fr_FR');
           _selectedFournisseurs = List.from(produit.fournisseurs);
@@ -185,7 +185,7 @@ class _add_ProduitState extends State<add_Produit> {
           _nomController.clear();
           _descriptionController.clear();
           _prixAchatController.clear();
-          stockTemp = 0;
+          stockTemp = 0.0;
           _prixVenteController.clear();
           _stockController.clear();
           _selectedFournisseurs.clear();
@@ -275,9 +275,9 @@ class _add_ProduitState extends State<add_Produit> {
         _descriptionController.text = produit.description ?? '';
         _prixAchatController.text = produit.prixAchat.toStringAsFixed(2);
         _prixVenteController.text = produit.prixVente.toStringAsFixed(2);
-        _stockController.text = produit.stock.toString();
-        _minimStockController.text = produit.minimStock.toString();
-        stockTemp = int.parse(produit.stock.toString());
+        _stockController.text = produit.stock.toStringAsFixed(2);
+        _minimStockController.text = produit.minimStock.toStringAsFixed(2);
+        stockTemp = double.parse(produit.stock.toStringAsFixed(2));
         _datePeremptionController.text =
             produit.datePeremption!.format('yMMMMd', 'fr_FR');
         _selectedFournisseurs = List.from(produit.fournisseurs);
@@ -290,7 +290,7 @@ class _add_ProduitState extends State<add_Produit> {
         _tempProduitId = '';
         _nomController.clear();
         _descriptionController.clear();
-        stockTemp = 0;
+        stockTemp = 0.0;
         _prixAchatController.clear();
         _prixVenteController.clear();
         _stockController.clear();
@@ -315,7 +315,7 @@ class _add_ProduitState extends State<add_Produit> {
     setState(() {
       _tempProduitId = '';
       _serialController.clear();
-      stockTemp = 0;
+      stockTemp = 0.0;
       _nomController.clear();
       _descriptionController.clear();
       _prixAchatController.clear();

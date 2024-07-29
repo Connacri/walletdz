@@ -5,14 +5,12 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import '../Entity.dart';
 import '../MyProviders.dart';
-import 'Add_Edit_ProduitScreen.dart';
 import 'ProduitListScreen.dart';
 import 'package:intl/intl.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:timeago/timeago.dart' as timeago;
 import 'add_Produit.dart';
-import 'add_edit_Product.dart';
 
 class FournisseurListScreen extends StatelessWidget {
   final Produit? produit;

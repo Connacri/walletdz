@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import '../1/objectBox/MyApp.dart';
 import '../MyListLotties.dart';
+import '../objectBox/MyApp.dart';
 
 class CheckRole extends StatelessWidget {
   final String userId;

@@ -8,13 +8,14 @@ import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart'; // Importez cette ligne
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '1/objectBox/MyApp.dart';
 import 'Oauth/Ogoogle/googleSignInProvider.dart';
 import 'Oauth/verifi_auth2.dart';
 import 'firebase_options.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'dart:io';
 import 'dart:convert';
+
+import 'objectBox/MyApp.dart';
 
 //late ObjectBox objectbox;
 Future<void> main() async {
@@ -110,6 +111,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => googleSignInProvider(),
+      
+      
       //lazy: true,
       child: MaterialApp(
           theme: ThemeData(
@@ -121,7 +124,9 @@ class MyApp extends StatelessWidget {
           //scaffoldMessengerKey: Utils.messengerKey,
           navigatorKey: navigatorKey,
           debugShowCheckedModeBanner: false,
-          title: _title,
+          title: 'Ramzi'
+          
+          ,
           themeMode: ThemeMode.dark,
           home: MyMainO()
           // verifi_auth2(
