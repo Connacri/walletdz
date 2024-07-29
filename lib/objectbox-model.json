@@ -97,7 +97,7 @@
         {
           "id": "8:4773469945258199278",
           "name": "stock",
-          "type": 6
+          "type": 8
         },
         {
           "id": "9:3618662337063473621",
@@ -107,7 +107,7 @@
         {
           "id": "11:7598222863889683261",
           "name": "stockinit",
-          "type": 6
+          "type": 8
         },
         {
           "id": "12:1827255615047715957",
@@ -127,14 +127,130 @@
         {
           "id": "15:8209867430423604798",
           "name": "minimStock",
+          "type": 8
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "3:7968206822164606643",
+      "lastPropertyId": "7:2787760657972690405",
+      "name": "Client",
+      "properties": [
+        {
+          "id": "1:3550449193447442136",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:4262833269610261032",
+          "name": "qr",
+          "type": 9
+        },
+        {
+          "id": "3:36313311528968912",
+          "name": "nom",
+          "type": 9
+        },
+        {
+          "id": "4:3647177150120252920",
+          "name": "phone",
+          "type": 9
+        },
+        {
+          "id": "5:8510624876376955688",
+          "name": "adresse",
+          "type": 9
+        },
+        {
+          "id": "6:7948986094101501762",
+          "name": "description",
+          "type": 9
+        },
+        {
+          "id": "7:2787760657972690405",
+          "name": "impayer",
+          "type": 8
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "4:1285774936409385946",
+      "lastPropertyId": "4:7593775792342322389",
+      "name": "Facture",
+      "properties": [
+        {
+          "id": "1:703887304841839968",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:142214021994294718",
+          "name": "qr",
+          "type": 9
+        },
+        {
+          "id": "3:807322010398501475",
+          "name": "date",
+          "type": 10
+        },
+        {
+          "id": "4:7593775792342322389",
+          "name": "clientId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "1:7209079759549609437",
+          "relationTarget": "Client"
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "5:615909935097060499",
+      "lastPropertyId": "5:2176273511660132623",
+      "name": "LigneFacture",
+      "properties": [
+        {
+          "id": "1:7495577581902831294",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:8662175227878512386",
+          "name": "produitId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "2:4469509526914219384",
+          "relationTarget": "Produit"
+        },
+        {
+          "id": "3:2271720061750415984",
+          "name": "factureId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "3:3115440698062349467",
+          "relationTarget": "Facture"
+        },
+        {
+          "id": "4:3968408471191777871",
+          "name": "quantite",
           "type": 6
+        },
+        {
+          "id": "5:2176273511660132623",
+          "name": "prixUnitaire",
+          "type": 8
         }
       ],
       "relations": []
     }
   ],
-  "lastEntityId": "2:8606136097133066204",
-  "lastIndexId": "0:0",
+  "lastEntityId": "5:615909935097060499",
+  "lastIndexId": "3:3115440698062349467",
   "lastRelationId": "1:2832941486252609678",
   "lastSequenceId": "0:0",
   "modelVersion": 5,

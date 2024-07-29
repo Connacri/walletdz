@@ -374,13 +374,13 @@ class _add_ProduitState extends State<add_Produit> {
               description: _descriptionController.text,
               prixAchat: double.parse(_prixAchatController.text),
               prixVente: double.parse(_prixVenteController.text),
-              stock: int.parse(_stockController.text),
+              stock: double.parse(_stockController.text),
               datePeremption: datePeremption,
               dateCreation: DateTime.now(),
               derniereModification: DateTime.now(),
               stockUpdate: DateTime.now(),
-              stockinit: int.parse(_stockController.text),
-              minimStock: int.parse(_minimStockController.text),
+              stockinit: double.parse(_stockController.text),
+              minimStock: double.parse(_minimStockController.text),
             );
 
             if (widget.specifiquefournisseur == null) {

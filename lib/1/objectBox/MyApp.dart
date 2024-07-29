@@ -60,12 +60,6 @@ class MyApp9 extends StatelessWidget {
             objectBox,
           ),
         ),
-        // ChangeNotifierProvider(
-        //   create: (_) => CommerceProviderTest(
-        //     objectBox,
-        //   ),
-        // ),
-        // Ajoutez les autres providers ici de la même manière
       ],
       child: MaterialApp(
         title: 'POS',
@@ -471,8 +465,8 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
           int totalProduits = produitProvider.getTotalProduits();
           List<Produit> produitsFiltres =
               produitProvider.getProduitsBetweenPrices(prixMin, prixMax);
-          var produitsLowStock = produitProvider.getProduitsLowStock(5);
-          var produitsLowStock0 = produitProvider.getProduitsLowStock(0);
+          var produitsLowStock = produitProvider.getProduitsLowStock(5.0);
+          var produitsLowStock0 = produitProvider.getProduitsLowStock(0.0);
 
           return Row(
             children: [
@@ -772,9 +766,12 @@ class LowStockList extends StatelessWidget {
           final produit = (produitsLowStock['produits'] as List<Produit>)
               //.take(5)
               .toList()[index];
-          return ListTile(
-            title: Text('${produit.nom}'),
-            subtitle: Text('Stock : ${produit.stock}'),
+          return Card(
+            child: ListTile(
+              title: Text('${produit.nom}'),
+              subtitle: Text('${produit.stockinit}'),
+              trailing: Text('Stock : ${produit.stock}'),
+            ),
           );
         },
       ),

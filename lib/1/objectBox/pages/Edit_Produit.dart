@@ -42,6 +42,7 @@ class _Edit_ProduitState extends State<Edit_Produit> {
   late final _dateCreation;
   late final _derniereModification;
   late final _stockUpdate;
+  late final _stockinit;
   List<Fournisseur> _selectedFournisseurs = [];
 
   File? _image;
@@ -51,6 +52,8 @@ class _Edit_ProduitState extends State<Edit_Produit> {
   bool _editQr = true;
   bool _isFirstFieldFilled = false;
   DateTime selectedDate = DateTime.now();
+  int _stock = 0;
+  int _stockInit = 0;
 
   @override
   void initState() {
@@ -58,7 +61,7 @@ class _Edit_ProduitState extends State<Edit_Produit> {
 
     _serialController.addListener(_onSerialChanged);
     _serialController.addListener(_checkFirstField);
-
+    _stockinitController.addListener(_updateStock);
     if (widget.produit != null) {
       _serialController.text = widget.produit!.qr ?? '';
       _nomController.text = widget.produit!.nom ?? '';
@@ -70,6 +73,7 @@ class _Edit_ProduitState extends State<Edit_Produit> {
       _datePeremptionController.text =
           widget.produit!.datePeremption!.format('yMMMMd', 'fr_FR');
       _dateCreation = widget.produit!.dateCreation;
+      _stockinit = widget.produit!.stockinit.toString();
       _minimStockController.text = widget.produit!.minimStock.toString();
       _derniereModification = widget.produit!.derniereModification;
       _stockUpdate = widget.produit!.stockUpdate!;
@@ -87,6 +91,8 @@ class _Edit_ProduitState extends State<Edit_Produit> {
   @override
   void dispose() {
     _serialController.removeListener(_onSerialChanged);
+    _serialController.removeListener(_checkFirstField);
+    _stockinitController.removeListener(_updateStock);
     _serialController.dispose();
     _nomController.dispose();
     _descriptionController.dispose();
@@ -203,26 +209,39 @@ class _Edit_ProduitState extends State<Edit_Produit> {
       final provider = Provider.of<CommerceProvider>(context, listen: false);
       //final produit = await provider.getProduitById(int.parse(code));
       final produit = await provider.getProduitByQr(code);
-      if (produit != null) {
-        setState(() {
-          _nomController.text = produit.nom;
-          _descriptionController.text = produit.description ?? '';
-          _prixAchatController.text = produit.prixAchat.toStringAsFixed(2);
-          _prixVenteController.text = produit.prixVente.toStringAsFixed(2);
-          _stockController.text = produit.stock.toString();
-          _datePeremptionController.text =
-              produit.datePeremption!.format('yMMMMd', 'fr_FR');
-          _dateCreation = widget.produit!.dateCreation.toString();
-          _stockinitController.text = widget.produit!.stockinit.toString();
-          _isFinded = true;
-          _minimStockController.text = widget.produit!.minimStock.toString();
-          _derniereModification =
-              widget.produit!.derniereModification.toString();
-          _stockUpdate = widget.produit!.stockUpdate.toString();
-        });
-      } else {
-        _clearAllFields();
-      }
+      // if (produit != null) {
+      //   setState(() {
+      //     _nomController.text = produit.nom;
+      //     _descriptionController.text = produit.description ?? '';
+      //     _prixAchatController.text = produit.prixAchat.toStringAsFixed(2);
+      //     _prixVenteController.text = produit.prixVente.toStringAsFixed(2);
+      //     _stockController.text = produit.stock.toString();
+      //     _datePeremptionController.text =
+      //         produit.datePeremption!.format('yMMMMd', 'fr_FR');
+      //     _dateCreation = widget.produit!.dateCreation.toString();
+      //     _stockinitController.text = widget.produit!.stockinit.toString();
+      //     _isFinded = true;
+      //     _minimStockController.text = widget.produit!.minimStock.toString();
+      //     _derniereModification =
+      //         widget.produit!.derniereModification.toString();
+      //     _stockUpdate = widget.produit!.stockUpdate.toString();
+      //   });
+      // } else {
+      // _clearAllFields();
+      // _tempProduitId = '';
+      // _nomController.clear();
+      // _descriptionController.clear();
+      // _prixAchatController.clear();
+      // _prixVenteController.clear();
+      // _stockController.clear();
+      // _selectedFournisseurs.clear();
+      // _datePeremptionController.clear();
+      // _minimStockController.clear();
+      // _existingImageUrl = '';
+      // _isFinded = false;
+      // _image = null;
+
+      // }
     }
   }
 
@@ -256,6 +275,7 @@ class _Edit_ProduitState extends State<Edit_Produit> {
         _stockController.text = produit.stock.toString();
         _datePeremptionController.text = produit.datePeremption.toString();
         _dateCreation = produit.dateCreation.toString();
+        _stockinit = widget.produit!.stockinit.toString();
         _stockinitController.text = produit.stockinit.toString();
         _minimStockController.text = widget.produit!.minimStock.toString();
         _derniereModification = widget.produit!.derniereModification.toString();
@@ -276,6 +296,7 @@ class _Edit_ProduitState extends State<Edit_Produit> {
       _selectedFournisseurs.clear();
       _datePeremptionController.clear();
       _dateCreation.clear();
+      _stockinit.clear();
       _stockinitController.clear();
       _existingImageUrl = '';
       _isFinded = false;
@@ -286,6 +307,13 @@ class _Edit_ProduitState extends State<Edit_Produit> {
       _stockUpdate.clear();
     }
     // print(_isFinded);
+  }
+
+  void _updateStock() {
+    setState(() {
+      int addedStock = int.tryParse(_stockController.text) ?? 0;
+      _stock = addedStock;
+    });
   }
 
   void _checkFirstField() {
@@ -308,6 +336,7 @@ class _Edit_ProduitState extends State<Edit_Produit> {
       _datePeremptionController.clear();
       _dateCreation.clear();
       _stockinitController.clear();
+      _stockinit.clear();
       _existingImageUrl = '';
       _isFinded = false;
       _isFirstFieldFilled = false;
@@ -390,13 +419,22 @@ class _Edit_ProduitState extends State<Edit_Produit> {
               description: _descriptionController.text,
               prixAchat: double.parse(_prixAchatController.text),
               prixVente: double.parse(_prixVenteController.text),
-              stock: int.parse(_stockController.text),
+              stock: double.parse(_stockController.text),
               datePeremption: datePeremption,
               derniereModification: DateTime.now(),
-              stockUpdate: DateTime.now(),
-              stockinit: int.parse(_stockinitController.text),
-              minimStock: int.parse(_minimStockController.text),
+              stockUpdate:
+                  _stockController.text != widget.produit!.stock.toString()
+                      ? DateTime.now()
+                      : widget.produit!.stockUpdate,
+              stockinit:
+                  widget.produit!.stock != double.parse(_stockController.text)
+                      ? double.parse(_stockController.text)
+                      : widget.produit!.stockinit,
+              minimStock: double.parse(_minimStockController.text),
             );
+            print('/////////////////////' + _stockController.text);
+            print(
+                '/////////////////////' + widget.produit!.stockinit.toString());
             if (produitDejaExist != null &&
                 _serialController.text != widget.produit!.qr) {
               return;
@@ -438,106 +476,6 @@ class _Edit_ProduitState extends State<Edit_Produit> {
       ),
     );
   }
-
-//   IconButton buildButton_Edit_Add(
-//       BuildContext context, CommerceProvider produitProvider, _isFinded) {
-//     return IconButton(
-//       onPressed: () async {
-//         print(' ');
-//         print('///////////////////datePeremption///////////////////');
-//         print(widget.produit!.datePeremption);
-//         print('//////////////////////////////////////');
-//         final dateFormat = DateFormat('dd MMM yyyy', 'fr');
-//         final datePeremption =
-//             dateFormat.parseLoose(_datePeremptionController.text);
-//         // final dateCreation = dateFormat.parseLoose(_dateCreation);
-//         //  print(_dateCreation);
-//         //  print(dateCreation);
-//         final produitDejaExist =
-//             await produitProvider.getProduitByQr(_serialController.text);
-//         if (_formKey.currentState!.validate()) {
-//           String imageUrl = '';
-// //******************************************************************************//
-//           if (produitDejaExist != null &&
-//               _serialController.text != widget.produit!.qr) {
-//             ScaffoldMessenger.of(context).showSnackBar(
-//               SnackBar(
-//                 content: Text(
-//                   'QR / Code Barre Produit existe déja !',
-//                   style: TextStyle(color: Colors.white),
-//                 ),
-//                 backgroundColor: Colors.red,
-//               ),
-//             );
-//             print('hadi produitDejaExist != null 111111111111111111');
-//           } else {
-//             if (_image != null) {
-//               imageUrl =
-//                   await uploadImageToSupabase(_image!, _existingImageUrl);
-//             } else if (_existingImageUrl != null &&
-//                 _existingImageUrl!.isNotEmpty) {
-//               imageUrl = _existingImageUrl!;
-//             }
-//             print('hadi produitDejaExist == null 2222222222222222222');
-//           }
-// ////////////////////////////////////////////////////////////////////////////////
-//           if (mounted) {
-//             final produit = Produit(
-//               qr: _serialController.text,
-//               image: imageUrl,
-//               nom: _nomController.text,
-//               description: _descriptionController.text,
-//               prixAchat: double.parse(_prixAchatController.text),
-//               prixVente: double.parse(_prixVenteController.text),
-//               stock: int.parse(_stockController.text),
-//               datePeremption: datePeremption,
-//               // dateCreation: dateCreation,
-//               derniereModification: DateTime.now(),
-//               stockUpdate: DateTime.now(),
-//               stockinit: int.parse(_stockinitController.text),
-//               minimStock: int.parse(_minimStockController.text),
-//             );
-//             if (produitDejaExist != null &&
-//                 _serialController.text != widget.produit!.qr) {
-//               return;
-//             } else if (widget.produit != null) {
-//               //update
-//
-//               produitProvider.updateProduitById(widget.produit!.id, produit,
-//                   fournisseurs: widget.specifiquefournisseur != null
-//                       ? null
-//                       : _selectedFournisseurs);
-//
-//               print('Produit existant mis à jour');
-//               print(produit.datePeremption);
-//               print(datePeremption);
-//             } else {
-//               //add new
-//               produitProvider.ajouterProduit(produit, _selectedFournisseurs);
-//               context.read<CommerceProvider>().ajouterProduit(
-//                   produit,
-//                   _selectedFournisseurs.isEmpty
-//                       ? [widget.specifiquefournisseur!]
-//                       : _selectedFournisseurs);
-//
-//               print('Nouveau produit ajouté');
-//             }
-//
-//             _formKey.currentState!.save();
-//             produitDejaExist != null &&
-//                     _serialController.text != widget.produit!.qr
-//                 ? null
-//                 : Navigator.of(context).pop();
-//           }
-//         }
-//       },
-//       icon: Icon(
-//         widget.produit != null
-//             ? Icons.edit
-//             : (_isFinded ? Icons.edit : Icons.check),
-//       ),
-//     );
-//   }
 
   @override
   Widget build(BuildContext context) {
@@ -853,14 +791,16 @@ class _Edit_ProduitState extends State<Edit_Produit> {
         Container(
           width: largeur,
           child: TextFormField(
-            enabled: _isFirstFieldFilled,
+            enabled: false, //_isFirstFieldFilled,
             controller: _stockinitController,
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 18, color: Colors.black),
             keyboardType: TextInputType.text,
             decoration: InputDecoration(
               hintStyle: TextStyle(color: Colors.black38),
-              fillColor: _isFirstFieldFilled ? Colors.green.shade100 : null,
+              fillColor:
+                  //_isFirstFieldFilled ? Colors.green.shade100 :
+                  null,
               hintText: 'Stock Initial',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8.0),
@@ -879,6 +819,7 @@ class _Edit_ProduitState extends State<Edit_Produit> {
               filled: true,
               contentPadding: EdgeInsets.all(15),
             ),
+
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Veuillez entrer un nom du Produit';
@@ -1195,10 +1136,7 @@ class _Edit_ProduitState extends State<Edit_Produit> {
                             _stockController.text.toString(),
                           )),
                         )
-                      : CircleAvatar(
-                          child: Text(
-                          ' ',
-                        ))
+                      : CircleAvatar(child: Icon(Icons.access_time_filled))
                   : GestureDetector(
                       onTap: () {
                         _stockController.text =
@@ -1214,7 +1152,7 @@ class _Edit_ProduitState extends State<Edit_Produit> {
               ),
               Expanded(
                 child: TextFormField(
-                  enabled: _isFirstFieldFilled,
+                  enabled: false, //_isFirstFieldFilled,
                   controller: _stockController,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
@@ -1273,7 +1211,7 @@ class _Edit_ProduitState extends State<Edit_Produit> {
                     //   onPressed: _showAddQuantityDialog,
                     //   icon: const Icon(Icons.add),
                     // ),
-                    hintText: 'Stock Minimum',
+                    hintText: 'Stock Alert',
 
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),

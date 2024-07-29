@@ -230,7 +230,7 @@ class CommerceProvider extends ChangeNotifier {
         nom: faker.food.dish(),
         prixAchat: faker.randomGenerator.decimal(min: 10),
         prixVente: faker.randomGenerator.decimal(min: 50),
-        stock: faker.randomGenerator.integer(100, min: 1),
+        stock: faker.randomGenerator.decimal(min : 100, scale : 15),
         description: faker.lorem.sentence(),
         qr: faker.randomGenerator.integer(999999).toString(),
         datePeremption:
@@ -240,8 +240,8 @@ class CommerceProvider extends ChangeNotifier {
             faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
         stockUpdate:
             faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
-        stockinit: faker.randomGenerator.integer(100, min: 1),
-        minimStock: faker.randomGenerator.integer(10, min: 1),
+        stockinit: faker.randomGenerator.decimal(min : 200),
+        minimStock: faker.randomGenerator.decimal(min : 1, scale : 2),
       );
     });
 

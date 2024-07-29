@@ -365,14 +365,14 @@ class _Add_Edit_ProduitScreen2State extends State<Add_Edit_ProduitScreen2> {
               description: _descriptionController.text,
               prixAchat: double.parse(_prixAchatController.text),
               prixVente: double.parse(_prixVenteController.text),
-              stock: int.parse(_stockController.text),
+              stock: double.parse(_stockController.text),
               datePeremption: DateTime.parse(_datePeremptionController.text),
               dateCreation: DateTime.parse(_dateCreationController.text),
               derniereModification:
                   DateTime.parse(_derniereModificationController.text),
               stockUpdate: DateTime.parse(_stockUpdateController.text),
-              stockinit: int.parse(_stockinitController.text),
-              minimStock: int.parse(_minimStockController.text),
+              stockinit: double.parse(_stockinitController.text),
+              minimStock: double.parse(_minimStockController.text),
             );
             if (produitDejaExist != null &&
                 _serialController.text != widget.produit!.qr) {
