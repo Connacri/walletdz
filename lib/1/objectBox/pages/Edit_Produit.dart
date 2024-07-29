@@ -1258,8 +1258,8 @@ class _Edit_ProduitState extends State<Edit_Produit> {
   }
 
   Future<void> _showAddQuantityDialog() async {
-    int currentValue = int.tryParse(_stockController.text) ?? 0;
-    int newQuantity = currentValue;
+    double currentValue = double.tryParse(_stockController.text) ?? 0;
+    double newQuantity = currentValue;
 
     return showDialog<void>(
       context: context,
@@ -1276,7 +1276,7 @@ class _Edit_ProduitState extends State<Edit_Produit> {
                   controller: TextEditingController(),
                   keyboardType: TextInputType.number,
                   onChanged: (value) {
-                    newQuantity = int.tryParse(value) ?? 0;
+                    newQuantity = double.tryParse(value) ?? 0.0;
                   },
                 ),
               ],
