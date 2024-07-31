@@ -15,6 +15,8 @@ import 'AddFournisseurFormFromProduit.dart';
 import 'FournisseurListScreen.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class add_Produit extends StatefulWidget {
   final Fournisseur? specifiquefournisseur;
@@ -330,6 +332,64 @@ class _add_ProduitState extends State<add_Produit> {
     });
   }
 
+  Future<void> ajouterProduitToSupabase(Produit produit) async {
+    final supabase = Supabase.instance.client;
+    final response = await supabase.from('produit').insert({
+      'qr': produit.qr,
+      'image': produit.image,
+      'nom': produit.nom,
+      'description': produit.description,
+      'prixachat': produit.prixAchat,
+      'prixvente': produit.prixVente,
+      'stock': produit.stock,
+      'dateperemption': produit.datePeremption?.toIso8601String(),
+      'datecreation': produit.dateCreation?.toIso8601String(),
+      'dernieremodification': produit.derniereModification.toIso8601String(),
+      'stockupdate': produit.stockUpdate?.toIso8601String(),
+      'stockinit': produit.stockinit,
+      'minimstock': produit.minimStock,
+    });
+    if (response == null) {
+      print('Erreur: la réponse est null');
+      return;
+    }
+    if (response.error == null) {
+      print('Produit ajouté à Supabase avec succès');
+    } else {
+      print(
+          'Erreur lors de l\'ajout du produit à Supabase: ${response.error!.message}');
+    }
+  }
+
+  Future<void> updateProduitToSupabase(int id, Produit produit) async {
+    final supabase = Supabase.instance.client;
+    final response = await supabase.from('produit').update({
+      'qr': produit.qr,
+      'image': produit.image,
+      'nom': produit.nom,
+      'description': produit.description,
+      'prixachat': produit.prixAchat,
+      'prixvente': produit.prixVente,
+      'stock': produit.stock,
+      'dateperemption': produit.datePeremption?.toIso8601String(),
+      'datecreation': produit.dateCreation?.toIso8601String(),
+      'dernieremodification': produit.derniereModification.toIso8601String(),
+      'stockupdate': produit.stockUpdate?.toIso8601String(),
+      'stockinit': produit.stockinit,
+      'minimstock': produit.minimStock,
+    }).eq('id', id);
+    if (response == null) {
+      print('Erreur: la réponse est null');
+      return;
+    }
+    if (response.error == null) {
+      print('Produit mis à jour dans Supabase avec succès');
+    } else {
+      print(
+          'Erreur lors de la mise à jour du produit dans Supabase: ${response.error!.message}');
+    }
+  }
+
   IconButton buildButton_Edit_Add(
       BuildContext context, CommerceProvider produitProvider, _isFinded) {
     return IconButton(
@@ -388,6 +448,8 @@ class _add_ProduitState extends State<add_Produit> {
                 return;
               } else {
                 produitProvider.ajouterProduit(produit, _selectedFournisseurs);
+                // await ajouterProduitToSupabase(
+                //     produit);
                 print('Nouveau produit ajouté');
               }
             } else {
@@ -399,13 +461,15 @@ class _add_ProduitState extends State<add_Produit> {
                       ..._selectedFournisseurs,
                       ...[widget.specifiquefournisseur!]
                     ]);
-
+                // await updateProduitToSupabase(int.parse(_tempProduitId),
+                //     produit);
                 print('Produit existant mis à jour');
               } else {
                 produitProvider.ajouterProduit(produit, [
                   ..._selectedFournisseurs,
                   ...[widget.specifiquefournisseur!]
                 ]);
+               // await ajouterProduitToSupabase(produit);
                 print('Nouveau produit ajouté');
               }
             }
@@ -490,69 +554,51 @@ class _add_ProduitState extends State<add_Produit> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Container(
-          height: 30,
-          child: _editQr == true
-              ? _tempProduitId.isNotEmpty
-                  ? Text('ID : ${_tempProduitId}',
-                      style: TextStyle(
-                        fontSize: 20,
-                      ))
-                  : Text(
-                      'L\'ID du Produit n\'a pas encore été créer',
-                      style: TextStyle(fontSize: 15),
-                    )
-              : Text(
-                  'Nouveau ID du produit sera créer',
-                  style: TextStyle(fontSize: 15),
-                ),
-        ),
-        Container(
-            height: 30,
-            child:
-                // _tempProduitId.isNotEmpty
-                //     ?
-                Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Switch(
-                  value: _editQr,
-                  onChanged: (bool newValue) {
-                    setState(() {
-                      _editQr = newValue;
-                    });
-                  },
-                ),
-                SizedBox(width: 10),
-                Text(
+        _editQr == true
+            ? _tempProduitId.isNotEmpty
+                ? Text('ID : ${_tempProduitId}',
+                    style: TextStyle(
+                      fontSize: 20,
+                    ))
+                : Text(
+                    'L\'ID du Produit n\'a pas encore été créer',
+                    style: TextStyle(fontSize: 15),
+                  )
+            : Text(
+                'Nouveau ID du produit sera créer',
+                style: TextStyle(fontSize: 15),
+              ),
+        Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Container(
+              height: 30,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Switch(
+                    value: _editQr,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        _editQr = newValue;
+                      });
+                    },
+                  ),
+                  SizedBox(width: 10),
+                  Text(
                     _editQr
                         ? 'Recherche par Code QR Activé'
                         : 'Recherche par Code QR Désactivé',
-                    style: TextStyle(
-                      fontSize: 20,
-                    )),
-              ],
-            )
-            // : Text(
-            //     '', //'Creation d\'un Nouveau Produit',
-            //     style: TextStyle(fontSize: 20),
-            //   ),
-            ),
-        SizedBox(height: 10),
+                  ),
+                ],
+              )),
+        ),
         Container(
           width: largeur,
           child: TextFormField(
-            //focusNode: FocusNode(),
             controller: _serialController,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 18,
-            ),
             decoration: InputDecoration(
-              hintStyle: TextStyle(color: Colors.black38),
-              // labelText: 'Numéro de série',
-              hintText: 'Code Barre / QrCode',
-
+              labelText: 'Code Barre / QrCode',
               prefixIcon: _isFirstFieldFilled == true
                   ? IconButton(
                       icon: Icon(Icons.clear),
@@ -560,7 +606,6 @@ class _add_ProduitState extends State<add_Produit> {
                       tooltip: 'Effacer tous les champs',
                     )
                   : null,
-
               suffixIcon: Platform.isIOS || Platform.isAndroid
                   ? IconButton(
                       icon: Icon(Icons.qr_code_scanner),
@@ -593,12 +638,10 @@ class _add_ProduitState extends State<add_Produit> {
             enabled: _isFirstFieldFilled,
             controller: _nomController,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 18, color: Colors.black),
             keyboardType: TextInputType.text,
             decoration: InputDecoration(
-              hintStyle: TextStyle(color: Colors.black38),
-              fillColor: _isFirstFieldFilled ? Colors.green.shade100 : null,
-              hintText: 'Nom Du Produit',
+              fillColor: _isFirstFieldFilled ? Colors.green : null,
+              labelText: 'Nom Du Produit',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8.0),
                 borderSide: BorderSide.none, // Supprime le contour
@@ -630,17 +673,9 @@ class _add_ProduitState extends State<add_Produit> {
           child: TextFormField(
             enabled: _isFirstFieldFilled,
             controller: _descriptionController,
-            textAlign: TextAlign.center,
-            maxLines: 5, // Permet un nombre illimité de lignes
-
-            style: const TextStyle(
-              fontSize: 18,
-            ),
+            maxLines: 5,
             keyboardType: TextInputType.text,
             decoration: InputDecoration(
-              hintStyle: TextStyle(color: Colors.black38),
-              //fillColor: Colors.blue.shade50,
-
               hintText: 'Déscription',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8.0),
@@ -656,7 +691,6 @@ class _add_ProduitState extends State<add_Produit> {
                 borderSide:
                     BorderSide.none, // Supprime le contour en état focus
               ),
-              //border: InputBorder.none,
               filled: true,
               contentPadding: EdgeInsets.all(15),
             ),
@@ -669,12 +703,10 @@ class _add_ProduitState extends State<add_Produit> {
             enabled: _isFirstFieldFilled,
             controller: _datePeremptionController,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 18, color: Colors.black),
             keyboardType: TextInputType.text,
             decoration: InputDecoration(
-              hintStyle: TextStyle(color: Colors.black38),
-              fillColor: _isFirstFieldFilled ? Colors.green.shade100 : null,
-              hintText: 'Date de Péremption',
+              fillColor: _isFirstFieldFilled ? Colors.green : null,
+              labelText: 'Date de Péremption',
               suffixIcon: IconButton(
                 icon: const Icon(Icons.date_range),
                 onPressed: () async {
@@ -729,14 +761,8 @@ class _add_ProduitState extends State<add_Produit> {
                       enabled: _isFirstFieldFilled,
                       controller: _prixAchatController,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 18,
-                      ),
                       decoration: InputDecoration(
-                        hintStyle: TextStyle(color: Colors.black38),
-                        //fillColor: Colors.blue.shade50,
-                        hintText: 'Prix d\'achat',
-
+                        labelText: 'Prix d\'achat',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
                           borderSide: BorderSide.none, // Supprime le contour
@@ -799,14 +825,8 @@ class _add_ProduitState extends State<add_Produit> {
                       enabled: _isFirstFieldFilled,
                       controller: _prixVenteController,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 18,
-                      ),
                       decoration: InputDecoration(
-                        hintStyle: TextStyle(color: Colors.black38),
-                        //fillColor: Colors.blue.shade50,
-                        hintText: 'Prix de vente',
-
+                        labelText: 'Prix de vente',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
                           borderSide: BorderSide.none, // Supprime le contour
@@ -873,14 +893,8 @@ class _add_ProduitState extends State<add_Produit> {
                       enabled: _isFirstFieldFilled,
                       controller: _prixAchatController,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 18,
-                      ),
                       decoration: InputDecoration(
-                        hintStyle: TextStyle(color: Colors.black38),
-                        //fillColor: Colors.blue.shade50,
-                        hintText: 'Prix d\'achat',
-
+                        labelText: 'Prix d\'achat',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
                           borderSide: BorderSide.none, // Supprime le contour
@@ -943,13 +957,9 @@ class _add_ProduitState extends State<add_Produit> {
                       enabled: _isFirstFieldFilled,
                       controller: _prixVenteController,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 18,
-                      ),
+
                       decoration: InputDecoration(
-                        hintStyle: TextStyle(color: Colors.black38),
-                        //fillColor: Colors.blue.shade50,
-                        hintText: 'Prix de vente',
+                        labelText: 'Prix de vente',
 
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
@@ -1036,20 +1046,9 @@ class _add_ProduitState extends State<add_Produit> {
                   enabled: _isFirstFieldFilled,
                   controller: _stockController,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 18,
-                  ),
                   decoration: InputDecoration(
-                    hintStyle: TextStyle(color: Colors.black38),
-                    //fillColor: Colors.blue.shade50,
-                    // prefixIcon: IconButton(
-                    //   onPressed: _showAddQuantityDialog,
-                    //   icon: const Icon(Icons.add),
-                    // ),
-                    hintText: 'Stock',
-                    // prefix: Text(
-                    //   'Stock',
-                    // ),
+                    labelText: 'Stock',
+
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
                       borderSide: BorderSide.none, // Supprime le contour
@@ -1085,20 +1084,9 @@ class _add_ProduitState extends State<add_Produit> {
                   enabled: _isFirstFieldFilled,
                   controller: _minimStockController,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 18,
-                  ),
                   decoration: InputDecoration(
-                    hintStyle: TextStyle(color: Colors.black38),
-                    //fillColor: Colors.blue.shade50,
-                    // prefixIcon: IconButton(
-                    //   onPressed: _showAddQuantityDialog,
-                    //   icon: const Icon(Icons.add),
-                    // ),
-                    hintText: 'Stock Alert',
-                    // prefix: Text(
-                    //   'Stock Minimal',
-                    // ),
+                    labelText: 'Stock Alert',
+
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
                       borderSide: BorderSide.none, // Supprime le contour

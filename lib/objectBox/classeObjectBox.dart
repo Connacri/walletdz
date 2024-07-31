@@ -9,30 +9,6 @@ import '../../objectbox.g.dart';
 import 'Entity.dart';
 
 class ObjectBox {
-  // late final Store store;
-  // late final Box<Produit> produitBox;
-  // late final Box<Fournisseur> fournisseurBox;
-  //
-  // static final ObjectBox _singleton = ObjectBox._internal();
-  //
-  // factory ObjectBox() {
-  //   return _singleton;
-  // }
-  // final random = Random();
-  // ObjectBox._internal();
-  //
-  // Future<void> init() async {
-  //   final dir = await getApplicationDocumentsDirectory();
-  //   if (!Store.isOpen('${dir.path}/objectbox')) {
-  //     store = await openStore(directory: '${dir.path}/objectbox');
-  //     produitBox = Box<Produit>(store);
-  //     fournisseurBox = Box<Fournisseur>(store);
-  //   }
-  // }
-  //
-  // void close() {
-  //   store.close();
-  // }
   late final Store store;
   late final Box<Produit> produitBox;
   late final Box<Fournisseur> fournisseurBox;
@@ -58,10 +34,9 @@ class ObjectBox {
     store.close();
   }
 
-  void fillWithFakeData(/*int count, int fourInt*/) {
+  void fillWithFakeData(int count, int fourInt) {
     final faker = Faker();
-    int count = 20;
-    int fourInt = 5;
+
     // Créer des fournisseurs
     List<Fournisseur> fournisseurs = List.generate(fourInt, (index) {
       return Fournisseur(
@@ -83,7 +58,7 @@ class ObjectBox {
         nom: faker.food.dish(),
         prixAchat: faker.randomGenerator.decimal(min: 60, scale: 20),
         prixVente: faker.randomGenerator.decimal(min: 500, scale: 50),
-        stock: faker.randomGenerator.decimal(min : 100, scale : 15),
+        stock: faker.randomGenerator.decimal(min: 100, scale: 15),
         description: faker.lorem.sentence(),
         qr: (indx + 1)
             .toString(), // faker.randomGenerator.integer(count).toString(),
@@ -92,10 +67,10 @@ class ObjectBox {
         dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
         derniereModification:
             faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
-         stockUpdate:
+        stockUpdate:
             faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
-        stockinit: faker.randomGenerator.decimal(min : 200),
-        minimStock: faker.randomGenerator.decimal(min : 1, scale : 2),
+        stockinit: faker.randomGenerator.decimal(min: 200),
+        minimStock: faker.randomGenerator.decimal(min: 1, scale: 2),
       );
 
       // Associer entre 1 et 10 fournisseurs aléatoires au produit

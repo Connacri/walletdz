@@ -3,7 +3,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:walletdz/objectBox/pages/ProduitListSupabase.dart';
 import '../../MyListLotties.dart';
+import '../objectbox.g.dart';
 import 'Entity.dart';
 import 'MyProviders.dart';
 import 'classeObjectBox.dart';
@@ -17,6 +21,7 @@ import 'package:faker/faker.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'pages/ProduitListScreen.dart';
+import 'pages/ProduitListSupabase.dart' as supa;
 import 'pages/add_Produit.dart'; // Importez le package path_provider
 
 class MyMainO extends StatelessWidget {
@@ -50,7 +55,6 @@ class MyApp9 extends StatelessWidget {
     if (objectBox == null) {
       return Center(child: CircularProgressIndicator());
     }
-
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
@@ -120,6 +124,26 @@ class _HomeScreenState extends State<HomeScreen> {
   double prixMin = 0;
   double prixMax = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    _loadPrix();
+  }
+
+  Future<void> _savePrix() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble('prixMin', prixMin);
+    await prefs.setDouble('prixMax', prixMax);
+  }
+
+  Future<void> _loadPrix() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      prixMin = prefs.getDouble('prixMin') ?? 0.0;
+      prixMax = prefs.getDouble('prixMax') ?? 0.0;
+    });
+  }
+
   void _ouvrirDialogAjustementPrix(BuildContext context) {
     double nouveauPrixMin = prixMin;
     double nouveauPrixMax = prixMax;
@@ -158,6 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   prixMin = nouveauPrixMin;
                   prixMax = nouveauPrixMax;
                 });
+                _savePrix(); // Sauvegarder les nouvelles valeurs
                 Navigator.of(context).pop();
               },
             ),
@@ -174,9 +199,29 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text('Facturation'),
         actions: [
+          // IconButton(
+          //   onPressed: () {
+          //     Navigator.of(context).push(MaterialPageRoute(
+          //         builder: (ctx) => SyncScreen(
+          //             supabase: Supabase.instance.client,
+          //             objectboxStore: widget.objectBox.store)));
+          //   },
+          //   icon: Icon(Icons.face_2_sharp),
+          // ),
           IconButton(
             onPressed: () {
-              widget.objectBox.fillWithFakeData();
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (ctx) => supa.ProduitListPage2(
+                      supabase: Supabase.instance.client,
+                      objectboxStore: widget.objectBox.store
+                      // objectBox: widget.objectBox,
+                      )));
+            },
+            icon: Icon(Icons.local_police),
+          ),
+          IconButton(
+            onPressed: () {
+              widget.objectBox.fillWithFakeData(1000, 500);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Données factices ajoutées !')),
               );
@@ -290,37 +335,30 @@ class _HomeScreenState extends State<HomeScreen> {
                     SmallBanner: false,
                   ),
                 ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            LowStockList(produitsLowStock: produitsLowStock),
-                      ),
-                    );
-                  },
-                  child: CardAlert(
-                    image: 'https://picsum.photos/seed/${randomId + 2}/200/100',
-                    text:
-                        'Alert stock < 5\n${produitsLowStock['count']} Produits\n\nRupture de stock\n${produitsLowStock0['count']} Produits',
-                    provider: produitProvider,
-                    // button: ElevatedButton(
-                    //     onPressed: () {
-                    //       Navigator.of(context).push(
-                    //         MaterialPageRoute(
-                    //           builder: (context) =>
-                    //               LowStockList(produitsLowStock: produitsLowStock),
-                    //           // ProduitListInterval(
-                    //           //   produitsFiltres:
-                    //           //       produitsFiltres,
-                    //           // ),
-                    //         ),
-                    //       );
-                    //     },
-                    //     child: Text(('Voire La List'))),
-                    Color1: Colors.red,
-                    Color2: Colors.black,
-                  ),
+                CardAlert(
+                  image: 'https://picsum.photos/seed/${randomId + 2}/200/100',
+                  text:
+                      'Alert stock < 5\n${produitsLowStock['count']} Produits\n\nRupture de stock\n${produitsLowStock0['count']} Produits',
+                  provider: produitProvider,
+                  button: produitsLowStock['count'] == 0 &&
+                          produitsLowStock0['count'] == 0
+                      ? null
+                      : ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => LowStockList(
+                                    produitsLowStock: produitsLowStock),
+                                // ProduitListInterval(
+                                //   produitsFiltres:
+                                //       produitsFiltres,
+                                // ),
+                              ),
+                            );
+                          },
+                          child: Text(('Voire La List'))),
+                  Color1: Colors.red,
+                  Color2: Colors.black,
                 ),
                 SizedBox(height: 18),
                 ElevatedButton.icon(
@@ -390,6 +428,26 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
   double prixMin = 0;
   double prixMax = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    _loadPrix();
+  }
+
+  Future<void> _savePrix() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble('prixMin', prixMin);
+    await prefs.setDouble('prixMax', prixMax);
+  }
+
+  Future<void> _loadPrix() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      prixMin = prefs.getDouble('prixMin') ?? 0.0;
+      prixMax = prefs.getDouble('prixMax') ?? 0.0;
+    });
+  }
+
   void _ouvrirDialogAjustementPrix(BuildContext context) {
     double nouveauPrixMin = prixMin;
     double nouveauPrixMax = prixMax;
@@ -428,6 +486,7 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                   prixMin = nouveauPrixMin;
                   prixMax = nouveauPrixMax;
                 });
+                _savePrix(); // Sauvegarder les nouvelles valeurs
                 Navigator.of(context).pop();
               },
             ),
@@ -444,16 +503,27 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
       appBar: AppBar(
         title: Text('Facturation'),
         actions: [
+          // IconButton(
+          //   onPressed: () {
+          //     Navigator.of(context).push(MaterialPageRoute(
+          //         builder: (ctx) => SyncScreen(
+          //             supabase: Supabase.instance.client,
+          //             objectboxStore: widget.objectBox.store)));
+          //   },
+          //   icon: Icon(Icons.face_2_sharp),
+          // ),
           IconButton(
             onPressed: () {
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (ctx) => LottieListPage()));
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (ctx) => supa.ProduitListPage2(
+                      supabase: Supabase.instance.client,
+                      objectboxStore: widget.objectBox.store)));
             },
-            icon: Icon(Icons.local_bar_outlined),
+            icon: Icon(Icons.local_police),
           ),
           IconButton(
             onPressed: () {
-              widget.objectBox.fillWithFakeData();
+              widget.objectBox.fillWithFakeData(1000, 500);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Données factices ajoutées !')),
               );
@@ -466,6 +536,13 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                   .push(MaterialPageRoute(builder: (ctx) => add_Produit()));
             },
             icon: Icon(Icons.safety_check_rounded),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (ctx) => LottieListPage()));
+            },
+            icon: Icon(Icons.local_bar_outlined),
           ),
           SizedBox(
             width: 50,
@@ -580,7 +657,7 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                                 image:
                                     'https://picsum.photos/seed/${randomId + 1}/200/100',
                                 text:
-                                    '${produitsFiltres.length} Produits\nentre ${prixMin.toStringAsFixed(2)} DZD et ${prixMax.toStringAsFixed(2)} DZD',
+                                    '${produitsFiltres.length} Produits\n${prixMin.toStringAsFixed(2)}\n${prixMax.toStringAsFixed(2)}',
                                 provider: produitProvider,
                                 button: produitsFiltres.length == 0
                                     ? ElevatedButton(
@@ -613,39 +690,32 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                             ),
                           ),
                           Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => LowStockList(
-                                        produitsLowStock: produitsLowStock),
-                                  ),
-                                );
-                              },
-                              child: CardAlert(
-                                image:
-                                    'https://picsum.photos/seed/${randomId + 2}/200/100',
-                                text:
-                                    'Alert stock < 5\n${produitsLowStock['count']} Produits\n\nRupture de stock\n${produitsLowStock0['count']} Produits',
-                                provider: produitProvider,
-                                button: ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (context) => LowStockList(
-                                              produitsLowStock:
-                                                  produitsLowStock),
-                                          // ProduitListInterval(
-                                          //   produitsFiltres:
-                                          //       produitsFiltres,
-                                          // ),
-                                        ),
-                                      );
-                                    },
-                                    child: Text(('Voire La List'))),
-                                Color1: Colors.red,
-                                Color2: Colors.black,
-                              ),
+                            child: CardAlert(
+                              image:
+                                  'https://picsum.photos/seed/${randomId + 2}/200/100',
+                              text:
+                                  'Alert stock < 5\n${produitsLowStock['count']} Produits\n\nRupture de stock\n${produitsLowStock0['count']} Produits',
+                              provider: produitProvider,
+                              button: produitsLowStock['count'] == 0 &&
+                                      produitsLowStock0['count'] == 0
+                                  ? null
+                                  : ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (context) => LowStockList(
+                                                produitsLowStock:
+                                                    produitsLowStock),
+                                            // ProduitListInterval(
+                                            //   produitsFiltres:
+                                            //       produitsFiltres,
+                                            // ),
+                                          ),
+                                        );
+                                      },
+                                      child: Text(('Voire La List'))),
+                              Color1: Colors.red,
+                              Color2: Colors.black,
                             ),
                           ),
                           // Expanded(
@@ -957,7 +1027,7 @@ class CardAlert extends StatelessWidget {
                 Center(
                   child: FittedBox(
                     child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(18.0),
                       child: Text(
                         text!,
                         textAlign: TextAlign.center,
@@ -977,11 +1047,6 @@ class CardAlert extends StatelessWidget {
                     ),
                   ),
                 ),
-                button != null
-                    ? SizedBox(
-                        height: 15,
-                      )
-                    : Container(),
                 button != null ? FittedBox(child: button) : Container(),
               ],
             )

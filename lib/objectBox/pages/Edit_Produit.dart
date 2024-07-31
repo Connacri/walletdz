@@ -597,17 +597,10 @@ class _Edit_ProduitState extends State<Edit_Produit> {
         Container(
           width: largeur,
           child: TextFormField(
-            //focusNode: FocusNode(),
             controller: _serialController,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 18,
-            ),
             decoration: InputDecoration(
-              hintStyle: TextStyle(color: Colors.black38),
-              // labelText: 'Numéro de série',
-              hintText: 'Code Barre / QrCode',
-
+              labelText: 'Code Barre / QrCode',
               prefixIcon: _isFirstFieldFilled != true
                   ? IconButton(
                       icon: Icon(Icons.clear),
@@ -615,7 +608,6 @@ class _Edit_ProduitState extends State<Edit_Produit> {
                       tooltip: 'Effacer tous les champs',
                     )
                   : null,
-
               suffixIcon: Platform.isIOS || Platform.isAndroid
                   ? IconButton(
                       icon: Icon(Icons.qr_code_scanner),
@@ -648,12 +640,10 @@ class _Edit_ProduitState extends State<Edit_Produit> {
             enabled: _isFirstFieldFilled,
             controller: _nomController,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 18, color: Colors.black),
             keyboardType: TextInputType.text,
             decoration: InputDecoration(
-              hintStyle: TextStyle(color: Colors.black38),
-              fillColor: _isFirstFieldFilled ? Colors.green.shade100 : null,
-              hintText: 'Nom Du Produit',
+              fillColor: _isFirstFieldFilled ? Colors.green : null,
+              labelText: 'Nom Du Produit',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8.0),
                 borderSide: BorderSide.none, // Supprime le contour
@@ -685,17 +675,9 @@ class _Edit_ProduitState extends State<Edit_Produit> {
           child: TextFormField(
             enabled: _isFirstFieldFilled,
             controller: _descriptionController,
-            textAlign: TextAlign.center,
-            maxLines: 5, // Permet un nombre illimité de lignes
-
-            style: const TextStyle(
-              fontSize: 18,
-            ),
+            maxLines: 5,
             keyboardType: TextInputType.text,
             decoration: InputDecoration(
-              hintStyle: TextStyle(color: Colors.black38),
-              //fillColor: Colors.blue.shade50,
-
               hintText: 'Déscription',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8.0),
@@ -711,7 +693,6 @@ class _Edit_ProduitState extends State<Edit_Produit> {
                 borderSide:
                     BorderSide.none, // Supprime le contour en état focus
               ),
-              //border: InputBorder.none,
               filled: true,
               contentPadding: EdgeInsets.all(15),
             ),
@@ -740,12 +721,10 @@ class _Edit_ProduitState extends State<Edit_Produit> {
             enabled: _isFirstFieldFilled,
             controller: _datePeremptionController,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 18, color: Colors.black),
             keyboardType: TextInputType.text,
             decoration: InputDecoration(
-              hintStyle: TextStyle(color: Colors.black38),
-              fillColor: _isFirstFieldFilled ? Colors.green.shade100 : null,
-              hintText: 'Date de Péremption',
+              fillColor: _isFirstFieldFilled ? Colors.green : null,
+              labelText: 'Date de Péremption',
               suffixIcon: IconButton(
                 icon: const Icon(Icons.date_range),
                 onPressed: () async {
@@ -796,14 +775,10 @@ class _Edit_ProduitState extends State<Edit_Produit> {
             enabled: false, //_isFirstFieldFilled,
             controller: _stockinitController,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 18, color: Colors.black),
             keyboardType: TextInputType.text,
             decoration: InputDecoration(
-              hintStyle: TextStyle(color: Colors.black38),
-              fillColor:
-                  //_isFirstFieldFilled ? Colors.green.shade100 :
-                  null,
-              hintText: 'Stock Initial',
+              fillColor: null,
+              labelText: 'Stock Initial',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8.0),
                 borderSide: BorderSide.none, // Supprime le contour
@@ -841,14 +816,9 @@ class _Edit_ProduitState extends State<Edit_Produit> {
                       enabled: _isFirstFieldFilled,
                       controller: _prixAchatController,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 18,
-                      ),
                       decoration: InputDecoration(
                         hintStyle: TextStyle(color: Colors.black38),
-                        //fillColor: Colors.blue.shade50,
-                        hintText: 'Prix d\'achat',
-
+                        labelText: 'Prix d\'achat',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
                           borderSide: BorderSide.none, // Supprime le contour
@@ -904,21 +874,15 @@ class _Edit_ProduitState extends State<Edit_Produit> {
                       },
                     ),
                   ),
-                  SizedBox(width: 10),
+                  SizedBox(height: 10),
                   Container(
                     width: -5 + largeur / 2,
                     child: TextFormField(
                       enabled: _isFirstFieldFilled,
                       controller: _prixVenteController,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 18,
-                      ),
                       decoration: InputDecoration(
-                        hintStyle: TextStyle(color: Colors.black38),
-                        //fillColor: Colors.blue.shade50,
-                        hintText: 'Prix de vente',
-
+                        labelText: 'Prix de vente',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
                           borderSide: BorderSide.none, // Supprime le contour
@@ -985,14 +949,8 @@ class _Edit_ProduitState extends State<Edit_Produit> {
                       enabled: _isFirstFieldFilled,
                       controller: _prixAchatController,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 18,
-                      ),
                       decoration: InputDecoration(
-                        hintStyle: TextStyle(color: Colors.black38),
-                        //fillColor: Colors.blue.shade50,
-                        hintText: 'Prix d\'achat',
-
+                        labelText: 'Prix d\'achat',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
                           borderSide: BorderSide.none, // Supprime le contour
@@ -1055,14 +1013,8 @@ class _Edit_ProduitState extends State<Edit_Produit> {
                       enabled: _isFirstFieldFilled,
                       controller: _prixVenteController,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 18,
-                      ),
                       decoration: InputDecoration(
-                        hintStyle: TextStyle(color: Colors.black38),
-                        //fillColor: Colors.blue.shade50,
-                        hintText: 'Prix de vente',
-
+                        labelText: 'Prix de vente',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
                           borderSide: BorderSide.none, // Supprime le contour
@@ -1134,8 +1086,14 @@ class _Edit_ProduitState extends State<Edit_Produit> {
                             //     produit.stock.toString();
                           },
                           child: CircleAvatar(
+                            child: FittedBox(
+                                child: Padding(
+                              padding: const EdgeInsets.all(5.0),
                               child: Text(
-                                  '${double.tryParse(_stockController.text)!.toStringAsFixed(2)}')),
+                                '${double.tryParse(_stockController.text)!.toStringAsFixed(2)}',
+                              ),
+                            )),
+                          ),
                         )
                       : CircleAvatar(child: Icon(Icons.access_time_filled))
                   : GestureDetector(
@@ -1144,9 +1102,13 @@ class _Edit_ProduitState extends State<Edit_Produit> {
                             widget.produit!.stock.toStringAsFixed(2);
                       },
                       child: CircleAvatar(
-                          child: Text(
-                        widget.produit!.stock.toStringAsFixed(2) ?? '0',
-                      )),
+                          child: FittedBox(
+                              child: Padding(
+                        padding: const EdgeInsets.all(5.0),
+                        child: Text(
+                          widget.produit!.stock.toStringAsFixed(2),
+                        ),
+                      ))),
                     ),
               SizedBox(
                 width: 10,
@@ -1156,17 +1118,8 @@ class _Edit_ProduitState extends State<Edit_Produit> {
                   enabled: false, //_isFirstFieldFilled,
                   controller: _stockController,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 18,
-                  ),
                   decoration: InputDecoration(
-                    hintStyle: TextStyle(color: Colors.black38),
-                    //fillColor: Colors.blue.shade50,
-                    // prefixIcon: IconButton(
-                    //   onPressed: _showAddQuantityDialog,
-                    //   icon: const Icon(Icons.add),
-                    // ),
-                    hintText: 'Stock',
+                    labelText: 'Stock',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
                       borderSide: BorderSide.none, // Supprime le contour
@@ -1202,18 +1155,8 @@ class _Edit_ProduitState extends State<Edit_Produit> {
                   enabled: _isFirstFieldFilled,
                   controller: _minimStockController,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 18,
-                  ),
                   decoration: InputDecoration(
-                    hintStyle: TextStyle(color: Colors.black38),
-                    //fillColor: Colors.blue.shade50,
-                    // prefixIcon: IconButton(
-                    //   onPressed: _showAddQuantityDialog,
-                    //   icon: const Icon(Icons.add),
-                    // ),
-                    hintText: 'Stock Alert',
-
+                    labelText: 'Stock Alert',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
                       borderSide: BorderSide.none, // Supprime le contour

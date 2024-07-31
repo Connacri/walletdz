@@ -1,9 +1,11 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:faker/faker.dart';
+import '../objectBox/pages/ProduitListSupabase.dart';
 import '../../objectbox.g.dart';
 import 'Entity.dart';
 import 'classeObjectBox.dart';
+import 'package:objectbox/objectbox.dart';
 
 class CommerceProvider extends ChangeNotifier {
   final ObjectBox _objectBox;
@@ -230,7 +232,7 @@ class CommerceProvider extends ChangeNotifier {
         nom: faker.food.dish(),
         prixAchat: faker.randomGenerator.decimal(min: 10),
         prixVente: faker.randomGenerator.decimal(min: 50),
-        stock: faker.randomGenerator.decimal(min : 100, scale : 15),
+        stock: faker.randomGenerator.decimal(min: 100, scale: 15),
         description: faker.lorem.sentence(),
         qr: faker.randomGenerator.integer(999999).toString(),
         datePeremption:
@@ -240,8 +242,8 @@ class CommerceProvider extends ChangeNotifier {
             faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
         stockUpdate:
             faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
-        stockinit: faker.randomGenerator.decimal(min : 200),
-        minimStock: faker.randomGenerator.decimal(min : 1, scale : 2),
+        stockinit: faker.randomGenerator.decimal(min: 200),
+        minimStock: faker.randomGenerator.decimal(min: 1, scale: 2),
       );
     });
 
@@ -393,6 +395,33 @@ class CommerceProvider extends ChangeNotifier {
       //  print('Notifications envoyées aux auditeurs.');
     } catch (e) {
       print('Erreur lors de la suppression du produit du fournisseur : $e');
+    }
+  }
+}
+
+class SyncNotifier extends ChangeNotifier {
+  final SupabaseSync supabaseSync;
+  bool _isSyncing = false;
+  String? _errorMessage;
+
+  SyncNotifier(this.supabaseSync);
+
+  bool get isSyncing => _isSyncing;
+  String? get errorMessage => _errorMessage;
+
+  Future<void> syncData() async {
+    _isSyncing = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await supabaseSync.syncToSupabase();
+      await supabaseSync.syncFromSupabase();
+    } on SyncException catch (e) {
+      _errorMessage = e.message;
+    } finally {
+      _isSyncing = false;
+      notifyListeners();
     }
   }
 }

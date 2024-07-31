@@ -44,6 +44,32 @@ class Produit {
     required this.derniereModification,
     required this.stockinit,
   });
+  factory Produit.fromJson(Map<String, dynamic> json) {
+    return Produit(
+      id: json['id'] ?? 0,
+      qr: json['qr'],
+      image: json['image'],
+      nom: json['nom'] ?? '',
+      description: json['description'],
+      prixAchat: (json['prixachat'] ?? 0).toDouble(),
+      prixVente: (json['prixvente'] ?? 0).toDouble(),
+      stock: (json['stock'] ?? 0).toDouble(),
+      minimStock: (json['minimstock'] ?? 0).toDouble(),
+      stockinit: (json['stockinit'] ?? 0).toDouble(),
+      dateCreation: json['datecreation'] != null
+          ? DateTime.parse(json['datecreation'])
+          : null,
+      datePeremption: json['dateperemption'] != null
+          ? DateTime.parse(json['dateperemption'])
+          : null,
+      stockUpdate: json['stockupdate'] != null
+          ? DateTime.parse(json['stockupdate'])
+          : null,
+      derniereModification: DateTime.parse(
+          json['dernieremodification'] //?? DateTime.now().toIso8601String()
+          ),
+    );
+  }
 }
 
 @Entity()
@@ -71,6 +97,18 @@ class Fournisseur {
     required this.dateCreation,
     required this.derniereModification,
   });
+  factory Fournisseur.fromJson(Map<String, dynamic> json) {
+    return Fournisseur(
+      id: json['id'] ?? 0,
+      qr: json['qr'],
+      nom: json['nom'] ?? '',
+      phone: json['phone'],
+      adresse: json['adresse'],
+      dateCreation: json['datecreation'],
+      derniereModification: DateTime.parse(
+          json['dernieremodification'] ?? DateTime.now().toIso8601String()),
+    );
+  }
 }
 
 @Entity()

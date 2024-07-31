@@ -64,10 +64,12 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
       }
     }
 
-    Color getColorBasedOnStock(double stock, double alert) {
+    Color getColorBasedOnStock(double stock, double stockInit, double alert) {
       if (stock <= 0) {
-        return Colors.red;
+        return Colors.grey;
       } else if (stock > 0 && stock <= alert) {
+        return Colors.red;
+      } else if (stock <= alert && stock > stockInit * 0.30) {
         return Colors.orange;
       } else {
         return Colors.green;
@@ -113,11 +115,14 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                 final peremption =
                     produit.datePeremption!.difference(DateTime.now()).inDays;
                 Color colorPeremption =
-                    getColorBasedOnPeremption(peremption, produit.minimStock);
-                final double percentProgress =
-                    produit.stock / produit.stockinit;
-                Color colorStock =
-                    getColorBasedOnStock(produit.stock, produit.minimStock);
+                    getColorBasedOnPeremption(peremption, 5.0);
+                final double percentProgress = produit.stock != 0 &&
+                        produit.stockinit != 0 &&
+                        produit.stockinit >= produit.stock
+                    ? produit.stock / produit.stockinit
+                    : 0;
+                Color colorStock = getColorBasedOnStock(
+                    produit.stock, produit.stockinit, produit.minimStock);
                 return Slidable(
                   key: ValueKey(produit.id),
                   startActionPane: ActionPane(
@@ -141,166 +146,202 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                         ? Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              ListTile(
-                                onTap: () {
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (ctx) =>
-                                        ProduitDetailPage(produit: produit),
-                                  ));
-                                },
-                                onLongPress: () {
-                                  _deleteProduit(context, produit);
-                                },
-                                leading: Tooltip(
-                                  message: 'ID : ${produit.id}',
-                                  child: GestureDetector(
-                                    onDoubleTap: () {
-                                      Platform.isIOS || Platform.isAndroid
-                                          ? _showAllFournisseursDialog(
-                                              context,
-                                              produit, /*fournisseurs*/
+                                ListTile(
+                                  onTap: () {
+                                    Navigator.of(context)
+                                        .push(MaterialPageRoute(
+                                      builder: (ctx) =>
+                                          ProduitDetailPage(produit: produit),
+                                    ));
+                                  },
+                                  onLongPress: () {
+                                    _deleteProduit(context, produit);
+                                  },
+                                  leading: Tooltip(
+                                    message: 'ID : ${produit.id}',
+                                    child: GestureDetector(
+                                      onDoubleTap: () {
+                                        _showAllFournisseursDialog(
+                                          context,
+                                          produit, /*fournisseurs*/
+                                        );
+                                      },
+                                      child: produit.image == null ||
+                                              produit.image!.isEmpty
+                                          ? CircleAvatar(
+                                              child: Icon(
+                                                  Icons.image_not_supported),
                                             )
-                                          : null;
-                                    },
-                                    child: produit.image == null ||
-                                            produit.image!.isEmpty
-                                        ? CircleAvatar(
-                                            child:
-                                                Icon(Icons.image_not_supported),
-                                          )
-                                        : Column(
+                                          : Column(
+                                              children: [
+                                                Expanded(
+                                                  child: CircleAvatar(
+                                                    backgroundImage:
+                                                        CachedNetworkImageProvider(
+                                                      produit.image!,
+                                                      errorListener: (error) =>
+                                                          Icon(Icons.error),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Text('Id:' +
+                                                    produit.id.toString()),
+                                              ],
+                                            ),
+                                    ),
+                                  ),
+                                  title: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8),
+                                    child: Text(produit.nom),
+                                  ),
+                                  subtitle: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Column(
+                                        children: [
+                                          Row(
                                             children: [
-                                              Expanded(
-                                                child: CircleAvatar(
-                                                  backgroundImage:
-                                                      CachedNetworkImageProvider(
-                                                    produit.image!,
-                                                    errorListener: (error) =>
-                                                        Icon(Icons.error),
+                                              Center(
+                                                child: Text(
+                                                  'A : ${produit.prixAchat.toStringAsFixed(2)} ',
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: 10,
+                                              ),
+                                              Container(
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 5, vertical: 2),
+                                                decoration: BoxDecoration(
+                                                  gradient: LinearGradient(
+                                                    colors: [
+                                                      Colors.lightGreen,
+                                                      Colors.black45
+                                                    ], // Couleurs du dégradé
+                                                    begin: Alignment
+                                                        .topLeft, // Début du dégradé
+                                                    end: Alignment
+                                                        .bottomRight, // Fin du dégradé
+                                                  ), // Couleur de fond
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10), // Coins arrondis
+                                                ),
+                                                child: Center(
+                                                  child: Text(
+                                                    '${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)}',
+                                                    style: TextStyle(
+                                                        color: Colors.white),
                                                   ),
                                                 ),
                                               ),
-                                              Text('Id:' +
-                                                  produit.id.toString()),
                                             ],
                                           ),
+                                          SizedBox(height: 5),
+                                          Container(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 5, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                colors: [
+                                                  Colors.red,
+                                                  Colors.black45
+                                                ], // Couleurs du dégradé
+                                                begin: Alignment
+                                                    .topLeft, // Début du dégradé
+                                                end: Alignment
+                                                    .bottomRight, // Fin du dégradé
+                                              ), // Couleur de fond
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                      10), // Coins arrondis
+                                            ),
+                                            child: Center(
+                                              child: Text(
+                                                'Reste : ${produit.datePeremption!.difference(DateTime.now()).inDays} Jours ',
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(
+                                        height: 5,
+                                      ),
+                                    ],
+                                  ),
+                                  trailing: Padding(
+                                    padding: const EdgeInsets.only(left: 15),
+                                    child: Text(
+                                      '${produit.prixVente.toStringAsFixed(2)}',
+                                      style: TextStyle(fontSize: 20),
+                                    ),
                                   ),
                                 ),
-                                title: Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 8),
-                                  child: Text(produit.nom),
-                                ),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                Row(
                                   children: [
-                                    Column(
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Center(
-                                              child: Text(
-                                                'A : ${produit.prixAchat.toStringAsFixed(2)} ',
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              width: 10,
-                                            ),
-                                            Container(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 5, vertical: 2),
-                                              decoration: BoxDecoration(
-                                                gradient: LinearGradient(
-                                                  colors: [
-                                                    Colors.lightGreen,
-                                                    Colors.black45
-                                                  ], // Couleurs du dégradé
-                                                  begin: Alignment
-                                                      .topLeft, // Début du dégradé
-                                                  end: Alignment
-                                                      .bottomRight, // Fin du dégradé
-                                                ), // Couleur de fond
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                        10), // Coins arrondis
-                                              ),
-                                              child: Center(
-                                                child: Text(
-                                                  '${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)}',
-                                                  style: TextStyle(
-                                                      color: Colors.white),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        SizedBox(height: 5),
-                                        Container(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 5, vertical: 2),
-                                          decoration: BoxDecoration(
-                                            gradient: LinearGradient(
-                                              colors: [
-                                                Colors.red,
-                                                Colors.black45
-                                              ], // Couleurs du dégradé
-                                              begin: Alignment
-                                                  .topLeft, // Début du dégradé
-                                              end: Alignment
-                                                  .bottomRight, // Fin du dégradé
-                                            ), // Couleur de fond
-                                            borderRadius: BorderRadius.circular(
-                                                10), // Coins arrondis
-                                          ),
-                                          child: Center(
-                                            child: Text(
-                                              'Reste : ${produit.datePeremption!.difference(DateTime.now()).inDays} Jours ',
-                                              style: TextStyle(
-                                                  color: Colors.white),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8),
+                                      child:
+                                          Text('QR : ' + produit.qr.toString()),
                                     ),
-                                    SizedBox(
-                                      height: 5,
+                                    SizedBox(width: 2),
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 5, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            Colors.blue,
+                                            Colors.black45
+                                          ], // Couleurs du dégradé
+                                          begin: Alignment
+                                              .topLeft, // Début du dégradé
+                                          end: Alignment
+                                              .bottomRight, // Fin du dégradé
+                                        ), // Couleur de fond
+                                        borderRadius: BorderRadius.circular(
+                                            10), // Coins arrondis
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          '${produit.minimStock.toStringAsFixed(produit.minimStock.truncateToDouble() == produit.minimStock ? 0 : 2)}',
+                                          // '${(produit.minimStock).toStringAsFixed(2)}',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 2),
+                                    Expanded(
+                                      child: Padding(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 15),
+                                        child: new LinearPercentIndicator(
+                                          animation: true,
+                                          animationDuration: 1000,
+                                          lineHeight: 20.0,
+                                          leading: new Text(produit.stockinit
+                                              .toStringAsFixed(1)),
+                                          trailing: new Text(
+                                              produit.stock.toStringAsFixed(1)),
+                                          percent: percentProgress,
+                                          center: new Text(
+                                              '${(percentProgress * 100).toStringAsFixed(1)}%'),
+                                          linearStrokeCap:
+                                              LinearStrokeCap.roundAll,
+                                          backgroundColor: Colors.grey.shade300,
+                                          progressColor: colorStock,
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ),
-                                trailing: Padding(
-                                  padding: const EdgeInsets.only(left: 15),
-                                  child: Text(
-                                    '${produit.prixVente.toStringAsFixed(2)}',
-                                    style: TextStyle(fontSize: 20),
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 15),
-                                child: new LinearPercentIndicator(
-                                  animation: true,
-                                  animationDuration: 1000,
-                                  lineHeight: 20.0,
-                                  leading:
-                                      new Text(produit.stockinit.toString()),
-                                  trailing: new Text(produit.stock.toString()),
-                                  percent: percentProgress,
-                                  center: new Text(
-                                      '${(percentProgress * 100).toStringAsFixed(1)}%'),
-                                  linearStrokeCap: LinearStrokeCap.roundAll,
-                                  backgroundColor: Colors.grey.shade300,
-                                  progressColor: colorPeremption,
-                                ),
-                              ),
-                              Center(
-                                child: Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 8),
-                                  child: Text('QR : ' + produit.qr.toString()),
-                                ),
-                              )
-                            ],
-                          )
+                                SizedBox(height: 15),
+                              ])
                         : GestureDetector(
                             onTap: () {
                               Navigator.of(context).push(MaterialPageRoute(
@@ -423,7 +464,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                                   ),
                                                   child: Center(
                                                     child: Text(
-                                                      'Péremption : ${produit.datePeremption!.day}/${produit.datePeremption!.month}/${produit.datePeremption!.year}  Reste : ${peremption + 1} Jours ',
+                                                      'Péremption : ${produit.datePeremption!.day}/${produit.datePeremption!.month}/${produit.datePeremption!.year}  Reste : ${peremption} Jours ',
                                                       style: TextStyle(
                                                           color: Colors.white),
                                                     ),
@@ -466,7 +507,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                               ),
                                               child: Center(
                                                 child: Text(
-                                                  '${(produit.stockinit).toStringAsFixed(0)}',
+                                                  '${produit.minimStock.toStringAsFixed(produit.minimStock.truncateToDouble() == produit.minimStock ? 0 : 2)}',
                                                   style: TextStyle(
                                                       color: Colors.white),
                                                 ),
@@ -490,7 +531,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                                     LinearStrokeCap.roundAll,
                                                 backgroundColor:
                                                     Colors.grey.shade300,
-                                                progressColor: colorPeremption,
+                                                progressColor: colorStock,
                                               ),
                                             ),
                                           ],
