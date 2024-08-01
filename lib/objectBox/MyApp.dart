@@ -123,6 +123,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   double prixMin = 0;
   double prixMax = 0;
+  final TextEditingController _productController = TextEditingController();
+  final TextEditingController _supplierController = TextEditingController();
 
   @override
   void initState() {
@@ -192,6 +194,56 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _showDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Définir les données factices'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _productController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: 'Nombre de produits'),
+              ),
+              TextField(
+                controller: _supplierController,
+                keyboardType: TextInputType.number,
+                decoration:
+                    InputDecoration(labelText: 'Nombre de fournisseurs'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Annuler'),
+            ),
+            TextButton(
+              onPressed: () {
+                final int products = int.tryParse(_productController.text) ?? 0;
+                final int suppliers =
+                    int.tryParse(_supplierController.text) ?? 0;
+
+                widget.objectBox.fillWithFakeData(products, suppliers);
+                // ScaffoldMessenger.of(context).showSnackBar(
+                //   SnackBar(content: Text('Données factices ajoutées !')),
+                // );
+
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final randomId = Random().nextInt(100);
@@ -199,19 +251,10 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text('Facturation'),
         actions: [
-          // IconButton(
-          //   onPressed: () {
-          //     Navigator.of(context).push(MaterialPageRoute(
-          //         builder: (ctx) => SyncScreen(
-          //             supabase: Supabase.instance.client,
-          //             objectboxStore: widget.objectBox.store)));
-          //   },
-          //   icon: Icon(Icons.face_2_sharp),
-          // ),
           IconButton(
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(
-                  builder: (ctx) => supa.ProduitListPage2(
+                  builder: (ctx) => supa.ProduitListPage(
                       supabase: Supabase.instance.client,
                       objectboxStore: widget.objectBox.store
                       // objectBox: widget.objectBox,
@@ -221,19 +264,14 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           IconButton(
             onPressed: () {
-              widget.objectBox.fillWithFakeData(1000, 500);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Données factices ajoutées !')),
-              );
+              // widget.objectBox.fillWithFakeData(1000, 500);
+              // ScaffoldMessenger.of(context).showSnackBar(
+              //   SnackBar(content: Text('Données factices ajoutées !')),
+              // );
+              _showDialog();
+              print('_showDialog');
             },
             icon: Icon(Icons.send),
-          ),
-          IconButton(
-            onPressed: () {
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (ctx) => add_Produit()));
-            },
-            icon: Icon(Icons.safety_check_rounded),
           ),
           IconButton(
             onPressed: () {
@@ -417,6 +455,9 @@ class HomeScreenWide extends StatefulWidget {
 
 class _HomeScreenWideState extends State<HomeScreenWide> {
   int _selectedIndex = 0;
+  final TextEditingController _productController = TextEditingController();
+  final TextEditingController _supplierController = TextEditingController();
+
   List<Widget> _widgetOptions() {
     return [
       homeRail(),
@@ -496,6 +537,56 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
     );
   }
 
+  void _showDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Définir les données factices'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _productController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: 'Nombre de produits'),
+              ),
+              TextField(
+                controller: _supplierController,
+                keyboardType: TextInputType.number,
+                decoration:
+                    InputDecoration(labelText: 'Nombre de fournisseurs'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Annuler'),
+            ),
+            TextButton(
+              onPressed: () {
+                final int products = int.tryParse(_productController.text) ?? 0;
+                final int suppliers =
+                    int.tryParse(_supplierController.text) ?? 0;
+
+                widget.objectBox.fillWithFakeData(products, suppliers);
+                // ScaffoldMessenger.of(context).showSnackBar(
+                //   SnackBar(content: Text('Données factices ajoutées !')),
+                // );
+
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final randomId = Random().nextInt(100);
@@ -515,7 +606,7 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
           IconButton(
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(
-                  builder: (ctx) => supa.ProduitListPage2(
+                  builder: (ctx) => supa.ProduitListPage(
                       supabase: Supabase.instance.client,
                       objectboxStore: widget.objectBox.store)));
             },
@@ -523,19 +614,14 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
           ),
           IconButton(
             onPressed: () {
-              widget.objectBox.fillWithFakeData(1000, 500);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Données factices ajoutées !')),
-              );
+              // widget.objectBox.fillWithFakeData(1000, 500);
+              // ScaffoldMessenger.of(context).showSnackBar(
+              //   SnackBar(content: Text('Données factices ajoutées !')),
+              // );
+              _showDialog();
+              print('_showDialog');
             },
             icon: Icon(Icons.send),
-          ),
-          IconButton(
-            onPressed: () {
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (ctx) => add_Produit()));
-            },
-            icon: Icon(Icons.safety_check_rounded),
           ),
           IconButton(
             onPressed: () {

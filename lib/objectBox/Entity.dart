@@ -104,7 +104,7 @@ class Fournisseur {
       nom: json['nom'] ?? '',
       phone: json['phone'],
       adresse: json['adresse'],
-      dateCreation: json['datecreation'],
+      dateCreation: DateTime.parse(json['datecreation']),
       derniereModification: DateTime.parse(
           json['dernieremodification'] ?? DateTime.now().toIso8601String()),
     );
