@@ -13,6 +13,8 @@ class ObjectBox {
   late final Store store;
   late final Box<Produit> produitBox;
   late final Box<Fournisseur> fournisseurBox;
+  late final Box<Facture> factureBox;
+  late final Box<LigneFacture> ligneFacture;
 
   static final ObjectBox _singleton = ObjectBox._internal();
 
@@ -28,6 +30,8 @@ class ObjectBox {
       store = await openStore(directory: '${dir.path}/objectbox');
       produitBox = Box<Produit>(store);
       fournisseurBox = Box<Fournisseur>(store);
+      factureBox = Box<Facture>(store);
+      ligneFacture = Box<LigneFacture>(store);
     }
   }
 

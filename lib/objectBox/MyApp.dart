@@ -5,6 +5,7 @@ import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:walletdz/objectBox/pages/FactureListScreen.dart';
 import 'package:walletdz/objectBox/pages/ProduitListSupabase.dart';
 import '../../MyListLotties.dart';
 import '../objectbox.g.dart';
@@ -61,6 +62,9 @@ class MyApp9 extends StatelessWidget {
           create: (_) => CommerceProvider(
             objectBox,
           ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => CartProvider(),
         ),
       ],
       child: MaterialApp(
@@ -253,12 +257,27 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             onPressed: () {
+              Navigator.of(context).push(
+                  MaterialPageRoute(builder: (ctx) => FacturesListPage()));
+            },
+            icon: Icon(Icons.hail_outlined),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (ctx) => FacturePage()));
+            },
+            icon: Icon(Icons.invert_colors_off),
+          ),
+          SizedBox(
+            width: 50,
+          ),
+          IconButton(
+            onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (ctx) => supa.ProduitListPage(
                       supabase: Supabase.instance.client,
-                      objectboxStore: widget.objectBox.store
-                      // objectBox: widget.objectBox,
-                      )));
+                      objectboxStore: widget.objectBox.store)));
             },
             icon: Icon(Icons.local_police),
           ),
@@ -280,6 +299,9 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             icon: Icon(Icons.local_bar_outlined),
           ),
+          SizedBox(
+            width: 50,
+          )
         ],
       ),
       body: Consumer<CommerceProvider>(
@@ -304,15 +326,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     image: 'https://picsum.photos/seed/${randomId + 8}/200/100',
                     text: '${produitProvider.fournisseurs.length} Fournisseurs',
                     provider: produitProvider,
-                    // button: ElevatedButton(
-                    //   onPressed: () {
-                    //     Navigator.of(context).push(
-                    //       MaterialPageRoute(
-                    //           builder: (context) => FournisseurListScreen()),
-                    //     );
-                    //   },
-                    //   child: Text('Voir plus'),
-                    // ),
                     SmallBanner: true,
                   ),
                 ),
@@ -594,15 +607,23 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
       appBar: AppBar(
         title: Text('Facturation'),
         actions: [
-          // IconButton(
-          //   onPressed: () {
-          //     Navigator.of(context).push(MaterialPageRoute(
-          //         builder: (ctx) => SyncScreen(
-          //             supabase: Supabase.instance.client,
-          //             objectboxStore: widget.objectBox.store)));
-          //   },
-          //   icon: Icon(Icons.face_2_sharp),
-          // ),
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                  MaterialPageRoute(builder: (ctx) => FacturesListPage()));
+            },
+            icon: Icon(Icons.hail_outlined),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (ctx) => FacturePage()));
+            },
+            icon: Icon(Icons.invert_colors_off),
+          ),
+          SizedBox(
+            width: 50,
+          ),
           IconButton(
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(
@@ -1079,7 +1100,7 @@ class CardAlert extends StatelessWidget {
       child: SizedBox(
         height: Platform.isWindows || Platform.isMacOS || Platform.isLinux
             ? MediaQuery.of(context).size.width * 0.15
-            : MediaQuery.of(context).size.width * 0.55,
+            : MediaQuery.of(context).size.height * 0.35,
         width: MediaQuery.of(context).size.width * 0.30,
         child: Stack(
           fit: StackFit.passthrough,

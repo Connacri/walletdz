@@ -6,7 +6,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
-import '../../objectbox.g.dart';
 import '../Entity.dart';
 import '../classeObjectBox.dart';
 import 'FournisseurListScreen.dart';

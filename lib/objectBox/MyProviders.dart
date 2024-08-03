@@ -16,6 +16,7 @@ class CommerceProvider extends ChangeNotifier {
   final int _pageSize = 100;
   bool _hasMoreProduits = true;
   bool _isLoading = false;
+
   // List<Produit> get produits => _produits;
   List<Produit> get produitsP => _produitsP;
   bool get hasMoreProduits => _hasMoreProduits;
@@ -122,6 +123,15 @@ class CommerceProvider extends ChangeNotifier {
   void updateProduit(Produit produit) {
     _objectBox.produitBox.put(produit);
     chargerProduits(reset: true);
+  }
+
+  void updateProductStock(int productId, double newStock) {
+    final index = _produitsP.indexWhere((p) => p.id == productId);
+    if (index != -1) {
+      _produitsP[index].stock = newStock;
+      _objectBox.produitBox.put(_produitsP[index]);
+      notifyListeners();
+    }
   }
 
   void updateProduitById(int id, Produit updatedProduit,
@@ -399,29 +409,54 @@ class CommerceProvider extends ChangeNotifier {
   }
 }
 
-class SyncNotifier extends ChangeNotifier {
-  final SupabaseSync supabaseSync;
-  bool _isSyncing = false;
-  String? _errorMessage;
+class CartProvider with ChangeNotifier {
+  Facture _facture = Facture(date: DateTime.now(), qr: '');
 
-  SyncNotifier(this.supabaseSync);
+  Facture get facture => _facture;
 
-  bool get isSyncing => _isSyncing;
-  String? get errorMessage => _errorMessage;
-
-  Future<void> syncData() async {
-    _isSyncing = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    try {
-      await supabaseSync.syncToSupabase();
-      await supabaseSync.syncFromSupabase();
-    } on SyncException catch (e) {
-      _errorMessage = e.message;
-    } finally {
-      _isSyncing = false;
-      notifyListeners();
+  void addToCart(Produit produit) {
+    final index = _facture.lignesFacture
+        .indexWhere((item) => item.produit.target!.id == produit.id);
+    if (index != -1) {
+      _facture.lignesFacture[index].quantite += 1;
+    } else {
+      final ligneFacture = LigneFacture(
+        quantite: 1,
+        prixUnitaire: produit.prixVente,
+      );
+      ligneFacture.produit.target = produit;
+      _facture.lignesFacture.add(ligneFacture);
     }
+    notifyListeners();
+  }
+
+  void removeFromCart(Produit produit) {
+    final index = _facture.lignesFacture
+        .indexWhere((item) => item.produit.target!.id == produit.id);
+    if (index != -1) {
+      if (_facture.lignesFacture[index].quantite > 1) {
+        _facture.lignesFacture[index].quantite -= 1;
+      } else {
+        _facture.lignesFacture.removeAt(index);
+      }
+    }
+    notifyListeners();
+  }
+
+  double get totalAmount {
+    return _facture.lignesFacture
+        .fold(0, (sum, item) => sum + item.prixUnitaire * item.quantite);
+  }
+
+  void saveFacture() {
+    final box = ObjectBox().factureBox;
+    box.put(_facture);
+    _facture = Facture(date: DateTime.now(), qr: '');
+    notifyListeners();
+  }
+
+  void clearCart() {
+    _facture = Facture(date: DateTime.now(), qr: '');
+    notifyListeners();
   }
 }

@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:provider/provider.dart';
+import '../../objectbox.g.dart';
 import '../Entity.dart';
 import '../MyProviders.dart';
+import '../classeObjectBox.dart';
 import 'Edit_Produit.dart';
 import 'FournisseurListScreen.dart';
 import 'dart:io' show Platform;
@@ -997,6 +999,14 @@ class ProduitSearchDelegateMain extends SearchDelegate {
                 title: Text('${produit.id} ${produit.nom}'),
                 subtitle:
                     Text('Prix: ${produit.prixVente.toStringAsFixed(2)} DZD'),
+                trailing: IconButton(
+                  icon: Icon(Icons.add_shopping_cart),
+                  onPressed: () {
+                    Provider.of<CartProvider>(context, listen: false)
+                        .addToCart(produit);
+                    Navigator.of(context).pop();
+                  },
+                ),
               );
             },
           );
