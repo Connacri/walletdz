@@ -66,7 +66,7 @@ class FacturePage extends StatelessWidget {
                     final ligneFacture = items[index];
                     final produit = ligneFacture.produit.target!;
                     return ListTile(
-                      title: Text(produit.nom),
+                      title: Text('Prix: ${produit.nom} Qr: ${produit.qr}'),
                       subtitle: Text(
                           'Prix: ${ligneFacture.prixUnitaire.toStringAsFixed(2)} DZD\nQuantité: ${ligneFacture.quantite}'),
                       trailing: IconButton(
@@ -101,6 +101,7 @@ class FacturePage extends StatelessWidget {
                   ],
                 ),
               ),
+              SizedBox(height: 50)
             ],
           );
         },
@@ -190,6 +191,7 @@ class FactureDetailPage extends StatelessWidget {
               ],
             ),
           ),
+          SizedBox(height: 50)
         ],
       ),
     );
