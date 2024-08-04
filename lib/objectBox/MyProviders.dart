@@ -183,6 +183,10 @@ class CommerceProvider extends ChangeNotifier {
     return _objectBox.produitBox.count();
   }
 
+  int getTotalClientsCount() {
+    return _objectBox.clientBox.count();
+  }
+
   List<Produit> getProduitsBetweenPrices(double minPrice, double maxPrice) {
     final query = _objectBox.produitBox
         .query(Produit_.prixVente.between(minPrice, maxPrice));

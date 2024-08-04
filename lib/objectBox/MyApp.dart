@@ -333,6 +333,57 @@ class _HomeScreenState extends State<HomeScreen> {
                     SmallBanner: true,
                   ),
                 ),
+                Container(
+                  width: MediaQuery.of(context).size.width,
+                  child: Row(
+                    children: [
+                      ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (_) => FacturePage()));
+                          },
+                          label: Text('Facture Page'),
+                          icon: Icon(Icons.monetization_on_sharp)),
+                      ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (_) => FacturesListPage()));
+                          },
+                          label: Text('Facture List'),
+                          icon: Icon(Icons.list_alt)),
+                    ],
+                  ),
+                ),
+                ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => ClientListScreen()));
+                    },
+                    label: Text('Client List'),
+                    icon: Icon(Icons.account_circle)),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (context) => ClientListScreen()),
+                    );
+                  },
+                  child: CardTop(
+                    image: 'https://picsum.photos/seed/${randomId + 2}/200/100',
+                    text: '${produitProvider.getTotalClientsCount()} Clients',
+                    provider: produitProvider,
+                    // button: ElevatedButton(
+                    //   onPressed: () {
+                    //     Navigator.of(context).push(
+                    //       MaterialPageRoute(
+                    //           builder: (context) => ProduitListScreen()),
+                    //     );
+                    //   },
+                    //   child: Text('Voir plus'),
+                    // ),
+                    SmallBanner: false,
+                  ),
+                ),
                 GestureDetector(
                   onTap: () {
                     Navigator.of(context).push(
@@ -391,7 +442,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 CardAlert(
-                  image: 'https://picsum.photos/seed/${randomId + 2}/200/100',
+                  image: 'https://picsum.photos/seed/${randomId + 3}/200/100',
                   text:
                       'Alert stock < 5\n${produitsLowStock['count']} Produits\n\nRupture de stock\n${produitsLowStock0['count']} Produits',
                   provider: produitProvider,
@@ -898,6 +949,38 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
               },
             ),
           ),
+          SizedBox(height: 18),
+          ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => ClientListScreen()));
+              },
+              label: Text('Client List'),
+              icon: Icon(Icons.account_circle)),
+          SizedBox(height: 18),
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => ClientListScreen()),
+              );
+            },
+            child: CardTop(
+              image: 'https://picsum.photos/seed/${randomId + 2}/200/100',
+              text: '${produitProvider.getTotalClientsCount()} Clients',
+              provider: produitProvider,
+              // button: ElevatedButton(
+              //   onPressed: () {
+              //     Navigator.of(context).push(
+              //       MaterialPageRoute(
+              //           builder: (context) => ProduitListScreen()),
+              //     );
+              //   },
+              //   child: Text('Voir plus'),
+              // ),
+              SmallBanner: false,
+            ),
+          ),
+          SizedBox(height: 18),
         ],
       ),
     );

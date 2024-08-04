@@ -6,109 +6,9 @@ import '../MyProviders.dart';
 import '../Utils/QRViewExample.dart';
 import '../classeObjectBox.dart';
 import 'ProduitListScreen.dart';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
-// class FacturePage extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     final commerceProvider = Provider.of<CommerceProvider>(context);
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Facture'),
-//         actions: [
-//           IconButton(
-//             icon: Icon(Icons.search),
-//             onPressed: () {
-//               showSearch(
-//                   context: context,
-//                   delegate: ProduitSearchDelegateMain(commerceProvider));
-//             },
-//           ),
-//           IconButton(
-//             icon: Icon(Icons.qr_code_scanner),
-//             onPressed: () async {
-//               final result = await Navigator.push(
-//                 context,
-//                 MaterialPageRoute(builder: (context) => QRViewExample()),
-//               );
-//               if (result != null) {
-//                 final produit = await commerceProvider.getProduitByQr(result);
-//                 if (produit != null) {
-//                   Provider.of<CartProvider>(context, listen: false)
-//                       .addToCart(produit);
-//                 } else {
-//                   ScaffoldMessenger.of(context).showSnackBar(
-//                     SnackBar(
-//                       content: Text('Produit introuvable!'),
-//                       backgroundColor: Colors.red,
-//                     ),
-//                   );
-//                 }
-//               }
-//             },
-//           ),
-//           SizedBox(
-//             width: 100,
-//           )
-//         ],
-//       ),
-//       body: Consumer<CartProvider>(
-//         builder: (context, cartProvider, child) {
-//           final items = cartProvider.facture.lignesFacture;
-//           final totalAmount = cartProvider.totalAmount;
-//           final tva = totalAmount * 0.19; // TVA à 19%
-//
-//           return Column(
-//             children: [
-//               Expanded(
-//                 child: ListView.builder(
-//                   itemCount: items.length,
-//                   itemBuilder: (context, index) {
-//                     final ligneFacture = items[index];
-//                     final produit = ligneFacture.produit.target!;
-//                     return ListTile(
-//                       title: Text('Prix: ${produit.nom} Qr: ${produit.qr}'),
-//                       subtitle: Text(
-//                           'Prix: ${ligneFacture.prixUnitaire.toStringAsFixed(2)} DZD\nQuantité: ${ligneFacture.quantite}'),
-//                       trailing: IconButton(
-//                         icon: Icon(Icons.remove_shopping_cart),
-//                         onPressed: () {
-//                           cartProvider.removeFromCart(produit);
-//                         },
-//                       ),
-//                     );
-//                   },
-//                 ),
-//               ),
-//               Padding(
-//                 padding: const EdgeInsets.all(16.0),
-//                 child: Column(
-//                   crossAxisAlignment: CrossAxisAlignment.start,
-//                   children: [
-//                     Text('Total: ${totalAmount.toStringAsFixed(2)} DZD'),
-//                     Text('TVA (19%): ${tva.toStringAsFixed(2)} DZD'),
-//                     Text(
-//                         'Total TTC: ${(totalAmount + tva).toStringAsFixed(2)} DZD'),
-//                     SizedBox(height: 20),
-//                     ElevatedButton(
-//                       onPressed: () {
-//                         cartProvider.saveFacture();
-//                         ScaffoldMessenger.of(context).showSnackBar(
-//                           SnackBar(content: Text('Facture sauvegardée!')),
-//                         );
-//                       },
-//                       child: Text('Sauvegarder la facture'),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//               SizedBox(height: 50)
-//             ],
-//           );
-//         },
-//       ),
-//     );
-//   }
-// }
 class FacturePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -128,29 +28,36 @@ class FacturePage extends StatelessWidget {
               );
             },
           ),
-          IconButton(
-            icon: Icon(Icons.qr_code_scanner),
-            onPressed: () async {
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => QRViewExample()),
-              );
-              if (result != null) {
-                final produit = await commerceProvider.getProduitByQr(result);
-                if (produit != null) {
-                  Provider.of<CartProvider>(context, listen: false)
-                      .addToCart(produit);
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Produit introuvable!'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              }
-            },
-          ),
+          kIsWeb ||
+                  Platform.isWindows ||
+                  Platform.isLinux ||
+                  Platform.isFuchsia ||
+                  Platform.isIOS
+              ? Container()
+              : IconButton(
+                  icon: Icon(Icons.qr_code_scanner),
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => QRViewExample()),
+                    );
+                    if (result != null) {
+                      final produit =
+                          await commerceProvider.getProduitByQr(result);
+                      if (produit != null) {
+                        Provider.of<CartProvider>(context, listen: false)
+                            .addToCart(produit);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Produit introuvable!'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
+                  },
+                ),
           IconButton(
             icon: Icon(Icons.person_add),
             onPressed: () => _showClientDialog(context),
@@ -457,7 +364,7 @@ class FacturesListPage extends StatelessWidget {
                         child: Text('${facture.id}'),
                       ),
                     ),
-                    title: Text('Client ${facture.client.target!.nom}'),
+                    title: Text('Invoice ${facture.client.target!.nom}'),
                     subtitle: Text('${facture.date}'),
                     onLongPress: () {
                       Provider.of<CartProvider>(context, listen: false)
