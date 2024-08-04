@@ -9,19 +9,20 @@ import 'package:objectbox/objectbox.dart';
 
 class CommerceProvider extends ChangeNotifier {
   final ObjectBox _objectBox;
-  // List<Produit> _produits = [];
-  List<Produit> _produitsP = [];
+
+  List<Produit> _produits = [];
   List<Fournisseur> _fournisseurs = [];
+  List<Client> _clients = [];
   int _currentPage = 0;
   final int _pageSize = 100;
   bool _hasMoreProduits = true;
   bool _isLoading = false;
 
-  // List<Produit> get produits => _produits;
-  List<Produit> get produitsP => _produitsP;
+  List<Produit> get produits => _produits;
   bool get hasMoreProduits => _hasMoreProduits;
   List<Fournisseur> get fournisseurs => _fournisseurs;
   bool get isLoading => _isLoading;
+  List<Client> get clients => _clients;
 
   CommerceProvider(this._objectBox) {
     chargerProduits();
@@ -34,7 +35,7 @@ class CommerceProvider extends ChangeNotifier {
     notifyListeners();
     if (reset) {
       _currentPage = 0;
-      produitsP.clear();
+      produits.clear();
     }
 
     final query = _objectBox.produitBox.query()
@@ -53,7 +54,7 @@ class CommerceProvider extends ChangeNotifier {
         endIndex > allProduits.length ? allProduits.length : endIndex,
       );
 
-      _produitsP.addAll(newProduits);
+      _produits.addAll(newProduits);
       _currentPage++;
       _hasMoreProduits = endIndex < allProduits.length;
     }
@@ -62,11 +63,18 @@ class CommerceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // void getClientsFromBox() {
+  //   final box = ObjectBox().clientBox; // Utilisez le singleton ObjectBox
+  //   _clients = box.getAll();
+  //   notifyListeners();
+  // }
+
   Future<List<Produit>> rechercherProduits(String query,
       {int limit = 20}) async {
     final queryLower = query.toLowerCase();
     final idQuery = int.tryParse(query);
-    final qBuilder = _objectBox.produitBox.query(idQuery != null // la recherche se fait par id et moi je le veux pas qrcode
+    final qBuilder = _objectBox.produitBox.query(idQuery !=
+            null // la recherche se fait par id et moi je le veux pas qrcode
         ? Produit_.id.equals(idQuery) |
             Produit_.nom.contains(queryLower, caseSensitive: false)
         : Produit_.nom.contains(queryLower, caseSensitive: false));
@@ -74,7 +82,7 @@ class CommerceProvider extends ChangeNotifier {
   }
 
   void resetProduits() {
-    _produitsP.clear();
+    _produits.clear();
     _currentPage = 0;
     _hasMoreProduits = true;
 
@@ -86,7 +94,6 @@ class CommerceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Méthodes pour les produits
   Produit? getProduitById(int id) {
     return _objectBox.produitBox.get(id);
   }
@@ -126,10 +133,10 @@ class CommerceProvider extends ChangeNotifier {
   }
 
   void updateProductStock(int productId, double newStock) {
-    final index = _produitsP.indexWhere((p) => p.id == productId);
+    final index = _produits.indexWhere((p) => p.id == productId);
     if (index != -1) {
-      _produitsP[index].stock = newStock;
-      _objectBox.produitBox.put(_produitsP[index]);
+      _produits[index].stock = newStock;
+      _objectBox.produitBox.put(_produits[index]);
       notifyListeners();
     }
   }
@@ -410,9 +417,59 @@ class CommerceProvider extends ChangeNotifier {
 }
 
 class CartProvider with ChangeNotifier {
+  final ObjectBox _objectBox;
   Facture _facture = Facture(date: DateTime.now(), qr: '');
+  Client? _selectedClient;
+  List<Facture> _factures = [];
 
   Facture get facture => _facture;
+  Client? get selectedClient => _selectedClient;
+  List<Facture> get factures => _factures;
+
+  CartProvider(this._objectBox) {
+    fetchFactures();
+  }
+
+  void fetchFactures() {
+    _factures = _objectBox.factureBox.getAll();
+    notifyListeners();
+  }
+
+  void selectClient(Client client) {
+    _selectedClient = client;
+    _facture.client.target = client;
+    notifyListeners();
+  }
+
+  Future<void> createAndSelectClient(
+      String nom, String phone, String adresse, String description) async {
+    final newClient = Client(
+      qr: await generateQRCode('${_selectedClient!.id}'),
+      nom: nom,
+      phone: phone,
+      adresse: adresse,
+      description: description,
+      impayer: 0,
+    );
+    _objectBox.clientBox.put(newClient);
+    selectClient(newClient);
+  }
+
+  void createAnonymousClientIfNeeded() {
+    if (_selectedClient == null) {
+      final anonymousClient = Client(
+        qr: 'ANONYMOUS_${DateTime.now().millisecondsSinceEpoch}',
+        nom:
+            'ANONYMOUS_Client du ${_facture.date.day}/${_facture.date.month}/${_facture.date.year}',
+        phone: '',
+        adresse: '',
+        description: 'Client créé automatiquement',
+        impayer: 0,
+      );
+      _objectBox.clientBox.put(anonymousClient);
+      selectClient(anonymousClient);
+    }
+  }
 
   void addToCart(Produit produit) {
     final index = _facture.lignesFacture
@@ -425,6 +482,7 @@ class CartProvider with ChangeNotifier {
         prixUnitaire: produit.prixVente,
       );
       ligneFacture.produit.target = produit;
+      ligneFacture.facture.target = _facture;
       _facture.lignesFacture.add(ligneFacture);
     }
     notifyListeners();
@@ -448,15 +506,86 @@ class CartProvider with ChangeNotifier {
         .fold(0, (sum, item) => sum + item.prixUnitaire * item.quantite);
   }
 
-  void saveFacture() {
-    final box = ObjectBox().factureBox;
-    box.put(_facture);
+  Future<void> saveFacture() async {
+    createAnonymousClientIfNeeded();
+
+    // Mise à jour du montant impayé du client
+    _selectedClient!.impayer += totalAmount;
+    _objectBox.clientBox.put(_selectedClient!);
+
+    // Génération du QR code et sauvegarde de la facture
+    _facture.qr = await generateQRCode('${_facture.id}' '${_facture.date}');
+    _objectBox.factureBox.put(_facture);
+
+    // Sauvegarde des lignes de facture
+    for (var ligne in _facture.lignesFacture) {
+      _objectBox.ligneFacture.put(ligne);
+    }
+
+    // Réinitialisation de la facture et du client sélectionné
     _facture = Facture(date: DateTime.now(), qr: '');
+    _selectedClient = null;
     notifyListeners();
+    fetchFactures();
   }
 
   void clearCart() {
     _facture = Facture(date: DateTime.now(), qr: '');
+    _selectedClient = null;
     notifyListeners();
+  }
+
+  Future<String> generateQRCode(gRGenerated) async {
+    // Implémentez la logique de génération du QR code ici
+    // Par exemple, vous pourriez utiliser un package comme 'qr' pour générer le code
+    // et le convertir en chaîne de caractères
+    // await Future.delayed(
+    //     Duration(milliseconds: 100)); // Simuler une opération asynchrone
+    return //"QR_${_objectBox.random.nextInt(1000000)}";
+        "QR_${gRGenerated}";
+  }
+
+  Future<void> deleteFacture(Facture facture) async {
+    _objectBox.factureBox.remove(facture.id);
+    notifyListeners();
+    fetchFactures();
+  }
+
+  Future<void> updateFacture(Facture updatedFacture) async {
+    _objectBox.factureBox.put(updatedFacture);
+    notifyListeners();
+    fetchFactures();
+  }
+}
+
+class ClientProvider with ChangeNotifier {
+  final ObjectBox _objectBox;
+  List<Client> _clients = [];
+
+  List<Client> get clients => _clients;
+
+  ClientProvider(this._objectBox) {
+    getClientsFromBox();
+  }
+
+  void getClientsFromBox() {
+    final box = _objectBox.clientBox;
+    _clients = box.getAll();
+    notifyListeners();
+  }
+
+  Future<void> addClient(Client client) async {
+    _objectBox.clientBox.put(client);
+    getClientsFromBox();
+  }
+
+  Future<void> updateClient(Client client) async {
+    _objectBox.clientBox.put(client);
+    getClientsFromBox();
+  }
+
+  Future<void> deleteClient(Client client) async {
+    _objectBox.clientBox.remove(client.id);
+    getClientsFromBox();
   }
 }

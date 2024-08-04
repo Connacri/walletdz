@@ -5,6 +5,7 @@ import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:walletdz/objectBox/pages/ClientListScreen.dart';
 import 'package:walletdz/objectBox/pages/FactureListScreen.dart';
 import 'package:walletdz/objectBox/pages/ProduitListSupabase.dart';
 import '../../MyListLotties.dart';
@@ -64,7 +65,10 @@ class MyApp9 extends StatelessWidget {
           ),
         ),
         ChangeNotifierProvider(
-          create: (_) => CartProvider(),
+          create: (_) => CartProvider(objectBox),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ClientProvider(objectBox),
         ),
       ],
       child: MaterialApp(
@@ -474,7 +478,7 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
   List<Widget> _widgetOptions() {
     return [
       homeRail(),
-      ProduitListScreen(),
+      FacturesListPage(),
       FournisseurListScreen(),
     ];
   }
@@ -681,216 +685,220 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                     label: Text('Home'),
                   ),
                   NavigationRailDestination(
-                    icon: Icon(Icons.business),
-                    selectedIcon: Icon(Icons.business_center),
-                    label: Text('Produits'),
+                    icon: Icon(Icons.shopping_basket),
+                    selectedIcon: Icon(Icons.shopping_cart),
+                    label: Text('Caisse'),
                   ),
                   NavigationRailDestination(
-                    icon: Icon(Icons.factory),
-                    selectedIcon: Icon(Icons.factory),
-                    label: Text('Fournisseurs'),
+                    icon: Icon(Icons.account_box),
+                    selectedIcon: Icon(Icons.account_circle_sharp),
+                    label: Text('Clients'),
                   ),
                 ],
               ),
-              Expanded(
-                child: ListView(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(18.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          FournisseurListScreen()),
-                                );
-                              },
-                              child: CardTop(
-                                image:
-                                    'https://picsum.photos/seed/${randomId + 8}/200/100',
-                                text:
-                                    '${produitProvider.fournisseurs.length} Fournisseurs',
-                                provider: produitProvider,
-                                // button: ElevatedButton(
-                                //   onPressed: () {
-                                //     Navigator.of(context).push(
-                                //       MaterialPageRoute(
-                                //           builder: (context) =>
-                                //               FournisseurListScreen()),
-                                //     );
-                                //   },
-                                //   child: Text('Voir plus'),
-                                // ),
-                                SmallBanner: true,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          ProduitListScreen()),
-                                );
-                              },
-                              child: CardTop(
-                                image:
-                                    'https://picsum.photos/seed/$randomId/200/100',
-                                text:
-                                    '${produitProvider.getTotalProduits()} Produits',
-                                provider: produitProvider,
-                                // button: ElevatedButton(
-                                //   onPressed: () {
-                                //     Navigator.of(context).push(
-                                //       MaterialPageRoute(
-                                //           builder: (context) =>
-                                //               ProduitListScreen()),
-                                //     );
-                                //   },
-                                //   child: Text('Voir plus'),
-                                // ),
-                                SmallBanner: false,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => _ouvrirDialogAjustementPrix(context),
-                              child: CardTop(
-                                image:
-                                    'https://picsum.photos/seed/${randomId + 1}/200/100',
-                                text:
-                                    '${produitsFiltres.length} Produits\n${prixMin.toStringAsFixed(2)}\n${prixMax.toStringAsFixed(2)}',
-                                provider: produitProvider,
-                                button: produitsFiltres.length == 0
-                                    ? ElevatedButton(
-                                        onPressed: null,
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.grey[
-                                              300], // Couleur de fond grise
-                                          foregroundColor: Colors.grey[
-                                              600], // Couleur du texte grise
-                                          disabledBackgroundColor: Colors.grey[
-                                              300], // Assure que la couleur reste grise même désactivé
-                                          disabledForegroundColor: Colors.grey[
-                                              600], // Assure que la couleur du texte reste grise même désactivé
-                                        ),
-                                        child: Text(('Liste Vide')))
-                                    : ElevatedButton.icon(
-                                        onPressed: () {
-                                          Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    ProduitListInterval(
-                                                      produitsFiltres:
-                                                          produitsFiltres,
-                                                    )),
-                                          );
-                                        },
-                                        label: Text(('Voire La List'))),
-                                SmallBanner: false,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: CardAlert(
-                              image:
-                                  'https://picsum.photos/seed/${randomId + 2}/200/100',
-                              text:
-                                  'Alert stock < 5\n${produitsLowStock['count']} Produits\n\nRupture de stock\n${produitsLowStock0['count']} Produits',
-                              provider: produitProvider,
-                              button: produitsLowStock['count'] == 0 &&
-                                      produitsLowStock0['count'] == 0
-                                  ? null
-                                  : ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                            builder: (context) => LowStockList(
-                                                produitsLowStock:
-                                                    produitsLowStock),
-                                            // ProduitListInterval(
-                                            //   produitsFiltres:
-                                            //       produitsFiltres,
-                                            // ),
-                                          ),
-                                        );
-                                      },
-                                      child: Text(('Voire La List'))),
-                              Color1: Colors.red,
-                              Color2: Colors.black,
-                            ),
-                          ),
-                          // Expanded(
-                          //     child: _buildPriceRangeProductsCard(
-                          //         context, produitProvider)),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 18),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        ElevatedButton.icon(
-                            onPressed: () {
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled:
-                                    true, // Permet de redimensionner en fonction de la hauteur du contenu
-                                builder: (context) => AddFournisseurForm(),
-                              );
-                            },
-                            label: Text('Ajouter Un Fournisseur'),
-                            icon: Icon(Icons.add)),
-                        SizedBox(width: 18),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: (ctx) => add_Produit()));
-                          },
-                          label: Text('Ajouter Produit'),
-                          icon: Icon(Icons.safety_check_rounded),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 18),
-                    Container(
-                      width: MediaQuery.of(context).size.width / 5,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red, // Couleur de fond grise
-                          foregroundColor:
-                              Colors.grey[300], // Couleur du texte grise
-                          disabledBackgroundColor: Colors.grey[
-                              300], // Assure que la couleur reste grise même désactivé
-                          disabledForegroundColor: Colors.grey[
-                              600], // Assure que la couleur du texte reste grise même désactivé
-                        ),
-                        child: Text('Delete all'),
-                        onPressed: () {
-                          widget.objectBox.deleteDatabase();
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content:
-                                    Text('Base de Données Vider avec succes!')),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              _selectedIndex == 0
+                  ? buildExpanded(context, randomId, produitProvider,
+                      produitsFiltres, produitsLowStock, produitsLowStock0)
+                  : _selectedIndex == 1
+                      ? Expanded(child: FacturePage())
+                      : Expanded(child: ClientListScreen()),
               Expanded(
                 child: _widgetOptions()[_selectedIndex],
               ),
             ],
           );
         },
+      ),
+    );
+  }
+
+  Expanded buildExpanded(
+      BuildContext context,
+      int randomId,
+      CommerceProvider produitProvider,
+      List<Produit> produitsFiltres,
+      Map<String, dynamic> produitsLowStock,
+      Map<String, dynamic> produitsLowStock0) {
+    return Expanded(
+      child: ListView(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(18.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) => FournisseurListScreen()),
+                      );
+                    },
+                    child: CardTop(
+                      image:
+                          'https://picsum.photos/seed/${randomId + 8}/200/100',
+                      text:
+                          '${produitProvider.fournisseurs.length} Fournisseurs',
+                      provider: produitProvider,
+                      // button: ElevatedButton(
+                      //   onPressed: () {
+                      //     Navigator.of(context).push(
+                      //       MaterialPageRoute(
+                      //           builder: (context) =>
+                      //               FournisseurListScreen()),
+                      //     );
+                      //   },
+                      //   child: Text('Voir plus'),
+                      // ),
+                      SmallBanner: true,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) => ProduitListScreen()),
+                      );
+                    },
+                    child: CardTop(
+                      image: 'https://picsum.photos/seed/$randomId/200/100',
+                      text: '${produitProvider.getTotalProduits()} Produits',
+                      provider: produitProvider,
+                      // button: ElevatedButton(
+                      //   onPressed: () {
+                      //     Navigator.of(context).push(
+                      //       MaterialPageRoute(
+                      //           builder: (context) =>
+                      //               ProduitListScreen()),
+                      //     );
+                      //   },
+                      //   child: Text('Voir plus'),
+                      // ),
+                      SmallBanner: false,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => _ouvrirDialogAjustementPrix(context),
+                    child: CardTop(
+                      image:
+                          'https://picsum.photos/seed/${randomId + 1}/200/100',
+                      text:
+                          '${produitsFiltres.length} Produits\n${prixMin.toStringAsFixed(2)}\n${prixMax.toStringAsFixed(2)}',
+                      provider: produitProvider,
+                      button: produitsFiltres.length == 0
+                          ? ElevatedButton(
+                              onPressed: null,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    Colors.grey[300], // Couleur de fond grise
+                                foregroundColor:
+                                    Colors.grey[600], // Couleur du texte grise
+                                disabledBackgroundColor: Colors.grey[
+                                    300], // Assure que la couleur reste grise même désactivé
+                                disabledForegroundColor: Colors.grey[
+                                    600], // Assure que la couleur du texte reste grise même désactivé
+                              ),
+                              child: Text(('Liste Vide')))
+                          : ElevatedButton.icon(
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                      builder: (context) => ProduitListInterval(
+                                            produitsFiltres: produitsFiltres,
+                                          )),
+                                );
+                              },
+                              label: Text(('Voire La List'))),
+                      SmallBanner: false,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: CardAlert(
+                    image: 'https://picsum.photos/seed/${randomId + 2}/200/100',
+                    text:
+                        'Alert stock < 5\n${produitsLowStock['count']} Produits\n\nRupture de stock\n${produitsLowStock0['count']} Produits',
+                    provider: produitProvider,
+                    button: produitsLowStock['count'] == 0 &&
+                            produitsLowStock0['count'] == 0
+                        ? null
+                        : ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => LowStockList(
+                                      produitsLowStock: produitsLowStock),
+                                  // ProduitListInterval(
+                                  //   produitsFiltres:
+                                  //       produitsFiltres,
+                                  // ),
+                                ),
+                              );
+                            },
+                            child: Text(('Voire La List'))),
+                    Color1: Colors.red,
+                    Color2: Colors.black,
+                  ),
+                ),
+                // Expanded(
+                //     child: _buildPriceRangeProductsCard(
+                //         context, produitProvider)),
+              ],
+            ),
+          ),
+          SizedBox(height: 18),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              ElevatedButton.icon(
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled:
+                          true, // Permet de redimensionner en fonction de la hauteur du contenu
+                      builder: (context) => AddFournisseurForm(),
+                    );
+                  },
+                  label: Text('Ajouter Un Fournisseur'),
+                  icon: Icon(Icons.add)),
+              SizedBox(width: 18),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (ctx) => add_Produit()));
+                },
+                label: Text('Ajouter Produit'),
+                icon: Icon(Icons.safety_check_rounded),
+              ),
+            ],
+          ),
+          SizedBox(height: 18),
+          Container(
+            width: MediaQuery.of(context).size.width / 5,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, // Couleur de fond grise
+                foregroundColor: Colors.grey[300], // Couleur du texte grise
+                disabledBackgroundColor: Colors.grey[
+                    300], // Assure que la couleur reste grise même désactivé
+                disabledForegroundColor: Colors.grey[
+                    600], // Assure que la couleur du texte reste grise même désactivé
+              ),
+              child: Text('Delete all'),
+              onPressed: () {
+                widget.objectBox.deleteDatabase();
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Base de Données Vider avec succes!')),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

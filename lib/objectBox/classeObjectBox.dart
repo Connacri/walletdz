@@ -15,6 +15,7 @@ class ObjectBox {
   late final Box<Fournisseur> fournisseurBox;
   late final Box<Facture> factureBox;
   late final Box<LigneFacture> ligneFacture;
+  late final Box<Client> clientBox;
 
   static final ObjectBox _singleton = ObjectBox._internal();
 
@@ -32,6 +33,7 @@ class ObjectBox {
       fournisseurBox = Box<Fournisseur>(store);
       factureBox = Box<Facture>(store);
       ligneFacture = Box<LigneFacture>(store);
+      clientBox = Box<Client>(store);
     }
   }
 

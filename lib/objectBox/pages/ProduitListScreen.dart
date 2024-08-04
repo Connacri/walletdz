@@ -110,10 +110,10 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
         builder: (context, produitProvider, child) {
           return ListView.builder(
             controller: _scrollController,
-            itemCount: produitProvider.produitsP.length + 1,
+            itemCount: produitProvider.produits.length + 1,
             itemBuilder: (context, index) {
-              if (index < produitProvider.produitsP.length) {
-                final produit = produitProvider.produitsP[index];
+              if (index < produitProvider.produits.length) {
+                final produit = produitProvider.produits[index];
                 final peremption =
                     produit.datePeremption!.difference(DateTime.now()).inDays;
                 Color colorPeremption =
