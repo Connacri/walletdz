@@ -5,15 +5,23 @@ import '../Entity.dart';
 import '../MyProviders.dart';
 import '../Utils/QRViewExample.dart';
 import '../classeObjectBox.dart';
+import 'ClientListScreen.dart';
 import 'ProduitListScreen.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 
-class FacturePage extends StatelessWidget {
+class FacturePage extends StatefulWidget {
+  @override
+  State<FacturePage> createState() => _FacturePageState();
+}
+
+class _FacturePageState extends State<FacturePage> {
+  Client? _selectedClient;
   @override
   Widget build(BuildContext context) {
     final commerceProvider = Provider.of<CommerceProvider>(context);
     final cartProvider = Provider.of<CartProvider>(context);
+    final clientProvider = Provider.of<ClientProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -27,6 +35,37 @@ class FacturePage extends StatelessWidget {
                 delegate: ProduitSearchDelegateMain(commerceProvider),
               );
             },
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (ctx) => ClientSelectionPage(),
+                ),
+              );
+            },
+            child: Text('Sélectionner un Client'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Client? newClient = await showModalBottomSheet<Client>(
+                context: context,
+                isScrollControlled:
+                    true, // Permet de redimensionner en fonction de la hauteur du contenu
+                builder: (context) => AddClientForm(),
+              );
+
+              if (newClient != null) {
+                setState(() {
+                  _selectedClient = newClient;
+                });
+                cartProvider.setSelectedClient(newClient);
+              } else {
+                print(
+                    "Le client n'a pas été créé ou l'opération a été annulée.");
+              }
+            },
+            child: Text('Créer un Client'),
           ),
           kIsWeb ||
                   Platform.isWindows ||
@@ -58,10 +97,6 @@ class FacturePage extends StatelessWidget {
                     }
                   },
                 ),
-          IconButton(
-            icon: Icon(Icons.person_add),
-            onPressed: () => _showClientDialog(context),
-          ),
           SizedBox(width: 100),
         ],
       ),
@@ -107,13 +142,19 @@ class FacturePage extends StatelessWidget {
                     SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () async {
-                        await cartProvider.saveFacture();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Facture sauvegardée!')),
-                        );
+                        try {
+                          await cartProvider.saveFacture();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Facture sauvegardée!')),
+                          );
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Erreur: ${e.toString()}')),
+                          );
+                        }
                       },
                       child: Text('Sauvegarder la facture'),
-                    ),
+                    )
                   ],
                 ),
               ),
@@ -141,96 +182,38 @@ class FacturePage extends StatelessWidget {
                         Text('Client: ${client.nom}'),
                         Text('Téléphone: ${client.phone}'),
                         Text('Adresse: ${client.adresse}'),
+                        Text('qr: ${client.qr}'),
+                        Text('Nombre de factures : ${client.factures.length}'),
                       ],
                     )
                   : Text('Aucun client sélectionné'),
-            ),
-            Center(
-              child: ElevatedButton(
-                onPressed: () => _createNewClient(context),
-                child: Text('Créer un nouveau client'),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () => _showClientDialog(context),
-              child: Text(client != null ? 'Changer' : 'Sélectionner'),
             ),
           ],
         ),
       ),
     );
   }
-
-  void _showClientDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Sélectionner ou créer un client'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                ElevatedButton(
-                  child: Text('Sélectionner un client existant'),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _selectExistingClient(context);
-                  },
-                ),
-                ElevatedButton(
-                  child: Text('Créer un nouveau client'),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _createNewClient(context);
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void _selectExistingClient(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return ClientSelectionDialog();
-      },
-    );
-  }
-
-  void _createNewClient(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return NewClientDialog();
-      },
-    );
-  }
 }
 
-class ClientSelectionDialog extends StatefulWidget {
+class ClientSelectionPage extends StatefulWidget {
   @override
-  _ClientSelectionDialogState createState() => _ClientSelectionDialogState();
+  _ClientSelectionPageState createState() => _ClientSelectionPageState();
 }
 
-class _ClientSelectionDialogState extends State<ClientSelectionDialog> {
+class _ClientSelectionPageState extends State<ClientSelectionPage> {
   String _searchQuery = '';
   List<Client> _filteredClients = [];
 
   @override
-  void initState() {
-    super.initState();
-    _filteredClients =
-        Provider.of<CommerceProvider>(context, listen: false).clients;
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _filteredClients = Provider.of<CommerceProvider>(context).clients;
   }
 
   void _filterClients(String query) {
     setState(() {
       _searchQuery = query;
-      _filteredClients = Provider.of<CommerceProvider>(context, listen: false)
+      _filteredClients = Provider.of<CommerceProvider>(context)
           .clients
           .where((client) =>
               client.nom.toLowerCase().contains(query.toLowerCase()) ||
@@ -241,9 +224,11 @@ class _ClientSelectionDialogState extends State<ClientSelectionDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('Sélectionner un client'),
-      content: Container(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Sélectionner un client'),
+      ),
+      body: Container(
         width: double.maxFinite,
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -279,69 +264,6 @@ class _ClientSelectionDialogState extends State<ClientSelectionDialog> {
   }
 }
 
-class NewClientDialog extends StatefulWidget {
-  @override
-  _NewClientDialogState createState() => _NewClientDialogState();
-}
-
-class _NewClientDialogState extends State<NewClientDialog> {
-  final _formKey = GlobalKey<FormState>();
-  String nom = '', phone = '', adresse = '', description = '';
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('Créer un nouveau client'),
-      content: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Nom'),
-                validator: (value) => value!.isEmpty ? 'Champ requis' : null,
-                onSaved: (value) => nom = value!,
-              ),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Téléphone'),
-                validator: (value) => value!.isEmpty ? 'Champ requis' : null,
-                onSaved: (value) => phone = value!,
-              ),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Adresse'),
-                validator: (value) => value!.isEmpty ? 'Champ requis' : null,
-                onSaved: (value) => adresse = value!,
-              ),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Description'),
-                onSaved: (value) => description = value ?? '',
-              ),
-            ],
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          child: Text('Annuler'),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        ElevatedButton(
-          child: Text('Créer'),
-          onPressed: () {
-            if (_formKey.currentState!.validate()) {
-              _formKey.currentState!.save();
-              Provider.of<CartProvider>(context, listen: false)
-                  .createAndSelectClient(nom, phone, adresse, description);
-              Navigator.of(context).pop();
-            }
-          },
-        ),
-      ],
-    );
-  }
-}
-
 class FacturesListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -350,6 +272,30 @@ class FacturesListPage extends StatelessWidget {
       return Scaffold(
         appBar: AppBar(
           title: Text('Liste des Factures'),
+          actions: [
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.grey[300],
+                disabledBackgroundColor: Colors.grey[300],
+                disabledForegroundColor: Colors.grey[600],
+              ),
+              child: Text('Delete all'),
+              onPressed: () async {
+                await cartProvider.deleteAllFactures();
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Liste de Factures Vider avec succès!'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              },
+            ),
+            SizedBox(
+              width: 50,
+            ),
+          ],
         ),
         body: factures.isEmpty
             ? Center(child: Text('Aucune facture trouvée'))
@@ -357,6 +303,7 @@ class FacturesListPage extends StatelessWidget {
                 itemCount: factures.length,
                 itemBuilder: (context, index) {
                   final facture = factures[index];
+                  final client = facture.client.target;
                   return ListTile(
                     leading: CircleAvatar(
                       child: Padding(
@@ -364,7 +311,9 @@ class FacturesListPage extends StatelessWidget {
                         child: Text('${facture.id}'),
                       ),
                     ),
-                    title: Text('Invoice ${facture.client.target!.nom}'),
+                    title: Text(
+                      'Invoice ${client?.nom ?? 'Unknown'}',
+                    ),
                     subtitle: Text('${facture.date}'),
                     onLongPress: () {
                       Provider.of<CartProvider>(context, listen: false)

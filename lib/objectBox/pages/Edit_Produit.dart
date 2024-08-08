@@ -587,7 +587,26 @@ class _Edit_ProduitState extends State<Edit_Produit> {
                             )),
                       ],
                     )
-                  : Container()
+                  : Column(children: [
+                      Text(
+                        'Date de Création ${_dateCreation}',
+                        textAlign: TextAlign.justify,
+                        style:
+                            const TextStyle(fontSize: 13, color: Colors.grey),
+                      ),
+                      SizedBox(height: 5),
+                      Text(
+                        'Derniere Modification le ${_derniereModification}',
+                        style:
+                            const TextStyle(fontSize: 13, color: Colors.grey),
+                      ),
+                      SizedBox(height: 5),
+                      Text(
+                        'Stock Updated le ${_stockUpdate}',
+                        style:
+                            const TextStyle(fontSize: 13, color: Colors.grey),
+                      ),
+                    ])
               : Text(
                   '', //'Creation d\'un Nouveau Produit',
                   style: TextStyle(fontSize: 20),
@@ -642,7 +661,7 @@ class _Edit_ProduitState extends State<Edit_Produit> {
             textAlign: TextAlign.center,
             keyboardType: TextInputType.text,
             decoration: InputDecoration(
-              fillColor: _isFirstFieldFilled ? Colors.green : null,
+              fillColor: _isFirstFieldFilled ? Colors.green.shade100 : null,
               labelText: 'Nom Du Produit',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8.0),
@@ -699,21 +718,6 @@ class _Edit_ProduitState extends State<Edit_Produit> {
           ),
         ),
         SizedBox(height: 10),
-        Text(
-          'Date de Création ${_dateCreation}',
-          textAlign: TextAlign.justify,
-          style: const TextStyle(fontSize: 13, color: Colors.grey),
-        ),
-        SizedBox(height: 5),
-        Text(
-          'Derniere Modification le ${_derniereModification}',
-          style: const TextStyle(fontSize: 13, color: Colors.grey),
-        ),
-        SizedBox(height: 5),
-        Text(
-          'Stock Updated le ${_stockUpdate}',
-          style: const TextStyle(fontSize: 13, color: Colors.grey),
-        ),
         SizedBox(height: 10),
         Container(
           width: largeur,
@@ -723,7 +727,7 @@ class _Edit_ProduitState extends State<Edit_Produit> {
             textAlign: TextAlign.center,
             keyboardType: TextInputType.text,
             decoration: InputDecoration(
-              fillColor: _isFirstFieldFilled ? Colors.green : null,
+              fillColor: _isFirstFieldFilled ? Colors.yellow.shade300 : null,
               labelText: 'Date de Péremption',
               suffixIcon: IconButton(
                 icon: const Icon(Icons.date_range),

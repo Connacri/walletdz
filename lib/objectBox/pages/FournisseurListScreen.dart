@@ -48,7 +48,6 @@ class FournisseurListScreen extends StatelessWidget {
                     _deleteFournisseur(context, fournisseur);
                   },
                   onTap: () {
-                    print(fournisseur.produits);
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => ProduitsFournisseurPage(
@@ -78,7 +77,7 @@ class FournisseurListScreen extends StatelessWidget {
                     ],
                   ),
                   trailing: Container(
-                    width: 50,
+                    width: 70,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [

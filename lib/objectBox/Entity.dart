@@ -119,19 +119,27 @@ class Client {
   String phone;
   String adresse;
   String description;
-  double impayer;
+  double? impayer;
+  @Property(type: PropertyType.date)
+  DateTime? dateCreation;
+
+  @Property(type: PropertyType.date)
+  DateTime? derniereModification;
 
   @Backlink()
   final factures = ToMany<Facture>();
 
-  Client(
-      {this.id = 0,
-      required this.qr,
-      required this.nom,
-      required this.phone,
-      required this.adresse,
-      required this.description,
-      required this.impayer});
+  Client({
+    this.id = 0,
+    required this.qr,
+    required this.nom,
+    required this.phone,
+    required this.adresse,
+    required this.description,
+    this.impayer,
+    this.dateCreation,
+    this.derniereModification,
+  });
 }
 
 @Entity()

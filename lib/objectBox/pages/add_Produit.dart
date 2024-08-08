@@ -469,7 +469,7 @@ class _add_ProduitState extends State<add_Produit> {
                   ..._selectedFournisseurs,
                   ...[widget.specifiquefournisseur!]
                 ]);
-               // await ajouterProduitToSupabase(produit);
+                // await ajouterProduitToSupabase(produit);
                 print('Nouveau produit ajouté');
               }
             }
@@ -640,7 +640,7 @@ class _add_ProduitState extends State<add_Produit> {
             textAlign: TextAlign.center,
             keyboardType: TextInputType.text,
             decoration: InputDecoration(
-              fillColor: _isFirstFieldFilled ? Colors.green : null,
+              fillColor: _isFirstFieldFilled ? Colors.green.shade100 : null,
               labelText: 'Nom Du Produit',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8.0),
@@ -705,7 +705,7 @@ class _add_ProduitState extends State<add_Produit> {
             textAlign: TextAlign.center,
             keyboardType: TextInputType.text,
             decoration: InputDecoration(
-              fillColor: _isFirstFieldFilled ? Colors.green : null,
+              fillColor: _isFirstFieldFilled ? Colors.yellow.shade200 : null,
               labelText: 'Date de Péremption',
               suffixIcon: IconButton(
                 icon: const Icon(Icons.date_range),
@@ -1030,14 +1030,20 @@ class _add_ProduitState extends State<add_Produit> {
                         _stockController.text = stockTemp.toString();
                       },
                       child: CircleAvatar(
+                        child: FittedBox(
+                            child: Padding(
+                          padding: const EdgeInsets.all(5.0),
                           child: Text(
-                        _stockController.text.toString(),
-                      )),
+                            _stockController.text.toString(),
+                          ),
+                        )),
+                      ),
                     )
-                  : CircleAvatar(
-                      child: Text(
-                      ' ',
-                    )),
+                  : Container(),
+              // CircleAvatar(
+              //         child: Text(
+              //         ' ',
+              //       )),
               SizedBox(
                 width: 10,
               ),

@@ -153,7 +153,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(3, 7968206822164606643),
       name: 'Client',
-      lastPropertyId: const obx_int.IdUid(7, 2787760657972690405),
+      lastPropertyId: const obx_int.IdUid(9, 4541506935688772376),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -190,6 +190,16 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(7, 2787760657972690405),
             name: 'impayer',
             type: 8,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(8, 6863376831137326481),
+            name: 'dateCreation',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(9, 4541506935688772376),
+            name: 'derniereModification',
+            type: 10,
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
@@ -505,7 +515,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final phoneOffset = fbb.writeString(object.phone);
           final adresseOffset = fbb.writeString(object.adresse);
           final descriptionOffset = fbb.writeString(object.description);
-          fbb.startTable(8);
+          fbb.startTable(10);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, qrOffset);
           fbb.addOffset(2, nomOffset);
@@ -513,12 +523,18 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addOffset(4, adresseOffset);
           fbb.addOffset(5, descriptionOffset);
           fbb.addFloat64(6, object.impayer);
+          fbb.addInt64(7, object.dateCreation?.millisecondsSinceEpoch);
+          fbb.addInt64(8, object.derniereModification?.millisecondsSinceEpoch);
           fbb.finish(fbb.endTable());
           return object.id;
         },
         objectFromFB: (obx.Store store, ByteData fbData) {
           final buffer = fb.BufferContext(fbData);
           final rootOffset = buffer.derefObject(0);
+          final dateCreationValue =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 18);
+          final derniereModificationValue =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 20);
           final idParam =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
           final qrParam = const fb.StringReader(asciiOptimization: true)
@@ -532,8 +548,14 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final descriptionParam =
               const fb.StringReader(asciiOptimization: true)
                   .vTableGet(buffer, rootOffset, 14, '');
-          final impayerParam =
-              const fb.Float64Reader().vTableGet(buffer, rootOffset, 16, 0);
+          final impayerParam = const fb.Float64Reader()
+              .vTableGetNullable(buffer, rootOffset, 16);
+          final dateCreationParam = dateCreationValue == null
+              ? null
+              : DateTime.fromMillisecondsSinceEpoch(dateCreationValue);
+          final derniereModificationParam = derniereModificationValue == null
+              ? null
+              : DateTime.fromMillisecondsSinceEpoch(derniereModificationValue);
           final object = Client(
               id: idParam,
               qr: qrParam,
@@ -541,7 +563,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
               phone: phoneParam,
               adresse: adresseParam,
               description: descriptionParam,
-              impayer: impayerParam);
+              impayer: impayerParam,
+              dateCreation: dateCreationParam,
+              derniereModification: derniereModificationParam);
           obx_int.InternalToManyAccess.setRelInfo<Client>(
               object.factures,
               store,
@@ -758,6 +782,14 @@ class Client_ {
   /// See [Client.impayer].
   static final impayer =
       obx.QueryDoubleProperty<Client>(_entities[2].properties[6]);
+
+  /// See [Client.dateCreation].
+  static final dateCreation =
+      obx.QueryDateProperty<Client>(_entities[2].properties[7]);
+
+  /// See [Client.derniereModification].
+  static final derniereModification =
+      obx.QueryDateProperty<Client>(_entities[2].properties[8]);
 
   /// see [Client.factures]
   static final factures =

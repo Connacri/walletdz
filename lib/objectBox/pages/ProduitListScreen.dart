@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:provider/provider.dart';
 import '../../objectbox.g.dart';
@@ -207,7 +208,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                             children: [
                                               Center(
                                                 child: Text(
-                                                  'A : ${produit.prixAchat.toStringAsFixed(2)} ',
+                                                  'A : ${produit.prixAchat.toStringAsFixed(produit.prixAchat.truncateToDouble() == produit.prixAchat ? 0 : 2)}',
                                                 ),
                                               ),
                                               SizedBox(
@@ -233,7 +234,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                                 ),
                                                 child: Center(
                                                   child: Text(
-                                                    '${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)}',
+                                                    '${(produit.prixVente - produit.prixAchat).toStringAsFixed((produit.prixVente - produit.prixAchat).truncateToDouble() == (produit.prixVente - produit.prixAchat) ? 0 : 2)}',
                                                     style: TextStyle(
                                                         color: Colors.white),
                                                   ),
@@ -326,10 +327,12 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                           animation: true,
                                           animationDuration: 1000,
                                           lineHeight: 20.0,
-                                          leading: new Text(produit.stockinit
-                                              .toStringAsFixed(1)),
+                                          leading: new Text(
+                                            '${produit.stockinit.toStringAsFixed(produit.stockinit.truncateToDouble() == produit.stockinit ? 0 : 2)}',
+                                          ),
                                           trailing: new Text(
-                                              produit.stock.toStringAsFixed(1)),
+                                            '${produit.stock.toStringAsFixed(produit.stock.truncateToDouble() == produit.stock ? 0 : 2)}',
+                                          ),
                                           percent: percentProgress,
                                           center: new Text(
                                               '${(percentProgress * 100).toStringAsFixed(1)}%'),
@@ -508,10 +511,28 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                                         10), // Coins arrondis
                                               ),
                                               child: Center(
-                                                child: Text(
-                                                  '${produit.minimStock.toStringAsFixed(produit.minimStock.truncateToDouble() == produit.minimStock ? 0 : 2)}',
-                                                  style: TextStyle(
-                                                      color: Colors.white),
+                                                child: Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.add_alert,
+                                                      color: Colors.white,
+                                                      size: 15,
+                                                    ),
+                                                    SizedBox(
+                                                      width: 5,
+                                                    ),
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              right: 5),
+                                                      child: Text(
+                                                        '${produit.minimStock.toStringAsFixed(produit.minimStock.truncateToDouble() == produit.minimStock ? 0 : 2)}',
+                                                        style: TextStyle(
+                                                            color:
+                                                                Colors.white),
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
                                             ),
@@ -521,11 +542,12 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                                 animation: true,
                                                 animationDuration: 1000,
                                                 lineHeight: 20.0,
-                                                leading: new Text(produit
-                                                    .stockinit
-                                                    .toStringAsFixed(2)),
-                                                trailing: new Text(produit.stock
-                                                    .toStringAsFixed(2)),
+                                                leading: new Text(
+                                                  'Stock : ${produit.stockinit.toStringAsFixed(produit.stockinit.truncateToDouble() == produit.stockinit ? 0 : 2)}',
+                                                ),
+                                                trailing: new Text(
+                                                  'Reste : ${produit.stock.toStringAsFixed(produit.stock.truncateToDouble() == produit.stock ? 0 : 2)}',
+                                                ),
                                                 percent: percentProgress,
                                                 center: new Text(
                                                     '${(percentProgress * 100).toStringAsFixed(1)}%'),

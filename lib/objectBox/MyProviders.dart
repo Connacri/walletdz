@@ -27,6 +27,7 @@ class CommerceProvider extends ChangeNotifier {
   CommerceProvider(this._objectBox) {
     chargerProduits();
     _chargerFournisseurs();
+    getClientsFromBox();
   }
 
   Future<void> chargerProduits({bool reset = false}) async {
@@ -63,11 +64,11 @@ class CommerceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // void getClientsFromBox() {
-  //   final box = ObjectBox().clientBox; // Utilisez le singleton ObjectBox
-  //   _clients = box.getAll();
-  //   notifyListeners();
-  // }
+  void getClientsFromBox() {
+    final box = ObjectBox().clientBox; // Utilisez le singleton ObjectBox
+    _clients = box.getAll();
+    notifyListeners();
+  }
 
   Future<List<Produit>> rechercherProduits(String query,
       {int limit = 20}) async {
@@ -439,6 +440,11 @@ class CartProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void setSelectedClient(Client client) {
+    _selectedClient = client;
+    notifyListeners();
+  }
+
   void selectClient(Client client) {
     _selectedClient = client;
     _facture.client.target = client;
@@ -446,7 +452,12 @@ class CartProvider with ChangeNotifier {
   }
 
   Future<void> createAndSelectClient(
-      String nom, String phone, String adresse, String description) async {
+      String nom,
+      String phone,
+      String adresse,
+      String description,
+      DateTime dateCreation,
+      DateTime derniereModification) async {
     final newClient = Client(
       qr: await generateQRCode('${_selectedClient!.id}'),
       nom: nom,
@@ -454,6 +465,8 @@ class CartProvider with ChangeNotifier {
       adresse: adresse,
       description: description,
       impayer: 0,
+      dateCreation: dateCreation,
+      derniereModification: derniereModification,
     );
     _objectBox.clientBox.put(newClient);
     selectClient(newClient);
@@ -469,6 +482,8 @@ class CartProvider with ChangeNotifier {
         adresse: '',
         description: 'Client créé automatiquement',
         impayer: 0,
+        dateCreation: DateTime.now(),
+        derniereModification: DateTime.now(),
       );
       _objectBox.clientBox.put(anonymousClient);
       selectClient(anonymousClient);
@@ -510,15 +525,46 @@ class CartProvider with ChangeNotifier {
         .fold(0, (sum, item) => sum + item.prixUnitaire * item.quantite);
   }
 
+  // Future<void> saveFacture() async {
+  //   //createAnonymousClientIfNeeded();
+  //
+  //   // Mise à jour du montant impayé du client
+  //   //_selectedClient!.impayer += totalAmount;
+  //   _selectedClient?.impayer = (_selectedClient?.impayer ?? 0) + totalAmount;
+  //
+  //   _selectedClient == null ? null : _objectBox.clientBox.put(_selectedClient!);
+  //
+  //   // Génération du QR code et sauvegarde de la facture
+  //   _facture.qr = await generateQRCode('${_facture.id}' '${_facture.date}');
+  //   _objectBox.factureBox.put(_facture);
+  //
+  //   // Sauvegarde des lignes de facture
+  //   for (var ligne in _facture.lignesFacture) {
+  //     _objectBox.ligneFacture.put(ligne);
+  //   }
+  //
+  //   // Réinitialisation de la facture et du client sélectionné
+  //   _facture = Facture(date: DateTime.now(), qr: '');
+  //   _selectedClient = null;
+  //   notifyListeners();
+  //   fetchFactures();
+  // }
   Future<void> saveFacture() async {
-    createAnonymousClientIfNeeded();
+    // Vérifier si un client est sélectionné
+    if (_selectedClient != null) {
+      // Mise à jour du montant impayé du client
+      _selectedClient?.impayer = (_selectedClient?.impayer ?? 0) + totalAmount;
 
-    // Mise à jour du montant impayé du client
-    _selectedClient!.impayer += totalAmount;
-    _objectBox.clientBox.put(_selectedClient!);
+      // Sauvegarder le client mis à jour
+      _objectBox.clientBox.put(_selectedClient!);
+      // Associer le client à la facture
+      _facture.client.target = _selectedClient;
+    }
 
     // Génération du QR code et sauvegarde de la facture
-    _facture.qr = await generateQRCode('${_facture.id}' '${_facture.date}');
+    _facture.qr = await generateQRCode('${_facture.id} ${_facture.date}');
+
+    // Sauvegarder la facture
     _objectBox.factureBox.put(_facture);
 
     // Sauvegarde des lignes de facture
@@ -529,7 +575,10 @@ class CartProvider with ChangeNotifier {
     // Réinitialisation de la facture et du client sélectionné
     _facture = Facture(date: DateTime.now(), qr: '');
     _selectedClient = null;
+
     notifyListeners();
+
+    // Rafraîchir la liste des factures
     fetchFactures();
   }
 
@@ -560,6 +609,12 @@ class CartProvider with ChangeNotifier {
     notifyListeners();
     fetchFactures();
   }
+
+  Future<void> deleteAllFactures() async {
+    final box = _objectBox.factureBox;
+    box.removeAll();
+    fetchFactures();
+  }
 }
 
 class ClientProvider with ChangeNotifier {
@@ -581,15 +636,34 @@ class ClientProvider with ChangeNotifier {
   Future<void> addClient(Client client) async {
     _objectBox.clientBox.put(client);
     getClientsFromBox();
+    notifyListeners();
   }
 
   Future<void> updateClient(Client client) async {
     _objectBox.clientBox.put(client);
     getClientsFromBox();
+    notifyListeners();
   }
 
   Future<void> deleteClient(Client client) async {
     _objectBox.clientBox.remove(client.id);
     getClientsFromBox();
+    notifyListeners();
+  }
+
+  List<Facture> getFacturesForClient(Client client) {
+    // Utiliser ObjectBox pour récupérer les factures associées au client
+    final facturesQuery =
+        _objectBox.factureBox.query(Facture_.client.equals(client.id)).build();
+    final factures = facturesQuery.find();
+    facturesQuery.close();
+    return factures;
+  }
+
+  Future<void> deleteAllClients() async {
+    final box = _objectBox.clientBox;
+    box.removeAll();
+    getClientsFromBox();
+    notifyListeners();
   }
 }

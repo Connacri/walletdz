@@ -133,6 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
   double prixMax = 0;
   final TextEditingController _productController = TextEditingController();
   final TextEditingController _supplierController = TextEditingController();
+  final TextEditingController _clientController = TextEditingController();
 
   @override
   void initState() {
@@ -222,6 +223,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 decoration:
                     InputDecoration(labelText: 'Nombre de fournisseurs'),
               ),
+              TextField(
+                controller: _clientController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: 'Nombre de clients'),
+              ),
             ],
           ),
           actions: [
@@ -236,8 +242,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 final int products = int.tryParse(_productController.text) ?? 0;
                 final int suppliers =
                     int.tryParse(_supplierController.text) ?? 0;
+                final int clients = int.tryParse(_clientController.text) ?? 0;
 
-                widget.objectBox.fillWithFakeData(products, suppliers);
+                widget.objectBox.fillWithFakeData(clients, products, suppliers);
                 // ScaffoldMessenger.of(context).showSnackBar(
                 //   SnackBar(content: Text('Données factices ajoutées !')),
                 // );
@@ -292,7 +299,6 @@ class _HomeScreenState extends State<HomeScreen> {
               //   SnackBar(content: Text('Données factices ajoutées !')),
               // );
               _showDialog();
-              print('_showDialog');
             },
             icon: Icon(Icons.send),
           ),
@@ -336,6 +342,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Container(
                   width: MediaQuery.of(context).size.width,
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       ElevatedButton.icon(
                           onPressed: () {
@@ -525,6 +532,7 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
   int _selectedIndex = 0;
   final TextEditingController _productController = TextEditingController();
   final TextEditingController _supplierController = TextEditingController();
+  final TextEditingController _clientController = TextEditingController();
 
   List<Widget> _widgetOptions() {
     return [
@@ -625,6 +633,11 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                 decoration:
                     InputDecoration(labelText: 'Nombre de fournisseurs'),
               ),
+              TextField(
+                controller: _clientController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: 'Nombre de clients'),
+              ),
             ],
           ),
           actions: [
@@ -639,8 +652,9 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                 final int products = int.tryParse(_productController.text) ?? 0;
                 final int suppliers =
                     int.tryParse(_supplierController.text) ?? 0;
+                final int clients = int.tryParse(_clientController.text) ?? 0;
 
-                widget.objectBox.fillWithFakeData(products, suppliers);
+                widget.objectBox.fillWithFakeData(clients, products, suppliers);
                 // ScaffoldMessenger.of(context).showSnackBar(
                 //   SnackBar(content: Text('Données factices ajoutées !')),
                 // );
@@ -695,7 +709,6 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
               //   SnackBar(content: Text('Données factices ajoutées !')),
               // );
               _showDialog();
-              print('_showDialog');
             },
             icon: Icon(Icons.send),
           ),
@@ -966,7 +979,7 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
             },
             child: CardTop(
               image: 'https://picsum.photos/seed/${randomId + 2}/200/100',
-              text: '${produitProvider.getTotalClientsCount()} Clients',
+              text: '${produitProvider.clients.length} Clients',
               provider: produitProvider,
               // button: ElevatedButton(
               //   onPressed: () {
