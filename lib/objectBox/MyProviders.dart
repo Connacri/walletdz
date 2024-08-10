@@ -79,7 +79,9 @@ class CommerceProvider extends ChangeNotifier {
         ? Produit_.id.equals(idQuery) |
             Produit_.nom.contains(queryLower, caseSensitive: false)
         : Produit_.nom.contains(queryLower, caseSensitive: false));
-    return qBuilder.build().find();
+    // Inverser l'ordre des résultats
+    final results = qBuilder.build().find();
+    return results.reversed.toList();
   }
 
   void resetProduits() {
@@ -426,10 +428,12 @@ class CartProvider with ChangeNotifier {
   Facture _facture = Facture(date: DateTime.now(), qr: '');
   Client? _selectedClient;
   List<Facture> _factures = [];
+  Produit? produit;
 
   Facture get facture => _facture;
   Client? get selectedClient => _selectedClient;
   List<Facture> get factures => _factures;
+  int get factureCount => _factures.length;
 
   CartProvider(this._objectBox) {
     fetchFactures();
@@ -549,7 +553,7 @@ class CartProvider with ChangeNotifier {
   //   notifyListeners();
   //   fetchFactures();
   // }
-  Future<void> saveFacture() async {
+  Future<void> saveFacture(CommerceProvider commerceProvider) async {
     // Vérifier si un client est sélectionné
     if (_selectedClient != null) {
       // Mise à jour du montant impayé du client
@@ -567,11 +571,32 @@ class CartProvider with ChangeNotifier {
     // Sauvegarder la facture
     _objectBox.factureBox.put(_facture);
 
-    // Sauvegarde des lignes de facture
+    // // Sauvegarde des lignes de facture
+    // for (var ligne in _facture.lignesFacture) {
+    //   _objectBox.ligneFacture.put(ligne);
+    // }
+// Sauvegarde des lignes de facture et mise à jour des produits associés
     for (var ligne in _facture.lignesFacture) {
+      final produit = ligne.produit.target;
+
+      if (produit != null) {
+        // Mettre à jour le stock du produit en fonction de la quantité vendue
+        produit.stock -= ligne.quantite;
+
+        // Mettre à jour la date de modification du produit
+        produit.derniereModification = DateTime.now();
+
+        // Sauvegarder le produit mis à jour
+        _objectBox.produitBox.put(produit);
+        commerceProvider.updateProduit(produit);
+        // Notifier le `ClientProvider` de la mise à jour du produit
+        // Vous devez injecter le `ClientProvider` ou le notifier via une méthode appropriée
+        // Exemple : clientProvider.updateProduit(produit);
+      }
+
+      // Sauvegarder la ligne de facture
       _objectBox.ligneFacture.put(ligne);
     }
-
     // Réinitialisation de la facture et du client sélectionné
     _facture = Facture(date: DateTime.now(), qr: '');
     _selectedClient = null;
@@ -622,6 +647,7 @@ class ClientProvider with ChangeNotifier {
   List<Client> _clients = [];
 
   List<Client> get clients => _clients;
+  int get clientCount => _clients.length;
 
   ClientProvider(this._objectBox) {
     getClientsFromBox();

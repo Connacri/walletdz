@@ -244,7 +244,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     int.tryParse(_supplierController.text) ?? 0;
                 final int clients = int.tryParse(_clientController.text) ?? 0;
 
-                widget.objectBox.fillWithFakeData(clients, products, suppliers);
+                widget.objectBox.fillWithFakeData(clients, suppliers, products);
                 // ScaffoldMessenger.of(context).showSnackBar(
                 //   SnackBar(content: Text('Données factices ajoutées !')),
                 // );
@@ -654,7 +654,7 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                     int.tryParse(_supplierController.text) ?? 0;
                 final int clients = int.tryParse(_clientController.text) ?? 0;
 
-                widget.objectBox.fillWithFakeData(clients, products, suppliers);
+                widget.objectBox.fillWithFakeData(clients, suppliers, products);
                 // ScaffoldMessenger.of(context).showSnackBar(
                 //   SnackBar(content: Text('Données factices ajoutées !')),
                 // );

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../Entity.dart';
 import '../MyProviders.dart';
+import 'FactureListScreen.dart';
 
 class ClientListScreen extends StatelessWidget {
   @override
@@ -13,13 +14,17 @@ class ClientListScreen extends StatelessWidget {
 
         return Scaffold(
           appBar: AppBar(
-            title: Text('Clients'),
+            title: Consumer<ClientProvider>(
+              builder: (context, clientProvider, child) {
+                return Text('Nombre de clients: ${clientProvider.clientCount}');
+              },
+            ),
             actions: [
-              ElevatedButton(
+              IconButton(
                 onPressed: () async {
                   await clientProvider.deleteAllClients();
                 },
-                child: Text('Supprimer tous les clients'),
+                icon: Icon(Icons.clear_all_outlined),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red, // Couleur de fond grise
                   foregroundColor: Colors.grey[300], // Couleur du texte grise
@@ -56,13 +61,8 @@ class ClientListScreen extends StatelessWidget {
                       ),
                     ));
                   },
-                  title: Text(client.nom),
-                  subtitle: Column(
-                    children: [
-                      Text(client.phone.toString()),
-                      Text(client.description),
-                    ],
-                  ),
+                  title: Text(client.nom + ' ' + client.phone.toString()),
+                  subtitle: Text(client.description),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -202,13 +202,18 @@ class ClientDetailsPage extends StatelessWidget {
                           sum + (ligne.prixUnitaire * ligne.quantite));
 
                   return ListTile(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              FactureDetailPage(facture: facture),
+                        ),
+                      );
+                    },
                     title: Text('Facture ID: ${facture.id}'),
                     subtitle: Text(
                         'Date: ${facture.date.toLocal().toString().split(' ')[0]}\nMontant: ${totalAmount.toStringAsFixed(2)} DZD'),
                     trailing: Icon(Icons.receipt),
-                    onTap: () {
-                      // Afficher plus de détails de la facture si nécessaire
-                    },
                   );
                 },
               ),
