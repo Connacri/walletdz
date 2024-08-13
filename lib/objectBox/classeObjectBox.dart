@@ -106,6 +106,9 @@ class ObjectBox {
         dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
         derniereModification:
             faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
+        createdBy: 0,
+        updatedBy: 0,
+        deletedBy: 0,
       );
     });
     fournisseurBox.putMany(fournisseurs);
@@ -129,6 +132,9 @@ class ObjectBox {
             faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
         stockinit: faker.randomGenerator.decimal(min: 200),
         minimStock: faker.randomGenerator.decimal(min: 1, scale: 2),
+        createdBy: 0,
+        updatedBy: 0,
+        deletedBy: 0,
       );
 
       // Associer entre 1 et 10 fournisseurs aléatoires au produit
@@ -150,10 +156,12 @@ class ObjectBox {
         phone: faker.phoneNumber.us(),
         adresse: faker.address.streetAddress(),
         description: faker.lorem.sentence(),
-        impayer: faker.randomGenerator.decimal(min: 0, scale: 2),
         dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
         derniereModification:
             faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
+        createdBy: 0,
+        updatedBy: 0,
+        deletedBy: 0,
       );
 
       // Créer un nombre aléatoire de factures pour chaque client
@@ -161,7 +169,11 @@ class ObjectBox {
       for (int i = 0; i < numberOfFactures; i++) {
         final facture = Facture(
           qr: faker.randomGenerator.integer(999999).toString(),
+          impayer: faker.randomGenerator.decimal(min: 0, scale: 2),
           date: faker.date.dateTime(minYear: 2010, maxYear: 2024),
+          createdBy: 0,
+          updatedBy: 0,
+          deletedBy: 0,
         );
 
         // Créer des lignes de facture
@@ -170,7 +182,7 @@ class ObjectBox {
           final produit =
               produits[faker.randomGenerator.integer(produits.length)];
           final ligneFacture = LigneFacture(
-            quantite: faker.randomGenerator.integer(10, min: 1),
+            quantite: faker.randomGenerator.decimal(min: 1, scale: 10),
             prixUnitaire: produit.prixVente,
           );
           ligneFacture.produit.target = produit;
@@ -192,7 +204,11 @@ class ObjectBox {
         List.generate(numberOfFacturesSansClient, (index) {
       final facture = Facture(
         qr: faker.randomGenerator.integer(999999).toString(),
+        impayer: faker.randomGenerator.decimal(min: 0, scale: 2),
         date: faker.date.dateTime(minYear: 2010, maxYear: 2024),
+        createdBy: 0,
+        updatedBy: 0,
+        deletedBy: 0,
       );
 
       // Créer des lignes de facture
@@ -201,7 +217,7 @@ class ObjectBox {
         final produit =
             produits[faker.randomGenerator.integer(produits.length)];
         final ligneFacture = LigneFacture(
-          quantite: faker.randomGenerator.integer(10, min: 1),
+          quantite: faker.randomGenerator.decimal(min: 1, scale: 10),
           prixUnitaire: produit.prixVente,
         );
         ligneFacture.produit.target = produit;
@@ -226,6 +242,9 @@ class ObjectBox {
     // }
     produitBox.removeAll();
     fournisseurBox.removeAll();
+    clientBox.removeAll();
+    factureBox.removeAll();
+    ligneFacture.removeAll();
     // await deleteDatabase();
     await init();
   }

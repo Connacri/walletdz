@@ -16,7 +16,7 @@ class ClientListScreen extends StatelessWidget {
           appBar: AppBar(
             title: Consumer<ClientProvider>(
               builder: (context, clientProvider, child) {
-                return Text('Nombre de clients: ${clientProvider.clientCount}');
+                return Text('${clientProvider.clientCount} Clients');
               },
             ),
             actions: [
@@ -61,7 +61,11 @@ class ClientListScreen extends StatelessWidget {
                       ),
                     ));
                   },
-                  title: Text(client.nom + ' ' + client.phone.toString()),
+                  title: Text(client.id.toString() +
+                      ' ' +
+                      client.nom +
+                      ' ' +
+                      client.phone.toString()),
                   subtitle: Text(client.description),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -185,7 +189,7 @@ class ClientDetailsPage extends StatelessWidget {
             Text('Téléphone: ${client.phone}'),
             Text('Adresse: ${client.adresse}'),
             Text('Description: ${client.description}'),
-            Text('Impayer: ${client.impayer!.toStringAsFixed(2)} DZD'),
+            // Text('Impayer: ${client.impayer!.toStringAsFixed(2)} DZD'),
             SizedBox(height: 20),
             Text(
               'Factures:',
@@ -336,7 +340,10 @@ class _AddClientFormState extends State<AddClientForm> {
                       dateCreation: DateTime.now(),
                       derniereModification: DateTime.now(),
                       description: _descriptionController.text,
-                      impayer: double.parse(_impayerController.text),
+                      // impayer: double.parse(_impayerController.text),
+                      createdBy: 0,
+                      updatedBy: 0,
+                      deletedBy: 0,
                     );
                     context.read<ClientProvider>().addClient(client);
                     Navigator.of(context).pop(client);
@@ -369,8 +376,8 @@ void _editClient(BuildContext context, Client client) {
   final _adresseController = TextEditingController(text: client.adresse);
   final _descriptionController =
       TextEditingController(text: client.description);
-  final _impayerController =
-      TextEditingController(text: client.impayer.toString());
+  // final _impayerController =
+  //     TextEditingController(text: client.impayer.toString());
 
   showModalBottomSheet(
     context: context,
@@ -409,10 +416,10 @@ void _editClient(BuildContext context, Client client) {
                   controller: _descriptionController,
                   decoration: InputDecoration(labelText: 'Description'),
                 ),
-                TextFormField(
-                  controller: _impayerController,
-                  decoration: InputDecoration(labelText: 'Impayer'),
-                ),
+                // TextFormField(
+                //   controller: _impayerController,
+                //   decoration: InputDecoration(labelText: 'Impayer'),
+                // ),
               ],
             ),
           ),
@@ -438,7 +445,9 @@ void _editClient(BuildContext context, Client client) {
                       adresse: _adresseController.text,
                       derniereModification: DateTime.now(),
                       description: _descriptionController.text,
-                      impayer: double.parse(_impayerController.text),
+                      createdBy: 0,
+                      updatedBy: 0,
+                      deletedBy: 0,
                     );
                     context.read<ClientProvider>().updateClient(updatedClient);
                     Navigator.of(context).pop();

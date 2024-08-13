@@ -77,7 +77,8 @@ class CommerceProvider extends ChangeNotifier {
     final qBuilder = _objectBox.produitBox.query(idQuery !=
             null // la recherche se fait par id et moi je le veux pas qrcode
         ? Produit_.id.equals(idQuery) |
-            Produit_.nom.contains(queryLower, caseSensitive: false)
+            Produit_.nom.contains(queryLower, caseSensitive: false) |
+            Produit_.qr.contains(queryLower, caseSensitive: false)
         : Produit_.nom.contains(queryLower, caseSensitive: false));
     // Inverser l'ordre des résultats
     final results = qBuilder.build().find();
@@ -268,6 +269,9 @@ class CommerceProvider extends ChangeNotifier {
             faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
         stockinit: faker.randomGenerator.decimal(min: 200),
         minimStock: faker.randomGenerator.decimal(min: 1, scale: 2),
+        createdBy: 0,
+        updatedBy: 0,
+        deletedBy: 0,
       );
     });
 
@@ -425,7 +429,14 @@ class CommerceProvider extends ChangeNotifier {
 
 class CartProvider with ChangeNotifier {
   final ObjectBox _objectBox;
-  Facture _facture = Facture(date: DateTime.now(), qr: '');
+  Facture _facture = Facture(
+    date: DateTime.now(),
+    qr: '',
+    createdBy: 0,
+    updatedBy: 0,
+    deletedBy: 0,
+    impayer: 0.0,
+  );
   Client? _selectedClient;
   List<Facture> _factures = [];
   Produit? produit;
@@ -468,9 +479,11 @@ class CartProvider with ChangeNotifier {
       phone: phone,
       adresse: adresse,
       description: description,
-      impayer: 0,
       dateCreation: dateCreation,
       derniereModification: derniereModification,
+      createdBy: 0,
+      updatedBy: 0,
+      deletedBy: 0,
     );
     _objectBox.clientBox.put(newClient);
     selectClient(newClient);
@@ -485,9 +498,11 @@ class CartProvider with ChangeNotifier {
         phone: '',
         adresse: '',
         description: 'Client créé automatiquement',
-        impayer: 0,
         dateCreation: DateTime.now(),
         derniereModification: DateTime.now(),
+        createdBy: 0,
+        updatedBy: 0,
+        deletedBy: 0,
       );
       _objectBox.clientBox.put(anonymousClient);
       selectClient(anonymousClient);
@@ -557,7 +572,7 @@ class CartProvider with ChangeNotifier {
     // Vérifier si un client est sélectionné
     if (_selectedClient != null) {
       // Mise à jour du montant impayé du client
-      _selectedClient?.impayer = (_selectedClient?.impayer ?? 0) + totalAmount;
+      // _selectedClient?.impayer = (_selectedClient?.impayer ?? 0) + totalAmount;
 
       // Sauvegarder le client mis à jour
       _objectBox.clientBox.put(_selectedClient!);
@@ -598,7 +613,14 @@ class CartProvider with ChangeNotifier {
       _objectBox.ligneFacture.put(ligne);
     }
     // Réinitialisation de la facture et du client sélectionné
-    _facture = Facture(date: DateTime.now(), qr: '');
+    _facture = Facture(
+      date: DateTime.now(),
+      qr: '',
+      createdBy: 0,
+      updatedBy: 0,
+      deletedBy: 0,
+      impayer: 0.0,
+    );
     _selectedClient = null;
 
     notifyListeners();
@@ -608,7 +630,14 @@ class CartProvider with ChangeNotifier {
   }
 
   void clearCart() {
-    _facture = Facture(date: DateTime.now(), qr: '');
+    _facture = Facture(
+      date: DateTime.now(),
+      qr: '',
+      createdBy: 0,
+      updatedBy: 0,
+      deletedBy: 0,
+      impayer: 0.0,
+    );
     _selectedClient = null;
     notifyListeners();
   }

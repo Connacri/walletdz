@@ -1124,9 +1124,15 @@ class CardTop extends StatelessWidget {
                 height: 150,
                 fit: BoxFit.cover,
                 imageUrl: image,
-                // placeholder: (context, url) => Center(
-                //   child: CircularProgressIndicator(),
-                // ),
+                placeholder: (context, url) => Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Colors.blue, Colors.black],
+                    ),
+                  ),
+                ),
                 errorWidget: (context, url, error) => const Icon(Icons.error),
               ),
             ),

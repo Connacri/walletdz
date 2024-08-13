@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:objectbox/src/relations/to_many.dart';
 import 'package:provider/provider.dart';
 import '../Entity.dart';
 import '../MyProviders.dart';
@@ -7,6 +8,8 @@ import 'ClientListScreen.dart';
 import 'ProduitListScreen.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/services.dart';
+import 'add_Produit.dart';
 
 class FacturePage extends StatefulWidget {
   @override
@@ -15,6 +18,24 @@ class FacturePage extends StatefulWidget {
 
 class _FacturePageState extends State<FacturePage> {
   Client? _selectedClient;
+  String _barcodeBuffer = '';
+  late FocusNode _invisibleFocusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _invisibleFocusNode = FocusNode();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _invisibleFocusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    _invisibleFocusNode.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final commerceProvider = Provider.of<CommerceProvider>(context);
@@ -104,215 +125,179 @@ class _FacturePageState extends State<FacturePage> {
               : SizedBox(width: 0),
         ],
       ),
-      body: Consumer<CartProvider>(
-        builder: (context, cartProvider, child) {
-          final items = cartProvider.facture.lignesFacture;
-          final totalAmount = cartProvider.totalAmount;
-          final tva = totalAmount * 0.19; // TVA à 19%
-          return Column(
-            children: [
-              _buildClientInfo(context, cartProvider),
-              Expanded(
-                  child: ListView.builder(
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  final ligneFacture = items[index];
-                  final produit = ligneFacture.produit.target!;
-                  final TextEditingController _quantiteController =
-                      TextEditingController(
-                          text: ligneFacture.quantite.toString());
+      body: Consumer<CartProvider>(builder: (context, cartProvider, child) {
+        final items = cartProvider.facture.lignesFacture;
+        final totalAmount = cartProvider.totalAmount;
+        final tva = totalAmount * 0.19; // TVA à 19%
+        final impayer = cartProvider.facture.impayer;
 
-                  return Card(
-                    child: ListTile(
-                      title: Text('${produit.nom} Qr: ${produit.qr}'),
-                      subtitle: Text(
-                          ////////////////////// ne dois pas utiliser ligneFacture.quantite a sa place en ytilise une variable locale pour compabilse et dedeuire la qyantité avant sa savefacture
-                          'Prix: ${ligneFacture.prixUnitaire.toStringAsFixed(2)} DZD\nQuantité: ${ligneFacture.quantite}'),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: Icon(Icons.remove_shopping_cart),
-                            onPressed: () {
-                              cartProvider.removeFromCart(produit);
-                            },
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.edit),
-                            onPressed: () async {
-                              _showEditQuantityDialog(
-                                  context, ligneFacture, _quantiteController);
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              )),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Total: ${totalAmount.toStringAsFixed(2)} DZD'),
-                    Text('TVA (19%): ${tva.toStringAsFixed(2)} DZD'),
-                    Text(
-                        'Total TTC: ${(totalAmount + tva).toStringAsFixed(2)} DZD'),
-                    SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () async {
-                        try {
-                          await cartProvider.saveFacture(commerceProvider);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Facture sauvegardée!')),
-                          );
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Erreur: ${e.toString()}')),
-                          );
-                        }
-                      },
-                      child: Text('Sauvegarder la facture'),
-                    )
-                  ],
-                ),
-              ),
-              SizedBox(height: 50)
-            ],
-          );
-        },
-      ),
+        return RawKeyboardListener(
+            focusNode: _invisibleFocusNode,
+            onKey: (RawKeyEvent event) {
+              if (event is RawKeyDownEvent) {
+                if (event.logicalKey == LogicalKeyboardKey.enter) {
+                  _processBarcode(
+                      context,
+                      commerceProvider,
+                      cartProvider,
+                      double.parse(_barcodeBuffer),
+                      cartProvider.facture.lignesFacture);
+                } else {
+                  _barcodeBuffer += event.character ?? '';
+                }
+              }
+            },
+            child: buildColumn(context, cartProvider, items, totalAmount, tva,
+                impayer!, commerceProvider));
+      }),
     );
   }
 
-  // void _showEditQuantityDialog(BuildContext context, LigneFacture ligneFacture,
-  //     TextEditingController controller) {
-  //   // Créez une clé globale pour le formulaire
-  //   final _formKey = GlobalKey<FormState>();
-  //
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) {
-  //       return AlertDialog(
-  //         title: Text(
-  //             'Modifier la quantité pour ${ligneFacture.produit.target!.nom}'),
-  //         content: Form(
-  //           key: _formKey,
-  //           child: TextFormField(
-  //             controller: controller,
-  //             keyboardType: TextInputType.number,
-  //             decoration: InputDecoration(
-  //               labelText: 'Quantité',
-  //             ),
-  //             autovalidateMode: AutovalidateMode.onUserInteraction,
-  //             validator: (value) {
-  //               if (value == null || value.isEmpty) {
-  //                 return 'Veuillez entrer une quantité';
-  //               }
-  //               final int? enteredQuantity = int.tryParse(value);
-  //               if (enteredQuantity == null) {
-  //                 return 'Veuillez entrer un nombre valide';
-  //               }
-  //               if (enteredQuantity < 0 ||
-  //                   enteredQuantity > ligneFacture.produit.target!.stock) {
-  //                 return 'La quantité doit être entre 0 et ${ligneFacture.produit.target!.stock}';
-  //               }
-  //               return null;
-  //             },
-  //           ),
-  //         ),
-  //         actions: [
-  //           TextButton(
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             },
-  //             child: Text('Annuler'),
-  //           ),
-  //           ElevatedButton(
-  //             onPressed: () {
-  //               if (_formKey.currentState?.validate() ?? false) {
-  //                 final int newQuantity = int.parse(controller.text);
-  //
-  //                 // Mettre à jour la quantité dans la ligne de facture
-  //                 ligneFacture.quantite = newQuantity;
-  //
-  //                 // Mettre à jour le stock du produit
-  //                 ligneFacture.produit.target!.stock -= newQuantity;
-  //
-  //                 // Rafraîchir l'UI en appelant setState
-  //                 Navigator.of(context).pop();
-  //               }
-  //             },
-  //             child: Text('Enregistrer'),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
-  void _showEditQuantityDialog(BuildContext context, LigneFacture ligneFacture,
-      TextEditingController controller) {
-    // Créez une clé globale pour le formulaire
-    final _formKey = GlobalKey<FormState>();
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(
-              'Modifier la quantité pour ${ligneFacture.produit.target!.nom}'),
-          content: Form(
-            key: _formKey,
-            child: TextFormField(
-              controller: controller,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Quantité',
-              ),
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Veuillez entrer une quantité';
-                }
-                final int? enteredQuantity = int.tryParse(value);
-                if (enteredQuantity == null) {
-                  return 'Veuillez entrer un nombre valide';
-                }
-                if (enteredQuantity < 0 ||
-                    enteredQuantity > ligneFacture.produit.target!.stock) {
-                  return 'La quantité doit être entre 0 et ${ligneFacture.produit.target!.stock}';
-                }
-                return null;
-              },
-            ),
+  Column buildColumn(
+      BuildContext context,
+      CartProvider cartProvider,
+      ToMany<LigneFacture> items,
+      double totalAmount,
+      double tva,
+      double impayer,
+      CommerceProvider commerceProvider) {
+    return Column(
+      children: [
+        _buildClientInfo(context, cartProvider),
+        Expanded(
+          child: ListView.builder(
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              final ligneFacture = items[index];
+              final produit = ligneFacture.produit.target!;
+              final TextEditingController _quantiteController =
+                  TextEditingController(
+                      text: ligneFacture.quantite.toStringAsFixed(2));
+              final TextEditingController _prixController =
+                  TextEditingController(
+                      text: ligneFacture.prixUnitaire.toStringAsFixed(2));
+              return Card(
+                child: ListTile(
+                  title: Text('Qr: ${produit.qr} ${produit.nom}'),
+                  subtitle: Text(
+                      '${ligneFacture.prixUnitaire.toStringAsFixed(2)} DZD * ${ligneFacture.quantite} = ${(ligneFacture.prixUnitaire * ligneFacture.quantite).toStringAsFixed(2)} DZD'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.edit),
+                        onPressed: () async {
+                          _showEditQuantityDialog(context, ligneFacture,
+                              _quantiteController, _prixController);
+                        },
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          Icons.delete,
+                          color: Colors.red,
+                        ),
+                        onPressed: () {
+                          cartProvider.removeFromCart(produit);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Annuler'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState?.validate() ?? false) {
-                  final int newQuantity = int.parse(controller.text);
-
-                  // Mettre à jour la quantité dans la ligne de facture
-                  ligneFacture.quantite = newQuantity;
-
-                  // Rafraîchir l'UI en appelant setState
-                  setState(() {});
-                  Navigator.of(context).pop();
-                }
-              },
-              child: Text('Enregistrer'),
-            ),
-          ],
-        );
-      },
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Impayer: ${(impayer).toStringAsFixed(2)} DZD'),
+              Text('Total: ${totalAmount.toStringAsFixed(2)} DZD'),
+              Text('TVA (19%): ${tva.toStringAsFixed(2)} DZD'),
+              Text('Total TTC: ${(totalAmount + tva).toStringAsFixed(2)} DZD'),
+              Card(
+                color: Colors.green,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    'Montant à Payé: ${(totalAmount + tva - impayer).toStringAsFixed(2)} DZD',
+                    style: TextStyle(fontSize: 20, color: Colors.white),
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () async {
+                  try {
+                    await cartProvider.saveFacture(commerceProvider);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Facture sauvegardée!')),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Erreur: ${e.toString()}')),
+                    );
+                  }
+                },
+                child: Text('Sauvegarder la facture'),
+              )
+            ],
+          ),
+        ),
+        SizedBox(height: 50)
+      ],
     );
+  }
+
+  void _processBarcode(BuildContext context, CommerceProvider commerceProvider,
+      CartProvider cartProvider, double enteredQuantity, ligneFacture) async {
+    if (_barcodeBuffer.isNotEmpty) {
+      final produit = await commerceProvider.getProduitByQr(_barcodeBuffer);
+      if (produit == null) {
+        _navigateToAddProductPage(context, commerceProvider, cartProvider);
+      } else {
+        if (enteredQuantity > 0 ||
+            enteredQuantity <= ligneFacture.produit.target!.stock) {
+          cartProvider.addToCart(produit);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Produit ajouté : ${produit.nom}'),
+              backgroundColor: Colors.green,
+              showCloseIcon: true,
+              duration: _snackBarDisplayDuration(),
+            ),
+          );
+        } else {
+          SnackBar(
+            content: Text(
+                'La quantité doit être entre 0 et ${ligneFacture.produit.target!.stock}'),
+            backgroundColor: Colors.green,
+          );
+        }
+      }
+      _barcodeBuffer = '';
+    }
+  }
+
+  void _navigateToAddProductPage(BuildContext context,
+      CommerceProvider commerceProvider, CartProvider cartProvider) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => add_Produit(qrCode: _barcodeBuffer),
+      ),
+    );
+
+    if (result != null && result is Produit) {
+      cartProvider.addToCart(result);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Nouveau produit ajouté : ${result.nom}'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
   }
 
   Widget _buildClientInfo(BuildContext context, CartProvider cartProvider) {
@@ -321,11 +306,13 @@ class _FacturePageState extends State<FacturePage> {
       margin: EdgeInsets.all(8),
       child: InkWell(
         onTap: () {
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (ctx) => ClientDetailsPage(
-              client: client!,
-            ),
-          ));
+          client != null
+              ? Navigator.of(context).push(MaterialPageRoute(
+                  builder: (ctx) => ClientDetailsPage(
+                    client: client,
+                  ),
+                ))
+              : null;
         },
         child: Padding(
           padding: EdgeInsets.all(8),
@@ -352,6 +339,145 @@ class _FacturePageState extends State<FacturePage> {
       ),
     );
   }
+
+  void _showEditQuantityDialog(
+      BuildContext context,
+      LigneFacture ligneFacture,
+      TextEditingController _quantiteController,
+      TextEditingController _prixController) {
+    final _formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            'Modifier la quantité pour ${ligneFacture.produit.target!.nom}\nReste En Stock  ${ligneFacture.produit.target!.stock.toStringAsFixed(ligneFacture.produit.target!.stock.truncateToDouble() == ligneFacture.produit.target!.stock ? 0 : 2)}',
+            textAlign: TextAlign.center,
+          ),
+          content: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: _quantiteController,
+                  keyboardType: TextInputType.number,
+                  textAlign: TextAlign.center,
+                  decoration: InputDecoration(
+                    labelText: 'Quantité',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide.none, // Supprime le contour
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide:
+                          BorderSide.none, // Supprime le contour en état normal
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide:
+                          BorderSide.none, // Supprime le contour en état focus
+                    ),
+                    //border: InputBorder.none,
+                    filled: true,
+                    contentPadding: EdgeInsets.all(15),
+                  ),
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez entrer une quantité';
+                    }
+                    final double? enteredQuantity = double.tryParse(value);
+                    if (enteredQuantity == null) {
+                      return 'Veuillez entrer un nombre valide';
+                    }
+                    if (enteredQuantity <= 0)
+                      return 'La quantité doit être Superieur à 0.0';
+
+                    if (enteredQuantity > ligneFacture.produit.target!.stock) {
+                      return 'La quantité doit être entre 0.0 et ${ligneFacture.produit.target!.stock}';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                TextFormField(
+                  controller: _prixController,
+                  keyboardType: TextInputType.number,
+                  textAlign: TextAlign.center,
+                  decoration: InputDecoration(
+                    labelText: 'Prix',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide.none, // Supprime le contour
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide:
+                          BorderSide.none, // Supprime le contour en état normal
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide:
+                          BorderSide.none, // Supprime le contour en état focus
+                    ),
+                    //border: InputBorder.none,
+                    filled: true,
+                    contentPadding: EdgeInsets.all(15),
+                  ),
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez entrer une Prix';
+                    }
+                    final double? enteredPrice = double.tryParse(value);
+                    if (enteredPrice == null) {
+                      return 'Veuillez entrer un nombre valide';
+                    }
+                    if (enteredPrice < 0 ||
+                        enteredPrice > ligneFacture.produit.target!.prixVente) {
+                      return 'La Prix doit être entre ${ligneFacture.produit.target!.prixAchat} et ${ligneFacture.produit.target!.prixVente}';
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Annuler'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (_formKey.currentState?.validate() ?? false) {
+                  final double newQuantity =
+                      double.parse(_quantiteController.text);
+                  final double newPrice = double.parse(_prixController.text);
+                  ligneFacture.quantite = newQuantity;
+                  ligneFacture.prixUnitaire = newPrice;
+                  setState(() {});
+                  Navigator.of(context).pop();
+                }
+              },
+              child: Text('Enregistrer'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Duration _snackBarDisplayDuration() {
+    return Duration(seconds: 1); // Afficher la SnackBar pendant 1 secondes
+  }
 }
 
 class ClientSelectionPage extends StatefulWidget {
@@ -372,11 +498,12 @@ class _ClientSelectionPageState extends State<ClientSelectionPage> {
   void _filterClients(String query) {
     setState(() {
       _searchQuery = query;
-      _filteredClients = Provider.of<CommerceProvider>(context)
+      _filteredClients = Provider.of<ClientProvider>(context, listen: false)
           .clients
           .where((client) =>
               client.nom.toLowerCase().contains(query.toLowerCase()) ||
-              client.phone.contains(query))
+              client.id.toString().contains(query) ||
+              client.qr.contains(query))
           .toList();
     });
   }
@@ -405,7 +532,7 @@ class _ClientSelectionPageState extends State<ClientSelectionPage> {
                 itemBuilder: (context, index) {
                   final client = _filteredClients[index];
                   return ListTile(
-                    title: Text(client.nom),
+                    title: Text(client.id.toString() + '  ' + client.nom),
                     subtitle: Text(client.phone),
                     onTap: () {
                       Provider.of<CartProvider>(context, listen: false)
@@ -432,7 +559,7 @@ class FacturesListPage extends StatelessWidget {
         appBar: AppBar(
           title: Consumer<CartProvider>(
             builder: (context, cartProvider, child) {
-              return Text('Nombre de Factures: ${cartProvider.factureCount}');
+              return Text('${cartProvider.factureCount} Factures');
             },
           ),
           actions: [
@@ -471,13 +598,20 @@ class FacturesListPage extends StatelessWidget {
                     leading: CircleAvatar(
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text('${facture.id}'),
+                        child: FittedBox(child: Text('${facture.id}')),
                       ),
                     ),
                     title: Text(
                       'Invoice ${client?.nom ?? 'Unknown'}',
                     ),
-                    subtitle: Text('${facture.date}'),
+                    subtitle: Text(
+                      '${facture.date}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight:
+                            FontWeight.w300, /*fontStyle: FontStyle.italic*/
+                      ),
+                    ),
                     onLongPress: () {
                       Provider.of<CartProvider>(context, listen: false)
                           .deleteFacture(facture);

@@ -55,7 +55,7 @@ class _add_ProduitState extends State<add_Produit> {
   @override
   void initState() {
     super.initState();
-
+    _serialController.text = widget.qrCode ?? '';
     _serialController.addListener(_onSerialChanged);
     _serialController.addListener(_checkFirstField);
 
@@ -441,6 +441,9 @@ class _add_ProduitState extends State<add_Produit> {
               stockUpdate: DateTime.now(),
               stockinit: double.parse(_stockController.text),
               minimStock: double.parse(_minimStockController.text),
+              createdBy: 0,
+              updatedBy: 0,
+              deletedBy: 0,
             );
 
             if (widget.specifiquefournisseur == null) {

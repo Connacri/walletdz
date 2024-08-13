@@ -435,6 +435,9 @@ class _Edit_ProduitState extends State<Edit_Produit> {
                       ? double.parse(_stockController.text)
                       : widget.produit!.stockinit,
               minimStock: double.parse(_minimStockController.text),
+              createdBy: 0,
+              updatedBy: 0,
+              deletedBy: 0,
             );
 
             if (produitDejaExist != null &&
@@ -1479,6 +1482,9 @@ class _AddFournisseurFormFromProduitState
                         dateCreation: DateTime.parse(_creationController.text),
                         derniereModification: DateTime.parse(
                             _derniereModificationController.text),
+                        createdBy: 0,
+                        updatedBy: 0,
+                        deletedBy: 0,
                       );
                       context
                           .read<CommerceProvider>()

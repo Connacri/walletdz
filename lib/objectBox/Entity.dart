@@ -1,17 +1,42 @@
 import 'package:objectbox/objectbox.dart';
 
 @Entity()
+class User {
+  @Id()
+  int id;
+  String? photo;
+  String username;
+  String password;
+  String email;
+  String? phone;
+  String role;
+  User({
+    this.id = 0,
+    this.photo,
+    required this.username,
+    required this.password,
+    this.phone,
+    required this.email,
+    required this.role,
+  });
+}
+
+@Entity()
 class Produit {
   int id;
   String? qr;
   String? image;
   String nom;
   String? description;
+  String? origine;
   double prixAchat;
   double prixVente;
   double stock;
   double minimStock;
   double stockinit;
+  int createdBy;
+  int updatedBy;
+  int deletedBy;
 
   @Property(type: PropertyType.date)
   DateTime? dateCreation;
@@ -34,10 +59,14 @@ class Produit {
     this.image,
     required this.nom,
     this.description,
+    this.origine,
     required this.prixAchat,
     required this.prixVente,
     required this.stock,
     required this.minimStock,
+    required this.createdBy,
+    required this.updatedBy,
+    required this.deletedBy,
     this.dateCreation,
     this.datePeremption,
     this.stockUpdate,
@@ -50,11 +79,15 @@ class Produit {
       qr: json['qr'],
       image: json['image'],
       nom: json['nom'] ?? '',
-      description: json['description'],
+      description: json['description'] ?? '',
+      origine: json['origine'] ?? '',
       prixAchat: (json['prixachat'] ?? 0).toDouble(),
       prixVente: (json['prixvente'] ?? 0).toDouble(),
       stock: (json['stock'] ?? 0).toDouble(),
       minimStock: (json['minimstock'] ?? 0).toDouble(),
+      createdBy: (json['createdBy']).toInt(),
+      updatedBy: (json['updatedBy']).toInt(),
+      deletedBy: (json['deletedBy']).toInt(),
       stockinit: (json['stockinit'] ?? 0).toDouble(),
       dateCreation: json['datecreation'] != null
           ? DateTime.parse(json['datecreation'])
@@ -79,6 +112,9 @@ class Fournisseur {
   String nom;
   String? phone;
   String? adresse;
+  int createdBy;
+  int updatedBy;
+  int deletedBy;
 
   @Property(type: PropertyType.date)
   DateTime dateCreation;
@@ -94,6 +130,9 @@ class Fournisseur {
     required this.nom,
     this.phone,
     this.adresse,
+    required this.createdBy,
+    required this.updatedBy,
+    required this.deletedBy,
     required this.dateCreation,
     required this.derniereModification,
   });
@@ -104,6 +143,9 @@ class Fournisseur {
       nom: json['nom'] ?? '',
       phone: json['phone'],
       adresse: json['adresse'],
+      createdBy: (json['createdBy']).toInt(),
+      updatedBy: (json['updatedBy']).toInt(),
+      deletedBy: (json['deletedBy']).toInt(),
       dateCreation: DateTime.parse(json['datecreation']),
       derniereModification: DateTime.parse(
           json['dernieremodification'] ?? DateTime.now().toIso8601String()),
@@ -119,7 +161,9 @@ class Client {
   String phone;
   String adresse;
   String description;
-  double? impayer;
+  int createdBy;
+  int updatedBy;
+  int deletedBy;
   @Property(type: PropertyType.date)
   DateTime? dateCreation;
 
@@ -136,7 +180,9 @@ class Client {
     required this.phone,
     required this.adresse,
     required this.description,
-    this.impayer,
+    required this.createdBy,
+    required this.updatedBy,
+    required this.deletedBy,
     this.dateCreation,
     this.derniereModification,
   });
@@ -146,7 +192,10 @@ class Client {
 class Facture {
   int id;
   String qr;
-
+  double? impayer;
+  int createdBy;
+  int updatedBy;
+  int deletedBy;
   @Property(type: PropertyType.date)
   DateTime date;
 
@@ -159,6 +208,10 @@ class Facture {
     this.id = 0,
     required this.date,
     required this.qr,
+    required this.impayer,
+    required this.createdBy,
+    required this.updatedBy,
+    required this.deletedBy,
   });
 }
 
@@ -167,12 +220,39 @@ class LigneFacture {
   int id;
   final produit = ToOne<Produit>();
   final facture = ToOne<Facture>();
-  int quantite;
+  double quantite;
   double prixUnitaire;
 
   LigneFacture({
     this.id = 0,
     required this.quantite,
     required this.prixUnitaire,
+  });
+}
+
+@Entity()
+class DeletedProduct {
+  @Id()
+  int id = 0;
+
+  String name;
+  String description;
+  double price;
+  int quantity;
+
+  int createdBy;
+  int updatedBy;
+  int deletedBy;
+  DateTime deletedAt;
+
+  DeletedProduct({
+    required this.name,
+    required this.description,
+    required this.price,
+    required this.quantity,
+    required this.deletedAt,
+    required this.createdBy,
+    required this.updatedBy,
+    required this.deletedBy,
   });
 }

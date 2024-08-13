@@ -72,7 +72,10 @@ class FournisseurListScreen extends StatelessWidget {
                       Text(
                         'Créer le ${fournisseur.dateCreation.day}-${fournisseur.dateCreation.month}-${fournisseur.dateCreation.year}  Modifié ${timeago.format(fournisseur.derniereModification!, locale: 'fr')}',
                         style: TextStyle(
-                            fontSize: 13, fontWeight: FontWeight.w300),
+                          fontSize: 13,
+                          fontWeight:
+                              FontWeight.w300, /* fontStyle: FontStyle.italic*/
+                        ),
                       ),
                     ],
                   ),
@@ -796,6 +799,9 @@ class _AddFournisseurFormState extends State<AddFournisseurForm> {
                       adresse: _adresseController.text,
                       dateCreation: DateTime.now(),
                       derniereModification: DateTime.now(),
+                      createdBy: 0,
+                      updatedBy: 0,
+                      deletedBy: 0,
                     );
                     context
                         .read<CommerceProvider>()
@@ -889,6 +895,9 @@ void _editFournisseur(BuildContext context, Fournisseur fournisseur) {
                       adresse: _adresseController.text,
                       dateCreation: DateTime.parse(_creationController.text),
                       derniereModification: DateTime.now(),
+                      createdBy: 0,
+                      updatedBy: 0,
+                      deletedBy: 0,
                     );
                     context
                         .read<CommerceProvider>()

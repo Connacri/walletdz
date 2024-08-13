@@ -3,6 +3,7 @@ import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:provider/provider.dart';
 import '../../objectbox.g.dart';
@@ -81,19 +82,15 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Produits'),
-        actions: [
-          Consumer<CommerceProvider>(
-              builder: (context, produitProvider, child) {
-            int totalProduits = produitProvider.getTotalProduits();
+        title: Consumer<CommerceProvider>(
+            builder: (context, produitProvider, child) {
+          int totalProduits = produitProvider.getTotalProduits();
 
-            return Text(
-              '${totalProduits} Produits',
-            );
-          }),
-          SizedBox(
-            width: 50,
-          ),
+          return Text(
+            '${totalProduits} Produits',
+          );
+        }),
+        actions: [
           IconButton(
             icon: Icon(Icons.search),
             onPressed: () async {
@@ -145,6 +142,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                     ],
                   ),
                   child: Card(
+                    color: produit.stock <= 0 ? Colors.redAccent : null,
                     child: Platform.isIOS || Platform.isAndroid
                         ? Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -846,24 +844,25 @@ class ProduitDetailPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Center(
-                    //   child: Padding(
-                    //       padding: EdgeInsets.symmetric(
-                    //           horizontal: 50, vertical: 16),
-                    //       child: ElevatedButton(
-                    //         onPressed: () async {
-                    //           final updatedProduit =
-                    //               await Navigator.of(context).push(
-                    //             MaterialPageRoute(
-                    //               builder: (ctx) => EditProduitScreen(
-                    //                 produit: produit,
-                    //               ),
-                    //             ),
-                    //           );
-                    //         },
-                    //         child: Text('Modifier'),
-                    //       )),
-                    // ),
+                    Center(
+                      child: Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 50, vertical: 16),
+                          child: ElevatedButton.icon(
+                            onPressed: () async {
+                              final updatedProduit =
+                                  await Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (ctx) => Edit_Produit(
+                                    produit: produit,
+                                  ),
+                                ),
+                              );
+                            },
+                            label: Text('Modifier'),
+                            icon: Icon(Icons.edit),
+                          )),
+                    ),
                     Center(
                       child: PrettyQr(
                         data: produit.qr.toString(),
@@ -880,20 +879,34 @@ class ProduitDetailPage extends StatelessWidget {
                     ),
                     SizedBox(height: 8),
                     Text(
-                      'Prix d\'achat: ${produit.prixAchat.toStringAsFixed(2)}',
+                      'Prix d\'achat: ${produit.prixAchat.toStringAsFixed(2)} DZD',
                       style: TextStyle(fontSize: 16),
                     ),
                     Text(
-                      'Prix de vente: ${produit.prixVente.toStringAsFixed(2)}',
+                      'Prix de vente: ${produit.prixVente.toStringAsFixed(2)} DZD',
                       style: TextStyle(fontSize: 16),
                     ),
                     SizedBox(height: 16),
-                    Text('Description : ${produit.description}'),
+                    Text('Description :\n${produit.description}'),
                     SizedBox(height: 16),
                     Text(
                         'Earn : ${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)}'),
                     SizedBox(height: 16),
                     Text('Stock : ' + produit.stock.toString()),
+                    SizedBox(height: 10),
+                    Text('Stock Minimal pour l\'Alert : ' +
+                        produit.stockinit.toString()),
+                    SizedBox(height: 10),
+                    Text('Stock Update : ' + produit.stockUpdate.toString()),
+                    SizedBox(height: 10),
+                    Text('Date Creation : ' + produit.dateCreation.toString()),
+                    SizedBox(height: 10),
+                    Text('Date Peremption : ' +
+                        produit.datePeremption.toString()),
+                    SizedBox(height: 10),
+                    Text('Derniere Modification : ' +
+                        produit.derniereModification.toString()),
+                    SizedBox(height: 10),
                     SizedBox(
                       height: 16,
                     ),

@@ -121,6 +121,9 @@ class _AddFournisseurFormFromProduitState
                         dateCreation: DateTime.parse(_creationController.text),
                         derniereModification: DateTime.parse(
                             _derniereModificationController.text),
+                        createdBy: 0,
+                        updatedBy: 0,
+                        deletedBy: 0,
                       );
                       context
                           .read<CommerceProvider>()
