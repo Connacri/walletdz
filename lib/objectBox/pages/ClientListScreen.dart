@@ -172,7 +172,8 @@ class ClientDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final clientProvider = Provider.of<ClientProvider>(context);
     List<Facture> factures = clientProvider.getFacturesForClient(client);
-
+    final cartProvider = Provider.of<CartProvider>(context);
+    final commercProvider = Provider.of<CommerceProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Détails du Client'),
@@ -209,8 +210,11 @@ class ClientDetailsPage extends StatelessWidget {
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) =>
-                              FactureDetailPage(facture: facture),
+                          builder: (context) => FactureDetailPage(
+                            facture: facture,
+                            cartProvider: cartProvider,
+                            commerceProvider: commercProvider,
+                          ),
                         ),
                       );
                     },

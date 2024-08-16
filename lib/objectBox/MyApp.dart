@@ -764,9 +764,10 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                   ? buildExpanded(context, randomId, produitProvider,
                       produitsFiltres, produitsLowStock, produitsLowStock0)
                   : _selectedIndex == 1
-                      ? Expanded(child: FacturePage())
-                      : Expanded(child: ClientListScreen()),
+                      ? Expanded(flex: 2, child: FacturePage())
+                      : Expanded(flex: 1, child: ClientListScreen()),
               Expanded(
+                flex: 1,
                 child: _widgetOptions()[_selectedIndex],
               ),
             ],
@@ -784,6 +785,7 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
       Map<String, dynamic> produitsLowStock,
       Map<String, dynamic> produitsLowStock0) {
     return Expanded(
+      flex: 1,
       child: ListView(
         children: [
           Padding(

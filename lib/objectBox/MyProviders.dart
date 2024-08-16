@@ -544,30 +544,46 @@ class CartProvider with ChangeNotifier {
         .fold(0, (sum, item) => sum + item.prixUnitaire * item.quantite);
   }
 
-  // Future<void> saveFacture() async {
-  //   //createAnonymousClientIfNeeded();
-  //
-  //   // Mise à jour du montant impayé du client
-  //   //_selectedClient!.impayer += totalAmount;
-  //   _selectedClient?.impayer = (_selectedClient?.impayer ?? 0) + totalAmount;
-  //
-  //   _selectedClient == null ? null : _objectBox.clientBox.put(_selectedClient!);
-  //
-  //   // Génération du QR code et sauvegarde de la facture
-  //   _facture.qr = await generateQRCode('${_facture.id}' '${_facture.date}');
-  //   _objectBox.factureBox.put(_facture);
-  //
-  //   // Sauvegarde des lignes de facture
-  //   for (var ligne in _facture.lignesFacture) {
-  //     _objectBox.ligneFacture.put(ligne);
-  //   }
-  //
-  //   // Réinitialisation de la facture et du client sélectionné
-  //   _facture = Facture(date: DateTime.now(), qr: '');
-  //   _selectedClient = null;
-  //   notifyListeners();
-  //   fetchFactures();
-  // }
+  Map<String, dynamic> calculateTotalsForInterval(
+      DateTime startDate, DateTime endDate) {
+    double totalTTC = 0.0;
+    double totalImpayes = 0.0;
+    double totalTVA = 0.0;
+    const double tvaRate = 0.19; // Taux de TVA (20% par exemple)
+
+    // Récupérer les factures depuis ObjectBox au moment de l'appel de la méthode
+    List<Facture> facturesDansIntervalle =
+        _objectBox.factureBox.getAll().where((facture) {
+      return (facture.date.isAfter(startDate) &&
+              facture.date.isBefore(endDate)) ||
+          facture.date.isAtSameMomentAs(startDate) ||
+          facture.date.isAtSameMomentAs(endDate);
+    }).toList();
+
+    // Calculer les totaux pour chaque facture dans l'intervalle
+    for (var facture in facturesDansIntervalle) {
+      double montantHT = facture.lignesFacture.fold(0.0, (sum, ligne) {
+        return sum + (ligne.prixUnitaire * ligne.quantite);
+      });
+
+      double tva = montantHT * tvaRate;
+      double montantTTC = montantHT + tva;
+
+      totalTTC += montantTTC;
+      totalTVA += tva;
+
+      // Ajouter le montant impayé
+      totalImpayes += facture.impayer ?? 0.0;
+    }
+
+    // Retourner les résultats sous forme de map
+    return {
+      'totalTTC': totalTTC,
+      'totalImpayes': totalImpayes,
+      'totalTVA': totalTVA,
+    };
+  }
+
   Future<void> saveFacture(CommerceProvider commerceProvider) async {
     // Vérifier si un client est sélectionné
     if (_selectedClient != null) {
