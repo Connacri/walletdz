@@ -5,14 +5,15 @@ import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:walletdz/objectBox/pages/ClientListScreen.dart';
-import 'package:walletdz/objectBox/pages/FactureListScreen.dart';
-import 'package:walletdz/objectBox/pages/ProduitListSupabase.dart';
+import '../objectBox/pages/ClientListScreen.dart';
+import '../objectBox/pages/FactureListScreen.dart';
+import '../objectBox/pages/ProduitListSupabase.dart';
 import '../../MyListLotties.dart';
 import '../objectbox.g.dart';
 import 'Entity.dart';
 import 'MyProviders.dart';
 import 'classeObjectBox.dart';
+import 'hash.dart';
 import 'pages/FournisseurListScreen.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:io' show Platform;
@@ -266,6 +267,20 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text('Facturation'),
         actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (ctx) => hashPage()));
+            },
+            icon: Icon(Icons.add_chart_rounded),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (ctx) => LicensePage()));
+            },
+            icon: Icon(Icons.account_tree_rounded),
+          ),
           IconButton(
             onPressed: () {
               Navigator.of(context).push(
@@ -676,6 +691,20 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
       appBar: AppBar(
         title: Text('Facturation'),
         actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (ctx) => hashPage()));
+            },
+            icon: Icon(Icons.add_chart_rounded),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (ctx) => LicensePage()));
+            },
+            icon: Icon(Icons.account_tree_rounded),
+          ),
           IconButton(
             onPressed: () {
               Navigator.of(context).push(
