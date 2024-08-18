@@ -8,6 +8,7 @@ import 'package:network_info_plus/network_info_plus.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:pincode_input_fields/pincode_input_fields.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class hashPage extends StatefulWidget {
   @override
@@ -22,11 +23,13 @@ class _hashPageState extends State<hashPage> {
   String _enteredHash = '';
   String _p4ssw0rd = "Oran2024";
   bool _isShowMessage = false;
+  bool _isLicenseValidated = false;
 
   @override
   void initState() {
     super.initState();
     _initDeviceIdentifier();
+    _checkLicenseStatus();
   }
 
   Future<void> _initDeviceIdentifier() async {
@@ -39,6 +42,29 @@ class _hashPageState extends State<hashPage> {
         _numHash = generateNumHash(_deviceIdentifier, _p4ssw0rd);
       });
     }
+  }
+
+  Future<void> _checkLicenseStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool? isLicenseValidated = prefs.getBool('isLicenseValidated');
+    if (isLicenseValidated != null && isLicenseValidated) {
+      setState(() {
+        _isLicenseValidated = true;
+      });
+    }
+  }
+
+  Future<void> _saveLicenseStatus(bool status) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLicenseValidated', status);
+  }
+
+  Future<void> _removeLicenseStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('isLicenseValidated');
+    setState(() {
+      _isLicenseValidated = false;
+    });
   }
 
   @override
@@ -70,165 +96,178 @@ class _hashPageState extends State<hashPage> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Text("Hash SHA-512 (QR code):"),
-            Spacer(),
-            _hash512.isNotEmpty
-                ? Center(
-                    child: PrettyQr(
-                      data: _hash512.toString(),
-                      size: 200.0,
-                      elementColor: Theme.of(context).hintColor,
-                    ),
-                  )
-                : CircularProgressIndicator(),
-            Spacer(),
-            SelectableText(_deviceIdentifier),
-            SelectableText(
-                utf8.encode(_deviceIdentifier + _p4ssw0rd).toString()),
-            SelectableText(generateHash(_deviceIdentifier, _p4ssw0rd)),
-            SelectableText(generateShortHash(_deviceIdentifier, _p4ssw0rd)),
-            SelectableText(generateNumHash(_deviceIdentifier, _p4ssw0rd)),
-            Spacer(),
-            Text("Entrer le PIN (depuis l'application mobile):"),
-            Spacer(),
-            Center(
-              child: PincodeInputFields(
-                onChanged: (value) {
-                  // Met à jour le hash saisi à chaque changement
-                  setState(() {
-                    _enteredHash = value;
-                  });
-                },
-                onInputComplete: () {
-                  // Valide le hash après avoir rempli les champs
-                  if (validateNumHash(
-                      _enteredHash, _deviceIdentifier, _p4ssw0rd)) {
-                    setState(() {
-                      _isShowMessage = true;
-                    });
-
-                    // Ouvrir l'application
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text("Licence Numerique validée!"),
-                        backgroundColor: Colors.green,
+      body: _isLicenseValidated
+          ? Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Spacer(),
+                Text(
+                  "Licence validée,\nL'application est activée.", //textAlign :
+                  style: TextStyle(fontSize: 25, color: Colors.green),
+                ),
+                Spacer(),
+                ElevatedButton(
+                    onPressed: () async {
+                      await _removeLicenseStatus();
+                    },
+                    child: Text('Delete Licence')),
+                Spacer(),
+              ],
+            )
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Text("Hash SHA-512 (QR code):"),
+                  Spacer(),
+                  _hash512.isNotEmpty
+                      ? Center(
+                          child: PrettyQr(
+                            data: _hash512.toString(),
+                            size: 200.0,
+                            elementColor: Theme.of(context).hintColor,
+                          ),
+                        )
+                      : CircularProgressIndicator(),
+                  Spacer(),
+                  SelectableText(_deviceIdentifier),
+                  SelectableText(
+                      utf8.encode(_deviceIdentifier + _p4ssw0rd).toString()),
+                  SelectableText(generateHash(_deviceIdentifier, _p4ssw0rd)),
+                  SelectableText(
+                      generateShortHash(_deviceIdentifier, _p4ssw0rd)),
+                  SelectableText(generateNumHash(_deviceIdentifier, _p4ssw0rd)),
+                  Spacer(),
+                  Text("Entrer le PIN (depuis l'application mobile):"),
+                  Spacer(),
+                  Center(
+                    child: PincodeInputFields(
+                      onChanged: (value) {
+                        setState(() {
+                          _enteredHash = value;
+                        });
+                      },
+                      onInputComplete: () {
+                        if (validateNumHash(
+                            _enteredHash, _deviceIdentifier, _p4ssw0rd)) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text("Licence Numerique validée!")),
+                          );
+                          _saveLicenseStatus(true);
+                          setState(() {
+                            _isLicenseValidated = true;
+                          });
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("num Hash incorrect!")),
+                          );
+                        }
+                      },
+                      autoFocus: true,
+                      length: 10,
+                      heigth: 54,
+                      width: 51,
+                      borderRadius: BorderRadius.circular(9),
+                      unfocusBorder: Border.all(
+                        width: 1,
+                        color: const Color(0xFF5B6774),
                       ),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text("num Hash incorrect!"),
-                        backgroundColor: Colors.red,
+                      focusBorder: Border.all(
+                        width: 1,
+                        color: const Color(0xFF9B71F4),
                       ),
-                    );
-                  }
-                },
-                autoFocus: true,
-                length: 10,
-                heigth: 54,
-                width: 51,
-                borderRadius: BorderRadius.circular(9),
-                unfocusBorder: Border.all(
-                  width: 1,
-                  color: const Color(0xFF5B6774),
-                ),
-                focusBorder: Border.all(
-                  width: 1,
-                  color: const Color(0xFF9B71F4),
-                ),
-                cursorColor: Colors.white,
-                cursorWidth: 2,
-                focusFieldColor: const Color(0xFF2A2B32),
-                unfocusFieldColor: const Color(0xFF2A2B32),
-                textStyle: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 21,
-                ),
-              ),
-            ),
-            _isShowMessage
-                ? Center(
-                    child: Text(
-                    "Licence Numerique validée!",
-                    style: const TextStyle(
-                      color: Colors.green,
-                      fontSize: 24,
+                      cursorColor: Colors.white,
+                      cursorWidth: 2,
+                      focusFieldColor: const Color(0xFF2A2B32),
+                      unfocusFieldColor: const Color(0xFF2A2B32),
+                      textStyle: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 21,
+                      ),
                     ),
-                  ))
-                : Center(
-                    child: Text(
-                    "num Hash incorrect!",
-                    style: const TextStyle(
-                      color: Colors.red,
-                      fontSize: 24,
-                    ),
-                  )),
-            Spacer(),
-            Text("Entrer le hash court (depuis l'application mobile):"),
-            Spacer(),
-            Container(
-              width:
-                  Platform.isIOS || Platform.isAndroid ? double.infinity : 400,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
-                  //  keyboardType: TextInputType.number,
-                  textAlign: TextAlign.center,
-                  decoration: InputDecoration(
-                    labelStyle: TextStyle(),
-
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide: BorderSide.none, // Supprime le contour
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide:
-                          BorderSide.none, // Supprime le contour en état normal
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide:
-                          BorderSide.none, // Supprime le contour en état focus
-                    ),
-                    //border: InputBorder.none,
-                    filled: true,
-                    contentPadding: EdgeInsets.all(15),
                   ),
-                  onChanged: (value) {
-                    setState(() {
-                      _enteredHash = value;
-                    });
-                  },
-                ),
+                  _isShowMessage
+                      ? Center(
+                          child: Text(
+                          "Licence Numerique validée!",
+                          style: const TextStyle(
+                            color: Colors.green,
+                            fontSize: 24,
+                          ),
+                        ))
+                      : Center(
+                          child: Text(
+                          "num Hash incorrect!",
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 24,
+                          ),
+                        )),
+                  Spacer(),
+                  Text("Entrer le hash court (depuis l'application mobile):"),
+                  Spacer(),
+                  Container(
+                    width: Platform.isIOS || Platform.isAndroid
+                        ? double.infinity
+                        : 400,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextFormField(
+                        //  keyboardType: TextInputType.number,
+                        textAlign: TextAlign.center,
+                        decoration: InputDecoration(
+                          labelStyle: TextStyle(),
+
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide.none, // Supprime le contour
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide
+                                .none, // Supprime le contour en état normal
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide
+                                .none, // Supprime le contour en état focus
+                          ),
+                          //border: InputBorder.none,
+                          filled: true,
+                          contentPadding: EdgeInsets.all(15),
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            _enteredHash = value;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                  Spacer(),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (validateHash(
+                          _enteredHash, _deviceIdentifier, _p4ssw0rd)) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Licence validée!")));
+                        _saveLicenseStatus(true);
+                        setState(() {
+                          _isLicenseValidated = true;
+                        });
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Hash incorrect!")));
+                      }
+                    },
+                    child: Text("Valider"),
+                  ),
+                  Spacer(),
+                ],
               ),
             ),
-            Spacer(),
-            ElevatedButton(
-              onPressed: () {
-                if (validateHash(_enteredHash, _deviceIdentifier, _p4ssw0rd)) {
-                  // Ouvrir l'application
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text("Licence validée!"),
-                    backgroundColor: Colors.green,
-                  ));
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text("Hash incorrect!"),
-                    backgroundColor: Colors.redAccent,
-                  ));
-                }
-              },
-              child: Text("Valider"),
-            ),
-            Spacer(),
-          ],
-        ),
-      ),
     );
   }
 }
