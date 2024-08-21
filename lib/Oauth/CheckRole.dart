@@ -65,7 +65,7 @@ class CheckRole extends StatelessWidget {
             //  if (userRole == "admin") {
             //   return adminLoggedPage(); // Normalement Tani Premium Page
             // } else {
-            return MyMainO(); //home1();
+            return MyMain(); //home1();
           } else
             return Scaffold(
               body: Center(child: CircularProgressIndicator()

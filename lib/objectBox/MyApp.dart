@@ -27,7 +27,7 @@ import 'pages/ProduitListScreen.dart';
 import 'pages/ProduitListSupabase.dart' as supa;
 import 'pages/add_Produit.dart'; // Importez le package path_provider
 
-class MyMainO extends StatelessWidget {
+class MyMain extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureProvider<ObjectBox?>(
@@ -265,8 +265,17 @@ class _HomeScreenState extends State<HomeScreen> {
     final randomId = Random().nextInt(100);
     return Scaffold(
       appBar: AppBar(
-        title: Text('Facturation'),
+        title: Text('POS'),
         actions: [
+          Platform.isAndroid || Platform.isIOS
+              ? IconButton(
+            onPressed: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (ctx) => HashAdmin()));
+            },
+            icon: Icon(Icons.add_chart_rounded),
+          )
+              :
           IconButton(
             onPressed: () {
               Navigator.of(context)
@@ -281,23 +290,23 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             icon: Icon(Icons.account_tree_rounded),
           ),
-          IconButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                  MaterialPageRoute(builder: (ctx) => FacturesListPage()));
-            },
-            icon: Icon(Icons.hail_outlined),
-          ),
-          IconButton(
-            onPressed: () {
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (ctx) => FacturePage()));
-            },
-            icon: Icon(Icons.invert_colors_off),
-          ),
-          SizedBox(
-            width: 50,
-          ),
+          // IconButton(
+          //   onPressed: () {
+          //     Navigator.of(context).push(
+          //         MaterialPageRoute(builder: (ctx) => FacturesListPage()));
+          //   },
+          //   icon: Icon(Icons.hail_outlined),
+          // ),
+          // IconButton(
+          //   onPressed: () {
+          //     Navigator.of(context)
+          //         .push(MaterialPageRoute(builder: (ctx) => FacturePage()));
+          //   },
+          //   icon: Icon(Icons.invert_colors_off),
+          // ),
+          // SizedBox(
+          //   width: 50,
+          // ),
           IconButton(
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(
@@ -324,9 +333,6 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             icon: Icon(Icons.local_bar_outlined),
           ),
-          SizedBox(
-            width: 50,
-          )
         ],
       ),
       body: Consumer<CommerceProvider>(

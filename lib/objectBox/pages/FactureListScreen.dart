@@ -196,10 +196,12 @@ class _FacturePageState extends State<FacturePage> {
               final produit = ligneFacture.produit.target!;
               final TextEditingController _quantiteController =
                   TextEditingController(
-                      text: ligneFacture.quantite.toStringAsFixed(2));
+                text: ligneFacture.quantite.floor().toString(),
+              );
               final TextEditingController _prixController =
                   TextEditingController(
-                      text: ligneFacture.prixUnitaire.toStringAsFixed(2));
+                text: ligneFacture.prixUnitaire.floor().toString(),
+              );
               return Card(
                 child: ListTile(
                   title: Text('Qr: ${produit.qr} ${produit.nom}'),
@@ -362,13 +364,21 @@ class _FacturePageState extends State<FacturePage> {
                       ),
                       onChanged: (value) {
                         setState(() {
-                          _localImpayer = double.tryParse(value) ?? 0.0;
+                          _localImpayer = double.tryParse(value) ?? 0.00;
                         });
+                      },
+                      onTap: () {
+                        // Effacer le champ si la valeur initiale est 0
+                        if (_impayerController.text == '0' ||
+                            _impayerController.text == '0.0' ||
+                            _impayerController.text == '0.00') {
+                          _impayerController.clear();
+                        }
                       },
                       autofocus: true,
                     )
                   : Text(
-                      'Impayer: ${_localImpayer.toStringAsFixed(2)} DZD',
+                      'Impayer: ${_localImpayer} DZD',
                       style: TextStyle(fontSize: 16),
                     ),
             ),
@@ -497,7 +507,7 @@ class _FacturePageState extends State<FacturePage> {
       builder: (context) {
         return AlertDialog(
           title: Text(
-            'Modifier la quantité pour ${ligneFacture.produit.target!.nom}\nReste En Stock  ${ligneFacture.produit.target!.stock.toStringAsFixed(ligneFacture.produit.target!.stock.truncateToDouble() == ligneFacture.produit.target!.stock ? 0 : 2)}',
+            'Modifier la quantité pour ${ligneFacture.produit.target!.nom}\nReste En Stock  ${ligneFacture.produit.target!.stock.toStringAsFixed(ligneFacture.produit.target!.stock.truncateToDouble() == ligneFacture.produit.target!.stock ? 0 : 2)}\n${ligneFacture.produit.target!.prixAchat.toStringAsFixed(2)} et ${ligneFacture.produit.target!.prixVente.toStringAsFixed(2)}',
             textAlign: TextAlign.center,
           ),
           content: Form(
@@ -583,9 +593,11 @@ class _FacturePageState extends State<FacturePage> {
                     if (enteredPrice == null) {
                       return 'Veuillez entrer un nombre valide';
                     }
-                    if (enteredPrice < 0 ||
+                    if (enteredPrice <= 0)
+                      return 'La Prix doit être Superieur à 0.0';
+                    if (enteredPrice < ligneFacture.produit.target!.prixAchat ||
                         enteredPrice > ligneFacture.produit.target!.prixVente) {
-                      return 'La Prix doit être entre ${ligneFacture.produit.target!.prixAchat.toStringAsFixed(3)} et ${ligneFacture.produit.target!.prixVente.toStringAsFixed(3)}';
+                      return 'La Prix doit être entre ${ligneFacture.produit.target!.prixAchat.toStringAsFixed(2)} et ${ligneFacture.produit.target!.prixVente.toStringAsFixed(2)}';
                     }
                     return null;
                   },
@@ -799,7 +811,7 @@ class _FacturesListPageState extends State<FacturesListPage> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        Row(
+                        Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
@@ -832,11 +844,14 @@ class _FacturesListPageState extends State<FacturesListPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                  'Total TTC: ${_totals['totalTTC'].toStringAsFixed(2)} DZD'),
+                                  'Total TTC: ${_totals['totalTTC'].toStringAsFixed(2)} DZD',
+                                  style: TextStyle(color: Colors.green)),
                               Text(
-                                  'Total Impayés: ${_totals['totalImpayes'].toStringAsFixed(2)} DZD'),
+                                  'Total Impayés: ${_totals['totalImpayes'].toStringAsFixed(2)} DZD',
+                                  style: TextStyle(color: Colors.red)),
                               Text(
-                                  'Total TVA: ${_totals['totalTVA'].toStringAsFixed(2)} DZD'),
+                                  'Total TVA: ${_totals['totalTVA'].toStringAsFixed(2)} DZD',
+                                  style: TextStyle(color: Colors.blue)),
                             ],
                           ),
                       ],

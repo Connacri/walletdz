@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart'; // Importez cette ligne
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'Oauth/Ogoogle/googleSignInProvider.dart';
 import 'Oauth/verifi_auth2.dart';
@@ -16,6 +17,7 @@ import 'dart:io';
 import 'dart:convert';
 
 import 'objectBox/MyApp.dart';
+import 'objectBox/hash.dart';
 
 //late ObjectBox objectbox;
 Future<void> main() async {
@@ -90,7 +92,7 @@ Future initialization(BuildContext? context) async {
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   MyApp({
     super.key,
     /*required this.objectBox*/
@@ -99,20 +101,37 @@ class MyApp extends StatelessWidget {
   static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   static FirebaseInAppMessaging fiam = FirebaseInAppMessaging.instance;
 
-  final GoogleUser2 = FirebaseAuth.instance.currentUser;
-
-  // This widget is the root of your application.
-
   static const String _title = 'DZ Wallet';
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final GoogleUser2 = FirebaseAuth.instance.currentUser;
+  bool _isLicenseValidated = false;
   //final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+  @override
+  void initState() {
+    super.initState();
+    _checkLicenseStatus();
+  }
+
+  Future<void> _checkLicenseStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool? isLicenseValidated = prefs.getBool('isLicenseValidated');
+    if (isLicenseValidated != null && isLicenseValidated) {
+      setState(() {
+        _isLicenseValidated = true;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => googleSignInProvider(),
-      
-      
+
       //lazy: true,
       child: MaterialApp(
           theme: ThemeData(
@@ -124,11 +143,9 @@ class MyApp extends StatelessWidget {
           //scaffoldMessengerKey: Utils.messengerKey,
           navigatorKey: navigatorKey,
           debugShowCheckedModeBanner: false,
-          title: 'Ramzi'
-          
-          ,
+          title: 'Ramzi',
           themeMode: ThemeMode.dark,
-          home: MyMainO()
+          home: _isLicenseValidated ? MyMain() : hashPage()
           // verifi_auth2(
           //     // objectBox: objectBox,
           //     ),
