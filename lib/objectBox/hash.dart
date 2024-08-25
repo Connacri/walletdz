@@ -27,7 +27,8 @@ class _hashPageState extends State<hashPage> {
   String _p4ssw0rd = "Oran2024";
   bool _isShowMessage = false;
   bool _isLicenseValidated = false;
-  String _statusMessage = "Entrer le PIN (depuis l'application mobile)";
+  String _statusMessage = "Entrer le Code PIN";
+  int _lengthPin = 6;
 
   @override
   void initState() {
@@ -43,7 +44,7 @@ class _hashPageState extends State<hashPage> {
         _deviceIdentifier = identifier;
         _hash512 = generateHash(_deviceIdentifier, _p4ssw0rd);
         _shortHash = generateShortHash(_hash512, _p4ssw0rd);
-        _numHash = generateNumHash(_hash512, _p4ssw0rd);
+        _numHash = generateNumHash(_hash512, _p4ssw0rd, _lengthPin);
       });
     }
   }
@@ -90,8 +91,8 @@ class _hashPageState extends State<hashPage> {
           Platform.isAndroid || Platform.isIOS
               ? IconButton(
                   onPressed: () {
-                    Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (ctx) => HashAdmin()));
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (ctx) => HashAdmin(lengthPin: _lengthPin)));
                   },
                   icon: Icon(Icons.add_chart_rounded),
                 )
@@ -150,7 +151,7 @@ class _hashPageState extends State<hashPage> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  Text("Ce QR code doit etre scanner par l'Admin"),
+                  Text("Ce QR code doit etre scanner par un Admin"),
                   Spacer(),
                   _hash512.isNotEmpty
                       ? Center(
@@ -170,7 +171,8 @@ class _hashPageState extends State<hashPage> {
                   // Divider(),
                   // SelectableText(generateShortHash(_hash512, _p4ssw0rd)),
                   Divider(),
-                  SelectableText(generateNumHash(_hash512, _p4ssw0rd)),
+                  SelectableText(
+                      generateNumHash(_hash512, _p4ssw0rd, _lengthPin)),
                   Divider(),
                   Spacer(),
                   Center(
@@ -218,7 +220,7 @@ class _hashPageState extends State<hashPage> {
 
                         Future.delayed(Duration(seconds: 2), () {
                           if (validateNumHash(
-                              _enteredHash, _hash512, _p4ssw0rd)) {
+                              _enteredHash, _hash512, _p4ssw0rd, _lengthPin)) {
                             _saveLicenseStatus(true);
                             setState(() {
                               _isLicenseValidated = true;
@@ -232,7 +234,7 @@ class _hashPageState extends State<hashPage> {
                         });
                       },
                       autoFocus: true,
-                      length: 10,
+                      length: _lengthPin,
                       heigth: 54,
                       width: 51,
                       borderRadius: BorderRadius.circular(9),
@@ -382,8 +384,8 @@ String generateShortHash(String _hash512, String password) {
   return digest.toString();
 }
 
-String generateNumHash(String _hash512, String password) {
-  return generateNumericCode(_hash512, password);
+String generateNumHash(String _hash512, String password, int _lengthPin) {
+  return generateNumericCode(_hash512, password, _lengthPin);
 }
 
 bool validateHash(String enteredHash, String _hash512, String password) {
@@ -391,12 +393,13 @@ bool validateHash(String enteredHash, String _hash512, String password) {
   return enteredHash == calculatedHash;
 }
 
-bool validateNumHash(String enteredHash, String _hash512, String password) {
-  var calculatedHash = generateNumHash(_hash512, password);
+bool validateNumHash(
+    String enteredHash, String _hash512, String password, int _lengthPin) {
+  var calculatedHash = generateNumHash(_hash512, password, _lengthPin);
   return enteredHash == calculatedHash;
 }
 
-String generateNumericCode(String _hash512, String password) {
+String generateNumericCode(String _hash512, String password, int _lengthPin) {
   var bytes = utf8.encode(_hash512 + password);
   var digest = sha256.convert(bytes); // Utilisation de SHA-256
   var hexString = digest.toString();
@@ -405,12 +408,16 @@ String generateNumericCode(String _hash512, String password) {
   BigInt bigInt = BigInt.parse(hexString, radix: 16);
 
   // Extraire les 10 premiers chiffres
-  String numericCode = bigInt.toString().substring(0, 10);
+  String numericCode = bigInt.toString().substring(0, _lengthPin);
 
   return numericCode;
 }
 
 class HashAdmin extends StatefulWidget {
+  const HashAdmin({super.key, required this.lengthPin});
+
+  final int lengthPin;
+
   @override
   _HashAdminState createState() => _HashAdminState();
 }
@@ -465,7 +472,8 @@ class _HashAdminState extends State<HashAdmin> {
                     // Divider(),
                     // SelectableText(generateShortHash(qrCodeHash!, _p4ssw0rd)),
                     // Divider(),
-                    SelectableText(generateNumHash(qrCodeHash!, _p4ssw0rd)),
+                    SelectableText(generateNumHash(
+                        qrCodeHash!, _p4ssw0rd, widget.lengthPin)),
                     Divider(),
                     // Text('Licence: ' +
                     //     _validateHash(qrCodeHash!, _p4ssw0rd).toString()),
@@ -497,8 +505,8 @@ class _HashAdminState extends State<HashAdmin> {
     controller.scannedDataStream.listen((scanData) async {
       setState(() {
         qrCodeHash = generateHash(scanData.code!, _p4ssw0rd);
-        qrCodeNumHash = generateNumHash(
-            scanData.code!, _p4ssw0rd); // Génération du code numérique
+        qrCodeNumHash = generateNumHash(scanData.code!, _p4ssw0rd,
+            widget.lengthPin); // Génération du code numérique
       });
     });
   }

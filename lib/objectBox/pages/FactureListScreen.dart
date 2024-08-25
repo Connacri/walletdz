@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:objectbox/src/relations/to_many.dart';
+import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:provider/provider.dart';
+import 'package:qr_code_scanner/qr_code_scanner.dart';
 import '../Entity.dart';
 import '../MyProviders.dart';
 import '../Utils/QRViewExample.dart';
@@ -11,6 +13,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'add_Produit.dart';
+import 'package:syncfusion_flutter_barcodes/barcodes.dart';
 
 class FacturePage extends StatefulWidget {
   @override
@@ -187,12 +190,115 @@ class _FacturePageState extends State<FacturePage> {
       CommerceProvider commerceProvider) {
     return Column(
       children: [
-        _buildClientInfo(context, cartProvider),
+        Row(
+          children: [
+            Expanded(child: _buildClientInfo(context, cartProvider)),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 10),
+                    Text('Total: ${totalAmount.toStringAsFixed(2)} DZD'),
+                    Text('TVA (19%): ${tva.toStringAsFixed(2)} DZD'),
+                    Text(
+                        'Total TTC: ${(totalAmount + tva).toStringAsFixed(2)} DZD'),
+                    Card(
+                      color: Colors.green,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          'Montant à Payé: ${(totalAmount + tva - impayer).toStringAsFixed(2)} DZD',
+                          style: TextStyle(fontSize: 20, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: _buildImpayerRow(impayer),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            cartProvider.facture.impayer = _localImpayer;
+            // // Mettre à jour l'impayé dans le CartProvider avant de sauvegarder
+            // cartProvider.facture.impayer =
+            //     double.tryParse(_impayerController.text) ?? 0.0;
+
+            try {
+              await cartProvider.saveFacture(commerceProvider);
+              _localImpayer = 0.0;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Facture sauvegardée!')),
+              );
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Erreur: ${e.toString()}')),
+              );
+            }
+          },
+          child: Text('Sauvegarder la facture'),
+        ),
         Expanded(
-          child: ListView.builder(
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              final ligneFacture = items[index];
+          // child: ListView.builder(
+          //   itemCount: items.length,
+          //   itemBuilder: (context, index) {
+          //     final ligneFacture = items[index];
+          //     final produit = ligneFacture.produit.target!;
+          //     final TextEditingController _quantiteController =
+          //         TextEditingController(
+          //       text: ligneFacture.quantite.floor().toString(),
+          //     );
+          //     final TextEditingController _prixController =
+          //         TextEditingController(
+          //       text: ligneFacture.prixUnitaire.floor().toString(),
+          //     );
+          //     return Card(
+          //       child: ListTile(
+          //         title: Text('Qr: ${produit.qr} ${produit.nom}'),
+          //         subtitle: Text(
+          //             '${ligneFacture.prixUnitaire.toStringAsFixed(2)} x ${ligneFacture.quantite} = ${(ligneFacture.prixUnitaire * ligneFacture.quantite).toStringAsFixed(2)} DZD'),
+          //         trailing: Row(
+          //           mainAxisSize: MainAxisSize.min,
+          //           children: [
+          //             IconButton(
+          //               icon: Icon(Icons.edit),
+          //               onPressed: () async {
+          //                 _showEditQuantityDialog(context, ligneFacture,
+          //                     _quantiteController, _prixController);
+          //               },
+          //             ),
+          //             IconButton(
+          //               icon: Icon(
+          //                 Icons.delete,
+          //                 color: Colors.red,
+          //               ),
+          //               onPressed: () {
+          //                 cartProvider.removeFromCart(produit);
+          //               },
+          //             ),
+          //           ],
+          //         ),
+          //       ),
+          //     );
+          //   },
+          // ),
+          child: DataTable(
+            columns: [
+              DataColumn(label: Text('QR')),
+              DataColumn(label: Text('Produit')),
+              DataColumn(label: Text('Prix')),
+              DataColumn(label: Text('Quantité')),
+              DataColumn(label: Text('Total')),
+              DataColumn(label: Text('Actions')),
+            ],
+            rows: items.map((ligneFacture) {
               final produit = ligneFacture.produit.target!;
               final TextEditingController _quantiteController =
                   TextEditingController(
@@ -202,142 +308,41 @@ class _FacturePageState extends State<FacturePage> {
                   TextEditingController(
                 text: ligneFacture.prixUnitaire.floor().toString(),
               );
-              return Card(
-                child: ListTile(
-                  title: Text('Qr: ${produit.qr} ${produit.nom}'),
-                  subtitle: Text(
-                      '${ligneFacture.prixUnitaire.toStringAsFixed(2)} DZD * ${ligneFacture.quantite} = ${(ligneFacture.prixUnitaire * ligneFacture.quantite).toStringAsFixed(2)} DZD'),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.edit),
-                        onPressed: () async {
-                          _showEditQuantityDialog(context, ligneFacture,
-                              _quantiteController, _prixController);
-                        },
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.delete,
-                          color: Colors.red,
+              return DataRow(
+                cells: [
+                  DataCell(Text(produit.qr!)),
+                  DataCell(Text(produit.nom)),
+                  DataCell(Text(ligneFacture.prixUnitaire.toStringAsFixed(2))),
+                  DataCell(Text(ligneFacture.quantite.toString())),
+                  DataCell(Text(
+                      (ligneFacture.prixUnitaire * ligneFacture.quantite)
+                          .toStringAsFixed(2))),
+                  DataCell(
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.edit),
+                          onPressed: () async {
+                            _showEditQuantityDialog(context, ligneFacture,
+                                _quantiteController, _prixController);
+                          },
                         ),
-                        onPressed: () {
-                          cartProvider.removeFromCart(produit);
-                        },
-                      ),
-                    ],
+                        IconButton(
+                          icon: Icon(
+                            Icons.delete,
+                            color: Colors.red,
+                          ),
+                          onPressed: () {
+                            cartProvider.removeFromCart(produit);
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                ],
               );
-            },
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // TextFormField(
-              //   controller: _impayerController,
-              //   keyboardType: TextInputType.number,
-              //   decoration: InputDecoration(
-              //     labelText: 'Impayer',
-              //     border: OutlineInputBorder(),
-              //     suffixText: 'DZD',
-              //   ),
-              //   onChanged: (value) {
-              //     // Mettre à jour la variable impayer en temps réel
-              //     setState(() {
-              //       impayer = double.tryParse(value) ?? 0.0;
-              //     });
-              //   },
-              // ),
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //   children: [
-              //     Expanded(
-              //       child: _isEditingImpayer
-              //           ? TextFormField(
-              //               controller: _impayerController,
-              //               keyboardType: TextInputType.number,
-              //               decoration: InputDecoration(
-              //                 labelText: 'Impayer',
-              //                 border: OutlineInputBorder(),
-              //                 suffixText: 'DZD',
-              //               ),
-              //               onChanged: (value) {
-              //                 setState(() {
-              //                   impayer = double.tryParse(value) ?? 0.0;
-              //                 });
-              //               },
-              //               autofocus:
-              //                   true, // Ajout pour forcer le focus sur le TextFormField
-              //             )
-              //           : Text(
-              //               'Impayer: ${impayer.toStringAsFixed(2)} DZD',
-              //               style: TextStyle(fontSize: 16),
-              //             ),
-              //     ),
-              //     IconButton(
-              //       icon: Icon(
-              //         _isEditingImpayer ? Icons.check : Icons.edit,
-              //         color: _isEditingImpayer ? Colors.green : Colors.blue,
-              //       ),
-              //       onPressed: () {
-              //         setState(() {
-              //           if (_isEditingImpayer) {
-              //             // Si on termine l'édition, on met à jour l'impayer
-              //             impayer =
-              //                 double.tryParse(_impayerController.text) ?? 0.0;
-              //           } else {
-              //             // Lors du début de l'édition, pré-remplir le TextFormField avec la valeur actuelle
-              //             _impayerController.text = impayer.toString();
-              //           }
-              //           _isEditingImpayer = !_isEditingImpayer;
-              //         });
-              //       },
-              //     ),
-              //   ],
-              // ),
-              _buildImpayerRow(impayer),
-              SizedBox(height: 10),
-              Text('Total: ${totalAmount.toStringAsFixed(2)} DZD'),
-              Text('TVA (19%): ${tva.toStringAsFixed(2)} DZD'),
-              Text('Total TTC: ${(totalAmount + tva).toStringAsFixed(2)} DZD'),
-              Card(
-                color: Colors.green,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    'Montant à Payé: ${(totalAmount + tva - impayer).toStringAsFixed(2)} DZD',
-                    style: TextStyle(fontSize: 20, color: Colors.white),
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () async {
-                  cartProvider.facture.impayer = _localImpayer;
-                  // // Mettre à jour l'impayé dans le CartProvider avant de sauvegarder
-                  // cartProvider.facture.impayer =
-                  //     double.tryParse(_impayerController.text) ?? 0.0;
-
-                  try {
-                    await cartProvider.saveFacture(commerceProvider);
-                    _localImpayer = 0.0;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Facture sauvegardée!')),
-                    );
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Erreur: ${e.toString()}')),
-                    );
-                  }
-                },
-                child: Text('Sauvegarder la facture'),
-              ),
-            ],
+            }).toList(),
           ),
         ),
         SizedBox(height: 50)
@@ -350,38 +355,36 @@ class _FacturePageState extends State<FacturePage> {
     return StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
         return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(
-              child: _isEditingImpayer
-                  ? TextFormField(
-                      controller: _impayerController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'Impayer',
-                        border: OutlineInputBorder(),
-                        suffixText: 'DZD',
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          _localImpayer = double.tryParse(value) ?? 0.00;
-                        });
-                      },
-                      onTap: () {
-                        // Effacer le champ si la valeur initiale est 0
-                        if (_impayerController.text == '0' ||
-                            _impayerController.text == '0.0' ||
-                            _impayerController.text == '0.00') {
-                          _impayerController.clear();
-                        }
-                      },
-                      autofocus: true,
-                    )
-                  : Text(
-                      'Impayer: ${_localImpayer} DZD',
-                      style: TextStyle(fontSize: 16),
+            _isEditingImpayer
+                ? TextFormField(
+                    controller: _impayerController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'Impayer',
+                      border: OutlineInputBorder(),
+                      suffixText: 'DZD',
                     ),
-            ),
+                    onChanged: (value) {
+                      setState(() {
+                        _localImpayer = double.tryParse(value) ?? 0.00;
+                      });
+                    },
+                    onTap: () {
+                      // Effacer le champ si la valeur initiale est 0
+                      if (_impayerController.text == '0' ||
+                          _impayerController.text == '0.0' ||
+                          _impayerController.text == '0.00') {
+                        _impayerController.clear();
+                      }
+                    },
+                    autofocus: true,
+                  )
+                : Text(
+                    'Impayer: ${_localImpayer} DZD',
+                    style: TextStyle(fontSize: 16),
+                  ),
             IconButton(
               icon: Icon(
                 _isEditingImpayer ? Icons.check : Icons.edit,
@@ -471,25 +474,56 @@ class _FacturePageState extends State<FacturePage> {
         },
         child: Padding(
           padding: EdgeInsets.all(8),
-          child: Row(
-            children: [
-              Expanded(
-                child: client != null
-                    ? Column(
+          child: client != null
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Client: ${client.nom}'),
+                          Text(
+                            'Client: ${client.nom}',
+                            style: TextStyle(fontSize: 20),
+                          ),
                           Text('Téléphone: ${client.phone}'),
                           Text('Adresse: ${client.adresse}'),
-                          Text('qr: ${client.qr}'),
+                          Text('Qr: ${client.qr}'),
                           Text(
                               'Nombre de factures : ${client.factures.length}'),
                         ],
-                      )
-                    : Text('Aucun client sélectionné'),
-              ),
-            ],
-          ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Center(
+                          child: Container(
+                        height: 100,
+                        child: SfBarcodeGenerator(
+                          value: '${client.qr}',
+                          symbology: QRCode(),
+                          showValue: true,
+                        ),
+                      )),
+                    ),
+                  ],
+                )
+              : Column(
+                  children: [
+                    Text(
+                      ' ',
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    Text(' '),
+                    Text(
+                      'client non-Identifié',
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    Text(' '),
+                    Text(' '),
+                  ],
+                ),
         ),
       ),
     );
@@ -645,11 +679,13 @@ class ClientSelectionPage extends StatefulWidget {
 class _ClientSelectionPageState extends State<ClientSelectionPage> {
   String _searchQuery = '';
   List<Client> _filteredClients = [];
+  Client? _selectedClient;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _filteredClients = Provider.of<CommerceProvider>(context).clients;
+    _filterClients(_searchQuery);
   }
 
   void _filterClients(String query) {
@@ -667,9 +703,35 @@ class _ClientSelectionPageState extends State<ClientSelectionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final cartProvider = Provider.of<CartProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Sélectionner un client'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.account_circle_outlined),
+            onPressed: () async {
+              Client? newClient = await showModalBottomSheet<Client>(
+                context: context,
+                isScrollControlled:
+                    true, // Permet de redimensionner en fonction de la hauteur du contenu
+                builder: (context) => AddClientForm(),
+              );
+
+              if (newClient != null) {
+                setState(() {
+                  _selectedClient = newClient;
+                  _filteredClients;
+                  print("filtred client maj.");
+                });
+                cartProvider.setSelectedClient(newClient);
+              } else {
+                print(
+                    "Le client n'a pas été créé ou l'opération a été annulée.");
+              }
+            },
+          ),
+        ],
       ),
       body: Container(
         width: double.maxFinite,
@@ -684,22 +746,22 @@ class _ClientSelectionPageState extends State<ClientSelectionPage> {
               onChanged: _filterClients,
             ),
             Expanded(
-              child: ListView.builder(
-                itemCount: _filteredClients.length,
-                itemBuilder: (context, index) {
-                  final client = _filteredClients[index];
-                  return ListTile(
-                    title: Text(client.id.toString() + '  ' + client.nom),
-                    subtitle: Text(client.phone),
-                    onTap: () {
-                      Provider.of<CartProvider>(context, listen: false)
-                          .selectClient(client);
-                      Navigator.of(context).pop();
-                    },
-                  );
-                },
-              ),
-            ),
+                child: ListView.builder(
+              itemCount: _filteredClients.length,
+              itemBuilder: (context, index) {
+                final client =
+                    _filteredClients[_filteredClients.length - 1 - index];
+                return ListTile(
+                  title: Text(client.id.toString() + '  ' + client.nom),
+                  subtitle: Text(client.phone),
+                  onTap: () {
+                    Provider.of<CartProvider>(context, listen: false)
+                        .selectClient(client);
+                    Navigator.of(context).pop();
+                  },
+                );
+              },
+            )),
           ],
         ),
       ),

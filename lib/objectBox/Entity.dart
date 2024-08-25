@@ -19,6 +19,17 @@ class User {
     required this.email,
     required this.role,
   });
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'] ?? 0,
+      photo: json['photo'],
+      username: json['username'] ?? '',
+      password: json['password'] ?? '',
+      email: json['email'] ?? '',
+      phone: json['phone'],
+      role: json['role'] ?? '',
+    );
+  }
 }
 
 @Entity()
@@ -81,25 +92,25 @@ class Produit {
       nom: json['nom'] ?? '',
       description: json['description'] ?? '',
       origine: json['origine'] ?? '',
-      prixAchat: (json['prixachat'] ?? 0).toDouble(),
-      prixVente: (json['prixvente'] ?? 0).toDouble(),
+      prixAchat: (json['prixAchat'] ?? 0).toDouble(),
+      prixVente: (json['prixVente'] ?? 0).toDouble(),
       stock: (json['stock'] ?? 0).toDouble(),
-      minimStock: (json['minimstock'] ?? 0).toDouble(),
+      minimStock: (json['minimStock'] ?? 0).toDouble(),
       createdBy: (json['createdBy']).toInt(),
       updatedBy: (json['updatedBy']).toInt(),
       deletedBy: (json['deletedBy']).toInt(),
-      stockinit: (json['stockinit'] ?? 0).toDouble(),
-      dateCreation: json['datecreation'] != null
-          ? DateTime.parse(json['datecreation'])
+      stockinit: (json['stockInit'] ?? 0).toDouble(),
+      dateCreation: json['dateCreation'] != null
+          ? DateTime.parse(json['dateCreation'])
           : null,
-      datePeremption: json['dateperemption'] != null
-          ? DateTime.parse(json['dateperemption'])
+      datePeremption: json['datePeremption'] != null
+          ? DateTime.parse(json['datePeremption'])
           : null,
-      stockUpdate: json['stockupdate'] != null
-          ? DateTime.parse(json['stockupdate'])
+      stockUpdate: json['stockUpdate'] != null
+          ? DateTime.parse(json['stockUpdate'])
           : null,
       derniereModification: DateTime.parse(
-          json['dernieremodification'] //?? DateTime.now().toIso8601String()
+          json['derniereModification'] //?? DateTime.now().toIso8601String()
           ),
     );
   }
@@ -146,9 +157,9 @@ class Fournisseur {
       createdBy: (json['createdBy']).toInt(),
       updatedBy: (json['updatedBy']).toInt(),
       deletedBy: (json['deletedBy']).toInt(),
-      dateCreation: DateTime.parse(json['datecreation']),
+      dateCreation: DateTime.parse(json['dateCreation']),
       derniereModification: DateTime.parse(
-          json['dernieremodification'] ?? DateTime.now().toIso8601String()),
+          json['derniereModification'] ?? DateTime.now().toIso8601String()),
     );
   }
 }
@@ -186,6 +197,25 @@ class Client {
     this.dateCreation,
     this.derniereModification,
   });
+  factory Client.fromJson(Map<String, dynamic> json) {
+    return Client(
+      id: json['id'] ?? 0,
+      qr: json['qr'] ?? '',
+      nom: json['nom'] ?? '',
+      phone: json['phone'] ?? '',
+      adresse: json['adresse'] ?? '',
+      description: json['description'] ?? '',
+      createdBy: (json['createdBy']).toInt(),
+      updatedBy: (json['updatedBy']).toInt(),
+      deletedBy: (json['deletedBy']).toInt(),
+      dateCreation: json['dateCreation'] != null
+          ? DateTime.parse(json['dateCreation'])
+          : null,
+      derniereModification: json['derniereModification'] != null
+          ? DateTime.parse(json['derniereModification'])
+          : null,
+    );
+  }
 }
 
 @Entity()
@@ -213,6 +243,17 @@ class Facture {
     required this.updatedBy,
     required this.deletedBy,
   });
+  factory Facture.fromJson(Map<String, dynamic> json) {
+    return Facture(
+      id: json['id'] ?? 0,
+      qr: json['qr'] ?? '',
+      impayer: (json['impayer'] ?? 0).toDouble(),
+      date: DateTime.parse(json['date']),
+      createdBy: (json['createdBy']).toInt(),
+      updatedBy: (json['updatedBy']).toInt(),
+      deletedBy: (json['deletedBy']).toInt(),
+    );
+  }
 }
 
 @Entity()
@@ -228,6 +269,13 @@ class LigneFacture {
     required this.quantite,
     required this.prixUnitaire,
   });
+  factory LigneFacture.fromJson(Map<String, dynamic> json) {
+    return LigneFacture(
+      id: json['id'] ?? 0,
+      quantite: (json['quantite'] ?? 0).toDouble(),
+      prixUnitaire: (json['prixUnitaire'] ?? 0).toDouble(),
+    );
+  }
 }
 
 @Entity()
@@ -255,4 +303,16 @@ class DeletedProduct {
     required this.updatedBy,
     required this.deletedBy,
   });
+  factory DeletedProduct.fromJson(Map<String, dynamic> json) {
+    return DeletedProduct(
+      name: json['name'] ?? '',
+      description: json['description'] ?? '',
+      price: (json['price'] ?? 0).toDouble(),
+      quantity: (json['quantity'] ?? 0).toInt(),
+      deletedAt: DateTime.parse(json['deletedAt']),
+      createdBy: (json['createdBy']).toInt(),
+      updatedBy: (json['updatedBy']).toInt(),
+      deletedBy: (json['deletedBy']).toInt(),
+    );
+  }
 }

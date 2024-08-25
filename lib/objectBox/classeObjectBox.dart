@@ -11,6 +11,7 @@ import 'Entity.dart';
 
 class ObjectBox {
   late final Store store;
+  late final Box<User> userBox;
   late final Box<Produit> produitBox;
   late final Box<Fournisseur> fournisseurBox;
   late final Box<Facture> factureBox;
@@ -29,6 +30,7 @@ class ObjectBox {
     final dir = await getApplicationDocumentsDirectory();
     if (!Store.isOpen('${dir.path}/objectbox')) {
       store = await openStore(directory: '${dir.path}/objectbox');
+      userBox = Box<User>(store);
       produitBox = Box<Produit>(store);
       fournisseurBox = Box<Fournisseur>(store);
       factureBox = Box<Facture>(store);
@@ -41,60 +43,31 @@ class ObjectBox {
     store.close();
   }
 
-  // void fillWithFakeData(int count, int fourInt) {
-  //   final faker = Faker();
-  //
-  //   // Créer des fournisseurs
-  //   List<Fournisseur> fournisseurs = List.generate(fourInt, (index) {
-  //     return Fournisseur(
-  //       nom: faker.company.name(),
-  //       phone: faker.phoneNumber.us(),
-  //       adresse: faker.address.streetAddress(),
-  //       qr: faker.randomGenerator.integer(999999).toString(),
-  //       dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
-  //       derniereModification:
-  //           faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
-  //     );
-  //   });
-  //   fournisseurBox.putMany(fournisseurs);
-  //
-  //   // Créer des produits et les associer à des fournisseurs
-  //   List<Produit> produits = List.generate(count, (indx) {
-  //     Produit produit = Produit(
-  //       image: 'https://picsum.photos/200/300?random=${indx}',
-  //       nom: faker.food.dish(),
-  //       prixAchat: faker.randomGenerator.decimal(min: 60, scale: 20),
-  //       prixVente: faker.randomGenerator.decimal(min: 500, scale: 50),
-  //       stock: faker.randomGenerator.decimal(min: 100, scale: 15),
-  //       description: faker.lorem.sentence(),
-  //       qr: (indx + 1)
-  //           .toString(), // faker.randomGenerator.integer(count).toString(),
-  //       datePeremption: faker.date.dateTimeBetween(DateTime.now(),
-  //           DateTime(2024, 31, 8)), //.dateTime(minYear: 2025, maxYear: 2030),
-  //       dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
-  //       derniereModification:
-  //           faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
-  //       stockUpdate:
-  //           faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
-  //       stockinit: faker.randomGenerator.decimal(min: 200),
-  //       minimStock: faker.randomGenerator.decimal(min: 1, scale: 2),
-  //     );
-  //
-  //     // Associer entre 1 et 10 fournisseurs aléatoires au produit
-  //     int numberOfFournisseurs = faker.randomGenerator.integer(10, min: 1);
-  //     for (int i = 0; i < numberOfFournisseurs; i++) {
-  //       int randomIndex = faker.randomGenerator.integer(fournisseurs.length);
-  //       produit.fournisseurs.add(fournisseurs[randomIndex]);
-  //     }
-  //
-  //     return produit;
-  //   });
-  //   produitBox.putMany(produits);
-  // }
-
   void fillWithFakeData(
-      int clientCount, int fournisseurCount, int produitCount) {
+      int userCount, int clientCount, int fournisseurCount, int produitCount) {
     final faker = Faker();
+    List<String> roles = [
+      'admin',
+      'public',
+      'vendeur',
+      'owner',
+      'manager',
+      'it'
+    ];
+
+    // Créer des fournisseurs
+    List<User> users = List.generate(userCount, (index) {
+      roles.shuffle(Random()); // Shuffle the roles list in place
+      return User(
+        phone: faker.phoneNumber.de(),
+        username: faker.person.name(),
+        password: faker.internet.password(),
+        email: faker.internet.email(),
+        role: roles.first, // Assign the first role in the shuffled list
+      );
+    });
+
+    userBox.putMany(users);
 
     // Créer des fournisseurs
     List<Fournisseur> fournisseurs = List.generate(fournisseurCount, (index) {
@@ -245,7 +218,7 @@ class ObjectBox {
     clientBox.removeAll();
     factureBox.removeAll();
     ligneFacture.removeAll();
-    // await deleteDatabase();
+    //await deleteDatabase();
     await init();
   }
 }

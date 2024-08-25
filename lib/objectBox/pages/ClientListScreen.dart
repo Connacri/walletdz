@@ -42,7 +42,8 @@ class ClientListScreen extends StatelessWidget {
           body: ListView.builder(
             itemCount: clients.length,
             itemBuilder: (context, index) {
-              final client = clients[index];
+              //final client = clients[index];
+              final client = clients[clients.length - 1 - index];
               return Card(
                 child: ListTile(
                   leading: CircleAvatar(
@@ -75,10 +76,10 @@ class ClientListScreen extends StatelessWidget {
                         onPressed: () =>
                             _showEditDialog(context, client, clientProvider),
                       ),
-                      IconButton(
-                        icon: Icon(Icons.delete),
-                        onPressed: () => clientProvider.deleteClient(client),
-                      ),
+                      // IconButton(
+                      //   icon: Icon(Icons.delete),
+                      //   onPressed: () => clientProvider.deleteClient(client),
+                      // ),
                     ],
                   ),
                 ),

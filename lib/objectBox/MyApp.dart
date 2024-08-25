@@ -135,6 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _productController = TextEditingController();
   final TextEditingController _supplierController = TextEditingController();
   final TextEditingController _clientController = TextEditingController();
+  int lengthPin = 10;
 
   @override
   void initState() {
@@ -245,7 +246,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     int.tryParse(_supplierController.text) ?? 0;
                 final int clients = int.tryParse(_clientController.text) ?? 0;
 
-                widget.objectBox.fillWithFakeData(clients, suppliers, products);
+                widget.objectBox.fillWithFakeData(20, clients, suppliers, products);
                 // ScaffoldMessenger.of(context).showSnackBar(
                 //   SnackBar(content: Text('Données factices ajoutées !')),
                 // );
@@ -269,20 +270,22 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           Platform.isAndroid || Platform.isIOS
               ? IconButton(
-            onPressed: () {
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (ctx) => HashAdmin()));
-            },
-            icon: Icon(Icons.add_chart_rounded),
-          )
-              :
-          IconButton(
-            onPressed: () {
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (ctx) => hashPage()));
-            },
-            icon: Icon(Icons.add_chart_rounded),
-          ),
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (ctx) => HashAdmin(
+                              lengthPin: lengthPin,
+                            )));
+                  },
+                  icon: Icon(Icons.add_chart_rounded),
+                )
+              : Container(),
+          // IconButton(
+          //         onPressed: () {
+          //           Navigator.of(context)
+          //               .push(MaterialPageRoute(builder: (ctx) => hashPage()));
+          //         },
+          //         icon: Icon(Icons.add_chart_rounded),
+          //       ),
           IconButton(
             onPressed: () {
               Navigator.of(context)
@@ -675,7 +678,7 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                     int.tryParse(_supplierController.text) ?? 0;
                 final int clients = int.tryParse(_clientController.text) ?? 0;
 
-                widget.objectBox.fillWithFakeData(clients, suppliers, products);
+                widget.objectBox.fillWithFakeData(20,clients, suppliers, products);
                 // ScaffoldMessenger.of(context).showSnackBar(
                 //   SnackBar(content: Text('Données factices ajoutées !')),
                 // );
