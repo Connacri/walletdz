@@ -28,113 +28,6 @@ class SupabaseSync {
 
   SupabaseSync(this.supabase, this.objectboxStore);
 
-  // Future<void> syncToSupabase() async {
-  //   developer.log('Début de syncToSupabase');
-  //   final fournisseurBox = objectboxStore.box<Fournisseur>();
-  //   final produitBox = objectboxStore.box<Produit>();
-  //
-  //   List<Map<String, dynamic>> fournisseursData = [];
-  //   List<Map<String, dynamic>> produitsData = [];
-  //   List<Map<String, dynamic>> relationsData = [];
-  //   List<Map<String, dynamic>> clientsData = [];
-  //
-  //   try {
-  //     developer.log('Début de la collecte des données');
-  //     objectboxStore.runInTransaction(TxMode.read, () {
-  //       developer.log('Collecte des données fournisseurs');
-  //       for (var fournisseur in fournisseurBox.getAll()) {
-  //         fournisseursData.add({
-  //           'id': fournisseur.id,
-  //           'qr': fournisseur.qr,
-  //           'nom': fournisseur.nom,
-  //           'phone': fournisseur.phone,
-  //           'adresse': fournisseur.adresse,
-  //           'createdBy': fournisseur.createdBy,
-  //           'updatedBy': fournisseur.updatedBy,
-  //           'deletedBy': fournisseur.deletedBy,
-  //           'dateCreation': fournisseur.dateCreation.toIso8601String(),
-  //           'derniereModification':
-  //               fournisseur.derniereModification?.toIso8601String(),
-  //         });
-  //       }
-  //       developer.log(
-  //           'Nombre de fournisseurs collectés: ${fournisseursData.length}');
-  //
-  //       developer.log('Collecte des données produits');
-  //       for (var produit in produitBox.getAll()) {
-  //         produitsData.add({
-  //           'id': produit.id,
-  //           'qr': produit.qr,
-  //           'image': produit.image,
-  //           'nom': produit.nom,
-  //           'description': produit.description,
-  //           'origine': produit.origine,
-  //           'prixAchat': produit.prixAchat,
-  //           'prixVente': produit.prixVente,
-  //           'stock': produit.stock,
-  //           'minimStock': produit.minimStock,
-  //           'stockInit': produit.stockinit,
-  //           'createdBy': produit.createdBy,
-  //           'updatedBy': produit.updatedBy,
-  //           'deletedBy': produit.deletedBy,
-  //           'dateCreation': produit.dateCreation?.toIso8601String(),
-  //           'datePeremption': produit.datePeremption?.toIso8601String(),
-  //           'stockUpdate': produit.stockUpdate?.toIso8601String(),
-  //           'derniereModification':
-  //               produit.derniereModification.toIso8601String(),
-  //         });
-  //       }
-  //       developer.log('Nombre de produits collectés: ${produitsData.length}');
-  //
-  //       developer.log('Collecte des relations');
-  //       for (var fournisseur in fournisseurBox.getAll()) {
-  //         for (var produit in fournisseur.produits) {
-  //           relationsData.add({
-  //             'fournisseur_id': fournisseur.id,
-  //             'produit_id': produit.id,
-  //           });
-  //         }
-  //       }
-  //       developer
-  //           .log('Nombre de relations collectées: ${relationsData.length}');
-  //     });
-  //
-  //     developer.log('Début de la synchronisation avec Supabase');
-  //     developer.log('Synchronisation des fournisseurs');
-  //     final fournisseursResult = await supabase
-  //         .from('Fournisseur')
-  //         .upsert(fournisseursData, onConflict: 'id');
-  //     developer.log(
-  //         'Résultat de la synchronisation des fournisseurs: $fournisseursResult');
-  //
-  //     developer.log('Synchronisation des produits');
-  //     final produitsResult =
-  //         await supabase.from('Produit').upsert(produitsData, onConflict: 'id');
-  //     developer
-  //         .log('Résultat de la synchronisation des produits: $produitsResult');
-  //
-  //     developer.log('Suppression des anciennes relations');
-  //     final deleteResult = await supabase
-  //         .from('Produit_Fournisseur')
-  //         .delete()
-  //         .neq('fournisseur_id', 0)
-  //         .neq('produit_id', 0);
-  //     developer.log('Résultat de la suppression des relations: $deleteResult');
-  //
-  //     developer.log('Insertion des nouvelles relations');
-  //     final insertResult =
-  //         await supabase.from('Produit_Fournisseur').insert(relationsData);
-  //     developer.log('Résultat de l\'insertion des relations: $insertResult');
-  //
-  //     developer.log('Fin de syncToSupabase');
-  //   } catch (e) {
-  //     developer.log('Erreur dans syncToSupabase: $e',
-  //         error: e, stackTrace: StackTrace.current);
-  //     throw SyncException(
-  //         'Erreur lors de la synchronisation vers Supabase: $e');
-  //   }
-  // }
-
   Future<void> syncToSupabase() async {
     developer.log('Début de syncToSupabase');
 
@@ -437,7 +330,15 @@ class _ProduitListPageState extends State<ProduitListPage>
   final int _pageSizeDP = 20;
   int _currentPageDP = 0;
 
-  final ScrollController _scrollController = ScrollController();
+  //final ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollControllerProduits = ScrollController();
+  final ScrollController _scrollControllerFournisseurs = ScrollController();
+  final ScrollController _scrollControllerUsers = ScrollController();
+  final ScrollController _scrollControllerClients = ScrollController();
+  final ScrollController _scrollControllerFactures = ScrollController();
+  final ScrollController _scrollControllerLigneFactures = ScrollController();
+  final ScrollController _scrollControllerDeletedProducts = ScrollController();
+
   late TabController _tabController;
 
   @override
@@ -450,77 +351,84 @@ class _ProduitListPageState extends State<ProduitListPage>
     _loadMoreFactures();
     _loadMoreLigneFactures();
     _loadMoreDeletedProducts();
-    _scrollController.addListener(_onScrollProduits);
-    _scrollController.addListener(_onScrollFournisseurs);
-    _scrollController.addListener(_onScrollUsers);
-    _scrollController.addListener(_onScrollClients);
-    _scrollController.addListener(_onScrollFactures);
-    _scrollController.addListener(_onScrollLigneFactures);
-    _scrollController.addListener(_onScrollDeletedProducts);
+    _scrollControllerProduits.addListener(_onScrollProduits);
+    _scrollControllerFournisseurs.addListener(_onScrollFournisseurs);
+    _scrollControllerUsers.addListener(_onScrollUsers);
+    _scrollControllerClients.addListener(_onScrollClients);
+    _scrollControllerFactures.addListener(_onScrollFactures);
+    _scrollControllerLigneFactures.addListener(_onScrollLigneFactures);
+    _scrollControllerDeletedProducts.addListener(_onScrollDeletedProducts);
 
-    _tabController = TabController(length: 7, vsync: this);
+    _tabController = TabController(length: 6, vsync: this);
   }
 
   @override
   void dispose() {
-    _scrollController.removeListener(_onScrollProduits);
-    _scrollController.removeListener(_onScrollFournisseurs);
-    _scrollController.removeListener(_onScrollUsers);
-    _scrollController.removeListener(_onScrollClients);
-    _scrollController.removeListener(_onScrollFactures);
-    _scrollController.removeListener(_onScrollLigneFactures);
-    _scrollController.removeListener(_onScrollDeletedProducts);
+    _scrollControllerProduits.removeListener(_onScrollProduits);
+    _scrollControllerFournisseurs.removeListener(_onScrollFournisseurs);
+    _scrollControllerUsers.removeListener(_onScrollUsers);
+    _scrollControllerClients.removeListener(_onScrollClients);
+    _scrollControllerFactures.removeListener(_onScrollFactures);
+    _scrollControllerLigneFactures.removeListener(_onScrollLigneFactures);
+    _scrollControllerDeletedProducts.removeListener(_onScrollDeletedProducts);
 
-    _scrollController.dispose();
+    _scrollControllerProduits.dispose();
+    _scrollControllerFournisseurs.dispose();
+    _scrollControllerUsers.dispose();
+    _scrollControllerClients.dispose();
+    _scrollControllerFactures.dispose();
+    _scrollControllerLigneFactures.dispose();
+    _scrollControllerDeletedProducts.dispose();
+
     _tabController.dispose();
     super.dispose();
   }
 
   void _onScrollProduits() {
-    if (_scrollController.position.pixels ==
-        _scrollController.position.maxScrollExtent) {
+    if (_scrollControllerProduits.position.pixels ==
+        _scrollControllerProduits.position.maxScrollExtent) {
       _loadMoreProduits();
     }
   }
 
   void _onScrollFournisseurs() {
-    if (_scrollController.position.pixels ==
-        _scrollController.position.maxScrollExtent) {
+    if (_scrollControllerFournisseurs.position.pixels ==
+        _scrollControllerFournisseurs.position.maxScrollExtent) {
       _loadMoreFournisseurs();
     }
   }
 
   void _onScrollUsers() {
-    if (_scrollController.position.pixels ==
-        _scrollController.position.maxScrollExtent) {
+    if (_scrollControllerUsers.position.pixels ==
+        _scrollControllerUsers.position.maxScrollExtent) {
       _loadMoreUsers();
     }
   }
 
   void _onScrollClients() {
-    if (_scrollController.position.pixels ==
-        _scrollController.position.maxScrollExtent) {
+    if (_scrollControllerClients.position.pixels ==
+        _scrollControllerClients.position.maxScrollExtent) {
       _loadMoreClients();
     }
   }
 
   void _onScrollFactures() {
-    if (_scrollController.position.pixels ==
-        _scrollController.position.maxScrollExtent) {
+    if (_scrollControllerFactures.position.pixels ==
+        _scrollControllerFactures.position.maxScrollExtent) {
       _loadMoreFactures();
     }
   }
 
   void _onScrollLigneFactures() {
-    if (_scrollController.position.pixels ==
-        _scrollController.position.maxScrollExtent) {
+    if (_scrollControllerLigneFactures.position.pixels ==
+        _scrollControllerLigneFactures.position.maxScrollExtent) {
       _loadMoreLigneFactures();
     }
   }
 
   void _onScrollDeletedProducts() {
-    if (_scrollController.position.pixels ==
-        _scrollController.position.maxScrollExtent) {
+    if (_scrollControllerDeletedProducts.position.pixels ==
+        _scrollControllerDeletedProducts.position.maxScrollExtent) {
       _loadMoreDeletedProducts();
     }
   }
@@ -811,155 +719,6 @@ class _ProduitListPageState extends State<ProduitListPage>
     }
   }
 
-  // Future<List<Produit>> fetchProduitsFromSupabase() async {
-  //   final supabase = Supa.Supabase.instance.client;
-  //   try {
-  //     final List<Map<String, dynamic>> data =
-  //         await supabase.from('Produit').select().order('id', ascending: true);
-  //
-  //     List<Produit> produits =
-  //         data.map((item) => Produit.fromJson(item)).toList();
-  //     return produits;
-  //   } catch (e) {
-  //     print('Erreur lors de la récupération des produits: $e');
-  //     return [];
-  //   }
-  // }
-//////////////////////////////////////////////////////////////////////////////////
-  // Future<List<User>> fetchUsersFromSupabase() async {
-  //   final supabase = Supa.Supabase.instance.client;
-  //   try {
-  //     final List<Map<String, dynamic>> data =
-  //         await supabase.from('User').select().order('id', ascending: true);
-  //
-  //     print('Data: $data'); // Log the data list
-  //
-  //     List<User> users = data.map((item) {
-  //       print('User: $item'); // Log each individual map
-  //       return User.fromJson(item);
-  //     }).toList();
-  //
-  //     return users;
-  //   } catch (e) {
-  //     print('Erreur lors de la récupération des Users: $e');
-  //     return [];
-  //   }
-  // }
-  //
-  // Future<List<Produit>> fetchProduitsFromSupabase() async {
-  //   final supabase = Supa.Supabase.instance.client;
-  //   try {
-  //     final List<Map<String, dynamic>> data =
-  //         await supabase.from('Produit').select().order('id', ascending: true);
-  //
-  //     print('Data: $data'); // Log the data list
-  //
-  //     List<Produit> produits = data.map((item) {
-  //       print('Item: $item'); // Log each individual map
-  //       return Produit.fromJson(item);
-  //     }).toList();
-  //
-  //     return produits;
-  //   } catch (e) {
-  //     print('Erreur lors de la récupération des produits: $e');
-  //     return [];
-  //   }
-  // }
-  //
-  // Future<List<Fournisseur>> fetchFournisseursFromSupabase() async {
-  //   final supabase = Supa.Supabase.instance.client;
-  //   try {
-  //     final List<Map<String, dynamic>> data = await supabase
-  //         .from('Fournisseur')
-  //         .select()
-  //         .order('id', ascending: true);
-  //
-  //     List<Fournisseur> fournisseurs =
-  //         data.map((item) => Fournisseur.fromJson(item)).toList();
-  //     return fournisseurs;
-  //   } catch (e) {
-  //     print('Erreur lors de la récupération des fournisseurs: $e');
-  //     return [];
-  //   }
-  // }
-
-  // Future<List<User>> fetchUsersFromSupabase() async {
-  //   final supabase = Supa.Supabase.instance.client;
-  //   try {
-  //     final List<Map<String, dynamic>> data =
-  //     await supabase.from('User').select().order('id', ascending: true);
-  //
-  //     print('Data: $data'); // Log the data list
-  //
-  //     List<User> users = data.map((item) {
-  //       print('User: $item'); // Log each individual map
-  //       return User.fromJson(item);
-  //     }).toList();
-  //
-  //     return users;
-  //   } catch (e) {
-  //     print('Erreur lors de la récupération des Users: $e');
-  //     return [];
-  //   }
-  // }
-  // Future<List<User>> fetchUsersFromSupabase() async {
-  //   final supabase = Supa.Supabase.instance.client;
-  //   try {
-  //     final List<Map<String, dynamic>> data =
-  //     await supabase.from('User').select().order('id', ascending: true);
-  //
-  //     print('Data: $data'); // Log the data list
-  //
-  //     List<User> users = data.map((item) {
-  //       print('User: $item'); // Log each individual map
-  //       return User.fromJson(item);
-  //     }).toList();
-  //
-  //     return users;
-  //   } catch (e) {
-  //     print('Erreur lors de la récupération des Users: $e');
-  //     return [];
-  //   }
-  // }
-  // Future<List<User>> fetchUsersFromSupabase() async {
-  //   final supabase = Supa.Supabase.instance.client;
-  //   try {
-  //     final List<Map<String, dynamic>> data =
-  //     await supabase.from('User').select().order('id', ascending: true);
-  //
-  //     print('Data: $data'); // Log the data list
-  //
-  //     List<User> users = data.map((item) {
-  //       print('User: $item'); // Log each individual map
-  //       return User.fromJson(item);
-  //     }).toList();
-  //
-  //     return users;
-  //   } catch (e) {
-  //     print('Erreur lors de la récupération des Users: $e');
-  //     return [];
-  //   }
-  // }
-  // Future<List<User>> fetchUsersFromSupabase() async {
-  //   final supabase = Supa.Supabase.instance.client;
-  //   try {
-  //     final List<Map<String, dynamic>> data =
-  //     await supabase.from('User').select().order('id', ascending: true);
-  //
-  //     print('Data: $data'); // Log the data list
-  //
-  //     List<User> users = data.map((item) {
-  //       print('User: $item'); // Log each individual map
-  //       return User.fromJson(item);
-  //     }).toList();
-  //
-  //     return users;
-  //   } catch (e) {
-  //     print('Erreur lors de la récupération des Users: $e');
-  //     return [];
-  //   }
-  // }
-//////////////////////////////////////////////////////////////////////////////////
   Future<List<User>> fetchUsersFromSupabase() async {
     final supabase = Supa.Supabase.instance.client;
     try {
@@ -990,10 +749,20 @@ class _ProduitListPageState extends State<ProduitListPage>
         _successMessage = "Toutes les tables ont été vidées";
       });
       print('Lignes de la table produitfournisseur supprimées avec succès.');
-
+      await supabase
+          .from('LigneFacture')
+          .delete()
+          .neq('id', 0)
+          .timeout(Duration(minutes: 2));
+      print('Toutes les tables LigneFacture ont été vidées avec succès.');
       // Supprimer les lignes de la table produits
       print('Suppression des lignes de la table produits...');
-      await supabase.from('Produit').delete().neq('id', 0);
+
+      supabase
+          .from('Produit')
+          .delete()
+          .neq('id', 0)
+          .timeout(Duration(minutes: 2));
       print('Lignes de la table produits supprimées avec succès.');
 
       // Supprimer les lignes de la table fournisseurs
@@ -1004,8 +773,8 @@ class _ProduitListPageState extends State<ProduitListPage>
       print('Toutes les tables ont été vidées avec succès.');
       await supabase.from('Facture').delete().neq('id', 0);
       print('Toutes les tables Facture ont été vidées avec succès.');
-      await supabase.from('LigneFacture').delete().neq('id', 0);
-      print('Toutes les tables LigneFacture ont été vidées avec succès.');
+      await supabase.from('User').delete().neq('id', 0);
+      print('Toutes les tables Facture ont été vidées avec succès.');
       await supabase.from('Client').delete().neq('id', 0);
       print('Toutes les tables Client ont été vidées avec succès.');
       await supabase.from('DeletedProduct').delete().neq('id', 0);
@@ -1126,7 +895,6 @@ class _ProduitListPageState extends State<ProduitListPage>
             Tab(text: 'Users'),
             Tab(text: 'Clients'),
             Tab(text: 'Factures'),
-            Tab(text: 'LigneFactures'),
             Tab(text: 'DeletedProducts'),
           ],
         ),
@@ -1135,7 +903,7 @@ class _ProduitListPageState extends State<ProduitListPage>
         controller: _tabController,
         children: [
           ListView.builder(
-            controller: _scrollController,
+            controller: _scrollControllerProduits,
             itemCount: _produits.length + 1,
             itemBuilder: (context, index) {
               if (index < _produits.length) {
@@ -1511,7 +1279,9 @@ class _ProduitListPageState extends State<ProduitListPage>
                                                   .toStringAsFixed(2)),
                                               trailing: new Text(produit.stock
                                                   .toStringAsFixed(2)),
-                                              percent: percentProgress,
+                                              percent: percentProgress < 0
+                                                  ? 0
+                                                  : percentProgress,
                                               center: new Text(
                                                   '${(percentProgress * 100).toStringAsFixed(1)}%'),
                                               linearStrokeCap:
@@ -1554,7 +1324,7 @@ class _ProduitListPageState extends State<ProduitListPage>
             },
           ),
           ListView.builder(
-            controller: _scrollController,
+            controller: _scrollControllerFournisseurs,
             itemCount: _fournisseurs.length + 1,
             itemBuilder: (context, index) {
               if (index < _fournisseurs.length) {
@@ -1621,81 +1391,28 @@ class _ProduitListPageState extends State<ProduitListPage>
           ListView.builder(
             itemCount: _users.length,
             itemBuilder: (context, index) {
-              final user = _users[index];
-              return ListTile(
-                title: Text(user.username),
-                subtitle: Text(user.email),
-                // Add more widgets here to display other user data
-              );
+              if (index < _users.length) {
+                final user = _users[index];
+                return ListTile(
+                  title: Text(user.username),
+                  subtitle: Text(user.email),
+                  // Add more widgets here to display other user data
+                );
+              } else if (_hasMore) {
+                return Center(
+                  child: LinearProgressIndicator(),
+                );
+              } else {
+                return Container(
+                  padding: EdgeInsets.all(16),
+                  alignment: Alignment.center,
+                  child: Text('Fin de la liste'),
+                );
+              }
             },
           ),
-          // ListView.builder(
-          //   controller: _scrollController,
-          //   itemCount: _users.length + 1,
-          //   itemBuilder: (context, index) {
-          //     if (index < _users.length) {
-          //       final user = _users[index];
-          //       return Card(
-          //         child: ListTile(
-          //           onTap: () {
-          //             // Navigator.of(context).push(
-          //             //   MaterialPageRoute(
-          //             //     builder: (context) => ProduitsFournisseurPage(
-          //             //       fournisseur: user,
-          //             //     ),
-          //             //   ),
-          //             // );
-          //           },
-          //           leading: CircleAvatar(
-          //             child: FittedBox(
-          //                 child: Padding(
-          //               padding: const EdgeInsets.all(8.0),
-          //               child: Text(user.id.toString()),
-          //             )),
-          //           ),
-          //           title: Text(user.username),
-          //           subtitle: Column(
-          //             crossAxisAlignment: CrossAxisAlignment.start,
-          //             children: [
-          //               Text('Phone : ${user.phone}'),
-          //               // Text(
-          //               //   'Créer le ${fournisseur.dateCreation.day}-${fournisseur.dateCreation.month}-${fournisseur.dateCreation.year}  Modifié ${timeago.format(fournisseur.derniereModification!, locale: 'fr')}',
-          //               //   style: TextStyle(
-          //               //       fontSize: 13, fontWeight: FontWeight.w300),
-          //               // ),
-          //             ],
-          //           ),
-          //           trailing: Container(
-          //             width: 50,
-          //             child: Row(
-          //               mainAxisAlignment: MainAxisAlignment.start,
-          //               children: [
-          //                 Expanded(
-          //                   child: Text(
-          //                     user.role.toString(),
-          //                     style: TextStyle(fontSize: 20),
-          //                   ),
-          //                 ),
-          //               ],
-          //             ),
-          //           ),
-          //         ),
-          //       );
-          //     } else if (_hasMore) {
-          //       return Center(
-          //         child: LinearProgressIndicator(),
-          //       );
-          //     } else {
-          //       return Container(
-          //         padding: EdgeInsets.all(16),
-          //         alignment: Alignment.center,
-          //         child: Text('Fin de la liste'),
-          //       );
-          //     }
-          //   },
-          // ),
           ListView.builder(
-            controller: _scrollController,
+            controller: _scrollControllerClients,
             itemCount: _clients.length + 1,
             itemBuilder: (context, index) {
               if (index < _clients.length) {
@@ -1760,7 +1477,7 @@ class _ProduitListPageState extends State<ProduitListPage>
             },
           ),
           ListView.builder(
-            controller: _scrollController,
+            controller: _scrollControllerFactures,
             itemCount: _factures.length + 1,
             itemBuilder: (context, index) {
               if (index < _factures.length) {
@@ -1783,11 +1500,11 @@ class _ProduitListPageState extends State<ProduitListPage>
                         child: Text(facture.id.toString()),
                       )),
                     ),
-                    title: Text(facture.client.target!.nom),
+                    title: Text('${facture.client.target?.nom ?? 'Unknown'}'),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Text('Phone : ${facture.lignesFacture.length}'),
+                        Text('Phone : ${facture.lignesFacture.length}'),
                         Text(
                           'Créer le ${facture.date.day}-${facture.date.month}-${facture.date.year}  Modifié ${timeago.format(facture.date, locale: 'fr')}',
                           style: TextStyle(
@@ -1811,74 +1528,7 @@ class _ProduitListPageState extends State<ProduitListPage>
             },
           ),
           ListView.builder(
-            controller: _scrollController,
-            itemCount: _ligneFactures.length + 1,
-            itemBuilder: (context, index) {
-              if (index < _ligneFactures.length) {
-                final ligneFacture = _ligneFactures[index];
-                return Card(
-                  child: ListTile(
-                    // onTap: () {
-                    //   Navigator.of(context).push(
-                    //     MaterialPageRoute(
-                    //       builder: (context) => ProduitsFournisseurPage(
-                    //         fournisseur: fournisseur,
-                    //       ),
-                    //     ),
-                    //   );
-                    // },
-                    leading: CircleAvatar(
-                      child: FittedBox(
-                          child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(ligneFacture.id.toString()),
-                      )),
-                    ),
-                    title:
-                        Text(ligneFacture.facture.target!.client.target!.nom),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                            'Phone : ${ligneFacture.facture.target!.client.target!.phone}'),
-                        Text(
-                          'Créer le ${ligneFacture.facture.target?.date.day}-${ligneFacture.facture.target?.date.month}-${ligneFacture.facture.target?.date.year}}',
-                          style: TextStyle(
-                              fontSize: 13, fontWeight: FontWeight.w300),
-                        ),
-                      ],
-                    ),
-                    trailing: Container(
-                      width: 50,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              ligneFacture.produit.toString(),
-                              style: TextStyle(fontSize: 20),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              } else if (_hasMore) {
-                return Center(
-                  child: LinearProgressIndicator(),
-                );
-              } else {
-                return Container(
-                  padding: EdgeInsets.all(16),
-                  alignment: Alignment.center,
-                  child: Text('Fin de la liste'),
-                );
-              }
-            },
-          ),
-          ListView.builder(
-            controller: _scrollController,
+            controller: _scrollControllerDeletedProducts,
             itemCount: _deletedProducts.length + 1,
             itemBuilder: (context, index) {
               if (index < _deletedProducts.length) {

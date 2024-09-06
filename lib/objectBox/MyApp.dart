@@ -1,15 +1,12 @@
 import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../objectBox/pages/ClientListScreen.dart';
 import '../objectBox/pages/FactureListScreen.dart';
-import '../objectBox/pages/ProduitListSupabase.dart';
 import '../../MyListLotties.dart';
-import '../objectbox.g.dart';
 import 'Entity.dart';
 import 'MyProviders.dart';
 import 'classeObjectBox.dart';
@@ -18,10 +15,7 @@ import 'pages/FournisseurListScreen.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:io' show Platform;
 import 'dart:io';
-import 'dart:isolate';
-import 'package:percent_indicator/percent_indicator.dart';
-import 'package:faker/faker.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:faker/faker.dart' as Faker;
 
 import 'pages/ProduitListScreen.dart';
 import 'pages/ProduitListSupabase.dart' as supa;
@@ -246,7 +240,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     int.tryParse(_supplierController.text) ?? 0;
                 final int clients = int.tryParse(_clientController.text) ?? 0;
 
-                widget.objectBox.fillWithFakeData(20, clients, suppliers, products);
+                widget.objectBox
+                    .fillWithFakeData(20, clients, suppliers, products);
                 // ScaffoldMessenger.of(context).showSnackBar(
                 //   SnackBar(content: Text('Données factices ajoutées !')),
                 // );
@@ -494,7 +489,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             );
                           },
                           child: Text(('Voire La List'))),
-                  Color1: Colors.red,
+                  Color1: Colors.red.shade100,
                   Color2: Colors.black,
                 ),
                 SizedBox(height: 18),
@@ -678,7 +673,8 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                     int.tryParse(_supplierController.text) ?? 0;
                 final int clients = int.tryParse(_clientController.text) ?? 0;
 
-                widget.objectBox.fillWithFakeData(20,clients, suppliers, products);
+                widget.objectBox
+                    .fillWithFakeData(20, clients, suppliers, products);
                 // ScaffoldMessenger.of(context).showSnackBar(
                 //   SnackBar(content: Text('Données factices ajoutées !')),
                 // );
@@ -700,6 +696,24 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
       appBar: AppBar(
         title: Text('Facturation'),
         actions: [
+          // ElevatedButton(
+          //   onPressed: () {
+          //     // Appelez la méthode ici sans essayer d'utiliser sa valeur de retour
+          //     widget.objectBox.ajouterQuantitesAleatoires();
+          //   },
+          //   child: Text('Ajouter Quantités Aléatoires'),
+          // ),
+          // ElevatedButton(
+          //   onPressed: () async {
+          //     String filePath =
+          //         "C:/Users/INDRA/Documents/Articles.xls"; // Assurez-vous de mettre le bon chemin ici.
+          //     await widget.objectBox
+          //         .importProduitsDepuisExcel(filePath, 20, 3000, 500);
+          //
+          //     print("Produits importés avec succès !");
+          //   },
+          //   child: Text("Importer Produits"),
+          // ),
           IconButton(
             onPressed: () {
               Navigator.of(context)
@@ -944,7 +958,7 @@ class _HomeScreenWideState extends State<HomeScreenWide> {
                               );
                             },
                             child: Text(('Voire La List'))),
-                    Color1: Colors.red,
+                    Color1: Colors.red[500]!,
                     Color2: Colors.black,
                   ),
                 ),

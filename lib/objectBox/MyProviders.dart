@@ -113,6 +113,25 @@ class CommerceProvider extends ChangeNotifier {
     }
   }
 
+  // Produit? findProduitByQrOrId(String code) {
+  //   // Rechercher le produit par QR ou ID
+  //   return _produits.firstWhere(
+  //     (produit) => produit.qr == code || produit.id.toString() == code,
+  //     orElse: () => Produit(
+  //       nom: 'Produit inconnu',
+  //       prixAchat: 0.0,
+  //       prixVente: 0.0,
+  //       stock: 0.0,
+  //       minimStock: 0.0,
+  //       createdBy: 0,
+  //       updatedBy: 0,
+  //       deletedBy: 0,
+  //       derniereModification: DateTime.now(),
+  //       stockinit: 0.0,
+  //     ),
+  //   );
+  // }
+
   List<Produit> getProduitsForFournisseur(Fournisseur fournisseur) {
     // Récupérer les données directement depuis la base de données
     return _objectBox.fournisseurBox
@@ -463,6 +482,11 @@ class CartProvider with ChangeNotifier {
   void selectClient(Client client) {
     _selectedClient = client;
     _facture.client.target = client;
+    notifyListeners();
+  }
+
+  void resetClient() {
+    _selectedClient = null;
     notifyListeners();
   }
 

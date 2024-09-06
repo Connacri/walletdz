@@ -25,7 +25,7 @@ dependencies:
   provider: ^6.1.2
   fluttertoast:
   font_awesome_flutter: ^10.7.0
-#  flutter_native_splash: any
+  #  flutter_native_splash: any
   shared_preferences: ^2.2.3
   avatar_glow: ^3.0.1
   url_launcher: ^6.3.0
@@ -46,7 +46,7 @@ dependencies:
   screenshot: ^3.0.0
   email_validator: ^3.0.0
   flutter_islamic_icons: ^1.0.2
-  supabase_flutter: ^2.6.0
+  supabase_flutter: ^2.5.8
   #  horizontal_calendar: any
   geocoding: ^3.0.0
   map_launcher: ^3.3.1
@@ -61,29 +61,30 @@ dependencies:
   pretty_qr_code: ^3.3.0
   http: ^1.2.1
   decimal: ^3.0.2
-  openfoodfacts: ^3.13.0
+  openfoodfacts: ^3.12.0
   video_player: ^2.9.1
   chewie: ^1.8.1
   flutter_easyloading: ^3.0.5
-  wakelock_plus: ^1.2.8
-  faker: ^2.2.0
-  postgres: ^3.3.0
+  wakelock_plus: ^1.2.5
+  faker: ^2.1.0
+  postgres: ^3.2.1
   timeago: ^3.7.0
   sqflite_common_ffi: ^2.3.3
-  objectbox: ^4.0.2
-  objectbox_flutter_libs: ^4.0.2
+  objectbox: ^4.0.1
+  objectbox_flutter_libs: ^4.0.1
   flutter_slidable: ^3.1.1
-  network_info_plus: ^6.0.1
+  network_info_plus: ^5.0.3
   multicast_dns: ^0.3.2+7
   percent_indicator: ^4.2.3
   icons_plus: ^5.0.0
   feedback: ^3.1.0
-  win32: ^5.5.4
-  msix: ^3.16.8
+  win32: ^5.5.1
+  msix: ^3.16.7
   easy_date_timeline: ^1.1.3
   device_info_plus: ^10.1.2
   pincode_input_fields: ^1.0.3
   syncfusion_flutter_barcodes: ^26.2.10
+  excel: ^4.0.6
 
 
 dev_dependencies:

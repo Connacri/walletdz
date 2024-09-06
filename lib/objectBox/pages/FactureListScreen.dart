@@ -7,6 +7,7 @@ import 'package:qr_code_scanner/qr_code_scanner.dart';
 import '../Entity.dart';
 import '../MyProviders.dart';
 import '../Utils/QRViewExample.dart';
+import '../classeObjectBox.dart';
 import 'ClientListScreen.dart';
 import 'ProduitListScreen.dart';
 import 'dart:io' show Platform;
@@ -30,6 +31,8 @@ class _FacturePageState extends State<FacturePage> {
 
   // Ajouter un TextEditingController pour gérer l'impayé
   final TextEditingController _impayerController = TextEditingController();
+  final TextEditingController _barcodeBufferController =
+      TextEditingController();
 
   @override
   void initState() {
@@ -54,7 +57,8 @@ class _FacturePageState extends State<FacturePage> {
   @override
   void dispose() {
     _invisibleFocusNode.dispose();
-    _impayerController.dispose(); // Ne pas oublier de disposer le contrôleur
+    _impayerController.dispose();
+    _barcodeBufferController.dispose();
     super.dispose();
   }
 
@@ -72,24 +76,76 @@ class _FacturePageState extends State<FacturePage> {
         final tva = totalAmount * 0.19; // TVA à 19%
         final impayer = cartProvider.facture.impayer ?? 0.0;
 
-        return RawKeyboardListener(
+        return KeyboardListener(
             focusNode: _invisibleFocusNode,
-            onKey: (RawKeyEvent event) {
-              if (event is RawKeyDownEvent) {
+            autofocus: true,
+            onKeyEvent: (KeyEvent event) {
+              if (event is KeyDownEvent) {
                 if (event.logicalKey == LogicalKeyboardKey.enter) {
-                  _processBarcode(
+                  // Si _barcodeBuffer est vide, utiliser la valeur du TextFormField
+                  if (_barcodeBuffer.isEmpty || _barcodeBuffer.trim().isEmpty) {
+                    _barcodeBuffer = _barcodeBufferController.text;
+                  }
+
+                  // Vérifiez si le buffer contient une valeur valide avant de convertir
+                  if (_barcodeBuffer.isNotEmpty &&
+                      double.tryParse(_barcodeBuffer) != null) {
+                    _processBarcode(
                       context,
                       commerceProvider,
                       cartProvider,
-                      double.parse(_barcodeBuffer),
-                      cartProvider.facture.lignesFacture);
+                      double.parse('1'),
+                      cartProvider.facture.lignesFacture,
+                    );
+                  } else {
+                    // Afficher un message d'erreur ou nettoyer le buffer si la valeur n'est pas valide
+                    print(
+                        'Erreur: Valeur du buffer invalide pour double.parse()');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text(
+                              'Entrée invalide. Veuillez entrer un code valide.')),
+                    );
+                    _barcodeBuffer = ''; // Réinitialiser le buffer
+                  }
                 } else {
+                  // Ajouter le caractère entré au buffer
                   _barcodeBuffer += event.character ?? '';
                 }
               }
             },
-            child: buildColumn(context, cartProvider, items, totalAmount, tva,
-                impayer, _isEditingImpayer, commerceProvider));
+            child: Column(
+              children: [
+                // Ajout du TextFormField pour la saisie du code produit
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: TextFormField(
+                    controller: _barcodeBufferController,
+                    decoration: InputDecoration(
+                      labelText: 'Code Produit (ID ou QR)',
+                      border: OutlineInputBorder(),
+                    ),
+                    onFieldSubmitted: (value) {
+                      _processBarcode(
+                        context,
+                        commerceProvider,
+                        cartProvider,
+                        double.parse('1'),
+                        cartProvider.facture.lignesFacture,
+                      );
+                      _barcodeBufferController.clear();
+                    },
+                    onChanged: (value) {
+                      _barcodeBufferController.text = value;
+                    },
+                  ),
+                ),
+                Expanded(
+                  child: buildColumn(context, cartProvider, items, totalAmount,
+                      tva, impayer, _isEditingImpayer, commerceProvider),
+                ),
+              ],
+            ));
       }),
     );
   }
@@ -99,6 +155,17 @@ class _FacturePageState extends State<FacturePage> {
     return AppBar(
       title: Text('Facture'),
       actions: [
+        Center(
+          child: ElevatedButton(
+            onPressed: () async {
+              await ObjectBox().cleanQrCodes().whenComplete(() =>
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('QR codes nettoyés avec succès.')),
+                  ));
+            },
+            child: Text('Nettoyer les QR Codes'),
+          ),
+        ),
         IconButton(
           icon: Icon(Icons.search),
           onPressed: () {
@@ -246,49 +313,6 @@ class _FacturePageState extends State<FacturePage> {
           child: Text('Sauvegarder la facture'),
         ),
         Expanded(
-          // child: ListView.builder(
-          //   itemCount: items.length,
-          //   itemBuilder: (context, index) {
-          //     final ligneFacture = items[index];
-          //     final produit = ligneFacture.produit.target!;
-          //     final TextEditingController _quantiteController =
-          //         TextEditingController(
-          //       text: ligneFacture.quantite.floor().toString(),
-          //     );
-          //     final TextEditingController _prixController =
-          //         TextEditingController(
-          //       text: ligneFacture.prixUnitaire.floor().toString(),
-          //     );
-          //     return Card(
-          //       child: ListTile(
-          //         title: Text('Qr: ${produit.qr} ${produit.nom}'),
-          //         subtitle: Text(
-          //             '${ligneFacture.prixUnitaire.toStringAsFixed(2)} x ${ligneFacture.quantite} = ${(ligneFacture.prixUnitaire * ligneFacture.quantite).toStringAsFixed(2)} DZD'),
-          //         trailing: Row(
-          //           mainAxisSize: MainAxisSize.min,
-          //           children: [
-          //             IconButton(
-          //               icon: Icon(Icons.edit),
-          //               onPressed: () async {
-          //                 _showEditQuantityDialog(context, ligneFacture,
-          //                     _quantiteController, _prixController);
-          //               },
-          //             ),
-          //             IconButton(
-          //               icon: Icon(
-          //                 Icons.delete,
-          //                 color: Colors.red,
-          //               ),
-          //               onPressed: () {
-          //                 cartProvider.removeFromCart(produit);
-          //               },
-          //             ),
-          //           ],
-          //         ),
-          //       ),
-          //     );
-          //   },
-          // ),
           child: DataTable(
             columns: [
               DataColumn(label: Text('QR')),
@@ -355,31 +379,32 @@ class _FacturePageState extends State<FacturePage> {
     return StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
         return Row(
-          //mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _isEditingImpayer
-                ? TextFormField(
-                    controller: _impayerController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: 'Impayer',
-                      border: OutlineInputBorder(),
-                      suffixText: 'DZD',
+                ? Expanded(
+                    child: TextFormField(
+                      controller: _impayerController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Impayer',
+                        border: OutlineInputBorder(),
+                        suffixText: 'DZD',
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          _localImpayer = double.tryParse(value) ?? 0.00;
+                        });
+                      },
+                      onTap: () {
+                        // Effacer le champ si la valeur initiale est 0
+                        if (_impayerController.text == '0' ||
+                            _impayerController.text == '0.0' ||
+                            _impayerController.text == '0.00') {
+                          _impayerController.clear();
+                        }
+                      },
+                      autofocus: true,
                     ),
-                    onChanged: (value) {
-                      setState(() {
-                        _localImpayer = double.tryParse(value) ?? 0.00;
-                      });
-                    },
-                    onTap: () {
-                      // Effacer le champ si la valeur initiale est 0
-                      if (_impayerController.text == '0' ||
-                          _impayerController.text == '0.0' ||
-                          _impayerController.text == '0.00') {
-                        _impayerController.clear();
-                      }
-                    },
-                    autofocus: true,
                   )
                 : Text(
                     'Impayer: ${_localImpayer} DZD',
@@ -408,31 +433,39 @@ class _FacturePageState extends State<FacturePage> {
     );
   }
 
-  void _processBarcode(BuildContext context, CommerceProvider commerceProvider,
-      CartProvider cartProvider, double enteredQuantity, ligneFacture) async {
+  void _processBarcode(
+    BuildContext context,
+    CommerceProvider commerceProvider,
+    CartProvider cartProvider,
+    double enteredQuantity,
+    ligneFacture,
+  ) async {
     if (_barcodeBuffer.isNotEmpty) {
       final produit = await commerceProvider.getProduitByQr(_barcodeBuffer);
+
       if (produit == null) {
         _navigateToAddProductPage(context, commerceProvider, cartProvider);
       } else {
-        if (enteredQuantity > 0 ||
-            enteredQuantity <= ligneFacture.produit.target!.stock) {
-          cartProvider.addToCart(produit);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Produit ajouté : ${produit.nom}'),
-              backgroundColor: Colors.green,
-              showCloseIcon: true,
-              duration: _snackBarDisplayDuration(),
-            ),
-          );
-        } else {
+        // if (
+        //     // enteredQuantity > 0 ||
+        //     //     enteredQuantity
+        //     ligneFacture.quantite <= ligneFacture.produit.target!.stock) {
+        cartProvider.addToCart(produit);
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-                'La quantité doit être entre 0 et ${ligneFacture.produit.target!.stock}'),
+            content: Text('Produit ajouté : ${produit.nom}'),
             backgroundColor: Colors.green,
-          );
-        }
+            showCloseIcon: true,
+            duration: _snackBarDisplayDuration(),
+          ),
+        );
+        // } else {
+        //   SnackBar(
+        //     content: Text(
+        //         'La quantité doit être entre 0 et ${ligneFacture.produit.target!.stock}'),
+        //     backgroundColor: Colors.green,
+        //   );
+        // }
       }
       _barcodeBuffer = '';
     }
@@ -463,14 +496,18 @@ class _FacturePageState extends State<FacturePage> {
     return Card(
       margin: EdgeInsets.all(8),
       child: InkWell(
-        onTap: () {
+        onTap: () async {
           client != null
-              ? Navigator.of(context).push(MaterialPageRoute(
+              ? await Navigator.of(context).push(MaterialPageRoute(
                   builder: (ctx) => ClientDetailsPage(
                     client: client,
                   ),
                 ))
-              : null;
+              : await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (ctx) => ClientSelectionPage(),
+                  ),
+                );
         },
         child: Padding(
           padding: EdgeInsets.all(8),
@@ -498,12 +535,17 @@ class _FacturePageState extends State<FacturePage> {
                     Expanded(
                       flex: 1,
                       child: Center(
-                          child: Container(
-                        height: 100,
-                        child: SfBarcodeGenerator(
-                          value: '${client.qr}',
-                          symbology: QRCode(),
-                          showValue: true,
+                          child: GestureDetector(
+                        onLongPress: () {
+                          cartProvider.resetClient();
+                        },
+                        child: Container(
+                          height: 100,
+                          child: SfBarcodeGenerator(
+                            value: '${client.qr}',
+                            symbology: QRCode(),
+                            showValue: true,
+                          ),
                         ),
                       )),
                     ),

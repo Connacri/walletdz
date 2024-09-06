@@ -546,7 +546,9 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                                 trailing: new Text(
                                                   'Reste : ${produit.stock.toStringAsFixed(produit.stock.truncateToDouble() == produit.stock ? 0 : 2)}',
                                                 ),
-                                                percent: percentProgress,
+                                                percent: percentProgress < 0
+                                                    ? 0
+                                                    : percentProgress,
                                                 center: new Text(
                                                     '${(percentProgress * 100).toStringAsFixed(1)}%'),
                                                 linearStrokeCap:
