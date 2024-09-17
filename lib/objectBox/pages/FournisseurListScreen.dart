@@ -1,12 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import '../Entity.dart';
 import '../MyProviders.dart';
 import 'ProduitListScreen.dart';
-import 'package:intl/intl.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:timeago/timeago.dart' as timeago;
@@ -169,27 +166,27 @@ class ProduitsFournisseurPage extends StatelessWidget {
                     final produit = produits[index];
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Slidable(
-                          key: ValueKey(produit.id),
-                          startActionPane: ActionPane(
-                            extentRatio: largeur,
-                            motion: ScrollMotion(),
-                            children: [
-                              SlidableAction(
-                                onPressed: (BuildContext context) {
-                                  // Navigator.of(context).push(MaterialPageRoute(
-                                  //   builder: (ctx) => Edit_Product(
-                                  //     produit: produit,
-                                  //     specifiquefournisseur: fournisseur,
-                                  //   ),
-                                  // ));
-                                },
-                                backgroundColor: Colors.blue,
-                                icon: Icons.edit,
-                                label: 'Editer',
-                              ),
-                            ],
-                          ),
+                      // child: Slidable(
+                      //     key: ValueKey(produit.id),
+                      //     startActionPane: ActionPane(
+                      //       extentRatio: largeur,
+                      //       motion: ScrollMotion(),
+                      //       children: [
+                      //         SlidableAction(
+                      //           onPressed: (BuildContext context) {
+                      //             // Navigator.of(context).push(MaterialPageRoute(
+                      //             //   builder: (ctx) => Edit_Product(
+                      //             //     produit: produit,
+                      //             //     specifiquefournisseur: fournisseur,
+                      //             //   ),
+                      //             // ));
+                      //           },
+                      //           backgroundColor: Colors.blue,
+                      //           icon: Icons.edit,
+                      //           label: 'Editer',
+                      //         ),
+                      //       ],
+                      //     ),
                           child: Card(
                             child: ListTile(
                                 onTap: () {
@@ -293,7 +290,8 @@ class ProduitsFournisseurPage extends StatelessWidget {
                                   '${produit.prixVente.toStringAsFixed(2)}',
                                   style: TextStyle(fontSize: 20),
                                 )),
-                          )),
+                          ),
+                    //  ),
                     );
 
                     //   ListTile(

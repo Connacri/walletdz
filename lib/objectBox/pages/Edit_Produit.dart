@@ -11,6 +11,7 @@ import 'package:path/path.dart' as path;
 import '../Entity.dart';
 import '../MyProviders.dart';
 import '../Utils/QRViewExample.dart';
+import '../Utils/mobile_scanner/barcode_scanner_simple.dart';
 import 'FournisseurListScreen.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -201,7 +202,7 @@ class _Edit_ProduitState extends State<Edit_Produit> {
   Future<void> _scanQRCode() async {
     final code = await Navigator.of(context).push<String>(
       MaterialPageRoute(
-        builder: (context) => QRViewExample(),
+        builder: (context) => BarcodeScannerSimple(), //QRViewExample(),
       ),
     );
     if (code != null) {

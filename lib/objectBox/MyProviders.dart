@@ -74,9 +74,11 @@ class CommerceProvider extends ChangeNotifier {
       {int limit = 20}) async {
     final queryLower = query.toLowerCase();
     final idQuery = int.tryParse(query);
-    final qBuilder = _objectBox.produitBox.query(idQuery !=
+    final qrQuery = query;
+
+    final qBuilder = _objectBox.produitBox.query(qrQuery !=
             null // la recherche se fait par id et moi je le veux pas qrcode
-        ? Produit_.id.equals(idQuery) |
+        ? Produit_.qr.equals(qrQuery) |
             Produit_.nom.contains(queryLower, caseSensitive: false) |
             Produit_.qr.contains(queryLower, caseSensitive: false)
         : Produit_.nom.contains(queryLower, caseSensitive: false));

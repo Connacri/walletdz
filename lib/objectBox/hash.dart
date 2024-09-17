@@ -5,10 +5,10 @@ import 'dart:convert';
 import 'dart:io' show Platform, Process, ProcessResult;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:lottie/lottie.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:pincode_input_fields/pincode_input_fields.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'MyApp.dart';
@@ -424,7 +424,8 @@ class HashAdmin extends StatefulWidget {
 
 class _HashAdminState extends State<HashAdmin> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  QRViewController? controller;
+  //QRViewController? controller;
+  MobileScannerController? controller;
   String? qrCodeHash;
   String? qrCodeNumHash; // Ajout d'une variable pour le hash numérique
   String _p4ssw0rd = "Oran2024";
@@ -440,6 +441,21 @@ class _HashAdminState extends State<HashAdmin> {
     qrCodeNumHash = null;
   }
 
+// Fonction à appeler dans initState()
+  void _initializeScanner() {
+    controller = MobileScannerController(
+      detectionSpeed: DetectionSpeed.noDuplicates,
+      facing: CameraFacing.back,
+    );
+    _onQRViewCreated(controller!);
+  }
+
+  void _onQRViewCreated(MobileScannerController controller) {
+    this.controller = controller;
+    _resetQrCodeData(); // Réinitialiser les données QR à chaque création de vue
+    controller.start();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -451,9 +467,25 @@ class _HashAdminState extends State<HashAdmin> {
           children: <Widget>[
             Expanded(
               flex: 3,
-              child: QRView(
-                key: qrKey,
-                onQRViewCreated: _onQRViewCreated,
+              // child: QRView(
+              //   key: qrKey,
+              //   onQRViewCreated: _onQRViewCreated,
+              // ),
+              // Dans le widget build, remplacez QRView par MobileScanner
+              child: MobileScanner(
+                controller: controller,
+                onDetect: (capture) {
+                  final List<Barcode> barcodes = capture.barcodes;
+                  for (final barcode in barcodes) {
+                    if (barcode.rawValue != null) {
+                      setState(() {
+                        qrCodeHash = generateHash(barcode.rawValue!, _p4ssw0rd);
+                        qrCodeNumHash = generateNumHash(
+                            barcode.rawValue!, _p4ssw0rd, widget.lengthPin);
+                      });
+                    }
+                  }
+                },
               ),
             ),
             if (qrCodeHash != null)
@@ -499,17 +531,17 @@ class _HashAdminState extends State<HashAdmin> {
     );
   }
 
-  void _onQRViewCreated(QRViewController controller) {
-    this.controller = controller;
-    _resetQrCodeData(); // Réinitialiser les données QR à chaque création de vue
-    controller.scannedDataStream.listen((scanData) async {
-      setState(() {
-        qrCodeHash = generateHash(scanData.code!, _p4ssw0rd);
-        qrCodeNumHash = generateNumHash(scanData.code!, _p4ssw0rd,
-            widget.lengthPin); // Génération du code numérique
-      });
-    });
-  }
+  // void _onQRViewCreated(QRViewController controller) {
+  //   this.controller = controller;
+  //   _resetQrCodeData(); // Réinitialiser les données QR à chaque création de vue
+  //   controller.scannedDataStream.listen((scanData) async {
+  //     setState(() {
+  //       qrCodeHash = generateHash(scanData.code!, _p4ssw0rd);
+  //       qrCodeNumHash = generateNumHash(scanData.code!, _p4ssw0rd,
+  //           widget.lengthPin); // Génération du code numérique
+  //     });
+  //   });
+  // }
 
   @override
   void dispose() {
@@ -524,10 +556,10 @@ class _HashAdminState extends State<HashAdmin> {
     super.deactivate();
   }
 
-  @override
-  void reassemble() {
-    super.reassemble();
-    controller?.pauseCamera(); // Pause la caméra lors du hot reload
-    controller?.resumeCamera(); // Reprendre la caméra après le hot reload
-  }
+  // @override
+  // void reassemble() {
+  //   super.reassemble();
+  //   controller?.pauseCamera(); // Pause la caméra lors du hot reload
+  //   controller?.resumeCamera(); // Reprendre la caméra après le hot reload
+  // }
 }

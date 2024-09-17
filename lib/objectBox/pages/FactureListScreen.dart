@@ -3,10 +3,10 @@ import 'package:intl/intl.dart';
 import 'package:objectbox/src/relations/to_many.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:provider/provider.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
 import '../Entity.dart';
 import '../MyProviders.dart';
 import '../Utils/QRViewExample.dart';
+import '../Utils/mobile_scanner/barcode_scanner_simple.dart';
 import '../classeObjectBox.dart';
 import 'ClientListScreen.dart';
 import 'ProduitListScreen.dart';
@@ -117,6 +117,7 @@ class _FacturePageState extends State<FacturePage> {
             child: Column(
               children: [
                 // Ajout du TextFormField pour la saisie du code produit
+
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: TextFormField(
@@ -125,20 +126,82 @@ class _FacturePageState extends State<FacturePage> {
                       labelText: 'Code Produit (ID ou QR)',
                       border: OutlineInputBorder(),
                     ),
+                    // onTap: () {
+                    //   // Si _barcodeBuffer est vide, utiliser la valeur du TextFormField
+                    //   if (_barcodeBuffer.isEmpty ||
+                    //       _barcodeBuffer.trim().isEmpty) {
+                    //     _barcodeBuffer = _barcodeBufferController.text;
+                    //   }
+                    //
+                    //   // Vérifiez si le buffer contient une valeur valide avant de convertir
+                    //   if (_barcodeBuffer.isNotEmpty &&
+                    //       double.tryParse(_barcodeBuffer) != null) {
+                    //     _processBarcode(
+                    //       context,
+                    //       commerceProvider,
+                    //       cartProvider,
+                    //       double.parse('1'),
+                    //       cartProvider.facture.lignesFacture,
+                    //     );
+                    //   } else {
+                    //     // Afficher un message d'erreur ou nettoyer le buffer si la valeur n'est pas valide
+                    //     print(
+                    //         'Erreur: Valeur du buffer invalide pour double.parse()');
+                    //     ScaffoldMessenger.of(context).showSnackBar(
+                    //       SnackBar(
+                    //           content: Text(
+                    //               'Entrée invalide. Veuillez entrer un code valide.')),
+                    //     );
+                    //     _barcodeBuffer = ''; // Réinitialiser le buffer
+                    //   }
+                    // },
                     onFieldSubmitted: (value) {
-                      _processBarcode(
-                        context,
-                        commerceProvider,
-                        cartProvider,
-                        double.parse('1'),
-                        cartProvider.facture.lignesFacture,
-                      );
-                      _barcodeBufferController.clear();
+                      // Si _barcodeBuffer est vide, utiliser la valeur du TextFormField
+                      if (value.isEmpty || value.trim().isEmpty) {
+                        value = _barcodeBufferController.text;
+                      }
+
+                      // Vérifiez si le buffer contient une valeur valide avant de convertir
+                      if (value.isNotEmpty && double.tryParse(value) != null) {
+                        _processBarcode(
+                          context,
+                          commerceProvider,
+                          cartProvider,
+                          double.parse('1'),
+                          cartProvider.facture.lignesFacture,
+                        );
+                        _barcodeBufferController.clear();
+                      } else {
+                        // Afficher un message d'erreur ou nettoyer le buffer si la valeur n'est pas valide
+                        print(
+                            'Erreur: Valeur du buffer invalide pour double.parse()');
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text(
+                                  'Entrée invalide. Veuillez entrer un code valide.')),
+                        );
+                        value = '';
+                      }
                     },
+                    // onFieldSubmitted: (value) {
+                    //   _processBarcode(
+                    //     context,
+                    //     commerceProvider,
+                    //     cartProvider,
+                    //     double.parse('1'),
+                    //     cartProvider.facture.lignesFacture,
+                    //   );
+                    //   _barcodeBufferController.clear();
+                    // },
                     onChanged: (value) {
                       _barcodeBufferController.text = value;
                     },
                   ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: ProductSearchField(
+                      _barcodeBufferController, _processBarcode),
                 ),
                 Expanded(
                   child: buildColumn(context, cartProvider, items, totalAmount,
@@ -216,7 +279,10 @@ class _FacturePageState extends State<FacturePage> {
                 onPressed: () async {
                   final result = await Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => QRViewExample()),
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          BarcodeScannerSimple(), // QRViewExample(),
+                    ),
                   );
                   if (result != null) {
                     final produit =
@@ -313,60 +379,67 @@ class _FacturePageState extends State<FacturePage> {
           child: Text('Sauvegarder la facture'),
         ),
         Expanded(
-          child: DataTable(
-            columns: [
-              DataColumn(label: Text('QR')),
-              DataColumn(label: Text('Produit')),
-              DataColumn(label: Text('Prix')),
-              DataColumn(label: Text('Quantité')),
-              DataColumn(label: Text('Total')),
-              DataColumn(label: Text('Actions')),
-            ],
-            rows: items.map((ligneFacture) {
-              final produit = ligneFacture.produit.target!;
-              final TextEditingController _quantiteController =
-                  TextEditingController(
-                text: ligneFacture.quantite.floor().toString(),
-              );
-              final TextEditingController _prixController =
-                  TextEditingController(
-                text: ligneFacture.prixUnitaire.floor().toString(),
-              );
-              return DataRow(
-                cells: [
-                  DataCell(Text(produit.qr!)),
-                  DataCell(Text(produit.nom)),
-                  DataCell(Text(ligneFacture.prixUnitaire.toStringAsFixed(2))),
-                  DataCell(Text(ligneFacture.quantite.toString())),
-                  DataCell(Text(
-                      (ligneFacture.prixUnitaire * ligneFacture.quantite)
-                          .toStringAsFixed(2))),
-                  DataCell(
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.edit),
-                          onPressed: () async {
-                            _showEditQuantityDialog(context, ligneFacture,
-                                _quantiteController, _prixController);
-                          },
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.delete,
-                            color: Colors.red,
-                          ),
-                          onPressed: () {
-                            cartProvider.removeFromCart(produit);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                columns: [
+                  DataColumn(label: Text('QR')),
+                  DataColumn(label: Text('Produit')),
+                  DataColumn(label: Text('Prix')),
+                  DataColumn(label: Text('Quantité')),
+                  DataColumn(label: Text('Total')),
+                  DataColumn(label: Text('Actions')),
                 ],
-              );
-            }).toList(),
+                rows: items.map((ligneFacture) {
+                  final produit = ligneFacture.produit.target!;
+                  final TextEditingController _quantiteController =
+                      TextEditingController(
+                    text: ligneFacture.quantite.floor().toString(),
+                  );
+                  final TextEditingController _prixController =
+                      TextEditingController(
+                    text: ligneFacture.prixUnitaire.floor().toString(),
+                  );
+                  return DataRow(
+                    cells: [
+                      DataCell(Text(produit.qr!)),
+                      DataCell(Text(produit.nom)),
+                      DataCell(
+                          Text(ligneFacture.prixUnitaire.toStringAsFixed(2))),
+                      DataCell(Text(ligneFacture.quantite.toString())),
+                      DataCell(Text(
+                          (ligneFacture.prixUnitaire * ligneFacture.quantite)
+                              .toStringAsFixed(2))),
+                      DataCell(
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.edit),
+                              onPressed: () async {
+                                _showEditQuantityDialog(context, ligneFacture,
+                                    _quantiteController, _prixController);
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                Icons.delete,
+                                color: Colors.red,
+                              ),
+                              onPressed: () {
+                                cartProvider.removeFromCart(produit);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                }).toList(),
+              ),
+            ),
           ),
         ),
         SizedBox(height: 50)
@@ -1243,6 +1316,113 @@ class _FactureDetailPageState extends State<FactureDetailPage> {
               child: Text('Enregistrer'),
             ),
           ],
+        );
+      },
+    );
+  }
+}
+
+class ProductSearchField extends StatelessWidget {
+  final TextEditingController _barcodeBufferController;
+  final Function(BuildContext, CommerceProvider, CartProvider, double,
+      List<LigneFacture>) _processBarcode;
+
+  ProductSearchField(this._barcodeBufferController, this._processBarcode);
+
+  @override
+  Widget build(BuildContext context) {
+    final commerceProvider = Provider.of<CommerceProvider>(context);
+    final cartProvider = Provider.of<CartProvider>(context);
+
+    return Autocomplete<Produit>(
+      optionsBuilder: (TextEditingValue textEditingValue) async {
+        if (textEditingValue.text == '') {
+          return const Iterable<Produit>.empty();
+        }
+        return await commerceProvider.rechercherProduits(textEditingValue.text);
+      },
+      displayStringForOption: (Produit option) => '${option.id} ${option.nom}',
+      fieldViewBuilder: (BuildContext context,
+          TextEditingController fieldTextEditingController,
+          FocusNode fieldFocusNode,
+          VoidCallback onFieldSubmitted) {
+        return TextFormField(
+          controller: fieldTextEditingController,
+          focusNode: fieldFocusNode,
+          decoration: InputDecoration(
+            labelText: 'Code Produit (ID ou QR)',
+            border: OutlineInputBorder(),
+            suffixIcon: IconButton(
+              icon: Icon(Icons.search),
+              onPressed: onFieldSubmitted,
+            ),
+          ),
+          onFieldSubmitted: (value) {
+            if (value.isNotEmpty && double.tryParse(value) != null) {
+              _processBarcode(
+                context,
+                commerceProvider,
+                cartProvider,
+                double.parse('1'),
+                cartProvider.facture.lignesFacture,
+              );
+              fieldTextEditingController.clear();
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                    content: Text(
+                        'Entrée invalide. Veuillez entrer un code valide.')),
+              );
+            }
+          },
+        );
+      },
+      optionsViewBuilder: (BuildContext context,
+          AutocompleteOnSelected<Produit> onSelected,
+          Iterable<Produit> options) {
+        return Align(
+          alignment: Alignment.topLeft,
+          child: Material(
+            elevation: 4.0,
+            child: Container(
+              height: 200.0,
+              width: 300.0,
+              child: ListView.builder(
+                padding: EdgeInsets.all(8.0),
+                itemCount: options.length,
+                itemBuilder: (BuildContext context, int index) {
+                  final Produit option = options.elementAt(index);
+                  return ListTile(
+                    title: Text('${option.id} ${option.nom}'),
+                    subtitle: Text(
+                        'Prix: ${option.prixVente.toStringAsFixed(2)} DZD'),
+                    onTap: () {
+                      onSelected(option);
+                    },
+                    trailing: IconButton(
+                      icon: Icon(Icons.add_shopping_cart),
+                      onPressed: () {
+                        cartProvider.addToCart(option);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text('${option.nom} ajouté au panier')),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      },
+      onSelected: (Produit selection) {
+        _processBarcode(
+          context,
+          commerceProvider,
+          cartProvider,
+          double.parse('1'),
+          cartProvider.facture.lignesFacture,
         );
       },
     );
