@@ -70,7 +70,7 @@
     },
     {
       "id": "2:8606136097133066204",
-      "lastPropertyId": "19:78600634238338283",
+      "lastPropertyId": "20:5939741701584325095",
       "name": "Produit",
       "properties": [
         {
@@ -162,6 +162,11 @@
         {
           "id": "19:78600634238338283",
           "name": "deletedBy",
+          "type": 6
+        },
+        {
+          "id": "20:5939741701584325095",
+          "name": "alertPeremption",
           "type": 6
         }
       ],
@@ -420,10 +425,55 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "9:5406683045265354164",
+      "lastPropertyId": "6:5704210873674130259",
+      "name": "Approvisionnement",
+      "properties": [
+        {
+          "id": "1:1427127697992029180",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:6586041333414819153",
+          "name": "quantite",
+          "type": 8
+        },
+        {
+          "id": "3:8947335276371114795",
+          "name": "prixUnitaire",
+          "type": 8
+        },
+        {
+          "id": "4:9010323130560500227",
+          "name": "datePeremption",
+          "type": 10
+        },
+        {
+          "id": "5:5002393926981366444",
+          "name": "produitId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "8:8838837656771167107",
+          "relationTarget": "Produit"
+        },
+        {
+          "id": "6:5704210873674130259",
+          "name": "fournisseurId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "9:7561266591184972565",
+          "relationTarget": "Fournisseur"
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "8:4487301589449865946",
-  "lastIndexId": "7:883844146634508365",
+  "lastEntityId": "9:5406683045265354164",
+  "lastIndexId": "9:7561266591184972565",
   "lastRelationId": "1:2832941486252609678",
   "lastSequenceId": "0:0",
   "modelVersion": 5,

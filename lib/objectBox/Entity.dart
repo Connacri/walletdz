@@ -1,5 +1,8 @@
 import 'package:objectbox/objectbox.dart';
 
+///toDo///
+///delaisPeremption
+///le produit peut avoir plusieurs qty et plusieurs prix et plusieur delaisPeremption
 @Entity()
 class User {
   @Id()
@@ -48,6 +51,7 @@ class Produit {
   int createdBy;
   int updatedBy;
   int deletedBy;
+  int alertPeremption;
 
   @Property(type: PropertyType.date)
   DateTime? dateCreation;
@@ -60,6 +64,9 @@ class Produit {
 
   @Property(type: PropertyType.date)
   DateTime derniereModification;
+
+  @Backlink()
+  final approvisionnements = ToMany<Approvisionnement>();
 
   @Backlink()
   final fournisseurs = ToMany<Fournisseur>();
@@ -78,6 +85,7 @@ class Produit {
     required this.createdBy,
     required this.updatedBy,
     required this.deletedBy,
+    required this.alertPeremption,
     this.dateCreation,
     this.datePeremption,
     this.stockUpdate,
@@ -96,6 +104,7 @@ class Produit {
       prixVente: (json['prixVente'] ?? 0).toDouble(),
       stock: (json['stock'] ?? 0).toDouble(),
       minimStock: (json['minimStock'] ?? 0).toDouble(),
+      alertPeremption : (json['alertPeremption']).toInt(),
       createdBy: (json['createdBy']).toInt(),
       updatedBy: (json['updatedBy']).toInt(),
       deletedBy: (json['deletedBy']).toInt(),
@@ -112,6 +121,37 @@ class Produit {
       derniereModification: DateTime.parse(
           json['derniereModification'] //?? DateTime.now().toIso8601String()
           ),
+    );
+  }
+}
+
+@Entity()
+class Approvisionnement {
+  int id;
+  double quantite;
+  double prixUnitaire;
+
+  @Property(type: PropertyType.date)
+  DateTime? datePeremption;
+
+  final produit = ToOne<Produit>();
+  final fournisseur = ToOne<Fournisseur>();
+
+  Approvisionnement({
+    this.id = 0,
+    required this.quantite,
+    required this.prixUnitaire,
+    this.datePeremption,
+  });
+
+  factory Approvisionnement.fromJson(Map<String, dynamic> json) {
+    return Approvisionnement(
+      id: json['id'] ?? 0,
+      quantite: (json['quantite'] ?? 0).toDouble(),
+      prixUnitaire: (json['prixUnitaire'] ?? 0).toDouble(),
+      datePeremption: json['datePeremption'] != null
+          ? DateTime.parse(json['datePeremption'])
+          : null,
     );
   }
 }
@@ -287,7 +327,7 @@ class DeletedProduct {
   String description;
   double price;
   int quantity;
-
+  //int delaisPeremption;
   int createdBy;
   int updatedBy;
   int deletedBy;
@@ -298,6 +338,7 @@ class DeletedProduct {
     required this.description,
     required this.price,
     required this.quantity,
+    //required this.delaisPeremption,
     required this.deletedAt,
     required this.createdBy,
     required this.updatedBy,
@@ -309,6 +350,7 @@ class DeletedProduct {
       description: json['description'] ?? '',
       price: (json['price'] ?? 0).toDouble(),
       quantity: (json['quantity'] ?? 0).toInt(),
+      //delaisPeremption : (json['delaisPeremption']).toInt(),
       deletedAt: DateTime.parse(json['deletedAt']),
       createdBy: (json['createdBy']).toInt(),
       updatedBy: (json['updatedBy']).toInt(),

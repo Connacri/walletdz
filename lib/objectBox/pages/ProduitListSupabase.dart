@@ -244,7 +244,19 @@ class SupabaseSync {
         // Synchroniser les fournisseurs
         for (var data in fournisseursData) {
           final fournisseur = Fournisseur.fromJson(data);
-          fournisseurBox.put(fournisseur);
+          if (fournisseur.id == 0) {
+            fournisseurBox.put(fournisseur); // ID 0 -> nouvel objet
+          } else {
+            // Mettre à jour si existant
+            final existingFournisseur = fournisseurBox.get(fournisseur.id);
+            if (existingFournisseur != null) {
+              fournisseurBox.put(fournisseur);
+            } else {
+              // Si l'objet avec cet ID n'existe pas, vous pouvez choisir de le réinitialiser
+              fournisseur.id = 0;
+              fournisseurBox.put(fournisseur);
+            }
+          }
         }
 
         // Synchroniser les produits
@@ -683,6 +695,9 @@ class _ProduitListPageState extends State<ProduitListPage>
   bool _isSyncing = false;
   String? _errorMessage;
   String? _successMessage;
+  bool _isSyncingF = false;
+  String? _errorMessageF;
+  String? _successMessageF;
 
   Future<void> _syncData() async {
     setState(() {
@@ -715,6 +730,40 @@ class _ProduitListPageState extends State<ProduitListPage>
     } finally {
       setState(() {
         _isSyncing = false;
+      });
+    }
+  }
+
+  Future<void> _syncDataFrom() async {
+    setState(() {
+      _isSyncingF = true;
+      _errorMessageF = null;
+      _successMessageF = null;
+    });
+
+    final sync = SupabaseSync(widget.supabase, widget.objectboxStore);
+
+    try {
+      await sync.syncFromSupabase();
+      setState(() {
+        _successMessageF = 'Synchronisation Depuis Serveur réussie';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              _successMessageF!,
+              style: TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+      });
+    } on SyncException catch (e) {
+      setState(() {
+        _errorMessageF = e.message;
+      });
+    } finally {
+      setState(() {
+        _isSyncingF = false;
       });
     }
   }
@@ -869,6 +918,46 @@ class _ProduitListPageState extends State<ProduitListPage>
                     IconButton(
                       icon: Icon(Icons.sync),
                       onPressed: _syncData,
+                    ),
+                ],
+              ),
+            ),
+          ),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(2.0),
+              child: Row(
+                children: [
+                  if (_errorMessageF != null)
+                    Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Center(
+                          child: Text(
+                            'Erreur', // : $_errorMessage',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        )),
+                  if (_successMessageF != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Center(
+                        child: Text(
+                          '$_successMessageF',
+                          style: TextStyle(color: Colors.green),
+                        ),
+                      ),
+                    ),
+                  if (_isSyncingF)
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3.0,
+                      ),
+                    )
+                  else
+                    IconButton(
+                      icon: Icon(Icons.sync, color: Colors.red),
+                      onPressed: _syncDataFrom,
                     ),
                 ],
               ),

@@ -152,7 +152,5 @@ flutter:
     - assets/images/icon.png
     - assets/firebase_logo.png
     - assets/google_logo.png
-    - assets/foodsList.json
-    - assets/maliste.json
-    - assets/listcode.json
+
 

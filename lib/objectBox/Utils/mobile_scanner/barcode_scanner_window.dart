@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'scanned_barcode_label.dart';
-
 import 'scanner_error_widget.dart';
 
 class BarcodeScannerWithScanWindow extends StatefulWidget {
@@ -44,7 +43,13 @@ class _BarcodeScannerWithScanWindowState
                 scannedBarcode.corners.isEmpty) {
               return const SizedBox();
             }
+            // Récupérer le code-barres scanné
+            final String scannedCode = scannedBarcode.rawValue ?? '';
 
+            // Dès que le code est scanné, retourner le résultat et fermer la page
+            if (scannedCode.isNotEmpty) {
+              Navigator.of(context).pop(scannedCode);
+            }
             return CustomPaint(
               painter: BarcodeOverlay(
                 barcodeCorners: scannedBarcode.corners,

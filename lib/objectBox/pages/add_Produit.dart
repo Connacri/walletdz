@@ -18,6 +18,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../Utils/mobile_scanner/barcode_scanner_window.dart';
 
 class add_Produit extends StatefulWidget {
   final Fournisseur? specifiquefournisseur;
@@ -40,6 +41,7 @@ class _add_ProduitState extends State<add_Produit> {
   final _serialController = TextEditingController();
   final _datePeremptionController = TextEditingController();
   final _minimStockController = TextEditingController();
+  final _alertPeremptionController = TextEditingController();
 
   List<Fournisseur> _selectedFournisseurs = [];
 
@@ -76,6 +78,7 @@ class _add_ProduitState extends State<add_Produit> {
     _prixAchatController.dispose();
     _prixVenteController.dispose();
     _stockController.dispose();
+    _alertPeremptionController.dispose();
     _datePeremptionController.dispose();
 
     super.dispose();
@@ -154,7 +157,7 @@ class _add_ProduitState extends State<add_Produit> {
   Future<void> _scanQRCode() async {
     final code = await Navigator.of(context).push<String>(
       MaterialPageRoute(
-        builder: (context) => BarcodeScannerSimple(), //QRViewExample(),
+        builder: (context) => BarcodeScannerWithScanWindow(), //QRViewExample(),
       ),
     );
     if (code != null) {
@@ -283,6 +286,7 @@ class _add_ProduitState extends State<add_Produit> {
         stockTemp = double.parse(produit.stock.toStringAsFixed(2));
         _datePeremptionController.text =
             produit.datePeremption!.format('yMMMMd', 'fr_FR');
+        _alertPeremptionController.text = produit.alertPeremption.toString();
         _selectedFournisseurs = List.from(produit.fournisseurs);
         _existingImageUrl = produit.image;
         _isFinded = true;
@@ -300,6 +304,7 @@ class _add_ProduitState extends State<add_Produit> {
         _selectedFournisseurs.clear();
         _datePeremptionController.clear();
         _minimStockController.clear();
+        _alertPeremptionController.clear();
         _existingImageUrl = '';
         _isFinded = false;
         _image = null;
@@ -327,6 +332,7 @@ class _add_ProduitState extends State<add_Produit> {
       _minimStockController.clear();
       _selectedFournisseurs.clear();
       _datePeremptionController.clear();
+      _alertPeremptionController.clear();
       _existingImageUrl = '';
       _isFirstFieldFilled = false;
       _image = null;
@@ -437,6 +443,7 @@ class _add_ProduitState extends State<add_Produit> {
               prixVente: double.parse(_prixVenteController.text),
               stock: double.parse(_stockController.text),
               datePeremption: datePeremption,
+              alertPeremption: int.parse(_alertPeremptionController.text),
               dateCreation: DateTime.now(),
               derniereModification: DateTime.now(),
               stockUpdate: DateTime.now(),
@@ -755,6 +762,68 @@ class _add_ProduitState extends State<add_Produit> {
           ),
         ),
         SizedBox(height: 10),
+        Container(
+          width: -5 + largeur / 2,
+          child: TextFormField(
+            enabled: _isFirstFieldFilled,
+            controller: _alertPeremptionController,
+            textAlign: TextAlign.center,
+            decoration: InputDecoration(
+              labelText: 'Alert Péremption',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: BorderSide.none, // Supprime le contour
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide:
+                    BorderSide.none, // Supprime le contour en état normal
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide:
+                    BorderSide.none, // Supprime le contour en état focus
+              ),
+              //border: InputBorder.none,
+              filled: true,
+              contentPadding: EdgeInsets.all(15),
+            ),
+            // keyboardType: TextInputType.number,
+            //  validator: (value) {
+            //    if (value == null || value.isEmpty) {
+            //      return 'Veuillez entrer le prix d\'achat';
+            //    }
+            //    return null;
+            //  },
+            keyboardType: TextInputType.numberWithOptions(decimal: false),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+            ],
+            // onChanged: (value) {
+            //   if (value.isNotEmpty) {
+            //     double? parsed = double.tryParse(value);
+            //     if (parsed != null) {
+            //       _prixAchatController.text = parsed.toStringAsFixed(2);
+            //       _prixAchatController.selection =
+            //           TextSelection.fromPosition(
+            //         TextPosition(
+            //             offset: _prixAchatController.text.length),
+            //       );
+            //     }
+            //   }
+            // },
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Veuillez entrer Le nombre de jours pour alerter la date de peremption';
+              }
+              // if (double.tryParse(value) == null) {
+              //   return 'Veuillez entrer un prix valide';
+              // }
+              // return null;
+            },
+          ),
+        ),
+        Spacer(),
         Platform.isAndroid || Platform.isIOS
             ? Column(
                 mainAxisAlignment: MainAxisAlignment.center,

@@ -109,6 +109,7 @@ class ObjectBox {
         createdBy: 0,
         updatedBy: 0,
         deletedBy: 0,
+        alertPeremption: Random().nextInt(5),
       );
 
       // Associer entre 1 et 10 fournisseurs aléatoires au produit
@@ -284,6 +285,7 @@ class ObjectBox {
               faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
           stockinit: faker.randomGenerator.decimal(min: 200),
           minimStock: faker.randomGenerator.decimal(min: 1, scale: 2),
+          alertPeremption: Random().nextInt(1000),
         );
         // Associer entre 1 et 10 fournisseurs aléatoires au produit
         int numberOfFournisseurs = faker.randomGenerator.integer(10, min: 1);

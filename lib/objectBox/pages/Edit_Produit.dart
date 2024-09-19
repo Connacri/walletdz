@@ -40,6 +40,7 @@ class _Edit_ProduitState extends State<Edit_Produit> {
   final _datePeremptionController = TextEditingController();
   final _stockinitController = TextEditingController();
   final _minimStockController = TextEditingController();
+  final _alertPeremptionController = TextEditingController();
   late final _dateCreation;
   late final _derniereModification;
   late final _stockUpdate;
@@ -71,6 +72,8 @@ class _Edit_ProduitState extends State<Edit_Produit> {
       _prixVenteController.text = widget.produit!.prixVente.toStringAsFixed(2);
       _stockController.text = widget.produit!.stock.toStringAsFixed(2);
       _stockinit = widget.produit!.stockinit.toStringAsFixed(2);
+      _alertPeremptionController.text =
+          widget.produit!.alertPeremption.toString();
       _minimStockController.text =
           widget.produit!.minimStock.toStringAsFixed(2);
       _stockinitController.text = widget.produit!.stockinit.toStringAsFixed(2);
@@ -105,6 +108,7 @@ class _Edit_ProduitState extends State<Edit_Produit> {
     _stockController.dispose();
     _datePeremptionController.dispose();
     _minimStockController.dispose();
+    _alertPeremptionController.dispose();
     //_derniereModification.dispose();
     //_stockUpdate.dispose();
     //_stockinitController.dispose();
@@ -283,6 +287,7 @@ class _Edit_ProduitState extends State<Edit_Produit> {
         _stockinitController.text = produit.stockinit.toStringAsFixed(2);
         _minimStockController.text =
             widget.produit!.minimStock.toStringAsFixed(2);
+        _alertPeremptionController.text = produit.alertPeremption.toString();
         _derniereModification = widget.produit!.derniereModification.toString();
         _stockUpdate = widget.produit!.stockUpdate.toString();
         _selectedFournisseurs = List.from(produit.fournisseurs);
@@ -303,6 +308,7 @@ class _Edit_ProduitState extends State<Edit_Produit> {
       _dateCreation.clear();
       _stockinit.clear();
       _stockinitController.clear();
+      _alertPeremptionController.clear();
       _existingImageUrl = '';
       _isFinded = false;
       //_isFirstFieldFilled = false;
@@ -341,6 +347,7 @@ class _Edit_ProduitState extends State<Edit_Produit> {
       _datePeremptionController.clear();
       _dateCreation.clear();
       _stockinitController.clear();
+      _alertPeremptionController.clear();
       _stockinit.clear();
       _existingImageUrl = '';
       _isFinded = false;
@@ -439,6 +446,7 @@ class _Edit_ProduitState extends State<Edit_Produit> {
               createdBy: 0,
               updatedBy: 0,
               deletedBy: 0,
+              alertPeremption: int.parse(_alertPeremptionController.text),
             );
 
             if (produitDejaExist != null &&
@@ -777,6 +785,68 @@ class _Edit_ProduitState extends State<Edit_Produit> {
           ),
         ),
         SizedBox(height: 10),
+        Container(
+          width: -5 + largeur / 2,
+          child: TextFormField(
+            enabled: _isFirstFieldFilled,
+            controller: _alertPeremptionController,
+            textAlign: TextAlign.center,
+            decoration: InputDecoration(
+              labelText: 'Alert Péremption',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: BorderSide.none, // Supprime le contour
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide:
+                    BorderSide.none, // Supprime le contour en état normal
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide:
+                    BorderSide.none, // Supprime le contour en état focus
+              ),
+              //border: InputBorder.none,
+              filled: true,
+              contentPadding: EdgeInsets.all(15),
+            ),
+            // keyboardType: TextInputType.number,
+            //  validator: (value) {
+            //    if (value == null || value.isEmpty) {
+            //      return 'Veuillez entrer le prix d\'achat';
+            //    }
+            //    return null;
+            //  },
+            keyboardType: TextInputType.numberWithOptions(decimal: false),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+            ],
+            // onChanged: (value) {
+            //   if (value.isNotEmpty) {
+            //     double? parsed = double.tryParse(value);
+            //     if (parsed != null) {
+            //       _prixAchatController.text = parsed.toStringAsFixed(2);
+            //       _prixAchatController.selection =
+            //           TextSelection.fromPosition(
+            //         TextPosition(
+            //             offset: _prixAchatController.text.length),
+            //       );
+            //     }
+            //   }
+            // },
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Veuillez entrer Le nombre de jours pour alerter la date de peremption';
+              }
+              // if (double.tryParse(value) == null) {
+              //   return 'Veuillez entrer un prix valide';
+              // }
+              // return null;
+            },
+          ),
+        ),
+        Spacer(),
         Container(
           width: largeur,
           child: TextFormField(
