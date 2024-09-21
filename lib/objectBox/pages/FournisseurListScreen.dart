@@ -67,7 +67,7 @@ class FournisseurListScreen extends StatelessWidget {
                     children: [
                       Text('Phone : ${fournisseur.phone}'),
                       Text(
-                        'Créer le ${fournisseur.dateCreation.day}-${fournisseur.dateCreation.month}-${fournisseur.dateCreation.year}  Modifié ${timeago.format(fournisseur.derniereModification!, locale: 'fr')}',
+                        'Créer le ${fournisseur.crud.target!.dateCreation!.day}-${fournisseur.crud.target!.dateCreation!.month}-${fournisseur.crud.target!.dateCreation!.year}  Modifié ${timeago.format(fournisseur.crud.target!.derniereModification, locale: 'fr')}',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight:
@@ -187,111 +187,105 @@ class ProduitsFournisseurPage extends StatelessWidget {
                       //         ),
                       //       ],
                       //     ),
-                          child: Card(
-                            child: ListTile(
-                                onTap: () {
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (ctx) =>
-                                        ProduitDetailPage(produit: produit),
-                                  ));
-                                },
-                                onLongPress: () {
-                                  _deleteProduit(context, produit);
-                                },
-                                leading: produit.image == null ||
-                                        produit.image!.isEmpty
-                                    ? CircleAvatar(
-                                        child: Icon(
-                                        Icons.image_not_supported,
-                                      ))
-                                    : CircleAvatar(
-                                        backgroundImage:
-                                            CachedNetworkImageProvider(
-                                          produit.image!,
-                                          errorListener: (error) =>
-                                              Icon(Icons.error),
-                                        ),
-                                      ),
-                                title: Text(produit.nom),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'A: ${produit.prixAchat.toStringAsFixed(2)}\nB: ${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)} ',
+                      child: Card(
+                        child: ListTile(
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (ctx) =>
+                                    ProduitDetailPage(produit: produit),
+                              ));
+                            },
+                            onLongPress: () {
+                              _deleteProduit(context, produit);
+                            },
+                            leading: produit.image == null ||
+                                    produit.image!.isEmpty
+                                ? CircleAvatar(
+                                    child: Icon(
+                                    Icons.image_not_supported,
+                                  ))
+                                : CircleAvatar(
+                                    backgroundImage: CachedNetworkImageProvider(
+                                      produit.image!,
+                                      errorListener: (error) =>
+                                          Icon(Icons.error),
                                     ),
-                                    Text(
-                                        'ID : ${produit.id} QR : ${produit.qr}'),
-                                    Text(
-                                      'Créer le ${produit.dateCreation!.day}-${produit.dateCreation!.month}-${produit.dateCreation!.year}  Modifié ${timeago.format(produit.derniereModification!, locale: 'fr')}',
-                                      style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w300),
-                                    ),
-                                    produit.fournisseurs.isEmpty
-                                        ? Container()
-                                        : Wrap(
-                                            spacing:
-                                                6.0, // Espace horizontal entre les éléments
-                                            runSpacing:
-                                                4.0, // Espace vertical entre les lignes
-                                            children: produit.fournisseurs
-                                                .map((fournisseurL) {
-                                              // print(fournisseurL.id);
-                                              // print(fournisseur.id);
+                                  ),
+                            title: Text(produit.nom),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'A: ${produit.prixAchat.toStringAsFixed(2)}\nB: ${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)} ',
+                                ),
+                                Text('ID : ${produit.id} QR : ${produit.qr}'),
+                                Text(
+                                  'Créer le ${produit.crud.target!.dateCreation!.day}-${produit.crud.target!.dateCreation!.month}-${produit.crud.target!.dateCreation!.year}  Modifié ${timeago.format(produit.crud.target!.derniereModification, locale: 'fr')}',
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w300),
+                                ),
+                                produit.fournisseurs.isEmpty
+                                    ? Container()
+                                    : Wrap(
+                                        spacing:
+                                            6.0, // Espace horizontal entre les éléments
+                                        runSpacing:
+                                            4.0, // Espace vertical entre les lignes
+                                        children: produit.fournisseurs
+                                            .map((fournisseurL) {
+                                          // print(fournisseurL.id);
+                                          // print(fournisseur.id);
 
-                                              return InkWell(
-                                                onTap: () {
-                                                  Navigator.of(context).push(
-                                                      MaterialPageRoute(
-                                                          builder: (ctx) =>
-                                                              ProduitsFournisseurPage(
-                                                                fournisseur:
-                                                                    fournisseur,
-                                                              )));
-                                                },
-                                                child: fournisseur.id ==
-                                                        fournisseurL.id
-                                                    ? Container()
-                                                    : Chip(
-                                                        shadowColor:
-                                                            Colors.black,
-                                                        backgroundColor: Theme
-                                                                .of(context)
+                                          return InkWell(
+                                            onTap: () {
+                                              Navigator.of(context).push(
+                                                  MaterialPageRoute(
+                                                      builder: (ctx) =>
+                                                          ProduitsFournisseurPage(
+                                                            fournisseur:
+                                                                fournisseur,
+                                                          )));
+                                            },
+                                            child: fournisseur.id ==
+                                                    fournisseurL.id
+                                                ? Container()
+                                                : Chip(
+                                                    shadowColor: Colors.black,
+                                                    backgroundColor:
+                                                        Theme.of(context)
                                                             .chipTheme
                                                             .backgroundColor,
-                                                        labelStyle: TextStyle(
-                                                          color:
-                                                              Theme.of(context)
-                                                                  .chipTheme
-                                                                  .labelStyle
-                                                                  ?.color,
-                                                        ),
-                                                        side: BorderSide.none,
-                                                        shape: RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .all(Radius
-                                                                        .circular(
-                                                                            10))),
-                                                        padding:
-                                                            EdgeInsets.zero,
-                                                        label: Text(
-                                                          fournisseurL.nom,
-                                                          style: TextStyle(
-                                                              fontSize: 10),
-                                                        ),
-                                                      ),
-                                              );
-                                            }).toList(),
-                                          ),
-                                  ],
-                                ),
-                                trailing: Text(
-                                  '${produit.prixVente.toStringAsFixed(2)}',
-                                  style: TextStyle(fontSize: 20),
-                                )),
-                          ),
-                    //  ),
+                                                    labelStyle: TextStyle(
+                                                      color: Theme.of(context)
+                                                          .chipTheme
+                                                          .labelStyle
+                                                          ?.color,
+                                                    ),
+                                                    side: BorderSide.none,
+                                                    shape: RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius.all(
+                                                                Radius.circular(
+                                                                    10))),
+                                                    padding: EdgeInsets.zero,
+                                                    label: Text(
+                                                      fournisseurL.nom,
+                                                      style: TextStyle(
+                                                          fontSize: 10),
+                                                    ),
+                                                  ),
+                                          );
+                                        }).toList(),
+                                      ),
+                              ],
+                            ),
+                            trailing: Text(
+                              '${produit.prixVente.toStringAsFixed(2)}',
+                              style: TextStyle(fontSize: 20),
+                            )),
+                      ),
+                      //  ),
                     );
 
                     //   ListTile(
@@ -795,11 +789,6 @@ class _AddFournisseurFormState extends State<AddFournisseurForm> {
                       nom: _nomController.text,
                       phone: _phoneController.text,
                       adresse: _adresseController.text,
-                      dateCreation: DateTime.now(),
-                      derniereModification: DateTime.now(),
-                      createdBy: 0,
-                      updatedBy: 0,
-                      deletedBy: 0,
                     );
                     context
                         .read<CommerceProvider>()
@@ -832,8 +821,8 @@ void _editFournisseur(BuildContext context, Fournisseur fournisseur) {
   final _nomController = TextEditingController(text: fournisseur.nom);
   final _phoneController = TextEditingController(text: fournisseur.phone);
   final _adresseController = TextEditingController(text: fournisseur.adresse);
-  final _creationController =
-      TextEditingController(text: fournisseur.dateCreation.toString());
+  final _creationController = TextEditingController(
+      text: fournisseur.crud.target!.dateCreation.toString());
 
   showModalBottomSheet(
     context: context,
@@ -891,12 +880,14 @@ void _editFournisseur(BuildContext context, Fournisseur fournisseur) {
                       nom: _nomController.text,
                       phone: _phoneController.text,
                       adresse: _adresseController.text,
-                      dateCreation: DateTime.parse(_creationController.text),
-                      derniereModification: DateTime.now(),
-                      createdBy: 0,
-                      updatedBy: 0,
-                      deletedBy: 0,
-                    );
+                    )..crud.target = Crud(
+                        createdBy: 0,
+                        updatedBy: 0,
+                        deletedBy: 0,
+                        dateCreation: DateTime.parse(_creationController.text),
+                        derniereModification: DateTime.now(),
+                        dateDeleting: null,
+                      );
                     context
                         .read<CommerceProvider>()
                         .updateFournisseur(fournisseur.id, updatedFournisseur);

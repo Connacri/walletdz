@@ -48,8 +48,10 @@ class _BarcodeScannerWithScanWindowState
 
             // Dès que le code est scanné, retourner le résultat et fermer la page
             if (scannedCode.isNotEmpty) {
+              controller.stop();
               Navigator.of(context).pop(scannedCode);
             }
+         
             return CustomPaint(
               painter: BarcodeOverlay(
                 barcodeCorners: scannedBarcode.corners,

@@ -3,6 +3,7 @@ import 'package:objectbox/objectbox.dart';
 ///toDo///
 ///delaisPeremption
 ///le produit peut avoir plusieurs qty et plusieurs prix et plusieur delaisPeremption
+
 @Entity()
 class User {
   @Id()
@@ -13,6 +14,8 @@ class User {
   String email;
   String? phone;
   String role;
+
+  final crud = ToOne<Crud>();
   User({
     this.id = 0,
     this.photo,
@@ -48,28 +51,18 @@ class Produit {
   double stock;
   double minimStock;
   double stockinit;
-  int createdBy;
-  int updatedBy;
-  int deletedBy;
   int alertPeremption;
 
   @Property(type: PropertyType.date)
-  DateTime? dateCreation;
-
-  @Property(type: PropertyType.date)
-  DateTime? datePeremption;
-
-  @Property(type: PropertyType.date)
   DateTime? stockUpdate;
-
-  @Property(type: PropertyType.date)
-  DateTime derniereModification;
 
   @Backlink()
   final approvisionnements = ToMany<Approvisionnement>();
 
   @Backlink()
   final fournisseurs = ToMany<Fournisseur>();
+
+  final crud = ToOne<Crud>();
 
   Produit({
     this.id = 0,
@@ -82,14 +75,8 @@ class Produit {
     required this.prixVente,
     required this.stock,
     required this.minimStock,
-    required this.createdBy,
-    required this.updatedBy,
-    required this.deletedBy,
     required this.alertPeremption,
-    this.dateCreation,
-    this.datePeremption,
     this.stockUpdate,
-    required this.derniereModification,
     required this.stockinit,
   });
   factory Produit.fromJson(Map<String, dynamic> json) {
@@ -104,19 +91,51 @@ class Produit {
       prixVente: (json['prixVente'] ?? 0).toDouble(),
       stock: (json['stock'] ?? 0).toDouble(),
       minimStock: (json['minimStock'] ?? 0).toDouble(),
-      alertPeremption : (json['alertPeremption']).toInt(),
+      alertPeremption: (json['alertPeremption']).toInt(),
+      stockinit: (json['stockInit'] ?? 0).toDouble(),
+      stockUpdate: json['stockUpdate'] != null
+          ? DateTime.parse(json['stockUpdate'])
+          : null,
+    );
+  }
+}
+
+@Entity()
+class Crud {
+  int id;
+  int createdBy;
+  int updatedBy;
+  int deletedBy;
+
+  @Property(type: PropertyType.date)
+  DateTime? dateCreation;
+
+  @Property(type: PropertyType.date)
+  DateTime derniereModification;
+
+  @Property(type: PropertyType.date)
+  DateTime? dateDeleting;
+
+  Crud({
+    this.id = 0,
+    required this.createdBy,
+    required this.updatedBy,
+    required this.deletedBy,
+    this.dateCreation,
+    required this.derniereModification,
+    required this.dateDeleting,
+  });
+  factory Crud.fromJson(Map<String, dynamic> json) {
+    return Crud(
+      id: json['id'] ?? 0,
       createdBy: (json['createdBy']).toInt(),
       updatedBy: (json['updatedBy']).toInt(),
       deletedBy: (json['deletedBy']).toInt(),
-      stockinit: (json['stockInit'] ?? 0).toDouble(),
       dateCreation: json['dateCreation'] != null
           ? DateTime.parse(json['dateCreation'])
           : null,
-      datePeremption: json['datePeremption'] != null
-          ? DateTime.parse(json['datePeremption'])
-          : null,
-      stockUpdate: json['stockUpdate'] != null
-          ? DateTime.parse(json['stockUpdate'])
+      dateDeleting: json['dateDeleting'] != null
+          ? DateTime.parse(json['dateDeleting'])
           : null,
       derniereModification: DateTime.parse(
           json['derniereModification'] //?? DateTime.now().toIso8601String()
@@ -129,18 +148,19 @@ class Produit {
 class Approvisionnement {
   int id;
   double quantite;
-  double prixUnitaire;
+  double prixAchat;
 
   @Property(type: PropertyType.date)
   DateTime? datePeremption;
 
   final produit = ToOne<Produit>();
   final fournisseur = ToOne<Fournisseur>();
+  final crud = ToOne<Crud>();
 
   Approvisionnement({
     this.id = 0,
     required this.quantite,
-    required this.prixUnitaire,
+    required this.prixAchat,
     this.datePeremption,
   });
 
@@ -148,7 +168,7 @@ class Approvisionnement {
     return Approvisionnement(
       id: json['id'] ?? 0,
       quantite: (json['quantite'] ?? 0).toDouble(),
-      prixUnitaire: (json['prixUnitaire'] ?? 0).toDouble(),
+      prixAchat: (json['prixAchat'] ?? 0).toDouble(),
       datePeremption: json['datePeremption'] != null
           ? DateTime.parse(json['datePeremption'])
           : null,
@@ -163,17 +183,10 @@ class Fournisseur {
   String nom;
   String? phone;
   String? adresse;
-  int createdBy;
-  int updatedBy;
-  int deletedBy;
-
-  @Property(type: PropertyType.date)
-  DateTime dateCreation;
-
-  @Property(type: PropertyType.date)
-  DateTime? derniereModification;
 
   final produits = ToMany<Produit>();
+
+  final crud = ToOne<Crud>();
 
   Fournisseur({
     this.id = 0,
@@ -181,11 +194,6 @@ class Fournisseur {
     required this.nom,
     this.phone,
     this.adresse,
-    required this.createdBy,
-    required this.updatedBy,
-    required this.deletedBy,
-    required this.dateCreation,
-    required this.derniereModification,
   });
   factory Fournisseur.fromJson(Map<String, dynamic> json) {
     return Fournisseur(
@@ -194,12 +202,6 @@ class Fournisseur {
       nom: json['nom'] ?? '',
       phone: json['phone'],
       adresse: json['adresse'],
-      createdBy: (json['createdBy']).toInt(),
-      updatedBy: (json['updatedBy']).toInt(),
-      deletedBy: (json['deletedBy']).toInt(),
-      dateCreation: DateTime.parse(json['dateCreation']),
-      derniereModification: DateTime.parse(
-          json['derniereModification'] ?? DateTime.now().toIso8601String()),
     );
   }
 }
@@ -211,18 +213,12 @@ class Client {
   String nom;
   String phone;
   String adresse;
-  String description;
-  int createdBy;
-  int updatedBy;
-  int deletedBy;
-  @Property(type: PropertyType.date)
-  DateTime? dateCreation;
-
-  @Property(type: PropertyType.date)
-  DateTime? derniereModification;
+  String? description;
 
   @Backlink()
   final factures = ToMany<Facture>();
+
+  final crud = ToOne<Crud>();
 
   Client({
     this.id = 0,
@@ -230,12 +226,7 @@ class Client {
     required this.nom,
     required this.phone,
     required this.adresse,
-    required this.description,
-    required this.createdBy,
-    required this.updatedBy,
-    required this.deletedBy,
-    this.dateCreation,
-    this.derniereModification,
+    this.description,
   });
   factory Client.fromJson(Map<String, dynamic> json) {
     return Client(
@@ -245,15 +236,6 @@ class Client {
       phone: json['phone'] ?? '',
       adresse: json['adresse'] ?? '',
       description: json['description'] ?? '',
-      createdBy: (json['createdBy']).toInt(),
-      updatedBy: (json['updatedBy']).toInt(),
-      deletedBy: (json['deletedBy']).toInt(),
-      dateCreation: json['dateCreation'] != null
-          ? DateTime.parse(json['dateCreation'])
-          : null,
-      derniereModification: json['derniereModification'] != null
-          ? DateTime.parse(json['derniereModification'])
-          : null,
     );
   }
 }
@@ -263,14 +245,12 @@ class Facture {
   int id;
   String qr;
   double? impayer;
-  int createdBy;
-  int updatedBy;
-  int deletedBy;
+
   @Property(type: PropertyType.date)
   DateTime date;
 
   final client = ToOne<Client>();
-
+  final crud = ToOne<Crud>();
   @Backlink()
   final lignesFacture = ToMany<LigneFacture>();
 
@@ -279,9 +259,6 @@ class Facture {
     required this.date,
     required this.qr,
     required this.impayer,
-    required this.createdBy,
-    required this.updatedBy,
-    required this.deletedBy,
   });
   factory Facture.fromJson(Map<String, dynamic> json) {
     return Facture(
@@ -289,9 +266,6 @@ class Facture {
       qr: json['qr'] ?? '',
       impayer: (json['impayer'] ?? 0).toDouble(),
       date: DateTime.parse(json['date']),
-      createdBy: (json['createdBy']).toInt(),
-      updatedBy: (json['updatedBy']).toInt(),
-      deletedBy: (json['deletedBy']).toInt(),
     );
   }
 }
@@ -327,22 +301,16 @@ class DeletedProduct {
   String description;
   double price;
   int quantity;
-  //int delaisPeremption;
-  int createdBy;
-  int updatedBy;
-  int deletedBy;
-  DateTime deletedAt;
+  int delaisPeremption;
+
+  final crud = ToOne<Crud>();
 
   DeletedProduct({
     required this.name,
     required this.description,
     required this.price,
     required this.quantity,
-    //required this.delaisPeremption,
-    required this.deletedAt,
-    required this.createdBy,
-    required this.updatedBy,
-    required this.deletedBy,
+    required this.delaisPeremption,
   });
   factory DeletedProduct.fromJson(Map<String, dynamic> json) {
     return DeletedProduct(
@@ -350,11 +318,7 @@ class DeletedProduct {
       description: json['description'] ?? '',
       price: (json['price'] ?? 0).toDouble(),
       quantity: (json['quantity'] ?? 0).toInt(),
-      //delaisPeremption : (json['delaisPeremption']).toInt(),
-      deletedAt: DateTime.parse(json['deletedAt']),
-      createdBy: (json['createdBy']).toInt(),
-      updatedBy: (json['updatedBy']).toInt(),
-      deletedBy: (json['deletedBy']).toInt(),
+      delaisPeremption: (json['delaisPeremption']).toInt(),
     );
   }
 }

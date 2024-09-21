@@ -67,7 +67,7 @@ class ClientListScreen extends StatelessWidget {
                       client.nom +
                       ' ' +
                       client.phone.toString()),
-                  subtitle: Text(client.description),
+                  subtitle: Text(client.description ?? ''),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -342,14 +342,14 @@ class _AddClientFormState extends State<AddClientForm> {
                       nom: _nomController.text,
                       phone: _phoneController.text,
                       adresse: _adresseController.text,
-                      dateCreation: DateTime.now(),
-                      derniereModification: DateTime.now(),
-                      description: _descriptionController.text,
-                      // impayer: double.parse(_impayerController.text),
-                      createdBy: 0,
-                      updatedBy: 0,
-                      deletedBy: 0,
-                    );
+                    )..crud.target = Crud(
+                        createdBy: 0,
+                        updatedBy: 0,
+                        deletedBy: 0,
+                        dateCreation: DateTime.now(),
+                        derniereModification: DateTime.now(),
+                        dateDeleting: null,
+                      );
                     context.read<ClientProvider>().addClient(client);
                     Navigator.of(context).pop(client);
                   }
@@ -448,12 +448,15 @@ void _editClient(BuildContext context, Client client) {
                       nom: _nomController.text,
                       phone: _phoneController.text,
                       adresse: _adresseController.text,
-                      derniereModification: DateTime.now(),
                       description: _descriptionController.text,
-                      createdBy: 0,
-                      updatedBy: 0,
-                      deletedBy: 0,
-                    );
+                    )..crud.target = Crud(
+                        createdBy: 0,
+                        updatedBy: 0,
+                        deletedBy: 0,
+                        dateCreation: DateTime.now(),
+                        derniereModification: DateTime.now(),
+                        dateDeleting: null,
+                      );
                     context.read<ClientProvider>().updateClient(updatedClient);
                     Navigator.of(context).pop();
                   }

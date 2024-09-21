@@ -54,6 +54,8 @@ class _add_ProduitState extends State<add_Produit> {
   String _lastScannedCode = '';
   bool _isFinded = false;
   double stockTemp = 0;
+  bool _showDescription = false;
+  bool _showAppro = false;
 
   @override
   void initState() {
@@ -178,8 +180,10 @@ class _add_ProduitState extends State<add_Produit> {
           _stockController.text = produit.stock.toStringAsFixed(2);
           stockTemp = double.parse(produit.stock.toStringAsFixed(2));
           _minimStockController.text = produit.minimStock.toStringAsFixed(2);
-          _datePeremptionController.text =
-              produit.datePeremption!.format('yMMMMd', 'fr_FR');
+          _alertPeremptionController.text = produit.alertPeremption.toString();
+          _datePeremptionController.text = produit
+              .approvisionnements.first.datePeremption!
+              .format('yMMMMd', 'fr_FR');
           _selectedFournisseurs = List.from(produit.fournisseurs);
           _existingImageUrl = produit.image;
           _isFinded = true;
@@ -192,6 +196,7 @@ class _add_ProduitState extends State<add_Produit> {
           _descriptionController.clear();
           _prixAchatController.clear();
           stockTemp = 0.0;
+          _alertPeremptionController.clear();
           _prixVenteController.clear();
           _stockController.clear();
           _selectedFournisseurs.clear();
@@ -442,32 +447,35 @@ class _add_ProduitState extends State<add_Produit> {
               prixAchat: double.parse(_prixAchatController.text),
               prixVente: double.parse(_prixVenteController.text),
               stock: double.parse(_stockController.text),
-              datePeremption: datePeremption,
               alertPeremption: int.parse(_alertPeremptionController.text),
-              dateCreation: DateTime.now(),
-              derniereModification: DateTime.now(),
               stockUpdate: DateTime.now(),
               stockinit: double.parse(_stockController.text),
               minimStock: double.parse(_minimStockController.text),
-              createdBy: 0,
-              updatedBy: 0,
-              deletedBy: 0,
-            );
+            )..crud.target = Crud(
+                createdBy: 0,
+                updatedBy: 0,
+                deletedBy: 0,
+                dateCreation: DateTime.now(),
+                derniereModification: DateTime.now(),
+                dateDeleting: null,
+              );
 
             if (widget.specifiquefournisseur == null) {
               if (produitDejaExist != null) {
                 return;
               } else {
-                produitProvider.ajouterProduit(produit, _selectedFournisseurs);
+                produitProvider.ajouterProduit(
+                    produit, _selectedFournisseurs, _approvisionnements);
                 // await ajouterProduitToSupabase(
                 //     produit);
                 print('Nouveau produit ajouté');
+                print(produit);
               }
             } else {
               if (produitDejaExist != null) {
                 // Mise à jour d'un produit existant
                 produitProvider.updateProduitById(
-                    int.parse(_tempProduitId), produit,
+                    int.parse(_tempProduitId), produit, _approvisionnements,
                     fournisseurs: [
                       ..._selectedFournisseurs,
                       ...[widget.specifiquefournisseur!]
@@ -476,10 +484,13 @@ class _add_ProduitState extends State<add_Produit> {
                 //     produit);
                 print('Produit existant mis à jour');
               } else {
-                produitProvider.ajouterProduit(produit, [
-                  ..._selectedFournisseurs,
-                  ...[widget.specifiquefournisseur!]
-                ]);
+                produitProvider.ajouterProduit(
+                    produit,
+                    [
+                      ..._selectedFournisseurs,
+                      ...[widget.specifiquefournisseur!],
+                    ],
+                    widget.approvisionnements);
                 // await ajouterProduitToSupabase(produit);
                 print('Nouveau produit ajouté');
               }
@@ -565,20 +576,23 @@ class _add_ProduitState extends State<add_Produit> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        _editQr == true
-            ? _tempProduitId.isNotEmpty
-                ? Text('ID : ${_tempProduitId}',
-                    style: TextStyle(
-                      fontSize: 20,
-                    ))
-                : Text(
-                    'L\'ID du Produit n\'a pas encore été créer',
-                    style: TextStyle(fontSize: 15),
-                  )
-            : Text(
-                'Nouveau ID du produit sera créer',
-                style: TextStyle(fontSize: 15),
-              ),
+        Container(
+          height: 20,
+          child: _editQr == true
+              ? _tempProduitId.isNotEmpty
+                  ? Text('ID : ${_tempProduitId}',
+                      style: TextStyle(
+                        fontSize: 20,
+                      ))
+                  : Text(
+                      'L\'ID du Produit n\'a pas encore été créer',
+                      style: TextStyle(fontSize: 20),
+                    )
+              : Text(
+                  'Nouveau ID du produit sera créer',
+                  style: TextStyle(fontSize: 20),
+                ),
+        ), //id
         Padding(
           padding: const EdgeInsets.all(20.0),
           child: Container(
@@ -602,7 +616,7 @@ class _add_ProduitState extends State<add_Produit> {
                   ),
                 ],
               )),
-        ),
+        ), //switch recherche auto
         Container(
           width: largeur,
           child: TextFormField(
@@ -641,7 +655,7 @@ class _add_ProduitState extends State<add_Produit> {
               contentPadding: EdgeInsets.all(15),
             ),
           ),
-        ),
+        ), //serial qrcode
         SizedBox(height: 10),
         Container(
           width: largeur,
@@ -677,90 +691,59 @@ class _add_ProduitState extends State<add_Produit> {
               return null;
             },
           ),
-        ),
+        ), // nom
         SizedBox(height: 10),
-        Container(
-          width: largeur,
-          child: TextFormField(
-            enabled: _isFirstFieldFilled,
-            controller: _descriptionController,
-            maxLines: 5,
-            keyboardType: TextInputType.text,
-            decoration: InputDecoration(
-              hintText: 'Déscription',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: BorderSide.none, // Supprime le contour
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide:
-                    BorderSide.none, // Supprime le contour en état normal
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide:
-                    BorderSide.none, // Supprime le contour en état focus
-              ),
-              filled: true,
-              contentPadding: EdgeInsets.all(15),
-            ),
-          ),
-        ),
-        SizedBox(height: 10),
-        Container(
-          width: largeur,
-          child: TextFormField(
-            enabled: _isFirstFieldFilled,
-            controller: _datePeremptionController,
-            textAlign: TextAlign.center,
-            keyboardType: TextInputType.text,
-            decoration: InputDecoration(
-              fillColor: _isFirstFieldFilled ? Colors.yellow.shade200 : null,
-              labelText: 'Date de Péremption',
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.date_range),
-                onPressed: () async {
-                  final DateTime? dateTimePerem = await showDatePicker(
-                    context: context,
-                    initialDate: selectedDate,
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2200),
-                  );
-                  if (dateTimePerem != null) {
-                    setState(() {
-                      selectedDate = dateTimePerem;
-                      _datePeremptionController.text =
-                          dateTimePerem.format('yMMMMd', 'fr_FR');
-                    });
-                  }
+        !_showDescription
+            ? IconButton(
+                icon: Icon(Icons.add),
+                onPressed: () {
+                  setState(() {
+                    _showDescription = true;
+                  });
                 },
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: BorderSide.none, // Supprime le contour
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide:
-                    BorderSide.none, // Supprime le contour en état normal
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide:
-                    BorderSide.none, // Supprime le contour en état focus
-              ),
-              filled: true,
-              contentPadding: EdgeInsets.all(15),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Veuillez entrer un nom du Produit';
-              }
-              return null;
-            },
-          ),
-        ),
+              )
+            : Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      width: largeur,
+                      child: TextFormField(
+                        enabled: _isFirstFieldFilled,
+                        controller: _descriptionController,
+                        maxLines: 5,
+                        keyboardType: TextInputType.text,
+                        decoration: InputDecoration(
+                          hintText: 'Déscription',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide.none, // Supprime le contour
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide
+                                .none, // Supprime le contour en état normal
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide
+                                .none, // Supprime le contour en état focus
+                          ),
+                          filled: true,
+                          contentPadding: EdgeInsets.all(15),
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.remove),
+                    onPressed: () {
+                      setState(() {
+                        _showDescription = false;
+                      });
+                    },
+                  ),
+                ],
+              ), // description
         SizedBox(height: 10),
         Container(
           width: -5 + largeur / 2,
@@ -822,275 +805,225 @@ class _add_ProduitState extends State<add_Produit> {
               // return null;
             },
           ),
-        ),
-        Spacer(),
-        Platform.isAndroid || Platform.isIOS
-            ? Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: -5 + largeur / 2,
-                    child: TextFormField(
-                      enabled: _isFirstFieldFilled,
-                      controller: _prixAchatController,
-                      textAlign: TextAlign.center,
-                      decoration: InputDecoration(
-                        labelText: 'Prix d\'achat',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide.none, // Supprime le contour
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide
-                              .none, // Supprime le contour en état normal
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide
-                              .none, // Supprime le contour en état focus
-                        ),
-                        //border: InputBorder.none,
-                        filled: true,
-                        contentPadding: EdgeInsets.all(15),
-                      ),
-                      // keyboardType: TextInputType.number,
-                      //  validator: (value) {
-                      //    if (value == null || value.isEmpty) {
-                      //      return 'Veuillez entrer le prix d\'achat';
-                      //    }
-                      //    return null;
-                      //  },
-                      keyboardType:
-                          TextInputType.numberWithOptions(decimal: true),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                            RegExp(r'^\d+\.?\d{0,2}')),
-                      ],
-                      // onChanged: (value) {
-                      //   if (value.isNotEmpty) {
-                      //     double? parsed = double.tryParse(value);
-                      //     if (parsed != null) {
-                      //       _prixAchatController.text = parsed.toStringAsFixed(2);
-                      //       _prixAchatController.selection =
-                      //           TextSelection.fromPosition(
-                      //         TextPosition(
-                      //             offset: _prixAchatController.text.length),
-                      //       );
-                      //     }
-                      //   }
-                      // },
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Veuillez entrer le prix d\'achat';
-                        }
-                        // if (double.tryParse(value) == null) {
-                        //   return 'Veuillez entrer un prix valide';
-                        // }
-                        // return null;
-                      },
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Container(
-                    width: -5 + largeur / 2,
-                    child: TextFormField(
-                      enabled: _isFirstFieldFilled,
-                      controller: _prixVenteController,
-                      textAlign: TextAlign.center,
-                      decoration: InputDecoration(
-                        labelText: 'Prix de vente',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide.none, // Supprime le contour
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide
-                              .none, // Supprime le contour en état normal
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide
-                              .none, // Supprime le contour en état focus
-                        ),
-                        //border: InputBorder.none,
-                        filled: true,
-                        contentPadding: EdgeInsets.all(15),
-                      ),
-                      // keyboardType: TextInputType.number,
-                      // validator: (value) {
-                      //   if (value == null || value.isEmpty) {
-                      //     return 'Veuillez entrer le prix de vente';
-                      //   }
-                      //   return null;
-                      // },
-                      keyboardType:
-                          TextInputType.numberWithOptions(decimal: true),
-                      // inputFormatters: [
-                      //   FilteringTextInputFormatter.allow(
-                      //       RegExp(r'^\d+\.?\d{0,2}')),
-                      // ],
-                      // onChanged: (value) {
-                      //   if (value.isNotEmpty) {
-                      //     double? parsed = double.tryParse(value);
-                      //     if (parsed != null) {
-                      //       _prixVenteController.text = parsed.toStringAsFixed(2);
-                      //       _prixVenteController.selection =
-                      //           TextSelection.fromPosition(
-                      //         TextPosition(
-                      //             offset: _prixVenteController.text.length),
-                      //       );
-                      //     }
-                      //   }
-                      // },
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Veuillez entrer le prix d\'achat';
-                        }
-                        // if (double.tryParse(value) == null) {
-                        //   return 'Veuillez entrer un prix valide';
-                        // }
-                        // return null;
-                      },
-                    ),
-                  ),
-                ],
-              )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: -5 + largeur / 2,
-                    child: TextFormField(
-                      enabled: _isFirstFieldFilled,
-                      controller: _prixAchatController,
-                      textAlign: TextAlign.center,
-                      decoration: InputDecoration(
-                        labelText: 'Prix d\'achat',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide.none, // Supprime le contour
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide
-                              .none, // Supprime le contour en état normal
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide
-                              .none, // Supprime le contour en état focus
-                        ),
-                        //border: InputBorder.none,
-                        filled: true,
-                        contentPadding: EdgeInsets.all(15),
-                      ),
-                      // keyboardType: TextInputType.number,
-                      //  validator: (value) {
-                      //    if (value == null || value.isEmpty) {
-                      //      return 'Veuillez entrer le prix d\'achat';
-                      //    }
-                      //    return null;
-                      //  },
-                      keyboardType:
-                          TextInputType.numberWithOptions(decimal: true),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                            RegExp(r'^\d+\.?\d{0,2}')),
-                      ],
-                      // onChanged: (value) {
-                      //   if (value.isNotEmpty) {
-                      //     double? parsed = double.tryParse(value);
-                      //     if (parsed != null) {
-                      //       _prixAchatController.text = parsed.toStringAsFixed(2);
-                      //       _prixAchatController.selection =
-                      //           TextSelection.fromPosition(
-                      //         TextPosition(
-                      //             offset: _prixAchatController.text.length),
-                      //       );
-                      //     }
-                      //   }
-                      // },
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Veuillez entrer le prix d\'achat';
-                        }
-                        // if (double.tryParse(value) == null) {
-                        //   return 'Veuillez entrer un prix valide';
-                        // }
-                        // return null;
-                      },
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  Container(
-                    width: -5 + largeur / 2,
-                    child: TextFormField(
-                      enabled: _isFirstFieldFilled,
-                      controller: _prixVenteController,
-                      textAlign: TextAlign.center,
-
-                      decoration: InputDecoration(
-                        labelText: 'Prix de vente',
-
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide.none, // Supprime le contour
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide
-                              .none, // Supprime le contour en état normal
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide
-                              .none, // Supprime le contour en état focus
-                        ),
-                        //border: InputBorder.none,
-                        filled: true,
-                        contentPadding: EdgeInsets.all(15),
-                      ),
-                      // keyboardType: TextInputType.number,
-                      // validator: (value) {
-                      //   if (value == null || value.isEmpty) {
-                      //     return 'Veuillez entrer le prix de vente';
-                      //   }
-                      //   return null;
-                      // },
-                      keyboardType:
-                          TextInputType.numberWithOptions(decimal: true),
-                      // inputFormatters: [
-                      //   FilteringTextInputFormatter.allow(
-                      //       RegExp(r'^\d+\.?\d{0,2}')),
-                      // ],
-                      // onChanged: (value) {
-                      //   if (value.isNotEmpty) {
-                      //     double? parsed = double.tryParse(value);
-                      //     if (parsed != null) {
-                      //       _prixVenteController.text = parsed.toStringAsFixed(2);
-                      //       _prixVenteController.selection =
-                      //           TextSelection.fromPosition(
-                      //         TextPosition(
-                      //             offset: _prixVenteController.text.length),
-                      //       );
-                      //     }
-                      //   }
-                      // },
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Veuillez entrer le prix d\'achat';
-                        }
-                        // if (double.tryParse(value) == null) {
-                        //   return 'Veuillez entrer un prix valide';
-                        // }
-                        // return null;
-                      },
-                    ),
-                  ),
-                ],
+        ), //alert peremption
+        SizedBox(height: 10),
+        Container(
+          width: -5 + largeur / 2,
+          child: TextFormField(
+            enabled: _isFirstFieldFilled,
+            controller: _prixVenteController,
+            textAlign: TextAlign.center,
+            decoration: InputDecoration(
+              labelText: 'Prix de vente',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: BorderSide.none, // Supprime le contour
               ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide:
+                    BorderSide.none, // Supprime le contour en état normal
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide:
+                    BorderSide.none, // Supprime le contour en état focus
+              ),
+              //border: InputBorder.none,
+              filled: true,
+              contentPadding: EdgeInsets.all(15),
+            ),
+            // keyboardType: TextInputType.number,
+            // validator: (value) {
+            //   if (value == null || value.isEmpty) {
+            //     return 'Veuillez entrer le prix de vente';
+            //   }
+            //   return null;
+            // },
+            keyboardType: TextInputType.numberWithOptions(decimal: true),
+            // inputFormatters: [
+            //   FilteringTextInputFormatter.allow(
+            //       RegExp(r'^\d+\.?\d{0,2}')),
+            // ],
+            // onChanged: (value) {
+            //   if (value.isNotEmpty) {
+            //     double? parsed = double.tryParse(value);
+            //     if (parsed != null) {
+            //       _prixVenteController.text = parsed.toStringAsFixed(2);
+            //       _prixVenteController.selection =
+            //           TextSelection.fromPosition(
+            //         TextPosition(
+            //             offset: _prixVenteController.text.length),
+            //       );
+            //     }
+            //   }
+            // },
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Veuillez entrer le prix d\'achat';
+              }
+              // if (double.tryParse(value) == null) {
+              //   return 'Veuillez entrer un prix valide';
+              // }
+              // return null;
+            },
+          ),
+        ), // prix de vente
+        SizedBox(height: 10),
+        Expanded(
+          child: TextFormField(
+            enabled: _isFirstFieldFilled,
+            controller: _minimStockController,
+            textAlign: TextAlign.center,
+            decoration: InputDecoration(
+              labelText: 'Stock Alert',
+
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: BorderSide.none, // Supprime le contour
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide:
+                    BorderSide.none, // Supprime le contour en état normal
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide:
+                    BorderSide.none, // Supprime le contour en état focus
+              ),
+              //border: InputBorder.none,
+              filled: true,
+              contentPadding: EdgeInsets.all(15),
+            ),
+            keyboardType: TextInputType.number,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Veuillez entrer le Stock Minimal';
+              }
+              return null;
+            },
+          ),
+        ), // alert stock
+        SizedBox(
+          width: 10,
+        ),
+        //////////////
+        Container(
+          width: largeur,
+          child: TextFormField(
+            enabled: _isFirstFieldFilled,
+            controller: _datePeremptionController,
+            textAlign: TextAlign.center,
+            keyboardType: TextInputType.text,
+            decoration: InputDecoration(
+              fillColor: _isFirstFieldFilled ? Colors.yellow.shade200 : null,
+              labelText: 'Date de Péremption',
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.date_range),
+                onPressed: () async {
+                  final DateTime? dateTimePerem = await showDatePicker(
+                    context: context,
+                    initialDate: selectedDate,
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2200),
+                  );
+                  if (dateTimePerem != null) {
+                    setState(() {
+                      selectedDate = dateTimePerem;
+                      _datePeremptionController.text =
+                          dateTimePerem.format('yMMMMd', 'fr_FR');
+                    });
+                  }
+                },
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: BorderSide.none, // Supprime le contour
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide:
+                    BorderSide.none, // Supprime le contour en état normal
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide:
+                    BorderSide.none, // Supprime le contour en état focus
+              ),
+              filled: true,
+              contentPadding: EdgeInsets.all(15),
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Veuillez entrer un nom du Produit';
+              }
+              return null;
+            },
+          ),
+        ), // date de peremption
+        SizedBox(height: 10),
+        Container(
+          width: -5 + largeur / 2,
+          child: TextFormField(
+            enabled: _isFirstFieldFilled,
+            controller: _prixAchatController,
+            textAlign: TextAlign.center,
+            decoration: InputDecoration(
+              labelText: 'Prix d\'achat',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: BorderSide.none, // Supprime le contour
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide:
+                    BorderSide.none, // Supprime le contour en état normal
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide:
+                    BorderSide.none, // Supprime le contour en état focus
+              ),
+              //border: InputBorder.none,
+              filled: true,
+              contentPadding: EdgeInsets.all(15),
+            ),
+            // keyboardType: TextInputType.number,
+            //  validator: (value) {
+            //    if (value == null || value.isEmpty) {
+            //      return 'Veuillez entrer le prix d\'achat';
+            //    }
+            //    return null;
+            //  },
+            keyboardType: TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+            ],
+            // onChanged: (value) {
+            //   if (value.isNotEmpty) {
+            //     double? parsed = double.tryParse(value);
+            //     if (parsed != null) {
+            //       _prixAchatController.text = parsed.toStringAsFixed(2);
+            //       _prixAchatController.selection =
+            //           TextSelection.fromPosition(
+            //         TextPosition(
+            //             offset: _prixAchatController.text.length),
+            //       );
+            //     }
+            //   }
+            // },
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Veuillez entrer le prix d\'achat';
+              }
+              // if (double.tryParse(value) == null) {
+              //   return 'Veuillez entrer un prix valide';
+              // }
+              // return null;
+            },
+          ),
+        ), //prix d'achat'
         SizedBox(height: 10),
         Container(
           width: largeur,
@@ -1158,44 +1091,7 @@ class _add_ProduitState extends State<add_Produit> {
               SizedBox(
                 width: 10,
               ),
-              Expanded(
-                child: TextFormField(
-                  enabled: _isFirstFieldFilled,
-                  controller: _minimStockController,
-                  textAlign: TextAlign.center,
-                  decoration: InputDecoration(
-                    labelText: 'Stock Alert',
 
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide: BorderSide.none, // Supprime le contour
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide:
-                          BorderSide.none, // Supprime le contour en état normal
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide:
-                          BorderSide.none, // Supprime le contour en état focus
-                    ),
-                    //border: InputBorder.none,
-                    filled: true,
-                    contentPadding: EdgeInsets.all(15),
-                  ),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez entrer le Stock Minimal';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              SizedBox(
-                width: 10,
-              ),
               CircleAvatar(
                 child: IconButton(
                   onPressed: _showAddQuantityDialog,
@@ -1204,7 +1100,7 @@ class _add_ProduitState extends State<add_Produit> {
               ),
             ],
           ),
-        ),
+        ), // stock
         SizedBox(height: 20),
       ],
     );

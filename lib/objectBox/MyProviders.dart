@@ -12,6 +12,7 @@ class CommerceProvider extends ChangeNotifier {
 
   List<Produit> _produits = [];
   List<Fournisseur> _fournisseurs = [];
+  List<Approvisionnement> _approvisionnements = [];
   List<Client> _clients = [];
   int _currentPage = 0;
   final int _pageSize = 100;
@@ -19,6 +20,7 @@ class CommerceProvider extends ChangeNotifier {
   bool _isLoading = false;
 
   List<Produit> get produits => _produits;
+  List<Approvisionnement> get approvisionnements => _approvisionnements;
   bool get hasMoreProduits => _hasMoreProduits;
   List<Fournisseur> get fournisseurs => _fournisseurs;
   bool get isLoading => _isLoading;
@@ -31,30 +33,34 @@ class CommerceProvider extends ChangeNotifier {
   }
 
   Future<void> chargerProduits({bool reset = false}) async {
-    if (_isLoading) return; // Empêche les appels multiples simultanés
+    // Empêche les appels multiples simultanés
+    if (_isLoading) return;
     _isLoading = true;
     notifyListeners();
+    // Réinitialiser la pagination si nécessaire
     if (reset) {
       _currentPage = 0;
       produits.clear();
     }
-
+// Créer la requête pour récupérer les produits triés par ID descendant
     final query = _objectBox.produitBox.query()
       ..order(Produit_.id, flags: Order.descending);
-
+    // Récupérer tous les produits (ou appliquer la pagination selon le besoin)
     final allProduits = await query.build().find();
-
+    // Gérer la pagination
     final startIndex = _currentPage * _pageSize;
     final endIndex = startIndex + _pageSize;
 
     if (startIndex >= allProduits.length) {
       _hasMoreProduits = false;
     } else {
+      // Sous-liste des nouveaux produits à ajouter
       final newProduits = allProduits.sublist(
         startIndex,
         endIndex > allProduits.length ? allProduits.length : endIndex,
       );
 
+      // Ajouter les nouveaux produits avec approvisionnements au fournisseur de produits
       _produits.addAll(newProduits);
       _currentPage++;
       _hasMoreProduits = endIndex < allProduits.length;
@@ -115,25 +121,6 @@ class CommerceProvider extends ChangeNotifier {
     }
   }
 
-  // Produit? findProduitByQrOrId(String code) {
-  //   // Rechercher le produit par QR ou ID
-  //   return _produits.firstWhere(
-  //     (produit) => produit.qr == code || produit.id.toString() == code,
-  //     orElse: () => Produit(
-  //       nom: 'Produit inconnu',
-  //       prixAchat: 0.0,
-  //       prixVente: 0.0,
-  //       stock: 0.0,
-  //       minimStock: 0.0,
-  //       createdBy: 0,
-  //       updatedBy: 0,
-  //       deletedBy: 0,
-  //       derniereModification: DateTime.now(),
-  //       stockinit: 0.0,
-  //     ),
-  //   );
-  // }
-
   List<Produit> getProduitsForFournisseur(Fournisseur fournisseur) {
     // Récupérer les données directement depuis la base de données
     return _objectBox.fournisseurBox
@@ -144,10 +131,38 @@ class CommerceProvider extends ChangeNotifier {
         [];
   }
 
-  void ajouterProduit(Produit produit, List<Fournisseur> fournisseurs) {
+  // void ajouterProduit(Produit produit, List<Fournisseur> fournisseurs,
+  //     List<Approvisionnement> approvisionnements) {
+  //   _ajouterOuMettreAJourFournisseurs(fournisseurs);
+  //   produit.fournisseurs.addAll(fournisseurs);
+  //   _objectBox.produitBox.put(produit);
+  //   chargerProduits(reset: true);
+  //   _chargerFournisseurs();
+  // }
+  void ajouterProduit(Produit produit, List<Fournisseur> fournisseurs,
+      List<Approvisionnement> approvisionnements, Crud crud) {
+    // Mettre à jour ou ajouter les fournisseurs
     _ajouterOuMettreAJourFournisseurs(fournisseurs);
+
+    // Associer les fournisseurs au produit
+    produit.fournisseurs
+        .clear(); // Clear existing relations to avoid duplicates
     produit.fournisseurs.addAll(fournisseurs);
+
+    // Ajouter ou mettre à jour les approvisionnements
+    for (var approvisionnement in approvisionnements) {
+      approvisionnement.produit.target =
+          produit; // Relier chaque approvisionnement au produit
+      _objectBox.approvisionnementBox.put(approvisionnement);
+    }
+
+    // Associer l'entité Crud au produit pour gérer les métadonnées
+    produit.crud.target = crud;
+
+    // Sauvegarder le produit avec les relations
     _objectBox.produitBox.put(produit);
+
+    // Recharger les produits et les fournisseurs après mise à jour
     chargerProduits(reset: true);
     _chargerFournisseurs();
   }
@@ -180,9 +195,7 @@ class CommerceProvider extends ChangeNotifier {
         ..image = updatedProduit.image
         ..minimStock = updatedProduit.minimStock
         // ..dateCreation = updatedProduit.dateCreation
-        ..datePeremption = updatedProduit.datePeremption
         ..stockUpdate = updatedProduit.stockUpdate
-        ..derniereModification = updatedProduit.derniereModification
         ..stockinit = updatedProduit.stockinit;
 
       if (fournisseurs != null) {
@@ -281,18 +294,10 @@ class CommerceProvider extends ChangeNotifier {
         stock: faker.randomGenerator.decimal(min: 100, scale: 15),
         description: faker.lorem.sentence(),
         qr: faker.randomGenerator.integer(999999).toString(),
-        datePeremption:
-            faker.date.dateTime(minYear: 2010, maxYear: DateTime.now().year),
-        dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
-        derniereModification:
-            faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
         stockUpdate:
             faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
         stockinit: faker.randomGenerator.decimal(min: 200),
         minimStock: faker.randomGenerator.decimal(min: 1, scale: 2),
-        createdBy: 0,
-        updatedBy: 0,
-        deletedBy: 0,
         alertPeremption: Random().nextInt(10),
       );
     });
@@ -454,9 +459,6 @@ class CartProvider with ChangeNotifier {
   Facture _facture = Facture(
     date: DateTime.now(),
     qr: '',
-    createdBy: 0,
-    updatedBy: 0,
-    deletedBy: 0,
     impayer: 0.0,
   );
   Client? _selectedClient;
@@ -506,18 +508,43 @@ class CartProvider with ChangeNotifier {
       phone: phone,
       adresse: adresse,
       description: description,
-      dateCreation: dateCreation,
-      derniereModification: derniereModification,
-      createdBy: 0,
-      updatedBy: 0,
-      deletedBy: 0,
     );
     _objectBox.clientBox.put(newClient);
     selectClient(newClient);
   }
 
+  // void createAnonymousClientIfNeeded() {
+  //   if (_selectedClient == null) {
+  //     final anonymousClient = Client(
+  //       qr: 'ANONYMOUS_${DateTime.now().millisecondsSinceEpoch}',
+  //       nom:
+  //           'ANONYMOUS_Client du ${_facture.date.day}/${_facture.date.month}/${_facture.date.year}',
+  //       phone: '',
+  //       adresse: '',
+  //       description: 'Client créé automatiquement',
+  //       dateCreation: DateTime.now(),
+  //       derniereModification: DateTime.now(),
+  //       createdBy: 0,
+  //       updatedBy: 0,
+  //       deletedBy: 0,
+  //     );
+  //     _objectBox.clientBox.put(anonymousClient);
+  //     selectClient(anonymousClient);
+  //   }
+  // }
   void createAnonymousClientIfNeeded() {
     if (_selectedClient == null) {
+      // Création de l'entité Crud pour le client anonyme
+      final crud = Crud(
+        createdBy: 0, // Id utilisateur anonyme
+        updatedBy: 0,
+        deletedBy: 0,
+        dateCreation: DateTime.now(),
+        derniereModification: DateTime.now(),
+        dateDeleting: null,
+      );
+
+      // Création du client anonyme
       final anonymousClient = Client(
         qr: 'ANONYMOUS_${DateTime.now().millisecondsSinceEpoch}',
         nom:
@@ -525,13 +552,15 @@ class CartProvider with ChangeNotifier {
         phone: '',
         adresse: '',
         description: 'Client créé automatiquement',
-        dateCreation: DateTime.now(),
-        derniereModification: DateTime.now(),
-        createdBy: 0,
-        updatedBy: 0,
-        deletedBy: 0,
       );
+
+      // Associer l'entité Crud au client
+      anonymousClient.crud.target = crud;
+
+      // Sauvegarder le client avec l'entité Crud
       _objectBox.clientBox.put(anonymousClient);
+
+      // Sélectionner le client anonyme comme client courant
       selectClient(anonymousClient);
     }
   }
@@ -641,9 +670,6 @@ class CartProvider with ChangeNotifier {
         // Mettre à jour le stock du produit en fonction de la quantité vendue
         produit.stock -= ligne.quantite;
 
-        // Mettre à jour la date de modification du produit
-        produit.derniereModification = DateTime.now();
-
         // Sauvegarder le produit mis à jour
         _objectBox.produitBox.put(produit);
         commerceProvider.updateProduit(produit);
@@ -659,9 +685,6 @@ class CartProvider with ChangeNotifier {
     _facture = Facture(
       date: DateTime.now(),
       qr: '',
-      createdBy: 0,
-      updatedBy: 0,
-      deletedBy: 0,
       impayer: 0.0,
     );
     _selectedClient = null;
@@ -676,9 +699,6 @@ class CartProvider with ChangeNotifier {
     _facture = Facture(
       date: DateTime.now(),
       qr: '',
-      createdBy: 0,
-      updatedBy: 0,
-      deletedBy: 0,
       impayer: 0.0,
     );
     _selectedClient = null;

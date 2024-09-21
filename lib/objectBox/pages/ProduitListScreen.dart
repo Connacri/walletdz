@@ -112,10 +112,10 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
             itemBuilder: (context, index) {
               if (index < produitProvider.produits.length) {
                 final produit = produitProvider.produits[index];
-                final peremption =
-                    produit.datePeremption!.difference(DateTime.now()).inDays;
-                Color colorPeremption =
-                    getColorBasedOnPeremption(peremption, 5.0);
+                // final peremption =
+                //     produit.datePeremption!.difference(DateTime.now()).inDays;
+                // Color colorPeremption =
+                //     getColorBasedOnPeremption(peremption, 5.0);
                 final double percentProgress = produit.stock != 0 &&
                         produit.stockinit != 0 &&
                         produit.stockinit >= produit.stock
@@ -143,7 +143,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                     //   ],
                     // ),
                     // child:
-                    GestureDetector(
+                    InkWell(
                         onTap: () {
                           Navigator.of(context).push(MaterialPageRoute(
                             builder: (ctx) => Edit_Produit(produit: produit),
@@ -256,33 +256,48 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                                   ],
                                                 ),
                                                 SizedBox(height: 5),
-                                                Container(
-                                                  padding: EdgeInsets.symmetric(
-                                                      horizontal: 5,
-                                                      vertical: 2),
-                                                  decoration: BoxDecoration(
-                                                    gradient: LinearGradient(
-                                                      colors: [
-                                                        Colors.red,
-                                                        Colors.black45
-                                                      ], // Couleurs du dégradé
-                                                      begin: Alignment
-                                                          .topLeft, // Début du dégradé
-                                                      end: Alignment
-                                                          .bottomRight, // Fin du dégradé
-                                                    ), // Couleur de fond
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10), // Coins arrondis
-                                                  ),
-                                                  child: Center(
+                                                // Container(
+                                                //   padding: EdgeInsets.symmetric(
+                                                //       horizontal: 5,
+                                                //       vertical: 2),
+                                                //   decoration: BoxDecoration(
+                                                //     gradient: LinearGradient(
+                                                //       colors: [
+                                                //         Colors.red,
+                                                //         Colors.black45
+                                                //       ], // Couleurs du dégradé
+                                                //       begin: Alignment
+                                                //           .topLeft, // Début du dégradé
+                                                //       end: Alignment
+                                                //           .bottomRight, // Fin du dégradé
+                                                //     ), // Couleur de fond
+                                                //     borderRadius:
+                                                //         BorderRadius.circular(
+                                                //             10), // Coins arrondis
+                                                //   ),
+                                                //   child: Center(
+                                                //     child: Text(
+                                                //       'Reste : ${produit.approvisionnements.map(f).datePeremption!.difference(DateTime.now()).inDays} Jours ',
+                                                //       style: TextStyle(
+                                                //           color: Colors.white),
+                                                //     ),
+                                                //   ),
+                                                // ),
+                                                SizedBox(height: 10),
+                                                Text('Approvisionnements:',
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold)),
+                                                ...produit.approvisionnements
+                                                    .map((appro) {
+                                                  return Padding(
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                            vertical: 4.0),
                                                     child: Text(
-                                                      'Reste : ${produit.datePeremption!.difference(DateTime.now()).inDays} Jours ',
-                                                      style: TextStyle(
-                                                          color: Colors.white),
-                                                    ),
-                                                  ),
-                                                ),
+                                                        '  - Date: ${appro.crud.target!.dateCreation}\n      Quantité: ${appro.quantite}\n      Prix d\'achat: ${appro.prixAchat}\n      Date de péremption: ${appro.datePeremption}'),
+                                                  );
+                                                }).toList(),
                                               ],
                                             ),
                                             SizedBox(
@@ -364,6 +379,31 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                         ],
                                       ),
                                       SizedBox(height: 15),
+                                      if (produit.approvisionnements.isNotEmpty)
+                                        Column(
+                                          children: produit.approvisionnements
+                                              .map((appro) {
+                                            return ListTile(
+                                              title: Text(
+                                                  'Fournisseur : ${appro.fournisseur.target?.nom ?? "Inconnu"}'),
+                                              subtitle: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                      'Quantité : ${appro.quantite}'),
+                                                  Text(
+                                                      'Prix unitaire : ${appro.prixAchat} DA'),
+                                                  Text(
+                                                      'Date de péremption : ${appro.datePeremption != null ? appro.datePeremption!.toLocal().toString() : "N/A"}'),
+                                                ],
+                                              ),
+                                            );
+                                          }).toList(),
+                                        )
+                                      else
+                                        Text(
+                                            'Aucun approvisionnement disponible'),
                                     ])
                               : GestureDetector(
                                   onTap: () {
@@ -477,37 +517,49 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                                       SizedBox(
                                                         width: 10,
                                                       ),
-                                                      Container(
-                                                        padding: EdgeInsets
-                                                            .symmetric(
-                                                                horizontal: 5,
-                                                                vertical: 2),
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          gradient:
-                                                              LinearGradient(
-                                                            colors: [
-                                                              Colors.black45,
-                                                              colorPeremption,
-                                                            ], // Couleurs du dégradé
-                                                            begin: Alignment
-                                                                .topLeft, // Début du dégradé
-                                                            end: Alignment
-                                                                .bottomRight, // Fin du dégradé
-                                                          ), // Couleur de fond
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                  10), // Coins arrondis
-                                                        ),
-                                                        child: Center(
+                                                      // Container(
+                                                      //   padding: EdgeInsets
+                                                      //       .symmetric(
+                                                      //           horizontal: 5,
+                                                      //           vertical: 2),
+                                                      //   decoration:
+                                                      //       BoxDecoration(
+                                                      //     gradient:
+                                                      //         LinearGradient(
+                                                      //       colors: [
+                                                      //         Colors.black45,
+                                                      //         colorPeremption,
+                                                      //       ], // Couleurs du dégradé
+                                                      //       begin: Alignment
+                                                      //           .topLeft, // Début du dégradé
+                                                      //       end: Alignment
+                                                      //           .bottomRight, // Fin du dégradé
+                                                      //     ), // Couleur de fond
+                                                      //     borderRadius:
+                                                      //         BorderRadius.circular(
+                                                      //             10), // Coins arrondis
+                                                      //   ),
+                                                      //   child: Center(
+                                                      //     child: Text(
+                                                      //       'Péremption : ${produit.datePeremption!.day}/${produit.datePeremption!.month}/${produit.datePeremption!.year}  Reste : ${peremption} Jours ',
+                                                      //       style: TextStyle(
+                                                      //           color: Colors
+                                                      //               .white),
+                                                      //     ),
+                                                      //   ),
+                                                      // ),
+                                                      ...produit
+                                                          .approvisionnements
+                                                          .map((appro) {
+                                                        return Padding(
+                                                          padding: EdgeInsets
+                                                              .symmetric(
+                                                                  vertical:
+                                                                      4.0),
                                                           child: Text(
-                                                            'Péremption : ${produit.datePeremption!.day}/${produit.datePeremption!.month}/${produit.datePeremption!.year}  Reste : ${peremption} Jours ',
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .white),
-                                                          ),
-                                                        ),
-                                                      ),
+                                                              '  - Date: ${appro.crud.target!.dateCreation}\n      Quantité: ${appro.quantite}\n      Prix d\'achat: ${appro.prixAchat}\n      Date de péremption: ${appro.datePeremption}'),
+                                                        );
+                                                      }).toList(),
                                                     ],
                                                   ),
                                                   SizedBox(height: 5),
@@ -615,6 +667,32 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                             style: TextStyle(fontSize: 20),
                                           ),
                                         ),
+                                        if (produit
+                                            .approvisionnements.isNotEmpty)
+                                          Column(
+                                            children: produit.approvisionnements
+                                                .map((appro) {
+                                              return ListTile(
+                                                title: Text(
+                                                    'Fournisseur : ${appro.fournisseur.target?.nom ?? "Inconnu"}'),
+                                                subtitle: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                        'Quantité : ${appro.quantite}'),
+                                                    Text(
+                                                        'Prix unitaire : ${appro.prixAchat} DA'),
+                                                    Text(
+                                                        'Date de péremption : ${appro.datePeremption != null ? appro.datePeremption!.toLocal().toString() : "N/A"}'),
+                                                  ],
+                                                ),
+                                              );
+                                            }).toList(),
+                                          )
+                                        else
+                                          Text(
+                                              'Aucun approvisionnement disponible'),
                                       ],
                                     ),
                                   ),
@@ -942,13 +1020,26 @@ class ProduitDetailPage extends StatelessWidget {
                     SizedBox(height: 10),
                     Text('Stock Update : ' + produit.stockUpdate.toString()),
                     SizedBox(height: 10),
-                    Text('Date Creation : ' + produit.dateCreation.toString()),
+                    ...produit.approvisionnements.map((appro) {
+                      return Padding(
+                        padding: EdgeInsets.symmetric(vertical: 4.0),
+                        child: Text(
+                            '  - Date: ${appro.crud.target!.dateCreation}\n      Quantité: ${appro.quantite}\n      Prix d\'achat: ${appro.prixAchat}\n      Date de péremption: ${appro.datePeremption}'),
+                      );
+                    }).toList(),
                     SizedBox(height: 10),
-                    Text('Date Peremption : ' +
-                        produit.datePeremption.toString()),
+                    ...produit.approvisionnements.map((appro) {
+                      return Padding(
+                        padding: EdgeInsets.symmetric(vertical: 4.0),
+                        child: Text(
+                            '  Date Peremption :  ${appro.datePeremption}'),
+                      );
+                    }).toList(),
+                    SizedBox(height: 10),
+                    SizedBox(height: 10),
                     SizedBox(height: 10),
                     Text('Derniere Modification : ' +
-                        produit.derniereModification.toString()),
+                        produit.crud.target!.derniereModification.toString()),
                     SizedBox(height: 10),
                     SizedBox(
                       height: 16,

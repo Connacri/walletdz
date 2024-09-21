@@ -118,13 +118,16 @@ class _AddFournisseurFormFromProduitState
                         nom: _nomController.text,
                         phone: _phoneController.text,
                         adresse: _adresseController.text,
-                        dateCreation: DateTime.parse(_creationController.text),
-                        derniereModification: DateTime.parse(
-                            _derniereModificationController.text),
-                        createdBy: 0,
-                        updatedBy: 0,
-                        deletedBy: 0,
-                      );
+                      )..crud.target = Crud(
+                          createdBy: 0,
+                          updatedBy: 0,
+                          deletedBy: 0,
+                          dateCreation:
+                              DateTime.parse(_creationController.text),
+                          derniereModification: DateTime.parse(
+                              _derniereModificationController.text),
+                          dateDeleting: null,
+                        );
                       context
                           .read<CommerceProvider>()
                           .addFournisseur(fournisseur);

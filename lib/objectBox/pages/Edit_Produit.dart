@@ -226,6 +226,8 @@ class _Edit_ProduitState extends State<Edit_Produit> {
       //     _stockController.text = produit.stock.toString();
       //     _datePeremptionController.text =
       //         produit.datePeremption!.format('yMMMMd', 'fr_FR');
+     // _alertPeremptionController.text = produit.alertPeremption.toString();
+
       //     _dateCreation = widget.produit!.dateCreation.toString();
       //     _stockinitController.text = widget.produit!.stockinit.toString();
       //     _isFinded = true;
@@ -846,7 +848,7 @@ class _Edit_ProduitState extends State<Edit_Produit> {
             },
           ),
         ),
-        Spacer(),
+        SizedBox(height: 10),
         Container(
           width: largeur,
           child: TextFormField(
@@ -877,7 +879,7 @@ class _Edit_ProduitState extends State<Edit_Produit> {
 
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Veuillez entrer un nom du Produit';
+                return 'Stock Initial';
               }
               return null;
             },
