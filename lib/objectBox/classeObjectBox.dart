@@ -14,6 +14,7 @@ import 'dart:math' show Random;
 class ObjectBox {
   late final Store store;
   late final Box<User> userBox;
+  late final Box<Crud> crud;
   late final Box<Produit> produitBox;
   late final Box<Approvisionnement> approvisionnementBox;
   late final Box<Fournisseur> fournisseurBox;
@@ -34,7 +35,9 @@ class ObjectBox {
     if (!Store.isOpen('${dir.path}/objectbox')) {
       store = await openStore(directory: '${dir.path}/objectbox');
       userBox = Box<User>(store);
+      crud = Box<Crud>(store);
       produitBox = Box<Produit>(store);
+      approvisionnementBox = Box<Approvisionnement>(store);
       fournisseurBox = Box<Fournisseur>(store);
       factureBox = Box<Facture>(store);
       ligneFacture = Box<LigneFacture>(store);
@@ -49,6 +52,7 @@ class ObjectBox {
   void fillWithFakeData(int userCount, int clientCount, int fournisseurCount,
       int produitCount, int approvisionnementCount) {
     final faker = Faker();
+    final random = Random();
     List<String> roles = [
       'admin',
       'public',
@@ -58,9 +62,9 @@ class ObjectBox {
       'it'
     ];
 
-    // Créer des fournisseurs
+    // Créer des utilisateurs
     List<User> users = List.generate(userCount, (index) {
-      roles.shuffle(Random()); // Shuffle the roles list in place
+      roles.shuffle(random); // Shuffle the roles list
       return User(
         phone: faker.phoneNumber.de(),
         username: faker.person.name(),
@@ -86,26 +90,20 @@ class ObjectBox {
           dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
           derniereModification:
               faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
-          dateDeleting: null,
         );
     });
     fournisseurBox.putMany(fournisseurs);
 
-    // Créer des produits et les associer à des fournisseurs
+    // Créer des produits
     List<Produit> produits = List.generate(produitCount, (indx) {
-      Produit produit = Produit(
+      return Produit(
         image: 'https://picsum.photos/200/300?random=${indx}',
         nom: faker.food.dish(),
-        prixAchat: faker.randomGenerator.decimal(min: 60, scale: 2),
         prixVente: faker.randomGenerator.decimal(min: 500, scale: 2),
-        stock: faker.randomGenerator.decimal(min: 100, scale: 2),
         description: faker.lorem.sentence(),
         qr: (indx + 1).toString(),
-        stockUpdate:
-            faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
-        stockinit: faker.randomGenerator.decimal(min: 200),
         minimStock: faker.randomGenerator.decimal(min: 1, scale: 2),
-        alertPeremption: Random().nextInt(5),
+        alertPeremption: random.nextInt(5),
       )..crud.target = Crud(
           createdBy: 0,
           updatedBy: 0,
@@ -113,29 +111,18 @@ class ObjectBox {
           dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
           derniereModification:
               faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
-          dateDeleting: null,
         );
-
-      // Associer entre 1 et 10 fournisseurs aléatoires au produit
-      int numberOfFournisseurs = faker.randomGenerator.integer(10, min: 1);
-      for (int i = 0; i < numberOfFournisseurs; i++) {
-        int randomIndex = faker.randomGenerator.integer(fournisseurs.length);
-        produit.fournisseurs.add(fournisseurs[randomIndex]);
-      }
-
-      return produit;
     });
     produitBox.putMany(produits);
 
-// Create approvisionnements
-    final approvisionnements = List.generate(approvisionnementCount, (_) {
+    // Créer des approvisionnements
+    List<Approvisionnement> approvisionnements =
+        List.generate(approvisionnementCount, (_) {
       final produit = produits[random.nextInt(produits.length)];
-      final fournisseur =
-          produit.fournisseurs[random.nextInt(produit.fournisseurs.length)];
+      final fournisseur = fournisseurs[random.nextInt(fournisseurs.length)];
       return Approvisionnement(
         quantite: faker.randomGenerator.decimal(min: 10, scale: 2),
-        prixAchat: produit.prixAchat *
-            (1 - random.nextDouble() * 0.2), // 0-20% discount
+        prixAchat: faker.randomGenerator.decimal(min: 100, scale: 2),
         datePeremption:
             faker.date.dateTimeBetween(DateTime.now(), DateTime(2025, 12, 31)),
       )
@@ -146,16 +133,15 @@ class ObjectBox {
           dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
           derniereModification:
               faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
-          dateDeleting: null,
         )
         ..produit.target = produit
         ..fournisseur.target = fournisseur;
     });
     approvisionnementBox.putMany(approvisionnements);
 
-    // Créer des clients et les associer à des factures
+    // Créer des clients
     List<Client> clients = List.generate(clientCount, (index) {
-      final client = Client(
+      return Client(
         qr: faker.randomGenerator.integer(999999).toString(),
         nom: faker.person.name(),
         phone: faker.phoneNumber.us(),
@@ -168,13 +154,15 @@ class ObjectBox {
           dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
           derniereModification:
               faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
-          dateDeleting: null,
         );
+    });
+    clientBox.putMany(clients);
 
-      // Créer un nombre aléatoire de factures pour chaque client
-      final numberOfFactures = faker.randomGenerator.integer(50);
-      for (int i = 0; i < numberOfFactures; i++) {
-        final facture = Facture(
+    // Créer des factures et les associer aux clients
+    clients.forEach((client) {
+      int numberOfFactures = faker.randomGenerator.integer(50);
+      List<Facture> factures = List.generate(numberOfFactures, (_) {
+        Facture facture = Facture(
           qr: faker.randomGenerator.integer(999999).toString(),
           impayer: faker.randomGenerator.decimal(min: 0, scale: 2),
           date: faker.date.dateTime(minYear: 2010, maxYear: 2024),
@@ -185,12 +173,11 @@ class ObjectBox {
             dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
             derniereModification: faker.date
                 .dateTime(minYear: 2000, maxYear: DateTime.now().year),
-            dateDeleting: null,
           );
 
         // Créer des lignes de facture
-        final numberOfLignes = faker.randomGenerator.integer(5, min: 1);
-        for (int j = 0; j < numberOfLignes; j++) {
+        int numberOfLignes = faker.randomGenerator.integer(5, min: 1);
+        for (int i = 0; i < numberOfLignes; i++) {
           final produit =
               produits[faker.randomGenerator.integer(produits.length)];
           final ligneFacture = LigneFacture(
@@ -202,49 +189,13 @@ class ObjectBox {
           facture.lignesFacture.add(ligneFacture);
         }
 
-        client.factures.add(facture);
-      }
+        return facture;
+      });
 
-      return client;
+      client.factures.addAll(factures);
     });
+
     clientBox.putMany(clients);
-
-    // Créer des factures sans clients
-    final numberOfFacturesSansClient =
-        faker.randomGenerator.integer(10, min: 1);
-    List<Facture> facturesSansClient =
-        List.generate(numberOfFacturesSansClient, (index) {
-      final facture = Facture(
-        qr: faker.randomGenerator.integer(999999).toString(),
-        impayer: faker.randomGenerator.decimal(min: 0, scale: 2),
-        date: faker.date.dateTime(minYear: 2010, maxYear: 2024),
-      )..crud.target = Crud(
-          createdBy: 0,
-          updatedBy: 0,
-          deletedBy: 0,
-          dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
-          derniereModification:
-              faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
-          dateDeleting: null,
-        );
-
-      // Créer des lignes de facture
-      final numberOfLignes = faker.randomGenerator.integer(5, min: 1);
-      for (int j = 0; j < numberOfLignes; j++) {
-        final produit =
-            produits[faker.randomGenerator.integer(produits.length)];
-        final ligneFacture = LigneFacture(
-          quantite: faker.randomGenerator.decimal(min: 1, scale: 10),
-          prixUnitaire: produit.prixVente,
-        );
-        ligneFacture.produit.target = produit;
-        ligneFacture.facture.target = facture;
-        facture.lignesFacture.add(ligneFacture);
-      }
-
-      return facture;
-    });
-    factureBox.putMany(facturesSansClient);
   }
 
   Future<void> importProduitsDepuisExcel(
@@ -260,7 +211,7 @@ class ObjectBox {
     final excel = Excel.decodeBytes(bytes);
     final roles = ['admin', 'public', 'vendeur', 'owner', 'manager', 'it'];
 
-    // Create users
+    // Création des utilisateurs
     final users = List.generate(userCount, (_) {
       roles.shuffle(random);
       return User(
@@ -269,11 +220,17 @@ class ObjectBox {
         password: faker.internet.password(),
         email: faker.internet.email(),
         role: roles.first,
-      );
+      )..crud.target = Crud(
+          createdBy: 0,
+          updatedBy: 0,
+          deletedBy: 0,
+          dateCreation: DateTime.now(),
+          derniereModification: DateTime.now(),
+        );
     });
     await userBox.putMany(users);
 
-    // Create suppliers
+    // Création des fournisseurs
     final fournisseurs = List.generate(fournisseurCount, (_) {
       final now = DateTime.now();
       return Fournisseur(
@@ -288,12 +245,11 @@ class ObjectBox {
           dateCreation: faker.date.dateTime(minYear: 2010, maxYear: now.year),
           derniereModification:
               faker.date.dateTime(minYear: 2000, maxYear: now.year),
-          dateDeleting: null,
         );
     });
     await fournisseurBox.putMany(fournisseurs);
 
-    // Import products from Excel
+    // Importation des produits depuis Excel
     for (var table in excel.tables.keys) {
       for (var row in excel.tables[table]!.rows.skip(1)) {
         final designation = row[1]?.value?.toString() ?? faker.food.dish();
@@ -303,17 +259,14 @@ class ObjectBox {
         final stock = double.tryParse(row[5]?.value?.toString() ?? '') ??
             faker.randomGenerator.integer(100).toDouble();
 
+        // Création d'un produit
         final produit = Produit(
           qr: row[10]?.value?.toString(),
           image:
               'https://picsum.photos/200/300?random=${faker.randomGenerator.integer(5000)}',
           nom: designation,
           description: row[1]?.value?.toString() ?? faker.lorem.sentence(),
-          origine: faker.address.country(),
-          prixAchat: prixAchat,
           prixVente: prixVente,
-          stock: stock,
-          stockinit: faker.randomGenerator.decimal(min: 200),
           minimStock: faker.randomGenerator.decimal(min: 1, scale: 2),
           alertPeremption: Random().nextInt(1000),
         )..crud.target = Crud(
@@ -323,21 +276,38 @@ class ObjectBox {
             dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
             derniereModification: faker.date
                 .dateTime(minYear: 2000, maxYear: DateTime.now().year),
-            dateDeleting: null,
           );
 
-        // Associate random suppliers with the product
-        final numberOfFournisseurs = faker.randomGenerator.integer(10, min: 1);
-        final shuffledFournisseurs = List<Fournisseur>.from(fournisseurs)
-          ..shuffle(random);
-        produit.fournisseurs
-            .addAll(shuffledFournisseurs.take(numberOfFournisseurs));
+        // Création des approvisionnements pour chaque produit
+        final nombreApprovisionnements =
+            faker.randomGenerator.integer(10, min: 1);
+        for (int i = 0; i < nombreApprovisionnements; i++) {
+          final fournisseur = fournisseurs[random.nextInt(fournisseurs.length)];
+
+          final approvisionnement = Approvisionnement(
+            quantite: faker.randomGenerator.integer(100).toDouble(),
+            prixAchat: prixAchat,
+            datePeremption: faker.date.dateTime(
+                minYear: DateTime.now().year, maxYear: DateTime.now().year + 2),
+          )
+            ..produit.target = produit
+            ..fournisseur.target = fournisseur
+            ..crud.target = Crud(
+              createdBy: faker.randomGenerator.integer(1000),
+              updatedBy: faker.randomGenerator.integer(1000),
+              deletedBy: faker.randomGenerator.integer(1000),
+              dateCreation: DateTime.now(),
+              derniereModification: DateTime.now(),
+            );
+
+          produit.approvisionnements.add(approvisionnement);
+        }
 
         await produitBox.put(produit);
       }
     }
 
-    // Create clients and invoices
+    // Création des clients et factures
     final clients = List.generate(clientCount, (_) {
       final client = Client(
         qr: faker.randomGenerator.integer(999999).toString(),
@@ -352,19 +322,18 @@ class ObjectBox {
           dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
           derniereModification:
               faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
-          dateDeleting: null,
         );
 
-      // Create random number of invoices for each client
-      final numberOfFactures = faker.randomGenerator.integer(50);
-      client.factures.addAll(
-          List.generate(numberOfFactures, (_) => _createFacture(faker)));
+      // Création d'un nombre aléatoire de factures pour chaque client
+      final nombreFactures = faker.randomGenerator.integer(50);
+      client.factures
+          .addAll(List.generate(nombreFactures, (_) => _createFacture(faker)));
 
       return client;
     });
     await clientBox.putMany(clients);
 
-    // Create invoices without clients
+    // Création des factures sans clients
     final facturesSansClient = List.generate(
       faker.randomGenerator.integer(10, min: 1),
       (_) => _createFacture(faker),
@@ -384,7 +353,6 @@ class ObjectBox {
         dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
         derniereModification:
             faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
-        dateDeleting: null,
       );
 
     // Create invoice lines
@@ -622,25 +590,5 @@ class ObjectBox {
         }
       }
     }
-  }
-
-  void ajouterQuantitesAleatoiresw() {
-    // Récupérer tous les produits dans la box
-    final produits = produitBox.getAll();
-    final random = Random();
-
-    // Parcourir chaque produit et ajouter une quantité aléatoire
-    for (var produit in produits) {
-      // Ajouter une quantité aléatoire (0 à 99)
-      double quantiteAleatoire = random.nextInt(100).toDouble();
-
-      // Mettre à jour la quantité du produit
-      produit.stock += quantiteAleatoire;
-
-      // Enregistrer le produit mis à jour dans la box
-      produitBox.put(produit);
-    }
-
-    print('Quantités aléatoires ajoutées aux produits existants.');
   }
 }

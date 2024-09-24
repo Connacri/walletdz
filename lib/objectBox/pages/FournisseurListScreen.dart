@@ -81,12 +81,12 @@ class FournisseurListScreen extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Text(
-                            fournisseur.produits.length.toString(),
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        ),
+                        // Expanded(
+                        //   child: Text(
+                        //     fournisseur.produits.length.toString(),
+                        //     style: TextStyle(fontSize: 20),
+                        //   ),
+                        // ),
                         Expanded(
                           child: IconButton(
                             icon: Icon(
@@ -192,14 +192,14 @@ class ProduitsFournisseurPage extends StatelessWidget {
                             onTap: () {
                               Navigator.of(context).push(MaterialPageRoute(
                                 builder: (ctx) =>
-                                    ProduitDetailPage(produit: produit),
+                                    ProduitDetailPage(produit: produit!),
                               ));
                             },
                             onLongPress: () {
-                              _deleteProduit(context, produit);
+                              _deleteProduit(context, produit!);
                             },
-                            leading: produit.image == null ||
-                                    produit.image!.isEmpty
+                            leading: produit!.image == null ||
+                                    produit!.image!.isEmpty
                                 ? CircleAvatar(
                                     child: Icon(
                                     Icons.image_not_supported,
@@ -215,9 +215,9 @@ class ProduitsFournisseurPage extends StatelessWidget {
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  'A: ${produit.prixAchat.toStringAsFixed(2)}\nB: ${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)} ',
-                                ),
+                                // Text(
+                                //   'A: ${produit.prixAchat.toStringAsFixed(2)}\nB: ${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)} ',
+                                // ),
                                 Text('ID : ${produit.id} QR : ${produit.qr}'),
                                 Text(
                                   'Créer le ${produit.crud.target!.dateCreation!.day}-${produit.crud.target!.dateCreation!.month}-${produit.crud.target!.dateCreation!.year}  Modifié ${timeago.format(produit.crud.target!.derniereModification, locale: 'fr')}',
@@ -225,59 +225,59 @@ class ProduitsFournisseurPage extends StatelessWidget {
                                       fontSize: 13,
                                       fontWeight: FontWeight.w300),
                                 ),
-                                produit.fournisseurs.isEmpty
-                                    ? Container()
-                                    : Wrap(
-                                        spacing:
-                                            6.0, // Espace horizontal entre les éléments
-                                        runSpacing:
-                                            4.0, // Espace vertical entre les lignes
-                                        children: produit.fournisseurs
-                                            .map((fournisseurL) {
-                                          // print(fournisseurL.id);
-                                          // print(fournisseur.id);
-
-                                          return InkWell(
-                                            onTap: () {
-                                              Navigator.of(context).push(
-                                                  MaterialPageRoute(
-                                                      builder: (ctx) =>
-                                                          ProduitsFournisseurPage(
-                                                            fournisseur:
-                                                                fournisseur,
-                                                          )));
-                                            },
-                                            child: fournisseur.id ==
-                                                    fournisseurL.id
-                                                ? Container()
-                                                : Chip(
-                                                    shadowColor: Colors.black,
-                                                    backgroundColor:
-                                                        Theme.of(context)
-                                                            .chipTheme
-                                                            .backgroundColor,
-                                                    labelStyle: TextStyle(
-                                                      color: Theme.of(context)
-                                                          .chipTheme
-                                                          .labelStyle
-                                                          ?.color,
-                                                    ),
-                                                    side: BorderSide.none,
-                                                    shape: RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius.all(
-                                                                Radius.circular(
-                                                                    10))),
-                                                    padding: EdgeInsets.zero,
-                                                    label: Text(
-                                                      fournisseurL.nom,
-                                                      style: TextStyle(
-                                                          fontSize: 10),
-                                                    ),
-                                                  ),
-                                          );
-                                        }).toList(),
-                                      ),
+                                // produit.fournisseurs.isEmpty
+                                //     ? Container()
+                                //     : Wrap(
+                                //         spacing:
+                                //             6.0, // Espace horizontal entre les éléments
+                                //         runSpacing:
+                                //             4.0, // Espace vertical entre les lignes
+                                //         children: produit.fournisseurs
+                                //             .map((fournisseurL) {
+                                //           // print(fournisseurL.id);
+                                //           // print(fournisseur.id);
+                                //
+                                //           return InkWell(
+                                //             onTap: () {
+                                //               Navigator.of(context).push(
+                                //                   MaterialPageRoute(
+                                //                       builder: (ctx) =>
+                                //                           ProduitsFournisseurPage(
+                                //                             fournisseur:
+                                //                                 fournisseur,
+                                //                           )));
+                                //             },
+                                //             child: fournisseur.id ==
+                                //                     fournisseurL.id
+                                //                 ? Container()
+                                //                 : Chip(
+                                //                     shadowColor: Colors.black,
+                                //                     backgroundColor:
+                                //                         Theme.of(context)
+                                //                             .chipTheme
+                                //                             .backgroundColor,
+                                //                     labelStyle: TextStyle(
+                                //                       color: Theme.of(context)
+                                //                           .chipTheme
+                                //                           .labelStyle
+                                //                           ?.color,
+                                //                     ),
+                                //                     side: BorderSide.none,
+                                //                     shape: RoundedRectangleBorder(
+                                //                         borderRadius:
+                                //                             BorderRadius.all(
+                                //                                 Radius.circular(
+                                //                                     10))),
+                                //                     padding: EdgeInsets.zero,
+                                //                     label: Text(
+                                //                       fournisseurL.nom,
+                                //                       style: TextStyle(
+                                //                           fontSize: 10),
+                                //                     ),
+                                //                   ),
+                                //           );
+                                //         }).toList(),
+                                //       ),
                               ],
                             ),
                             trailing: Text(
@@ -332,7 +332,7 @@ class ProduitsFournisseurPage extends StatelessWidget {
         children: [
           FloatingActionButton(
             onPressed: () {
-              _selectExistingProducts(context, commerceProvider);
+              //_selectExistingProducts(context, commerceProvider);
             },
             child: Icon(Icons.add_shopping_cart),
             heroTag: 'selectExisting',
@@ -353,24 +353,24 @@ class ProduitsFournisseurPage extends StatelessWidget {
     );
   }
 
-  void _selectExistingProducts(
-      BuildContext context, CommerceProvider provider) async {
-    final List<Produit> allProduits = await provider.rechercherProduits('');
-    final List<Produit>? selectedProduits = await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => SelectProductsPage(
-          allProduits: allProduits,
-          initiallySelectedProduits: fournisseur.produits.toList(),
-          fournisseur: fournisseur,
-        ),
-      ),
-    );
+  // void _selectExistingProducts(
+  //     BuildContext context, CommerceProvider provider) async {
+  //   final List<Produit> allProduits = await provider.rechercherProduits('');
+  //   final List<Produit>? selectedProduits = await Navigator.of(context).push(
+  //     MaterialPageRoute(
+  //       builder: (context) => SelectProductsPage(
+  //         allProduits: allProduits,
+  //         initiallySelectedProduits: fournisseur.produits.toList(),
+  //         fournisseur: fournisseur,
+  //       ),
+  //     ),
+  //   );
 
-    if (selectedProduits != null) {
-      provider.ajouterProduitsExistantsAuFournisseur(
-          fournisseur, selectedProduits);
-    }
-  }
+  // if (selectedProduits != null) {
+  //   provider.ajouterProduitsExistantsAuFournisseur(
+  //       fournisseur, selectedProduits);
+  // }
+  //}
 
   void _deleteProduit(BuildContext context, Produit produit) {
     showModalBottomSheet(
@@ -407,9 +407,9 @@ class ProduitsFournisseurPage extends StatelessWidget {
                             context,
                             listen: false);
                         // produitProvider.supprimerProduit(produit);
-                        produitProvider.supprimerProduitDuFournisseur(
-                            fournisseur, produit);
-                        print(fournisseur.id);
+                        // produitProvider.supprimerProduitDuFournisseur(
+                        //     fournisseur, produit);
+                        // print(fournisseur.id);
                         print(produit.id);
                         print('deleted');
                         Navigator.of(context).pop();
@@ -622,21 +622,21 @@ class MySliverAppBar extends StatelessWidget {
           alignment: Alignment.bottomCenter,
           fit: StackFit.expand,
           children: [
-            Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: fournisseur.produits.isNotEmpty &&
-                          fournisseur.produits.first.image != null
-                      ? CachedNetworkImageProvider(
-                          fournisseur.produits.first.image!)
-                      : CachedNetworkImageProvider(
-                          'https://picsum.photos/200/300?random=${(fournisseur.id) + 5}',
-                        ),
-                  fit: BoxFit.cover,
-                  filterQuality: FilterQuality.low,
-                ),
-              ),
-            ),
+            // Container(
+            //   decoration: BoxDecoration(
+            //     image: DecorationImage(
+            //       image: fournisseur.produits.isNotEmpty &&
+            //               fournisseur.produits.first.image != null
+            //           ? CachedNetworkImageProvider(
+            //               fournisseur.produits.first.image!)
+            //           : CachedNetworkImageProvider(
+            //               'https://picsum.photos/200/300?random=${(fournisseur.id) + 5}',
+            //             ),
+            //       fit: BoxFit.cover,
+            //       filterQuality: FilterQuality.low,
+            //     ),
+            //   ),
+            // ),
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -1016,7 +1016,7 @@ class FournisseurSearchDelegateMain extends SearchDelegate {
             );
           },
           title: Text(fournisseur.nom),
-          subtitle: Text('${fournisseur.produits.length} produits'),
+          // subtitle: Text('${fournisseur.produits.length} produits'),
         );
       },
     );
@@ -1045,7 +1045,7 @@ class FournisseurSearchDelegateMain extends SearchDelegate {
             );
           },
           title: Text('${fournisseur.id} ${fournisseur.nom}'),
-          trailing: Text('${fournisseur.produits.length} Produits'),
+          // trailing: Text('${fournisseur.produits.length} Produits'),
         );
       },
     );

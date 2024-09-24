@@ -13,6 +13,7 @@ class CommerceProvider extends ChangeNotifier {
   List<Produit> _produits = [];
   List<Fournisseur> _fournisseurs = [];
   List<Approvisionnement> _approvisionnements = [];
+  List<Approvisionnement> _approvisionnementTemporaire = [];
   List<Client> _clients = [];
   int _currentPage = 0;
   final int _pageSize = 100;
@@ -21,6 +22,9 @@ class CommerceProvider extends ChangeNotifier {
 
   List<Produit> get produits => _produits;
   List<Approvisionnement> get approvisionnements => _approvisionnements;
+  List<Approvisionnement> get approvisionnementTemporaire =>
+      _approvisionnementTemporaire;
+
   bool get hasMoreProduits => _hasMoreProduits;
   List<Fournisseur> get fournisseurs => _fournisseurs;
   bool get isLoading => _isLoading;
@@ -121,43 +125,93 @@ class CommerceProvider extends ChangeNotifier {
     }
   }
 
-  List<Produit> getProduitsForFournisseur(Fournisseur fournisseur) {
-    // Récupérer les données directement depuis la base de données
-    return _objectBox.fournisseurBox
-            .get(fournisseur.id)
-            ?.produits
-            .reversed
-            .toList() ??
-        [];
+  List<Produit?> getProduitsForFournisseur(Fournisseur fournisseur) {
+    // Récupérer le fournisseur à partir de l'ID
+    final fournisseurBox = _objectBox.fournisseurBox.get(fournisseur.id);
+
+    if (fournisseurBox == null) {
+      return [];
+    }
+
+    // Récupérer tous les approvisionnements du fournisseur
+    final approvisionnements = fournisseurBox.approvisionnements;
+
+    // Extraire les produits uniques associés aux approvisionnements
+    final produits = approvisionnements
+        .map((approvisionnement) => approvisionnement.produit.target)
+        .where((produit) => produit != null) // Filtrer les produits non-nuls
+        .toSet() // Supprimer les doublons
+        .toList();
+
+    return produits.reversed.toList();
   }
 
-  // void ajouterProduit(Produit produit, List<Fournisseur> fournisseurs,
-  //     List<Approvisionnement> approvisionnements) {
-  //   _ajouterOuMettreAJourFournisseurs(fournisseurs);
-  //   produit.fournisseurs.addAll(fournisseurs);
-  //   _objectBox.produitBox.put(produit);
-  //   chargerProduits(reset: true);
-  //   _chargerFournisseurs();
-  // }
-  void ajouterProduit(Produit produit, List<Fournisseur> fournisseurs,
-      List<Approvisionnement> approvisionnements, Crud crud) {
+  void ajouterProduit(
+    Produit produit,
+    List<Fournisseur> fournisseurs,
+    List<Approvisionnement> approvisionnements,
+  ) {
     // Mettre à jour ou ajouter les fournisseurs
     _ajouterOuMettreAJourFournisseurs(fournisseurs);
 
-    // Associer les fournisseurs au produit
-    produit.fournisseurs
-        .clear(); // Clear existing relations to avoid duplicates
-    produit.fournisseurs.addAll(fournisseurs);
+    // Lier Crud au produit
+    // produit.crud.target = crudProduit;
 
     // Ajouter ou mettre à jour les approvisionnements
-    for (var approvisionnement in approvisionnements) {
-      approvisionnement.produit.target =
-          produit; // Relier chaque approvisionnement au produit
-      _objectBox.approvisionnementBox.put(approvisionnement);
+    //_objectBox.crud.put(crudProduit);
+    final produitId = _objectBox.produitBox.put(produit);
+
+    // Enregistrer chaque approvisionnement temporaire
+    final boxApprovisionnement = _objectBox.approvisionnementBox;
+    final boxFournisseur = _objectBox.fournisseurBox;
+    final boxCrudApprovisionnement = _objectBox.crud;
+
+    for (var approvisionnementTemp in _approvisionnementTemporaire) {
+      // a. Vérifier ou créer le fournisseur
+      Fournisseur fournisseur = _fournisseurs.firstWhere(
+        (f) =>
+            f.nom.toLowerCase() ==
+            approvisionnementTemp.fournisseur.target!.nom.toLowerCase(),
+        orElse: () =>
+            Fournisseur(nom: approvisionnementTemp.fournisseur.target!.nom),
+      );
+
+      if (fournisseur.id == 0) {
+        // Nouveau fournisseur, l'enregistrer
+        boxFournisseur.put(fournisseur);
+        _fournisseurs.add(fournisseur);
+      } else {
+        // Si le fournisseur existe déjà, le récupérer de la boîte
+        fournisseur = _objectBox.fournisseurBox.get(fournisseur.id)!;
+      }
+
+      // b. Enregistrer le Crud pour l'approvisionnement
+      // boxCrudApprovisionnement.put(crudProduit);
+
+      // c. Créer l'instance de l'approvisionnement
+      Approvisionnement approvisionnement = Approvisionnement(
+        quantite: approvisionnementTemp.quantite,
+        prixAchat: approvisionnementTemp.prixAchat,
+        datePeremption: approvisionnementTemp.datePeremption,
+      );
+
+      // Lier les relations
+      // approvisionnement.crud.target = crudProduit;
+      approvisionnement.fournisseur.target = fournisseur;
+      approvisionnement.produit.targetId = produitId;
+
+      // d. Enregistrer l'approvisionnement
+      boxApprovisionnement.put(approvisionnement);
     }
 
-    // Associer l'entité Crud au produit pour gérer les métadonnées
-    produit.crud.target = crud;
+    // Enregistrer les approvisionnements fournis
+    for (var approvisionnement in approvisionnements) {
+      if (!_approvisionnements.contains(approvisionnement)) {
+        // Vérifier les doublons
+        approvisionnement.produit.target = produit;
+        _objectBox.approvisionnementBox.put(approvisionnement);
+      }
+    }
 
     // Sauvegarder le produit avec les relations
     _objectBox.produitBox.put(produit);
@@ -167,49 +221,79 @@ class CommerceProvider extends ChangeNotifier {
     _chargerFournisseurs();
   }
 
+  // void ajouterProduit(Produit produit, List<Fournisseur> fournisseurs,
+  //     List<Approvisionnement> approvisionnements, ) {
+  //   // Mettre à jour ou ajouter les fournisseurs
+  //   _ajouterOuMettreAJourFournisseurs(fournisseurs);
+  //
+  //   // Associer les fournisseurs au produit
+  //   produit.fournisseurs
+  //       .clear(); // Clear existing relations to avoid duplicates
+  //   produit.fournisseurs.addAll(fournisseurs);
+  //
+  //   // Ajouter ou mettre à jour les approvisionnements
+  //
+  //   for (var approvisionnement in approvisionnements) {
+  //     if (!_approvisionnements.contains(approvisionnement)) {
+  //       // Vérifier les doublons
+  //       approvisionnement.produit.target = produit;
+  //       _objectBox.approvisionnementBox.put(approvisionnement);
+  //     }
+  //   }
+  //   // Associer l'entité Crud au produit pour gérer les métadonnées
+  //   // produit.crud.target = crud;
+  //
+  //   // Sauvegarder le produit avec les relations
+  //   _objectBox.produitBox.put(produit);
+  //
+  //   // Recharger les produits et les fournisseurs après mise à jour
+  //   chargerProduits(reset: true);
+  //   _chargerFournisseurs();
+  // }
+
   void updateProduit(Produit produit) {
     _objectBox.produitBox.put(produit);
     chargerProduits(reset: true);
   }
 
-  void updateProductStock(int productId, double newStock) {
-    final index = _produits.indexWhere((p) => p.id == productId);
-    if (index != -1) {
-      _produits[index].stock = newStock;
-      _objectBox.produitBox.put(_produits[index]);
-      notifyListeners();
-    }
-  }
-
-  void updateProduitById(int id, Produit updatedProduit,
-      {List<Fournisseur>? fournisseurs}) {
-    final produit = getProduitById(id);
-    if (produit != null) {
-      produit
-        ..nom = updatedProduit.nom
-        ..description = updatedProduit.description
-        ..prixAchat = updatedProduit.prixAchat
-        ..prixVente = updatedProduit.prixVente
-        ..stock = updatedProduit.stock
-        ..qr = updatedProduit.qr
-        ..image = updatedProduit.image
-        ..minimStock = updatedProduit.minimStock
-        // ..dateCreation = updatedProduit.dateCreation
-        ..stockUpdate = updatedProduit.stockUpdate
-        ..stockinit = updatedProduit.stockinit;
-
-      if (fournisseurs != null) {
-        _ajouterOuMettreAJourFournisseurs(fournisseurs);
-        produit.fournisseurs.clear();
-        produit.fournisseurs.addAll(fournisseurs);
-      }
-
-      _objectBox.produitBox.put(produit);
-      chargerProduits(reset: true);
-      _chargerFournisseurs();
-      notifyListeners();
-    }
-  }
+  // void updateProductStock(int productId, double newStock) {
+  //   final index = _produits.indexWhere((p) => p.id == productId);
+  //   if (index != -1) {
+  //     _produits[index].stock = newStock;
+  //     _objectBox.produitBox.put(_produits[index]);
+  //     notifyListeners();
+  //   }
+  // }
+  //
+  // void updateProduitById(int id, Produit updatedProduit,
+  //     {List<Fournisseur>? fournisseurs}) {
+  //   final produit = getProduitById(id);
+  //   if (produit != null) {
+  //     produit
+  //       ..nom = updatedProduit.nom
+  //       ..description = updatedProduit.description
+  //       ..prixAchat = updatedProduit.prixAchat
+  //       ..prixVente = updatedProduit.prixVente
+  //       ..stock = updatedProduit.stock
+  //       ..qr = updatedProduit.qr
+  //       ..image = updatedProduit.image
+  //       ..minimStock = updatedProduit.minimStock
+  //       // ..dateCreation = updatedProduit.dateCreation
+  //       ..stockUpdate = updatedProduit.stockUpdate
+  //       ..stockinit = updatedProduit.stockinit;
+  //
+  //     if (fournisseurs != null) {
+  //       _ajouterOuMettreAJourFournisseurs(fournisseurs);
+  //       produit.fournisseurs.clear();
+  //       produit.fournisseurs.addAll(fournisseurs);
+  //     }
+  //
+  //     _objectBox.produitBox.put(produit);
+  //     chargerProduits(reset: true);
+  //     _chargerFournisseurs();
+  //     notifyListeners();
+  //   }
+  // }
 
   void supprimerProduit(Produit produit) {
     _objectBox.produitBox.remove(produit.id);
@@ -231,16 +315,16 @@ class CommerceProvider extends ChangeNotifier {
     return query.build().find();
   }
 
-  Map<String, dynamic> getProduitsLowStock(qtt) {
-    final query = _objectBox.produitBox.query(Produit_.stock.lessOrEqual(qtt));
-    final lowStockProduits = query.build().find();
-
-    return //lowStockProduits.length;
-        {
-      'count': lowStockProduits.length,
-      'produits': lowStockProduits,
-    };
-  }
+  // Map<String, dynamic> getProduitsLowStock(qtt) {
+  //   final query = _objectBox.produitBox.query(Produit_.stock.lessOrEqual(qtt));
+  //   final lowStockProduits = query.build().find();
+  //
+  //   return //lowStockProduits.length;
+  //       {
+  //     'count': lowStockProduits.length,
+  //     'produits': lowStockProduits,
+  //   };
+  // }
 
 //////////////////////////////////// Fournisseur ///////////////////////////////////////////
 
@@ -270,13 +354,43 @@ class CommerceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void ajouterFournisseurAvecProduits(
-      Fournisseur fournisseur, List<Produit> produits) {
+  void ajouterFournisseurAvecProduits(Fournisseur fournisseur,
+      List<Produit> produits, List<double> quantites, List<double> prixAchats) {
+    // Assurer que les quantités et les prix d'achat sont fournis pour chaque produit
+    if (produits.length != quantites.length ||
+        produits.length != prixAchats.length) {
+      throw ArgumentError(
+          "Les listes de produits, quantités et prix d'achat doivent avoir la même longueur.");
+    }
+
+    // Ajouter ou mettre à jour les produits
     _ajouterOuMettreAJourProduits(produits);
-    fournisseur.produits.addAll(produits);
+
+    // Associer chaque produit avec le fournisseur via un approvisionnement
+    for (int i = 0; i < produits.length; i++) {
+      Approvisionnement approvisionnement = Approvisionnement(
+        quantite: quantites[i],
+        prixAchat: prixAchats[i],
+        datePeremption:
+            null, // Ajouter si tu as besoin de gérer la date de péremption
+      );
+
+      // Définir les relations produit et fournisseur
+      approvisionnement.produit.target = produits[i];
+      approvisionnement.fournisseur.target = fournisseur;
+
+      // Ajouter l'approvisionnement dans la base de données
+      _objectBox.approvisionnementBox.put(approvisionnement);
+    }
+
+    // Sauvegarder le fournisseur dans la base de données
     _objectBox.fournisseurBox.put(fournisseur);
+
+    // Rafraîchir les listes de produits et fournisseurs
     chargerProduits(reset: true);
     _chargerFournisseurs();
+
+    // Notifier les auditeurs
     notifyListeners();
   }
 
@@ -289,22 +403,35 @@ class CommerceProvider extends ChangeNotifier {
         id: 0,
         image: 'https://picsum.photos/200/300?random=${Random().nextInt(1000)}',
         nom: faker.food.dish(),
-        prixAchat: faker.randomGenerator.decimal(min: 10),
-        prixVente: faker.randomGenerator.decimal(min: 50),
-        stock: faker.randomGenerator.decimal(min: 100, scale: 15),
         description: faker.lorem.sentence(),
         qr: faker.randomGenerator.integer(999999).toString(),
-        stockUpdate:
-            faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
-        stockinit: faker.randomGenerator.decimal(min: 200),
+        prixVente: faker.randomGenerator.decimal(min: 50),
         minimStock: faker.randomGenerator.decimal(min: 1, scale: 2),
+
         alertPeremption: Random().nextInt(10),
       );
     });
 
-    fournisseur.produits.addAll(produits);
+    // Ajouter les produits et créer des approvisionnements pour chaque produit
+    for (Produit produit in produits) {
+      Approvisionnement approvisionnement = Approvisionnement(
+        quantite: faker.randomGenerator.decimal(min: 100, scale: 15),
+        prixAchat: faker.randomGenerator.decimal(min: 10),
+        datePeremption: faker.date.dateTime(minYear: 2025),
+      );
+
+      // Définir les relations entre l'approvisionnement, le produit et le fournisseur
+      approvisionnement.produit.target = produit;
+      approvisionnement.fournisseur.target = fournisseur;
+
+      // Ajouter l'approvisionnement à la base de données
+      _objectBox.approvisionnementBox.put(approvisionnement);
+    }
+
+    // Sauvegarder le fournisseur et les produits associés
     _objectBox.fournisseurBox.put(fournisseur);
 
+    // Notifier les auditeurs que les données ont été mises à jour
     notifyListeners();
   }
 
@@ -324,22 +451,38 @@ class CommerceProvider extends ChangeNotifier {
   void ajouterProduitsExistantsAuFournisseur(
       Fournisseur fournisseur, List<Produit> produits) {
     for (var produit in produits) {
-      if (!fournisseur.produits.contains(produit)) {
-        fournisseur.produits.add(produit);
-        produit.fournisseurs.add(fournisseur);
+      // Vérifier si l'approvisionnement existe déjà pour ce produit
+      bool existe = fournisseur.approvisionnements
+          .any((a) => a.produit.target == produit);
+
+      if (!existe) {
+        // Créer un nouvel approvisionnement pour ce produit
+        Approvisionnement approvisionnement = Approvisionnement(
+          quantite: 0, // Définir la quantité initiale
+          prixAchat: 0, // Ajuster le prix d'achat si nécessaire
+          datePeremption: null, // Définir la date de péremption si nécessaire
+        );
+
+        // Établir les relations
+        approvisionnement.produit.target = produit;
+        approvisionnement.fournisseur.target = fournisseur;
+
+        // Ajouter l'approvisionnement au fournisseur
+        fournisseur.approvisionnements.add(approvisionnement);
       }
     }
+
+    // Sauvegarder le fournisseur et les produits associés
     _objectBox.fournisseurBox.put(fournisseur);
     _objectBox.produitBox.putMany(produits);
+
+    // Charger les produits et les fournisseurs
     chargerProduits(reset: true);
     _chargerFournisseurs();
     notifyListeners();
   }
 
   void supprimerProduitDuFournisseur(Fournisseur fournisseur, Produit produit) {
-    // print('Tentative de suppression du produit du fournisseur');
-    // print('Fournisseur: ${fournisseur.nom}, Produit: ${produit.nom}');
-
     try {
       // Charger les instances actuelles de la base de données
       Fournisseur? fournisseurActuel =
@@ -347,50 +490,38 @@ class CommerceProvider extends ChangeNotifier {
       Produit? produitActuel = _objectBox.produitBox.get(produit.id);
 
       if (fournisseurActuel == null) {
-        //  print('Fournisseur non trouvé dans la base de données.');
+        print('Fournisseur non trouvé dans la base de données.');
         return;
       }
       if (produitActuel == null) {
-        // print('Produit non trouvé dans la base de données.');
+        print('Produit non trouvé dans la base de données.');
         return;
       }
 
       _objectBox.store.runInTransaction(TxMode.write, () {
-        // Vérifier si le produit est dans la liste des produits du fournisseur et vice versa
-        bool produitDansFournisseur =
-            fournisseurActuel.produits.any((p) => p.id == produitActuel.id);
-        bool fournisseurDansProduit =
-            produitActuel.fournisseurs.any((f) => f.id == fournisseurActuel.id);
+        // Vérifier si l'approvisionnement existe pour ce produit et ce fournisseur
+        bool approvisionnementExiste = fournisseurActuel.approvisionnements
+            .any((a) => a.produit.target == produitActuel);
 
-        if (produitDansFournisseur && fournisseurDansProduit) {
-          // print(
-          //     'Produit trouvé dans le fournisseur et fournisseur trouvé dans le produit.');
-
-          // Supprimer les relations
-          fournisseurActuel.produits
-              .removeWhere((p) => p.id == produitActuel.id);
-          produitActuel.fournisseurs
-              .removeWhere((f) => f.id == fournisseurActuel.id);
-          // print(fournisseurActuel.produits);
-          // print(produitActuel.fournisseurs);
-
-          //  print('Relations supprimées. Mise à jour des objets.');
+        if (approvisionnementExiste) {
+          // Supprimer l'approvisionnement du fournisseur
+          fournisseurActuel.approvisionnements
+              .removeWhere((a) => a.produit.target == produitActuel);
 
           // Mise à jour dans la base de données
           _objectBox.fournisseurBox.put(fournisseurActuel);
-          // print('Fournisseur mis à jour dans la base de données.');
+          _objectBox.produitBox
+              .put(produitActuel); // Mettre à jour le produit si nécessaire
         } else {
-          // print(
-          //     'Le produit n\'est pas dans la liste du fournisseur ou le fournisseur n\'est pas dans la liste du produit.');
+          print(
+              'L\'approvisionnement n\'existe pas pour ce produit et ce fournisseur.');
         }
       });
 
       // Rechargement des données en dehors de la transaction
-      //  print('Rechargement des produits et des fournisseurs.');
       chargerProduits(reset: true);
       _chargerFournisseurs();
       notifyListeners();
-      //  print('Notifications envoyées aux auditeurs.');
     } catch (e) {
       print('Erreur lors de la suppression du produit du fournisseur : $e');
     }
@@ -404,52 +535,38 @@ class CommerceProvider extends ChangeNotifier {
           _objectBox.fournisseurBox.get(fournisseur.id);
 
       if (produitActuel == null) {
-        //  print('Fournisseur non trouvé dans la base de données.');
+        print('Produit non trouvé dans la base de données.');
         return;
       }
       if (fournisseurActuel == null) {
-        // print('Produit non trouvé dans la base de données.');
+        print('Fournisseur non trouvé dans la base de données.');
         return;
       }
 
       _objectBox.store.runInTransaction(TxMode.write, () {
-        // Vérifier si le produit est dans la liste des produits du fournisseur et vice versa
-        bool produitDansFournisseur =
-            fournisseurActuel.produits.any((p) => p.id == produitActuel.id);
-        bool fournisseurDansProduit =
-            produitActuel.fournisseurs.any((f) => f.id == fournisseurActuel.id);
+        // Vérifier si l'approvisionnement existe pour ce produit et ce fournisseur
+        bool approvisionnementExiste = fournisseurActuel.approvisionnements
+            .any((a) => a.produit.target == produitActuel);
 
-        if (produitDansFournisseur && fournisseurDansProduit) {
-          // print(
-          //     'Produit trouvé dans le fournisseur et fournisseur trouvé dans le produit.');
-
-          // Supprimer les relations
-          fournisseurActuel.produits
-              .removeWhere((p) => p.id == produitActuel.id);
-          produitActuel.fournisseurs
-              .removeWhere((f) => f.id == fournisseurActuel.id);
-          // print(fournisseurActuel.produits);
-          // print(produitActuel.fournisseurs);
-
-          //  print('Relations supprimées. Mise à jour des objets.');
+        if (approvisionnementExiste) {
+          // Supprimer l'approvisionnement du fournisseur
+          fournisseurActuel.approvisionnements
+              .removeWhere((a) => a.produit.target == produitActuel);
 
           // Mise à jour dans la base de données
           _objectBox.fournisseurBox.put(fournisseurActuel);
-          // print('Fournisseur mis à jour dans la base de données.');
         } else {
-          // print(
-          //     'Le produit n\'est pas dans la liste du fournisseur ou le fournisseur n\'est pas dans la liste du produit.');
+          print(
+              'L\'approvisionnement n\'existe pas pour ce produit et ce fournisseur.');
         }
       });
 
       // Rechargement des données en dehors de la transaction
-      //  print('Rechargement des produits et des fournisseurs.');
       chargerProduits(reset: true);
       _chargerFournisseurs();
       notifyListeners();
-      //  print('Notifications envoyées aux auditeurs.');
     } catch (e) {
-      print('Erreur lors de la suppression du produit du fournisseur : $e');
+      print('Erreur lors de la suppression du fournisseur du produit : $e');
     }
   }
 }
@@ -643,9 +760,6 @@ class CartProvider with ChangeNotifier {
   Future<void> saveFacture(CommerceProvider commerceProvider) async {
     // Vérifier si un client est sélectionné
     if (_selectedClient != null) {
-      // Mise à jour du montant impayé du client
-      // _selectedClient?.impayer = (_selectedClient?.impayer ?? 0) + totalAmount;
-
       // Sauvegarder le client mis à jour
       _objectBox.clientBox.put(_selectedClient!);
       // Associer le client à la facture
@@ -658,29 +772,24 @@ class CartProvider with ChangeNotifier {
     // Sauvegarder la facture
     _objectBox.factureBox.put(_facture);
 
-    // // Sauvegarde des lignes de facture
-    // for (var ligne in _facture.lignesFacture) {
-    //   _objectBox.ligneFacture.put(ligne);
-    // }
-// Sauvegarde des lignes de facture et mise à jour des produits associés
+    // Sauvegarde des lignes de facture et mise à jour des produits associés
     for (var ligne in _facture.lignesFacture) {
       final produit = ligne.produit.target;
 
       if (produit != null) {
         // Mettre à jour le stock du produit en fonction de la quantité vendue
-        produit.stock -= ligne.quantite;
+        double newStock =
+            produit.stock - ligne.quantite; // Utilisez le getter ici
 
         // Sauvegarder le produit mis à jour
         _objectBox.produitBox.put(produit);
         commerceProvider.updateProduit(produit);
-        // Notifier le `ClientProvider` de la mise à jour du produit
-        // Vous devez injecter le `ClientProvider` ou le notifier via une méthode appropriée
-        // Exemple : clientProvider.updateProduit(produit);
       }
 
       // Sauvegarder la ligne de facture
       _objectBox.ligneFacture.put(ligne);
     }
+
     // Réinitialisation de la facture et du client sélectionné
     _facture = Facture(
       date: DateTime.now(),

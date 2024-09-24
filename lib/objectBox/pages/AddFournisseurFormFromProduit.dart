@@ -299,10 +299,24 @@ class FournisseurSearchDelegate extends SearchDelegate<Fournisseur> {
           trailing: IconButton(
             icon: Icon(Icons.add),
             onPressed: () {
-              if (!produit.fournisseurs.contains(fournisseur)) {
-                produit.fournisseurs.add(fournisseur);
+              // Vérifie si le fournisseur n'est pas déjà dans la liste des fournisseurs du produit
+              if (!produit.approvisionnements.any(
+                  (appro) => appro.fournisseur.target?.id == fournisseur.id)) {
+                // Crée un nouvel approvisionnement avec le fournisseur
+                Approvisionnement nouvelApprovisionnement = Approvisionnement(
+                  quantite:
+                      0, // Valeur par défaut ou à modifier selon ton besoin
+                  prixAchat:
+                      0, // Valeur par défaut ou à modifier selon ton besoin
+                );
+                nouvelApprovisionnement.fournisseur.target = fournisseur;
+
+                // Ajoute l'approvisionnement au produit
+                produit.approvisionnements.add(nouvelApprovisionnement);
+                // Met à jour le produit dans le provider
                 produitProvider.updateProduit(produit);
               }
+              // Ferme le dialogue ou la page actuelle
               Navigator.of(context).pop();
             },
           ),

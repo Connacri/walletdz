@@ -353,15 +353,15 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                 SizedBox(
                   width: 50,
                 ),
-                IconButton(
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (ctx) => supa.ProduitListPage(
-                            supabase: Supabase.instance.client,
-                            objectboxStore: widget.objectBox.store)));
-                  },
-                  icon: Icon(Icons.local_police),
-                ),
+                // IconButton(
+                //   onPressed: () {
+                //     Navigator.of(context).push(MaterialPageRoute(
+                //         builder: (ctx) => supa.ProduitListPage(
+                //             supabase: Supabase.instance.client,
+                //             objectboxStore: widget.objectBox.store)));
+                //   },
+                //   icon: Icon(Icons.local_police),
+                // ),
                 IconButton(
                   onPressed: () {
                     // widget.objectBox.fillWithFakeData(1000, 500);
@@ -389,9 +389,9 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                 int totalProduits = produitProvider.getTotalProduits();
                 List<Produit> produitsFiltres =
                     produitProvider.getProduitsBetweenPrices(prixMin, prixMax);
-                var produitsLowStock = produitProvider.getProduitsLowStock(5.0);
-                var produitsLowStock0 =
-                    produitProvider.getProduitsLowStock(0.0);
+                // var produitsLowStock = produitProvider.getProduitsLowStock(5.0);
+                // var produitsLowStock0 =
+                //     produitProvider.getProduitsLowStock(0.0);
 
                 return Row(
                   children: [
@@ -427,8 +427,9 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                             randomId,
                             produitProvider,
                             produitsFiltres,
-                            produitsLowStock,
-                            produitsLowStock0)
+                            // produitsLowStock,
+                            // produitsLowStock0,
+                          )
                         : _selectedIndex == 1
                             ? Expanded(flex: 2, child: FacturePage())
                             : Expanded(flex: 1, child: ClientListScreen()),
@@ -512,15 +513,15 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                 // SizedBox(
                 //   width: 50,
                 // ),
-                IconButton(
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (ctx) => supa.ProduitListPage(
-                            supabase: Supabase.instance.client,
-                            objectboxStore: widget.objectBox.store)));
-                  },
-                  icon: Icon(Icons.local_police),
-                ),
+                // IconButton(
+                //   onPressed: () {
+                //     Navigator.of(context).push(MaterialPageRoute(
+                //         builder: (ctx) => supa.ProduitListPage(
+                //             supabase: Supabase.instance.client,
+                //             objectboxStore: widget.objectBox.store)));
+                //   },
+                //   icon: Icon(Icons.local_police),
+                // ),
                 IconButton(
                   onPressed: () {
                     // widget.objectBox.fillWithFakeData(1000, 500);
@@ -545,8 +546,8 @@ class _adaptiveHomeState extends State<adaptiveHome> {
               int totalProduits = produitProvider.getTotalProduits();
               List<Produit> produitsFiltres =
                   produitProvider.getProduitsBetweenPrices(prixMin, prixMax);
-              var produitsLowStock = produitProvider.getProduitsLowStock(5.0);
-              var produitsLowStock0 = produitProvider.getProduitsLowStock(0.0);
+              // var produitsLowStock = produitProvider.getProduitsLowStock(5.0);
+              // var produitsLowStock0 = produitProvider.getProduitsLowStock(0.0);
               return Padding(
                   padding: const EdgeInsets.all(5.0),
                   child: ListView(
@@ -682,32 +683,32 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                           SmallBanner: false,
                         ),
                       ),
-                      CardAlert(
-                        image:
-                            'https://picsum.photos/seed/${randomId + 3}/200/100',
-                        text:
-                            'Alert stock < 5\n${produitsLowStock['count']} Produits\n\nRupture de stock\n${produitsLowStock0['count']} Produits',
-                        provider: produitProvider,
-                        button: produitsLowStock['count'] == 0 &&
-                                produitsLowStock0['count'] == 0
-                            ? null
-                            : ElevatedButton(
-                                onPressed: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => LowStockList(
-                                          produitsLowStock: produitsLowStock),
-                                      // ProduitListInterval(
-                                      //   produitsFiltres:
-                                      //       produitsFiltres,
-                                      // ),
-                                    ),
-                                  );
-                                },
-                                child: Text(('Voire La List'))),
-                        Color1: Colors.red,
-                        Color2: Colors.black,
-                      ),
+                      // CardAlert(
+                      //   image:
+                      //       'https://picsum.photos/seed/${randomId + 3}/200/100',
+                      //   text:
+                      //       'Alert stock < 5\n${produitsLowStock['count']} Produits\n\nRupture de stock\n${produitsLowStock0['count']} Produits',
+                      //   provider: produitProvider,
+                      //   button: produitsLowStock['count'] == 0 &&
+                      //           produitsLowStock0['count'] == 0
+                      //       ? null
+                      //       : ElevatedButton(
+                      //           onPressed: () {
+                      //             Navigator.of(context).push(
+                      //               MaterialPageRoute(
+                      //                 builder: (context) => LowStockList(
+                      //                     produitsLowStock: produitsLowStock),
+                      //                 // ProduitListInterval(
+                      //                 //   produitsFiltres:
+                      //                 //       produitsFiltres,
+                      //                 // ),
+                      //               ),
+                      //             );
+                      //           },
+                      //           child: Text(('Voire La List'))),
+                      //   Color1: Colors.red,
+                      //   Color2: Colors.black,
+                      // ),
                       SizedBox(height: 18),
                       ElevatedButton.icon(
                           onPressed: () {
@@ -759,12 +760,13 @@ class _adaptiveHomeState extends State<adaptiveHome> {
   }
 
   Expanded buildExpanded(
-      BuildContext context,
-      int randomId,
-      CommerceProvider produitProvider,
-      List<Produit> produitsFiltres,
-      Map<String, dynamic> produitsLowStock,
-      Map<String, dynamic> produitsLowStock0) {
+    BuildContext context,
+    int randomId,
+    CommerceProvider produitProvider,
+    List<Produit> produitsFiltres,
+    // Map<String, dynamic> produitsLowStock,
+    // Map<String, dynamic> produitsLowStock0
+  ) {
     return Expanded(
       flex: 1,
       child: ListView(
@@ -864,33 +866,33 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                     ),
                   ),
                 ),
-                Expanded(
-                  child: CardAlert(
-                    image: 'https://picsum.photos/seed/${randomId + 2}/200/100',
-                    text:
-                        'Alert stock < 5\n${produitsLowStock['count']} Produits\n\nRupture de stock\n${produitsLowStock0['count']} Produits',
-                    provider: produitProvider,
-                    button: produitsLowStock['count'] == 0 &&
-                            produitsLowStock0['count'] == 0
-                        ? null
-                        : ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => LowStockList(
-                                      produitsLowStock: produitsLowStock),
-                                  // ProduitListInterval(
-                                  //   produitsFiltres:
-                                  //       produitsFiltres,
-                                  // ),
-                                ),
-                              );
-                            },
-                            child: Text(('Voire La List'))),
-                    Color1: Colors.red[900]!,
-                    Color2: Colors.black,
-                  ),
-                ),
+                // Expanded(
+                //   child: CardAlert(
+                //     image: 'https://picsum.photos/seed/${randomId + 2}/200/100',
+                //     text:
+                //         'Alert stock < 5\n${produitsLowStock['count']} Produits\n\nRupture de stock\n${produitsLowStock0['count']} Produits',
+                //     provider: produitProvider,
+                //     button: produitsLowStock['count'] == 0 &&
+                //             produitsLowStock0['count'] == 0
+                //         ? null
+                //         : ElevatedButton(
+                //             onPressed: () {
+                //               Navigator.of(context).push(
+                //                 MaterialPageRoute(
+                //                   builder: (context) => LowStockList(
+                //                       produitsLowStock: produitsLowStock),
+                //                   // ProduitListInterval(
+                //                   //   produitsFiltres:
+                //                   //       produitsFiltres,
+                //                   // ),
+                //                 ),
+                //               );
+                //             },
+                //             child: Text(('Voire La List'))),
+                //     Color1: Colors.red[900]!,
+                //     Color2: Colors.black,
+                //   ),
+                // ),
                 // Expanded(
                 //     child: _buildPriceRangeProductsCard(
                 //         context, produitProvider)),
@@ -1985,7 +1987,6 @@ class LowStockList extends StatelessWidget {
           return Card(
             child: ListTile(
               title: Text('${produit.nom}'),
-              subtitle: Text('${produit.stockinit}'),
               trailing: Text('Stock : ${produit.stock}'),
             ),
           );

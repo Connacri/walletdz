@@ -656,7 +656,9 @@ class _FacturePageState extends State<FacturePage> {
       builder: (context) {
         return AlertDialog(
           title: Text(
-            'Modifier la quantité pour ${ligneFacture.produit.target!.nom}\nReste En Stock  ${ligneFacture.produit.target!.stock.toStringAsFixed(ligneFacture.produit.target!.stock.truncateToDouble() == ligneFacture.produit.target!.stock ? 0 : 2)}\n${ligneFacture.produit.target!.prixAchat.toStringAsFixed(2)} et ${ligneFacture.produit.target!.prixVente.toStringAsFixed(2)}',
+            'Modifier la quantité pour ${ligneFacture.produit.target!.nom}\nReste En Stock  ${ligneFacture.produit.target!.stock.toStringAsFixed(ligneFacture.produit.target!.stock.truncateToDouble() == ligneFacture.produit.target!.stock ? 0 : 2)}'
+            //  ${ligneFacture.produit.target!.prixAchat.toStringAsFixed(2)} et ${ligneFacture.produit.target!.prixVente.toStringAsFixed(2)}'
+            ,
             textAlign: TextAlign.center,
           ),
           content: Form(
@@ -744,9 +746,11 @@ class _FacturePageState extends State<FacturePage> {
                     }
                     if (enteredPrice <= 0)
                       return 'La Prix doit être Superieur à 0.0';
-                    if (enteredPrice < ligneFacture.produit.target!.prixAchat ||
+                    if ( //enteredPrice < ligneFacture.produit.target!.prixAchat ||
                         enteredPrice > ligneFacture.produit.target!.prixVente) {
-                      return 'La Prix doit être entre ${ligneFacture.produit.target!.prixAchat.toStringAsFixed(2)} et ${ligneFacture.produit.target!.prixVente.toStringAsFixed(2)}';
+                      return 'La Prix doit être entre'
+                          //  ${ligneFacture.produit.target!.prixAchat.toStringAsFixed(2)}
+                          'et ${ligneFacture.produit.target!.prixVente.toStringAsFixed(2)}';
                     }
                     return null;
                   },

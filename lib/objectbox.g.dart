@@ -34,7 +34,8 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(2, 8758188655905488373),
             name: 'qr',
             type: 9,
-            flags: 0),
+            flags: 2080,
+            indexId: const obx_int.IdUid(17, 2877145562524481358)),
         obx_int.ModelProperty(
             id: const obx_int.IdUid(3, 414205311028485250),
             name: 'nom',
@@ -58,13 +59,13 @@ final _entities = <obx_int.ModelEntity>[
             indexId: const obx_int.IdUid(14, 7929166363009161217),
             relationTarget: 'Crud')
       ],
-      relations: <obx_int.ModelRelation>[
-        obx_int.ModelRelation(
-            id: const obx_int.IdUid(1, 2832941486252609678),
-            name: 'produits',
-            targetId: const obx_int.IdUid(2, 8606136097133066204))
-      ],
-      backlinks: <obx_int.ModelBacklink>[]),
+      relations: <obx_int.ModelRelation>[],
+      backlinks: <obx_int.ModelBacklink>[
+        obx_int.ModelBacklink(
+            name: 'approvisionnements',
+            srcEntity: 'Approvisionnement',
+            srcField: '')
+      ]),
   obx_int.ModelEntity(
       id: const obx_int.IdUid(2, 8606136097133066204),
       name: 'Produit',
@@ -80,7 +81,8 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(2, 1144798314351403869),
             name: 'qr',
             type: 9,
-            flags: 0),
+            flags: 2080,
+            indexId: const obx_int.IdUid(18, 7055039884597715807)),
         obx_int.ModelProperty(
             id: const obx_int.IdUid(3, 257039154436617685),
             name: 'image',
@@ -97,39 +99,14 @@ final _entities = <obx_int.ModelEntity>[
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(6, 6533552764826989296),
-            name: 'prixAchat',
-            type: 8,
-            flags: 0),
-        obx_int.ModelProperty(
             id: const obx_int.IdUid(7, 8989117107807645988),
             name: 'prixVente',
-            type: 8,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(8, 4773469945258199278),
-            name: 'stock',
-            type: 8,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(9, 3618662337063473621),
-            name: 'stockUpdate',
-            type: 10,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(11, 7598222863889683261),
-            name: 'stockinit',
             type: 8,
             flags: 0),
         obx_int.ModelProperty(
             id: const obx_int.IdUid(15, 8209867430423604798),
             name: 'minimStock',
             type: 8,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(16, 6070155937091833855),
-            name: 'origine',
-            type: 9,
             flags: 0),
         obx_int.ModelProperty(
             id: const obx_int.IdUid(20, 5939741701584325095),
@@ -149,9 +126,7 @@ final _entities = <obx_int.ModelEntity>[
         obx_int.ModelBacklink(
             name: 'approvisionnements',
             srcEntity: 'Approvisionnement',
-            srcField: ''),
-        obx_int.ModelBacklink(
-            name: 'fournisseurs', srcEntity: 'Fournisseur', srcField: '')
+            srcField: '')
       ]),
   obx_int.ModelEntity(
       id: const obx_int.IdUid(3, 7968206822164606643),
@@ -515,7 +490,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
   final model = obx_int.ModelInfo(
       entities: _entities,
       lastEntityId: const obx_int.IdUid(10, 8291227482886202026),
-      lastIndexId: const obx_int.IdUid(16, 1359581493053979498),
+      lastIndexId: const obx_int.IdUid(18, 7055039884597715807),
       lastRelationId: const obx_int.IdUid(1, 2832941486252609678),
       lastSequenceId: const obx_int.IdUid(0, 0),
       retiredEntityUids: const [6647246884597588827],
@@ -553,9 +528,14 @@ obx_int.ModelDefinition getObjectBoxModel() {
         5607971647867899978,
         78856214289649542,
         2514304964873444278,
-        78600634238338283
+        78600634238338283,
+        6533552764826989296,
+        4773469945258199278,
+        6070155937091833855,
+        3618662337063473621,
+        7598222863889683261
       ],
-      retiredRelationUids: const [],
+      retiredRelationUids: const [2832941486252609678],
       modelVersion: 5,
       modelVersionParserMinimum: 5,
       version: 1);
@@ -565,7 +545,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
         model: _entities[0],
         toOneRelations: (Fournisseur object) => [object.crud],
         toManyRelations: (Fournisseur object) => {
-              obx_int.RelInfo<Fournisseur>.toMany(1, object.id): object.produits
+              obx_int.RelInfo<Approvisionnement>.toOneBacklink(6, object.id,
+                      (Approvisionnement srcObject) => srcObject.fournisseur):
+                  object.approvisionnements
             },
         getId: (Fournisseur object) => object.id,
         setId: (Fournisseur object, int id) {
@@ -611,8 +593,11 @@ obx_int.ModelDefinition getObjectBoxModel() {
           object.crud.targetId =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 24, 0);
           object.crud.attach(store);
-          obx_int.InternalToManyAccess.setRelInfo<Fournisseur>(object.produits,
-              store, obx_int.RelInfo<Fournisseur>.toMany(1, object.id));
+          obx_int.InternalToManyAccess.setRelInfo<Fournisseur>(
+              object.approvisionnements,
+              store,
+              obx_int.RelInfo<Approvisionnement>.toOneBacklink(6, object.id,
+                  (Approvisionnement srcObject) => srcObject.fournisseur));
           return object;
         }),
     Produit: obx_int.EntityDefinition<Produit>(
@@ -621,9 +606,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         toManyRelations: (Produit object) => {
               obx_int.RelInfo<Approvisionnement>.toOneBacklink(5, object.id,
                       (Approvisionnement srcObject) => srcObject.produit):
-                  object.approvisionnements,
-              obx_int.RelInfo<Fournisseur>.toManyBacklink(1, object.id):
-                  object.fournisseurs
+                  object.approvisionnements
             },
         getId: (Produit object) => object.id,
         setId: (Produit object, int id) {
@@ -638,21 +621,14 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final descriptionOffset = object.description == null
               ? null
               : fbb.writeString(object.description!);
-          final origineOffset =
-              object.origine == null ? null : fbb.writeString(object.origine!);
           fbb.startTable(22);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, qrOffset);
           fbb.addOffset(2, imageOffset);
           fbb.addOffset(3, nomOffset);
           fbb.addOffset(4, descriptionOffset);
-          fbb.addFloat64(5, object.prixAchat);
           fbb.addFloat64(6, object.prixVente);
-          fbb.addFloat64(7, object.stock);
-          fbb.addInt64(8, object.stockUpdate?.millisecondsSinceEpoch);
-          fbb.addFloat64(10, object.stockinit);
           fbb.addFloat64(14, object.minimStock);
-          fbb.addOffset(15, origineOffset);
           fbb.addInt64(19, object.alertPeremption);
           fbb.addInt64(20, object.crud.targetId);
           fbb.finish(fbb.endTable());
@@ -661,8 +637,6 @@ obx_int.ModelDefinition getObjectBoxModel() {
         objectFromFB: (obx.Store store, ByteData fbData) {
           final buffer = fb.BufferContext(fbData);
           final rootOffset = buffer.derefObject(0);
-          final stockUpdateValue =
-              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 20);
           final idParam =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
           final qrParam = const fb.StringReader(asciiOptimization: true)
@@ -674,37 +648,21 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final descriptionParam =
               const fb.StringReader(asciiOptimization: true)
                   .vTableGetNullable(buffer, rootOffset, 12);
-          final origineParam = const fb.StringReader(asciiOptimization: true)
-              .vTableGetNullable(buffer, rootOffset, 34);
-          final prixAchatParam =
-              const fb.Float64Reader().vTableGet(buffer, rootOffset, 14, 0);
           final prixVenteParam =
               const fb.Float64Reader().vTableGet(buffer, rootOffset, 16, 0);
-          final stockParam =
-              const fb.Float64Reader().vTableGet(buffer, rootOffset, 18, 0);
           final minimStockParam =
               const fb.Float64Reader().vTableGet(buffer, rootOffset, 32, 0);
           final alertPeremptionParam =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 42, 0);
-          final stockUpdateParam = stockUpdateValue == null
-              ? null
-              : DateTime.fromMillisecondsSinceEpoch(stockUpdateValue);
-          final stockinitParam =
-              const fb.Float64Reader().vTableGet(buffer, rootOffset, 24, 0);
           final object = Produit(
               id: idParam,
               qr: qrParam,
               image: imageParam,
               nom: nomParam,
               description: descriptionParam,
-              origine: origineParam,
-              prixAchat: prixAchatParam,
               prixVente: prixVenteParam,
-              stock: stockParam,
               minimStock: minimStockParam,
-              alertPeremption: alertPeremptionParam,
-              stockUpdate: stockUpdateParam,
-              stockinit: stockinitParam);
+              alertPeremption: alertPeremptionParam);
           object.crud.targetId =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 44, 0);
           object.crud.attach(store);
@@ -713,8 +671,6 @@ obx_int.ModelDefinition getObjectBoxModel() {
               store,
               obx_int.RelInfo<Approvisionnement>.toOneBacklink(5, object.id,
                   (Approvisionnement srcObject) => srcObject.produit));
-          obx_int.InternalToManyAccess.setRelInfo<Produit>(object.fournisseurs,
-              store, obx_int.RelInfo<Fournisseur>.toManyBacklink(1, object.id));
           return object;
         }),
     Client: obx_int.EntityDefinition<Client>(
@@ -734,7 +690,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final nomOffset = fbb.writeString(object.nom);
           final phoneOffset = fbb.writeString(object.phone);
           final adresseOffset = fbb.writeString(object.adresse);
-          final descriptionOffset = fbb.writeString(object.description);
+          final descriptionOffset = object.description == null
+              ? null
+              : fbb.writeString(object.description!);
           fbb.startTable(14);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, qrOffset);
@@ -761,7 +719,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
               .vTableGet(buffer, rootOffset, 12, '');
           final descriptionParam =
               const fb.StringReader(asciiOptimization: true)
-                  .vTableGet(buffer, rootOffset, 14, '');
+                  .vTableGetNullable(buffer, rootOffset, 14);
           final object = Client(
               id: idParam,
               qr: qrParam,
@@ -1112,9 +1070,10 @@ class Fournisseur_ {
   static final crud =
       obx.QueryRelationToOne<Fournisseur, Crud>(_entities[0].properties[5]);
 
-  /// see [Fournisseur.produits]
-  static final produits =
-      obx.QueryRelationToMany<Fournisseur, Produit>(_entities[0].relations[0]);
+  /// see [Fournisseur.approvisionnements]
+  static final approvisionnements =
+      obx.QueryBacklinkToMany<Approvisionnement, Fournisseur>(
+          Approvisionnement_.fournisseur);
 }
 
 /// [Produit] entity fields to define ObjectBox queries.
@@ -1139,41 +1098,21 @@ class Produit_ {
   static final description =
       obx.QueryStringProperty<Produit>(_entities[1].properties[4]);
 
-  /// See [Produit.prixAchat].
-  static final prixAchat =
-      obx.QueryDoubleProperty<Produit>(_entities[1].properties[5]);
-
   /// See [Produit.prixVente].
   static final prixVente =
-      obx.QueryDoubleProperty<Produit>(_entities[1].properties[6]);
-
-  /// See [Produit.stock].
-  static final stock =
-      obx.QueryDoubleProperty<Produit>(_entities[1].properties[7]);
-
-  /// See [Produit.stockUpdate].
-  static final stockUpdate =
-      obx.QueryDateProperty<Produit>(_entities[1].properties[8]);
-
-  /// See [Produit.stockinit].
-  static final stockinit =
-      obx.QueryDoubleProperty<Produit>(_entities[1].properties[9]);
+      obx.QueryDoubleProperty<Produit>(_entities[1].properties[5]);
 
   /// See [Produit.minimStock].
   static final minimStock =
-      obx.QueryDoubleProperty<Produit>(_entities[1].properties[10]);
-
-  /// See [Produit.origine].
-  static final origine =
-      obx.QueryStringProperty<Produit>(_entities[1].properties[11]);
+      obx.QueryDoubleProperty<Produit>(_entities[1].properties[6]);
 
   /// See [Produit.alertPeremption].
   static final alertPeremption =
-      obx.QueryIntegerProperty<Produit>(_entities[1].properties[12]);
+      obx.QueryIntegerProperty<Produit>(_entities[1].properties[7]);
 
   /// See [Produit.crud].
   static final crud =
-      obx.QueryRelationToOne<Produit, Crud>(_entities[1].properties[13]);
+      obx.QueryRelationToOne<Produit, Crud>(_entities[1].properties[8]);
 
   /// see [Produit.approvisionnements]
   static final approvisionnements =

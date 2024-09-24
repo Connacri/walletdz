@@ -41,26 +41,17 @@ class User {
 @Entity()
 class Produit {
   int id;
+  @Unique()
   String? qr;
   String? image;
   String nom;
   String? description;
-  String? origine;
-  double prixAchat;
   double prixVente;
-  double stock;
   double minimStock;
-  double stockinit;
   int alertPeremption;
-
-  @Property(type: PropertyType.date)
-  DateTime? stockUpdate;
 
   @Backlink()
   final approvisionnements = ToMany<Approvisionnement>();
-
-  @Backlink()
-  final fournisseurs = ToMany<Fournisseur>();
 
   final crud = ToOne<Crud>();
 
@@ -70,15 +61,18 @@ class Produit {
     this.image,
     required this.nom,
     this.description,
-    this.origine,
-    required this.prixAchat,
     required this.prixVente,
-    required this.stock,
     required this.minimStock,
     required this.alertPeremption,
-    this.stockUpdate,
-    required this.stockinit,
   });
+  // // Getters pour calculer les valeurs dynamiques
+  // double get prixAchat => approvisionnements.isNotEmpty
+  //     ? approvisionnements.map((a) => a.prixAchat).reduce((a, b) => a + b) /
+  //         approvisionnements.length
+  //     : 0;
+
+  double get stock => approvisionnements.fold(0, (sum, a) => sum + a.quantite);
+
   factory Produit.fromJson(Map<String, dynamic> json) {
     return Produit(
       id: json['id'] ?? 0,
@@ -86,16 +80,9 @@ class Produit {
       image: json['image'],
       nom: json['nom'] ?? '',
       description: json['description'] ?? '',
-      origine: json['origine'] ?? '',
-      prixAchat: (json['prixAchat'] ?? 0).toDouble(),
       prixVente: (json['prixVente'] ?? 0).toDouble(),
-      stock: (json['stock'] ?? 0).toDouble(),
       minimStock: (json['minimStock'] ?? 0).toDouble(),
       alertPeremption: (json['alertPeremption']).toInt(),
-      stockinit: (json['stockInit'] ?? 0).toDouble(),
-      stockUpdate: json['stockUpdate'] != null
-          ? DateTime.parse(json['stockUpdate'])
-          : null,
     );
   }
 }
@@ -123,7 +110,7 @@ class Crud {
     required this.deletedBy,
     this.dateCreation,
     required this.derniereModification,
-    required this.dateDeleting,
+    this.dateDeleting,
   });
   factory Crud.fromJson(Map<String, dynamic> json) {
     return Crud(
@@ -179,14 +166,16 @@ class Approvisionnement {
 @Entity()
 class Fournisseur {
   int id;
+  @Unique()
   String? qr;
   String nom;
   String? phone;
   String? adresse;
 
-  final produits = ToMany<Produit>();
-
   final crud = ToOne<Crud>();
+
+  @Backlink()
+  final approvisionnements = ToMany<Approvisionnement>();
 
   Fournisseur({
     this.id = 0,

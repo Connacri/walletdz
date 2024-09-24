@@ -318,6 +318,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.1"
+  country_flags:
+    dependency: "direct main"
+    description:
+      name: country_flags
+      sha256: "0c2d9f0673ad0a5ec148f5b264c9e7338208b83000336bb4db8d189cd50df2bb"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
   cross_file:
     dependency: transitive
     description:
@@ -1106,6 +1114,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.3.1"
+  jovial_misc:
+    dependency: transitive
+    description:
+      name: jovial_misc
+      sha256: f6e64f789ee311025bb367be9c9afe9759f76dd8209070b7f38e735b5f529eb1
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.8.5"
+  jovial_svg:
+    dependency: transitive
+    description:
+      name: jovial_svg
+      sha256: "893dab3d9bbb8dd03e8225d457004950b9cf828d0009fd14c185cedacb96839c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.22"
   js:
     dependency: transitive
     description:
@@ -1354,6 +1378,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
+  openfoodfacts:
+    dependency: "direct main"
+    description:
+      name: openfoodfacts
+      sha256: "9ae8bfaed74c0e59bfe2cd217e2ad805d2d52710ec563861ea728176b8cd419f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.15.0"
   package_config:
     dependency: transitive
     description:
@@ -1482,6 +1514,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.8"
+  pointycastle:
+    dependency: transitive
+    description:
+      name: pointycastle
+      sha256: "4be0097fcf3fd3e8449e53730c631200ebc7b88016acecab2b0da2f0149222fe"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.9.1"
   polylabel:
     dependency: transitive
     description:
@@ -1502,10 +1542,10 @@ packages:
     dependency: "direct main"
     description:
       name: postgres
-      sha256: b39a9b4c07430b2f8c8666ef865b556ffac843b75e44ead04741d0fbf851d427
+      sha256: bc3a36f9960d822af1ac4c2e0a32c4e7a3e426d2ce4500c11afca40f53c34612
       url: "https://pub.dev"
     source: hosted
-    version: "3.3.0"
+    version: "3.4.0"
   postgrest:
     dependency: transitive
     description:
@@ -1819,18 +1859,18 @@ packages:
     dependency: "direct main"
     description:
       name: syncfusion_flutter_barcodes
-      sha256: "6c787fe28f89427be291bae8ee6aa6d563e8ffb28511846ed2dbcace32fc0d0f"
+      sha256: d0786dd5c2638b9a73fa287d1946bce71c76b22f3055eba25a6a2aa9d50fca87
       url: "https://pub.dev"
     source: hosted
-    version: "26.2.14"
+    version: "27.1.48"
   syncfusion_flutter_core:
     dependency: transitive
     description:
       name: syncfusion_flutter_core
-      sha256: "6e67726b85812afc7105725a23620b876ab7f6b04b8410e211330ffb8c2cdbe8"
+      sha256: "4347f4d2f5d89461df2c53e6fbf53aef38c7f05ed79b0760d935fb1ec836213b"
       url: "https://pub.dev"
     source: hosted
-    version: "26.2.14"
+    version: "27.1.48"
   synchronized:
     dependency: transitive
     description:
