@@ -42,6 +42,7 @@ class User {
 class Produit {
   int id;
   @Unique()
+  @Index() // Indexation du QR pour une recherche rapide
   String? qr;
   String? image;
   String nom;
@@ -90,9 +91,9 @@ class Produit {
 @Entity()
 class Crud {
   int id;
-  int createdBy;
+  int? createdBy;
   int updatedBy;
-  int deletedBy;
+  int? deletedBy;
 
   @Property(type: PropertyType.date)
   DateTime? dateCreation;
@@ -105,9 +106,9 @@ class Crud {
 
   Crud({
     this.id = 0,
-    required this.createdBy,
+    this.createdBy,
     required this.updatedBy,
-    required this.deletedBy,
+    this.deletedBy,
     this.dateCreation,
     required this.derniereModification,
     this.dateDeleting,

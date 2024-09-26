@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -9,6 +10,12 @@ import '../objectBox/pages/FactureListScreen.dart';
 import '../../MyListLotties.dart';
 import 'Entity.dart';
 import 'MyProviders.dart';
+import 'Utils/ads/AnchoredAdaptiveExample.dart';
+import 'Utils/ads/FluidExample.dart';
+import 'Utils/ads/InlineAdaptiveExample.dart';
+import 'Utils/ads/NativeTemplateExample.dart';
+import 'Utils/ads/WebViewExample.dart';
+import 'Utils/ads/homeExemple.dart';
 import 'Utils/mobile_scanner/main.dart';
 import 'classeObjectBox.dart';
 import 'hash.dart';
@@ -47,6 +54,8 @@ class MyMain extends StatelessWidget {
   }
 }
 
+const int maxFailedLoadAttempts = 3;
+
 class MyApp9 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -67,6 +76,8 @@ class MyApp9 extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => ClientProvider(objectBox),
         ),
+        ChangeNotifierProvider(create: (_) => FakeDataGenerator()),
+        ChangeNotifierProvider(create: (_) => AdProvider()),
       ],
       child: MaterialApp(
         title: 'POS',
@@ -128,9 +139,11 @@ class adaptiveHome extends StatefulWidget {
 class _adaptiveHomeState extends State<adaptiveHome> {
   double prixMin = 0;
   double prixMax = 0;
-  final TextEditingController _productController = TextEditingController();
-  final TextEditingController _supplierController = TextEditingController();
+  final TextEditingController _userController =
+      TextEditingController(text: '20');
   final TextEditingController _clientController = TextEditingController();
+  final TextEditingController _supplierController = TextEditingController();
+  final TextEditingController _productController = TextEditingController();
   final TextEditingController _approviController = TextEditingController();
 
   int lengthPin = 10;
@@ -207,59 +220,66 @@ class _adaptiveHomeState extends State<adaptiveHome> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        final objectBox = Provider.of<ObjectBox>(context, listen: false);
+        final fakeDataGenerator = Provider.of<FakeDataGenerator>(context);
         return AlertDialog(
-          title: Text('Définir les données factices'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _productController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'Nombre de produits'),
-              ),
-              TextField(
-                controller: _approviController,
-                keyboardType: TextInputType.number,
-                decoration:
-                    InputDecoration(labelText: 'Nombre d\'Approvisionnement'),
-              ),
-              TextField(
-                controller: _supplierController,
-                keyboardType: TextInputType.number,
-                decoration:
-                    InputDecoration(labelText: 'Nombre de fournisseurs'),
-              ),
-              TextField(
-                controller: _clientController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'Nombre de clients'),
-              ),
-            ],
+          title: Text('Générer des données factices'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                    controller: _userController,
+                    decoration:
+                        InputDecoration(labelText: 'Nombre d\'utilisateurs')),
+                TextField(
+                    controller: _clientController,
+                    decoration:
+                        InputDecoration(labelText: 'Nombre de clients')),
+                TextField(
+                    controller: _supplierController,
+                    decoration:
+                        InputDecoration(labelText: 'Nombre de fournisseurs')),
+                TextField(
+                    controller: _productController,
+                    decoration:
+                        InputDecoration(labelText: 'Nombre de produits')),
+                TextField(
+                    controller: _approviController,
+                    decoration: InputDecoration(
+                        labelText: 'Nombre d\'approvisionnements')),
+              ],
+            ),
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: fakeDataGenerator.isGenerating
+                  ? null
+                  : () => Navigator.of(context).pop(),
               child: Text('Annuler'),
             ),
-            TextButton(
-              onPressed: () {
-                final int products = int.tryParse(_productController.text) ?? 0;
-                final int suppliers =
-                    int.tryParse(_supplierController.text) ?? 0;
-                final int clients = int.tryParse(_clientController.text) ?? 0;
-                final int approvi = int.tryParse(_approviController.text) ?? 0;
+            ElevatedButton(
+              onPressed: fakeDataGenerator.isGenerating
+                  ? null
+                  : () {
+                      final int users =
+                          int.tryParse(_userController.text) ?? 20;
+                      final int clients =
+                          int.tryParse(_clientController.text) ?? 0;
+                      final int suppliers =
+                          int.tryParse(_supplierController.text) ?? 0;
+                      final int products =
+                          int.tryParse(_productController.text) ?? 0;
+                      final int approvi =
+                          int.tryParse(_approviController.text) ?? 0;
 
-                widget.objectBox.fillWithFakeData(
-                    20, clients, suppliers, products, approvi);
-                // ScaffoldMessenger.of(context).showSnackBar(
-                //   SnackBar(content: Text('Données factices ajoutées !')),
-                // );
-
-                Navigator.of(context).pop();
-              },
-              child: Text('OK'),
+                      fakeDataGenerator.generateFakeData(context, objectBox,
+                          users, clients, suppliers, products, approvi);
+                      Navigator.of(context).pop();
+                    },
+              child: fakeDataGenerator.isGenerating
+                  ? CircularProgressIndicator()
+                  : Text('Générer'),
             ),
           ],
         );
@@ -287,12 +307,19 @@ class _adaptiveHomeState extends State<adaptiveHome> {
             appBar: AppBar(
               title: Text('POS'),
               actions: [
-                // ElevatedButton(
+                IconButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (ctx) => MyHomePageAds()));
+                  },
+                  icon: Icon(Icons.ads_click, color: Colors.deepPurple),
+                ),
+                // IconButton(
                 //   onPressed: () {
                 //     // Appelez la méthode ici sans essayer d'utiliser sa valeur de retour
-                //     widget.objectBox.ajouterQuantitesAleatoires();
+                //     widget.objectBox..ajouterQuantitesAleatoires();
                 //   },
-                //   child: Text('Ajouter Quantités Aléatoires'),
+                //  icon: Icon(Icons.qr_code_scanner, color: Colors.blue),
                 // ),
                 ElevatedButton(
                   onPressed: () async {
@@ -447,6 +474,113 @@ class _adaptiveHomeState extends State<adaptiveHome> {
             appBar: AppBar(
               title: Text('POS'),
               actions: [
+                IconButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (ctx) => MyHomePageAds()));
+                  },
+                  icon: Icon(Icons.ads_click, color: Colors.deepPurple),
+                ),
+                // PopupMenuButton<String>(
+                //   onSelected: (String result) {
+                //     switch (result) {
+                //       case interstitialButtonText:
+                //         _showInterstitialAd();
+                //         break;
+                //       case rewardedButtonText:
+                //         _showRewardedAd();
+                //         break;
+                //       case rewardedInterstitialButtonText:
+                //         _showRewardedInterstitialAd();
+                //         break;
+                //       case fluidButtonText:
+                //         Navigator.push(
+                //           context,
+                //           MaterialPageRoute(
+                //               builder: (context) => FluidExample()),
+                //         );
+                //         break;
+                //       case inlineAdaptiveButtonText:
+                //         Navigator.push(
+                //           context,
+                //           MaterialPageRoute(
+                //               builder: (context) => InlineAdaptiveExample()),
+                //         );
+                //         break;
+                //       case anchoredAdaptiveButtonText:
+                //         Navigator.push(
+                //           context,
+                //           MaterialPageRoute(
+                //               builder: (context) => AnchoredAdaptiveExample()),
+                //         );
+                //         break;
+                //       case nativeTemplateButtonText:
+                //         Navigator.push(
+                //           context,
+                //           MaterialPageRoute(
+                //               builder: (context) => NativeTemplateExample()),
+                //         );
+                //         break;
+                //       case webviewExampleButtonText:
+                //         Navigator.push(
+                //           context,
+                //           MaterialPageRoute(
+                //               builder: (context) => WebViewExample()),
+                //         );
+                //         break;
+                //       case adInspectorButtonText:
+                //         MobileAds.instance.openAdInspector((error) => log(
+                //             ('Ad Inspector ' +
+                //                     (error == null
+                //                         ? 'opened.'
+                //                         : 'error: ' + (error.message ?? '')))
+                //                 as num)); /////////////////*********************hna pas sure
+                //         break;
+                //       default:
+                //         throw AssertionError('unexpected button: $result');
+                //     }
+                //   },
+                //   itemBuilder: (BuildContext context) =>
+                //       <PopupMenuEntry<String>>[
+                //     PopupMenuItem<String>(
+                //       value: interstitialButtonText,
+                //       child: Text(interstitialButtonText),
+                //     ),
+                //     PopupMenuItem<String>(
+                //       value: rewardedButtonText,
+                //       child: Text(rewardedButtonText),
+                //     ),
+                //     PopupMenuItem<String>(
+                //       value: rewardedInterstitialButtonText,
+                //       child: Text(rewardedInterstitialButtonText),
+                //     ),
+                //     PopupMenuItem<String>(
+                //       value: fluidButtonText,
+                //       child: Text(fluidButtonText),
+                //     ),
+                //     PopupMenuItem<String>(
+                //       value: inlineAdaptiveButtonText,
+                //       child: Text(inlineAdaptiveButtonText),
+                //     ),
+                //     PopupMenuItem<String>(
+                //       value: anchoredAdaptiveButtonText,
+                //       child: Text(anchoredAdaptiveButtonText),
+                //     ),
+                //     PopupMenuItem<String>(
+                //       value: nativeTemplateButtonText,
+                //       child: Text(nativeTemplateButtonText),
+                //     ),
+                //     PopupMenuItem<String>(
+                //       value: webviewExampleButtonText,
+                //       child: Text(webviewExampleButtonText),
+                //     ),
+                //     PopupMenuItem<String>(
+                //       value: adInspectorButtonText,
+                //       child: Text(adInspectorButtonText),
+                //     ),
+                //   ],
+                // ),
+
                 IconButton(
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(

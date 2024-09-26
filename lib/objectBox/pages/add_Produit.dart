@@ -484,103 +484,99 @@ class _add_ProduitState extends State<add_Produit> {
   }
 
   IconButton buildButton_Edit_Add(
-      BuildContext context, CommerceProvider produitProvider, _isFinded) {
+      BuildContext context, CommerceProvider produitProvider, bool _isFinded) {
     return IconButton(
       onPressed: () async {
-        final dateFormat = DateFormat('dd MMM yyyy', 'fr');
-        // final datePeremption =
-        //     dateFormat.parseLoose(_datePeremptionController.text);
         final produitDejaExist =
             await produitProvider.getProduitByQr(_serialController.text);
+
         if (_formKey.currentState!.validate()) {
           String imageUrl = '';
-//******************************************************************************//
-          if (produitDejaExist != null &&
-              widget.specifiquefournisseur == null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'QR / Code Barre Produit existe déja !',
-                  style: TextStyle(color: Colors.white),
-                ),
-                backgroundColor: Colors.red,
-              ),
+
+          // Gestion de l'image du produit
+          if (_image != null) {
+            imageUrl = await uploadImageToSupabase(_image!, _existingImageUrl);
+          } else if (_existingImageUrl != null &&
+              _existingImageUrl!.isNotEmpty) {
+            imageUrl = _existingImageUrl!;
+          }
+
+          // Création du produit s'il n'existe pas déjà
+          final produit = Produit(
+            qr: _serialController.text,
+            image: imageUrl,
+            nom: _nomController.text,
+            description: _descriptionController.text,
+            prixVente: double.parse(_prixVenteController.text),
+            alertPeremption: int.parse(_alertPeremptionController.text),
+            minimStock: double.parse(_minimStockController.text),
+          )..crud.target = Crud(
+              createdBy: 0,
+              updatedBy: 0,
+              deletedBy: 0,
+              dateCreation: DateTime.now(),
+              derniereModification: DateTime.now(),
+              dateDeleting: null,
             );
-            print('hadi produitDejaExist != null 111111111111111111');
-          } else {
-            if (_image != null) {
-              imageUrl =
-                  await uploadImageToSupabase(_image!, _existingImageUrl);
-            } else if (_existingImageUrl != null &&
-                _existingImageUrl!.isNotEmpty) {
-              imageUrl = _existingImageUrl!;
-            }
-            print('hadi produitDejaExist == null 2222222222222222222');
-            print(_tempProduitId);
-          }
-////////////////////////////////////////////////////////////////////////////////
-          if (mounted) {
-            final produit = Produit(
-              qr: _serialController.text,
-              image: imageUrl,
-              nom: _nomController.text,
-              description: _descriptionController.text,
-              // prixAchat: double.parse(_prixAchatController.text),
-              prixVente: double.parse(_prixVenteController.text),
-              //stock: double.parse(_stockController.text),
-              alertPeremption: int.parse(_alertPeremptionController.text),
-              minimStock: double.parse(_minimStockController.text),
-            )..crud.target = Crud(
-                createdBy: 0,
-                updatedBy: 0,
-                deletedBy: 0,
-                dateCreation: DateTime.now(),
-                derniereModification: DateTime.now(),
-                dateDeleting: null,
-              );
 
-            if (widget.specifiquefournisseur == null) {
-              if (produitDejaExist != null) {
-                return;
-              } else {
-                produitProvider.ajouterProduit(
-                  produit,
-                  _selectedFournisseurs,
-                  approvisionnements,
-                );
-                // await ajouterProduitToSupabase(
-                //     produit);
-                print('Nouveau produit ajouté');
-                print(produit);
-              }
+          // Ajout des approvisionnements depuis _approvisionnementTemporaire
+          for (int i = 0; i < _approvisionnementTemporaire.length; i++) {
+            var approvisionnement = _approvisionnementTemporaire[i];
+
+            // Associer le produit à chaque approvisionnement
+            approvisionnement.produit.target = produit;
+
+            // Associer le fournisseur correspondant à chaque approvisionnement
+            if (i < _selectedFournisseurs.length) {
+              approvisionnement.fournisseur.target = _selectedFournisseurs[i];
+            }
+
+            // Ajouter les données Crud pour chaque approvisionnement
+            approvisionnement.crud.target = Crud(
+              createdBy: 0,
+              updatedBy: 0,
+              deletedBy: 0,
+              dateCreation: DateTime.now(),
+              derniereModification: DateTime.now(),
+            );
+          }
+
+          // Vérification si le fournisseur est spécifique
+          if (widget.specifiquefournisseur == null) {
+            if (produitDejaExist == null) {
+              // Nouveau produit
+              produitProvider.ajouterProduit(
+                  produit, _selectedFournisseurs, _approvisionnementTemporaire);
+              print('Nouveau produit ajouté');
             } else {
-              if (produitDejaExist != null) {
-                // Mise à jour d'un produit existant
-                // produitProvider.updateProduitById(
-                //     int.parse(_tempProduitId), produit,
-                //     fournisseurs: [
-                //       ..._selectedFournisseurs,
-                //       ...[widget.specifiquefournisseur!]
-                //     ]);
-                // await updateProduitToSupabase(int.parse(_tempProduitId),
-                //     produit);
-                print('Produit existant mis à jour');
-              } else {
-                produitProvider.ajouterProduit(
-                    produit,
-                    [
-                      ..._selectedFournisseurs,
-                      ...[widget.specifiquefournisseur!],
-                    ],
-                    approvisionnements);
-                // await ajouterProduitToSupabase(produit);
-                print('Nouveau produit ajouté');
-              }
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('QR / Code Barre Produit existe déjà !'),
+                  backgroundColor: Colors.red,
+                ),
+              );
             }
-
-            _formKey.currentState!.save();
-            produitDejaExist != null ? null : Navigator.of(context).pop();
+          } else {
+            if (produitDejaExist == null) {
+              // Nouveau produit avec fournisseur spécifique
+              produitProvider.ajouterProduit(
+                produit,
+                [
+                  ..._selectedFournisseurs,
+                  widget.specifiquefournisseur!,
+                ],
+                _approvisionnementTemporaire,
+              );
+              print('Nouveau produit ajouté avec fournisseur spécifique');
+            } else {
+              // Mise à jour d'un produit existant
+              // produitProvider.updateProduit(produitDejaExist, produit, _approvisionnementTemporaire);
+              print('Produit existant mis à jour');
+            }
           }
+
+          _formKey.currentState!.save();
+          produitDejaExist == null ? Navigator.of(context).pop() : null;
         }
       },
       icon: Icon(
@@ -588,6 +584,110 @@ class _add_ProduitState extends State<add_Produit> {
       ),
     );
   }
+
+//   IconButton buildButton_Edit_Add(
+//       BuildContext context, CommerceProvider produitProvider, _isFinded) {
+//     return IconButton(
+//       onPressed: () async {
+//         final dateFormat = DateFormat('dd MMM yyyy', 'fr');
+//         // final datePeremption =
+//         //     dateFormat.parseLoose(_datePeremptionController.text);
+//         final produitDejaExist =
+//             await produitProvider.getProduitByQr(_serialController.text);
+//         if (_formKey.currentState!.validate()) {
+//           String imageUrl = '';
+// //******************************************************************************//
+//           if (produitDejaExist != null &&
+//               widget.specifiquefournisseur == null) {
+//             ScaffoldMessenger.of(context).showSnackBar(
+//               SnackBar(
+//                 content: Text(
+//                   'QR / Code Barre Produit existe déja !',
+//                   style: TextStyle(color: Colors.white),
+//                 ),
+//                 backgroundColor: Colors.red,
+//               ),
+//             );
+//             print('hadi produitDejaExist != null 111111111111111111');
+//           } else {
+//             if (_image != null) {
+//               imageUrl =
+//                   await uploadImageToSupabase(_image!, _existingImageUrl);
+//             } else if (_existingImageUrl != null &&
+//                 _existingImageUrl!.isNotEmpty) {
+//               imageUrl = _existingImageUrl!;
+//             }
+//             print('hadi produitDejaExist == null 2222222222222222222');
+//             print(_tempProduitId);
+//           }
+// ////////////////////////////////////////////////////////////////////////////////
+//           if (mounted) {
+//             final produit = Produit(
+//               qr: _serialController.text,
+//               image: imageUrl,
+//               nom: _nomController.text,
+//               description: _descriptionController.text,
+//               prixVente: double.parse(_prixVenteController.text),
+//               alertPeremption: int.parse(_alertPeremptionController.text),
+//               minimStock: double.parse(_minimStockController.text),
+//             )..crud.target = Crud(
+//                 createdBy: 0,
+//                 updatedBy: 0,
+//                 deletedBy: 0,
+//                 dateCreation: DateTime.now(),
+//                 derniereModification: DateTime.now(),
+//                 dateDeleting: null,
+//               );
+//
+//             if (widget.specifiquefournisseur == null) {
+//               if (produitDejaExist != null) {
+//                 return;
+//               } else {
+//                 produitProvider.ajouterProduit(
+//                   produit,
+//                   _selectedFournisseurs,
+//                   approvisionnements,
+//                 );
+//                 // await ajouterProduitToSupabase(
+//                 //     produit);
+//                 print('Nouveau produit ajouté');
+//                 print(produit);
+//               }
+//             } else {
+//               if (produitDejaExist != null) {
+//                 // Mise à jour d'un produit existant
+//                 // produitProvider.updateProduitById(
+//                 //     int.parse(_tempProduitId), produit,
+//                 //     fournisseurs: [
+//                 //       ..._selectedFournisseurs,
+//                 //       ...[widget.specifiquefournisseur!]
+//                 //     ]);
+//                 // await updateProduitToSupabase(int.parse(_tempProduitId),
+//                 //     produit);
+//                 print('Produit existant mis à jour');
+//               } else {
+//                 produitProvider.ajouterProduit(
+//                     produit,
+//                     [
+//                       ..._selectedFournisseurs,
+//                       ...[widget.specifiquefournisseur!],
+//                     ],
+//                     approvisionnements);
+//                 // await ajouterProduitToSupabase(produit);
+//                 print('Nouveau produit ajouté');
+//               }
+//             }
+//
+//             _formKey.currentState!.save();
+//             produitDejaExist != null ? null : Navigator.of(context).pop();
+//           }
+//         }
+//       },
+//       icon: Icon(
+//         _isFinded ? Icons.edit : Icons.check,
+//       ),
+//     );
+//   }
 
   Future<String> uploadImageToSupabase(File image, String? oldImageUrl) async {
     final String bucket = 'products';
@@ -666,47 +766,6 @@ class _add_ProduitState extends State<add_Produit> {
       }
     });
   }
-  // @override
-  // Widget build(BuildContext context) {
-  //   final produitProvider =
-  //       Provider.of<CommerceProvider>(context, listen: false);
-  //   final double largeur;
-  //   if (kIsWeb || Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-  //     // Pour le web
-  //     largeur = MediaQuery.of(context).size.width / 3;
-  //   } else if (Platform.isAndroid || Platform.isIOS) {
-  //     // Pour Android et iOS
-  //     largeur = MediaQuery.of(context).size.width;
-  //   } else {
-  //     // Pour les autres plateformes (Desktop)
-  //     largeur = MediaQuery.of(context).size.width / 3;
-  //   }
-  //   return Scaffold(
-  //     appBar: buildAppBar(context, produitProvider),
-  //     body: Form(
-  //       key: _formKey,
-  //       child: SingleChildScrollView(
-  //         padding: EdgeInsets.symmetric(
-  //           horizontal: 15,
-  //         ),
-  //         child: Platform.isAndroid || Platform.isIOS
-  //             ? Column(
-  //                 children: [
-  //                   buildColumnForm(largeur),
-  //                   buildColumnPicSuplyers(largeur, context),
-  //                 ],
-  //               )
-  //             : Row(
-  //                 crossAxisAlignment: CrossAxisAlignment.start,
-  //                 children: [
-  //                   Expanded(child: buildColumnForm(largeur)),
-  //                   Expanded(child: buildColumnPicSuplyers(largeur, context)),
-  //                 ],
-  //               ),
-  //       ),
-  //     ),
-  //   );
-  // }
 
   Column buildColumnForm(double largeur) {
     return Column(
@@ -756,11 +815,15 @@ class _add_ProduitState extends State<add_Produit> {
         ), //switch recherche auto
         _serialController.text.isNotEmpty
             ? FlagDetector(
-                barcode: _serialController
-                    .text) // Afficher FlagDetector avec le code-barres
+                barcode: _serialController.text,
+                height: 30,
+                width: 50,
+              ) // Afficher FlagDetector avec le code-barres
             : FlagDetector(
-                barcode: _serialController
-                    .text), // Ne rien afficher si le champ est vide
+                barcode: _serialController.text,
+                height: 30,
+                width: 50,
+              ), // Ne rien afficher si le champ est vide
         SizedBox(height: 15),
         Container(
           width: largeur,
@@ -977,23 +1040,7 @@ class _add_ProduitState extends State<add_Produit> {
                       });
                     },
                   )
-                // TextButton(
-                //             onPressed: () {
-                //               setState(() {
-                //                 _showAppro = true;
-                //               });
-                //             },
-                //             child: Text('Approvisionnement'),
-                //           )
                 : Container()
-            // IconButton(
-            //         icon: Icon(Icons.add, color: Colors.red),
-            //         onPressed: () {
-            //           setState(() {
-            //             _showAppro = true;
-            //           });
-            //         },
-            //       )
             : Container(
                 padding:
                     EdgeInsets.all(10.0), // Espacement à l'intérieur du cadre
@@ -1016,117 +1063,6 @@ class _add_ProduitState extends State<add_Produit> {
                         });
                       },
                     ),
-
-                    // Padding(
-                    //   padding: const EdgeInsets.all(10.0),
-                    //   child: Container(
-                    //     width: largeur,
-                    //     child: Row(
-                    //       children: [
-                    //         Expanded(
-                    //           child: TextFormField(
-                    //             enabled: _isFirstFieldFilled,
-                    //             controller: _minimStockController,
-                    //             textAlign: TextAlign.center,
-                    //             decoration: InputDecoration(
-                    //               labelText: 'Stock Alert',
-                    //
-                    //               border: OutlineInputBorder(
-                    //                 borderRadius: BorderRadius.circular(8.0),
-                    //                 borderSide:
-                    //                     BorderSide.none, // Supprime le contour
-                    //               ),
-                    //               enabledBorder: OutlineInputBorder(
-                    //                 borderRadius: BorderRadius.circular(8.0),
-                    //                 borderSide: BorderSide
-                    //                     .none, // Supprime le contour en état normal
-                    //               ),
-                    //               focusedBorder: OutlineInputBorder(
-                    //                 borderRadius: BorderRadius.circular(8.0),
-                    //                 borderSide: BorderSide
-                    //                     .none, // Supprime le contour en état focus
-                    //               ),
-                    //               //border: InputBorder.none,
-                    //               filled: true,
-                    //               contentPadding: EdgeInsets.all(15),
-                    //             ),
-                    //             keyboardType: TextInputType.number,
-                    //             validator: (value) {
-                    //               if (value == null || value.isEmpty) {
-                    //                 return 'Veuillez entrer le Stock Minimal';
-                    //               }
-                    //               return null;
-                    //             },
-                    //           ),
-                    //         ), // stock alert
-                    //         SizedBox(width: 10),
-                    //         Expanded(
-                    //           child: TextFormField(
-                    //             enabled: _isFirstFieldFilled,
-                    //             controller: _alertPeremptionController,
-                    //             textAlign: TextAlign.center,
-                    //             decoration: InputDecoration(
-                    //               labelText: 'Alert Péremption',
-                    //               border: OutlineInputBorder(
-                    //                 borderRadius: BorderRadius.circular(8.0),
-                    //                 borderSide:
-                    //                     BorderSide.none, // Supprime le contour
-                    //               ),
-                    //               enabledBorder: OutlineInputBorder(
-                    //                 borderRadius: BorderRadius.circular(8.0),
-                    //                 borderSide: BorderSide
-                    //                     .none, // Supprime le contour en état normal
-                    //               ),
-                    //               focusedBorder: OutlineInputBorder(
-                    //                 borderRadius: BorderRadius.circular(8.0),
-                    //                 borderSide: BorderSide
-                    //                     .none, // Supprime le contour en état focus
-                    //               ),
-                    //               //border: InputBorder.none,
-                    //               filled: true,
-                    //               contentPadding: EdgeInsets.all(15),
-                    //             ),
-                    //             // keyboardType: TextInputType.number,
-                    //             //  validator: (value) {
-                    //             //    if (value == null || value.isEmpty) {
-                    //             //      return 'Veuillez entrer le prix d\'achat';
-                    //             //    }
-                    //             //    return null;
-                    //             //  },
-                    //             keyboardType: TextInputType.numberWithOptions(
-                    //                 decimal: false),
-                    //             inputFormatters: [
-                    //               FilteringTextInputFormatter.allow(
-                    //                   RegExp(r'^\d+\.?\d{0,2}')),
-                    //             ],
-                    //             // onChanged: (value) {
-                    //             //   if (value.isNotEmpty) {
-                    //             //     double? parsed = double.tryParse(value);
-                    //             //     if (parsed != null) {
-                    //             //       _prixAchatController.text = parsed.toStringAsFixed(2);
-                    //             //       _prixAchatController.selection =
-                    //             //           TextSelection.fromPosition(
-                    //             //         TextPosition(
-                    //             //             offset: _prixAchatController.text.length),
-                    //             //       );
-                    //             //     }
-                    //             //   }
-                    //             // },
-                    //             validator: (value) {
-                    //               if (value == null || value.isEmpty) {
-                    //                 return 'Veuillez entrer Le nombre de jours pour alerter la date de peremption';
-                    //               }
-                    //               // if (double.tryParse(value) == null) {
-                    //               //   return 'Veuillez entrer un prix valide';
-                    //               // }
-                    //               // return null;
-                    //             },
-                    //           ),
-                    //         ),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ), //alert peremption
                     SizedBox(height: 10),
                     Container(
                       width: -5 + largeur / 2,
@@ -1309,8 +1245,7 @@ class _add_ProduitState extends State<add_Produit> {
                           ), // stock alert
                         ],
                       ),
-                    ),
-                    // stock
+                    ), // stock
                     SizedBox(height: 10),
                     Container(
                       width: largeur,
@@ -1441,40 +1376,8 @@ class _add_ProduitState extends State<add_Produit> {
                           ),
                         ],
                       ),
-                    ),
-                    // date de peremption
+                    ), // date de peremption
                     SizedBox(height: 10),
-                    IconButton(
-                      padding: EdgeInsets.all(10),
-                      icon: Icon(_isEditing ? Icons.edit : Icons.send,
-                          color: _isEditing ? Colors.blue : Colors.green),
-                      onPressed: saveApprovisionnement,
-                      //     () {
-                      //   setState(() {
-                      //     Approvisionnement nouveauApprovisionnement =
-                      //         Approvisionnement(
-                      //       quantite: double.parse(_stockController.text) ?? 0.0,
-                      //       prixAchat:
-                      //           double.parse(_prixAchatController.text) ?? 0.0,
-                      //       datePeremption: DateFormat('dd MMMM yyyy', 'fr_FR')
-                      //           .parse(_datePeremptionController
-                      //               .text), // Utilisation de DateFormat
-                      //     );
-                      //     ajouterApprovisionnementTemporaire(
-                      //         nouveauApprovisionnement);
-                      //     // Mettre à jour le stock global
-                      //
-                      //     stockGlobale += nouveauApprovisionnement.quantite;
-                      //     _stockController.clear();
-                      //     _prixAchatController.clear();
-                      //     _datePeremptionController.clear();
-                      //   });
-                      // },
-                    ),
-                    // ElevatedButton(
-                    //   onPressed: saveApprovisionnement,
-                    //   child: Text(_isEditing ? 'Mettre à jour' : 'Ajouter'),
-                    // ),
                     Container(
                       width: largeur,
                       child: Wrap(
@@ -1534,6 +1437,7 @@ class _add_ProduitState extends State<add_Produit> {
                                 });
                               },
                               child: RawChip(
+                                labelPadding: EdgeInsets.zero,
                                 padding: EdgeInsets.all(7),
                                 label: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -1580,6 +1484,39 @@ class _add_ProduitState extends State<add_Produit> {
                         ],
                       ),
                     ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ElevatedButton.icon(
+                        icon: Icon(_isEditing ? Icons.edit : Icons.send,
+                            color: _isEditing ? Colors.blue : Colors.green),
+                        onPressed: saveApprovisionnement,
+                        label: Text(_isEditing
+                            ? 'Modifier le Stock'
+                            : 'Ajouter ce Stock'),
+                        //     () {
+                        //   setState(() {
+                        //     Approvisionnement nouveauApprovisionnement =
+                        //         Approvisionnement(
+                        //       quantite: double.parse(_stockController.text) ?? 0.0,
+                        //       prixAchat:
+                        //           double.parse(_prixAchatController.text) ?? 0.0,
+                        //       datePeremption: DateFormat('dd MMMM yyyy', 'fr_FR')
+                        //           .parse(_datePeremptionController
+                        //               .text), // Utilisation de DateFormat
+                        //     );
+                        //     ajouterApprovisionnementTemporaire(
+                        //         nouveauApprovisionnement);
+                        //     // Mettre à jour le stock global
+                        //
+                        //     stockGlobale += nouveauApprovisionnement.quantite;
+                        //     _stockController.clear();
+                        //     _prixAchatController.clear();
+                        //     _datePeremptionController.clear();
+                        //   });
+                        // },
+                      ),
+                    ),
+
                     Flexible(
                       child: Container(
                         width: largeur,
@@ -1766,6 +1703,7 @@ class _add_ProduitState extends State<add_Produit> {
               )
             : Container(),
         SizedBox(height: 20),
+
         //buildButton_Edit_Add(context, produitProvider, _isFinded),
         SizedBox(
           height: 50,

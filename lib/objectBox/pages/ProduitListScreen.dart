@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../../objectbox.g.dart';
 import '../Entity.dart';
 import '../MyProviders.dart';
+import '../Utils/country_flags.dart';
 import '../classeObjectBox.dart';
 import 'Edit_Produit.dart';
 import 'FournisseurListScreen.dart';
@@ -104,6 +105,301 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
           )
         ],
       ),
+      // body: Consumer<CommerceProvider>(
+      //   builder: (context, produitProvider, child) {
+      //     return ListView.builder(
+      //       controller: _scrollController,
+      //       itemCount: produitProvider.produits.length + 1,
+      //       itemBuilder: (context, index) {
+      //         if (index < produitProvider.produits.length) {
+      //           final produit = produitProvider.produits[index];
+      //           // final peremption =
+      //           //     produit.datePeremption!.difference(DateTime.now()).inDays;
+      //           // Color colorPeremption =
+      //           //     getColorBasedOnPeremption(peremption, 5.0);
+      //           // final double percentProgress = produit.stock != 0 &&
+      //           //         produit.stockinit != 0 &&
+      //           //         produit.stockinit >= produit.stock
+      //           //     ? produit.stock / produit.stockinit
+      //           //     : 0;
+      //           // Color colorStock = getColorBasedOnStock(
+      //           //     produit.stock, produit.stockinit, produit.minimStock);
+      //           return
+      //               // Slidable(
+      //               // key: ValueKey(produit.id),
+      //               // startActionPane: ActionPane(
+      //               //   extentRatio: largeur,
+      //               //   motion: ScrollMotion(),
+      //               //   children: [
+      //               //     SlidableAction(
+      //               //       onPressed: (BuildContext context) {
+      //               //         Navigator.of(context).push(MaterialPageRoute(
+      //               //           builder: (ctx) => Edit_Produit(produit: produit),
+      //               //         ));
+      //               //       },
+      //               //       backgroundColor: Colors.blue,
+      //               //       icon: Icons.edit,
+      //               //       label: 'Editer',
+      //               //     ),
+      //               //   ],
+      //               // ),
+      //               // child:
+      //               InkWell(
+      //                   onTap: () {
+      //                     // Navigator.of(context).push(MaterialPageRoute(
+      //                     //   builder: (ctx) => Edit_Produit(produit: produit),
+      //                     // ));
+      //                   },
+      //                   child: Card(
+      //                       child: Column(
+      //                           crossAxisAlignment: CrossAxisAlignment.start,
+      //                           children: [
+      //                         ListTile(
+      //                           onTap: () {
+      //                             Navigator.of(context).push(MaterialPageRoute(
+      //                               builder: (ctx) =>
+      //                                   ProduitDetailPage(produit: produit),
+      //                             ));
+      //                           },
+      //                           onLongPress: () {
+      //                             _deleteProduit(context, produit);
+      //                           },
+      //                           leading: Tooltip(
+      //                             message: 'ID : ${produit.id}',
+      //                             child: GestureDetector(
+      //                               onDoubleTap: () {
+      //                                 _showAllFournisseursDialog(
+      //                                   context,
+      //                                   produit, /*fournisseurs*/
+      //                                 );
+      //                               },
+      //                               child: produit.image == null ||
+      //                                       produit.image!.isEmpty
+      //                                   ? CircleAvatar(
+      //                                       child:
+      //                                           Icon(Icons.image_not_supported),
+      //                                     )
+      //                                   : Column(
+      //                                       children: [
+      //                                         Expanded(
+      //                                           child: CircleAvatar(
+      //                                             backgroundImage:
+      //                                                 CachedNetworkImageProvider(
+      //                                               produit.image!,
+      //                                               errorListener: (error) =>
+      //                                                   Icon(Icons.error),
+      //                                             ),
+      //                                           ),
+      //                                         ),
+      //                                         Text('Id:' +
+      //                                             produit.id.toString()),
+      //                                       ],
+      //                                     ),
+      //                             ),
+      //                           ),
+      //                           title: Padding(
+      //                             padding:
+      //                                 const EdgeInsets.symmetric(horizontal: 8),
+      //                             child: Text(produit.nom),
+      //                           ),
+      //                           subtitle: Column(
+      //                             crossAxisAlignment: CrossAxisAlignment.start,
+      //                             children: [
+      //                               Column(
+      //                                 children: [
+      //                                   Row(
+      //                                     children: [
+      //                                       // Center(
+      //                                       //   child: Text(
+      //                                       //     'A : ${produit.prixAchat.toStringAsFixed(produit.prixAchat.truncateToDouble() == produit.prixAchat ? 0 : 2)}',
+      //                                       //   ),
+      //                                       // ),
+      //                                       SizedBox(
+      //                                         width: 10,
+      //                                       ),
+      //                                       // Container(
+      //                                       //   padding:
+      //                                       //       EdgeInsets.symmetric(
+      //                                       //           horizontal: 5,
+      //                                       //           vertical: 2),
+      //                                       //   decoration: BoxDecoration(
+      //                                       //     gradient:
+      //                                       //         LinearGradient(
+      //                                       //       colors: [
+      //                                       //         Colors.lightGreen,
+      //                                       //         Colors.black45
+      //                                       //       ], // Couleurs du dégradé
+      //                                       //       begin: Alignment
+      //                                       //           .topLeft, // Début du dégradé
+      //                                       //       end: Alignment
+      //                                       //           .bottomRight, // Fin du dégradé
+      //                                       //     ), // Couleur de fond
+      //                                       //     borderRadius:
+      //                                       //         BorderRadius.circular(
+      //                                       //             10), // Coins arrondis
+      //                                       //   ),
+      //                                       //   child: Center(
+      //                                       //     child: Text(
+      //                                       //       '${(produit.prixVente - produit.prixAchat).toStringAsFixed((produit.prixVente - produit.prixAchat).truncateToDouble() == (produit.prixVente - produit.prixAchat) ? 0 : 2)}',
+      //                                       //       style: TextStyle(
+      //                                       //           color:
+      //                                       //               Colors.white),
+      //                                       //     ),
+      //                                       //   ),
+      //                                       // ),
+      //                                     ],
+      //                                   ),
+      //                                   SizedBox(height: 5),
+      //                                   // Container(
+      //                                   //   padding: EdgeInsets.symmetric(
+      //                                   //       horizontal: 5,
+      //                                   //       vertical: 2),
+      //                                   //   decoration: BoxDecoration(
+      //                                   //     gradient: LinearGradient(
+      //                                   //       colors: [
+      //                                   //         Colors.red,
+      //                                   //         Colors.black45
+      //                                   //       ], // Couleurs du dégradé
+      //                                   //       begin: Alignment
+      //                                   //           .topLeft, // Début du dégradé
+      //                                   //       end: Alignment
+      //                                   //           .bottomRight, // Fin du dégradé
+      //                                   //     ), // Couleur de fond
+      //                                   //     borderRadius:
+      //                                   //         BorderRadius.circular(
+      //                                   //             10), // Coins arrondis
+      //                                   //   ),
+      //                                   //   child: Center(
+      //                                   //     child: Text(
+      //                                   //       'Reste : ${produit.approvisionnements.map(f).datePeremption!.difference(DateTime.now()).inDays} Jours ',
+      //                                   //       style: TextStyle(
+      //                                   //           color: Colors.white),
+      //                                   //     ),
+      //                                   //   ),
+      //                                   // ),
+      //                                   SizedBox(height: 10),
+      //                                   Text('Approvisionnements:',
+      //                                       style: TextStyle(
+      //                                           fontWeight: FontWeight.bold)),
+      //                                   ...produit.approvisionnements
+      //                                       .map((appro) {
+      //                                     return Padding(
+      //                                       padding: EdgeInsets.symmetric(
+      //                                           vertical: 4.0),
+      //                                       child: Text(
+      //                                           '  - Date: ${appro.crud.target!.dateCreation}\n      Quantité: ${appro.quantite}\n      Prix d\'achat: ${appro.prixAchat}\n      Date de péremption: ${appro.datePeremption}'),
+      //                                     );
+      //                                   }).toList(),
+      //                                 ],
+      //                               ),
+      //                               SizedBox(
+      //                                 height: 5,
+      //                               ),
+      //                             ],
+      //                           ),
+      //                           trailing: Padding(
+      //                             padding: const EdgeInsets.only(left: 15),
+      //                             child: Text(
+      //                               '${produit.prixVente.toStringAsFixed(2)}',
+      //                               style: TextStyle(fontSize: 20),
+      //                             ),
+      //                           ),
+      //                         ),
+      //                         Row(
+      //                           children: [
+      //                             Padding(
+      //                               padding: const EdgeInsets.symmetric(
+      //                                   horizontal: 8),
+      //                               child:
+      //                                   Text('QR : ' + produit.qr.toString()),
+      //                             ),
+      //                             SizedBox(width: 2),
+      //                             Container(
+      //                               padding: EdgeInsets.symmetric(
+      //                                   horizontal: 5, vertical: 2),
+      //                               decoration: BoxDecoration(
+      //                                 gradient: LinearGradient(
+      //                                   colors: [
+      //                                     Colors.blue,
+      //                                     Colors.black45
+      //                                   ], // Couleurs du dégradé
+      //                                   begin: Alignment
+      //                                       .topLeft, // Début du dégradé
+      //                                   end: Alignment
+      //                                       .bottomRight, // Fin du dégradé
+      //                                 ), // Couleur de fond
+      //                                 borderRadius: BorderRadius.circular(
+      //                                     10), // Coins arrondis
+      //                               ),
+      //                               child: Center(
+      //                                 child: Text(
+      //                                   '${produit.minimStock.toStringAsFixed(produit.minimStock.truncateToDouble() == produit.minimStock ? 0 : 2)}',
+      //                                   // '${(produit.minimStock).toStringAsFixed(2)}',
+      //                                   style: TextStyle(color: Colors.white),
+      //                                 ),
+      //                               ),
+      //                             ),
+      //                             SizedBox(width: 2),
+      //                             Expanded(
+      //                               child: Padding(
+      //                                 padding:
+      //                                     EdgeInsets.symmetric(horizontal: 15),
+      //                                 child: new LinearPercentIndicator(
+      //                                   animation: true,
+      //                                   animationDuration: 1000,
+      //                                   lineHeight: 20.0,
+      //                                   // leading: new Text(
+      //                                   //   '${produit.stockinit.toStringAsFixed(produit.stockinit.truncateToDouble() == produit.stockinit ? 0 : 2)}',
+      //                                   // ),
+      //                                   trailing: new Text(
+      //                                     '${produit.stock.toStringAsFixed(produit.stock.truncateToDouble() == produit.stock ? 0 : 2)}',
+      //                                   ),
+      //                                   // percent: percentProgress,
+      //                                   // center: new Text(
+      //                                   //     '${(percentProgress * 100).toStringAsFixed(1)}%'),
+      //                                   linearStrokeCap:
+      //                                       LinearStrokeCap.roundAll,
+      //                                   backgroundColor: Colors.grey.shade300,
+      //                                   // progressColor: colorStock,
+      //                                 ),
+      //                               ),
+      //                             ),
+      //                           ],
+      //                         ),
+      //                         SizedBox(height: 15),
+      //                         if (produit.approvisionnements.isNotEmpty)
+      //                           Column(
+      //                             children:
+      //                                 produit.approvisionnements.map((appro) {
+      //                               return ListTile(
+      //                                 title: Text(
+      //                                     'Fournisseur : ${appro.fournisseur.target?.nom ?? "Inconnu"}'),
+      //                                 subtitle: Column(
+      //                                   crossAxisAlignment:
+      //                                       CrossAxisAlignment.start,
+      //                                   children: [
+      //                                     Text('Quantité : ${appro.quantite}'),
+      //                                     Text(
+      //                                         'Prix unitaire : ${appro.prixAchat} DA'),
+      //                                     Text(
+      //                                         'Date de péremption : ${appro.datePeremption != null ? appro.datePeremption!.toLocal().toString() : "N/A"}'),
+      //                                   ],
+      //                                 ),
+      //                               );
+      //                             }).toList(),
+      //                           )
+      //                         else
+      //                           Text('Aucun approvisionnement disponible'),
+      //                       ])));
+      //         } else if (produitProvider.hasMoreProduits) {
+      //           return Center(child: CircularProgressIndicator());
+      //         } else {
+      //           return SizedBox.shrink();
+      //         }
+      //       },
+      //     );
+      //   },
+      // ),
       body: Consumer<CommerceProvider>(
         builder: (context, produitProvider, child) {
           return ListView.builder(
@@ -112,592 +408,390 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
             itemBuilder: (context, index) {
               if (index < produitProvider.produits.length) {
                 final produit = produitProvider.produits[index];
-                // final peremption =
-                //     produit.datePeremption!.difference(DateTime.now()).inDays;
-                // Color colorPeremption =
-                //     getColorBasedOnPeremption(peremption, 5.0);
-                // final double percentProgress = produit.stock != 0 &&
-                //         produit.stockinit != 0 &&
-                //         produit.stockinit >= produit.stock
-                //     ? produit.stock / produit.stockinit
-                //     : 0;
-                // Color colorStock = getColorBasedOnStock(
-                //     produit.stock, produit.stockinit, produit.minimStock);
-                return
-                    // Slidable(
-                    // key: ValueKey(produit.id),
-                    // startActionPane: ActionPane(
-                    //   extentRatio: largeur,
-                    //   motion: ScrollMotion(),
-                    //   children: [
-                    //     SlidableAction(
-                    //       onPressed: (BuildContext context) {
-                    //         Navigator.of(context).push(MaterialPageRoute(
-                    //           builder: (ctx) => Edit_Produit(produit: produit),
-                    //         ));
-                    //       },
-                    //       backgroundColor: Colors.blue,
-                    //       icon: Icons.edit,
-                    //       label: 'Editer',
-                    //     ),
-                    //   ],
-                    // ),
-                    // child:
-                    InkWell(
-                        onTap: () {
-                          // Navigator.of(context).push(MaterialPageRoute(
-                          //   builder: (ctx) => Edit_Produit(produit: produit),
-                          // ));
-                        },
-                        child: Card(
-                          color: produit.stock <= 0 ? Colors.redAccent : null,
-                          child: Platform.isIOS || Platform.isAndroid
-                              ? Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                      ListTile(
-                                        onTap: () {
-                                          Navigator.of(context)
-                                              .push(MaterialPageRoute(
-                                            builder: (ctx) => ProduitDetailPage(
-                                                produit: produit),
-                                          ));
-                                        },
-                                        onLongPress: () {
-                                          _deleteProduit(context, produit);
-                                        },
-                                        leading: Tooltip(
-                                          message: 'ID : ${produit.id}',
-                                          child: GestureDetector(
-                                            onDoubleTap: () {
-                                              _showAllFournisseursDialog(
-                                                context,
-                                                produit, /*fournisseurs*/
-                                              );
-                                            },
-                                            child: produit.image == null ||
-                                                    produit.image!.isEmpty
-                                                ? CircleAvatar(
-                                                    child: Icon(Icons
-                                                        .image_not_supported),
-                                                  )
-                                                : Column(
-                                                    children: [
-                                                      Expanded(
-                                                        child: CircleAvatar(
-                                                          backgroundImage:
-                                                              CachedNetworkImageProvider(
-                                                            produit.image!,
-                                                            errorListener:
-                                                                (error) => Icon(
-                                                                    Icons
-                                                                        .error),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      Text('Id:' +
-                                                          produit.id
-                                                              .toString()),
-                                                    ],
-                                                  ),
-                                          ),
-                                        ),
-                                        title: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 8),
-                                          child: Text(produit.nom),
-                                        ),
-                                        subtitle: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Column(
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    // Center(
-                                                    //   child: Text(
-                                                    //     'A : ${produit.prixAchat.toStringAsFixed(produit.prixAchat.truncateToDouble() == produit.prixAchat ? 0 : 2)}',
-                                                    //   ),
-                                                    // ),
-                                                    SizedBox(
-                                                      width: 10,
-                                                    ),
-                                                    // Container(
-                                                    //   padding:
-                                                    //       EdgeInsets.symmetric(
-                                                    //           horizontal: 5,
-                                                    //           vertical: 2),
-                                                    //   decoration: BoxDecoration(
-                                                    //     gradient:
-                                                    //         LinearGradient(
-                                                    //       colors: [
-                                                    //         Colors.lightGreen,
-                                                    //         Colors.black45
-                                                    //       ], // Couleurs du dégradé
-                                                    //       begin: Alignment
-                                                    //           .topLeft, // Début du dégradé
-                                                    //       end: Alignment
-                                                    //           .bottomRight, // Fin du dégradé
-                                                    //     ), // Couleur de fond
-                                                    //     borderRadius:
-                                                    //         BorderRadius.circular(
-                                                    //             10), // Coins arrondis
-                                                    //   ),
-                                                    //   child: Center(
-                                                    //     child: Text(
-                                                    //       '${(produit.prixVente - produit.prixAchat).toStringAsFixed((produit.prixVente - produit.prixAchat).truncateToDouble() == (produit.prixVente - produit.prixAchat) ? 0 : 2)}',
-                                                    //       style: TextStyle(
-                                                    //           color:
-                                                    //               Colors.white),
-                                                    //     ),
-                                                    //   ),
-                                                    // ),
-                                                  ],
-                                                ),
-                                                SizedBox(height: 5),
-                                                // Container(
-                                                //   padding: EdgeInsets.symmetric(
-                                                //       horizontal: 5,
-                                                //       vertical: 2),
-                                                //   decoration: BoxDecoration(
-                                                //     gradient: LinearGradient(
-                                                //       colors: [
-                                                //         Colors.red,
-                                                //         Colors.black45
-                                                //       ], // Couleurs du dégradé
-                                                //       begin: Alignment
-                                                //           .topLeft, // Début du dégradé
-                                                //       end: Alignment
-                                                //           .bottomRight, // Fin du dégradé
-                                                //     ), // Couleur de fond
-                                                //     borderRadius:
-                                                //         BorderRadius.circular(
-                                                //             10), // Coins arrondis
-                                                //   ),
-                                                //   child: Center(
-                                                //     child: Text(
-                                                //       'Reste : ${produit.approvisionnements.map(f).datePeremption!.difference(DateTime.now()).inDays} Jours ',
-                                                //       style: TextStyle(
-                                                //           color: Colors.white),
-                                                //     ),
-                                                //   ),
-                                                // ),
-                                                SizedBox(height: 10),
-                                                Text('Approvisionnements:',
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold)),
-                                                ...produit.approvisionnements
-                                                    .map((appro) {
-                                                  return Padding(
-                                                    padding:
-                                                        EdgeInsets.symmetric(
-                                                            vertical: 4.0),
-                                                    child: Text(
-                                                        '  - Date: ${appro.crud.target!.dateCreation}\n      Quantité: ${appro.quantite}\n      Prix d\'achat: ${appro.prixAchat}\n      Date de péremption: ${appro.datePeremption}'),
-                                                  );
-                                                }).toList(),
-                                              ],
-                                            ),
-                                            SizedBox(
-                                              height: 5,
-                                            ),
-                                          ],
-                                        ),
-                                        trailing: Padding(
-                                          padding:
-                                              const EdgeInsets.only(left: 15),
-                                          child: Text(
-                                            '${produit.prixVente.toStringAsFixed(2)}',
-                                            style: TextStyle(fontSize: 20),
-                                          ),
-                                        ),
-                                      ),
-                                      Row(
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 8),
-                                            child: Text('QR : ' +
-                                                produit.qr.toString()),
-                                          ),
-                                          SizedBox(width: 2),
-                                          Container(
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal: 5, vertical: 2),
-                                            decoration: BoxDecoration(
-                                              gradient: LinearGradient(
-                                                colors: [
-                                                  Colors.blue,
-                                                  Colors.black45
-                                                ], // Couleurs du dégradé
-                                                begin: Alignment
-                                                    .topLeft, // Début du dégradé
-                                                end: Alignment
-                                                    .bottomRight, // Fin du dégradé
-                                              ), // Couleur de fond
-                                              borderRadius:
-                                                  BorderRadius.circular(
-                                                      10), // Coins arrondis
-                                            ),
-                                            child: Center(
-                                              child: Text(
-                                                '${produit.minimStock.toStringAsFixed(produit.minimStock.truncateToDouble() == produit.minimStock ? 0 : 2)}',
-                                                // '${(produit.minimStock).toStringAsFixed(2)}',
-                                                style: TextStyle(
-                                                    color: Colors.white),
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(width: 2),
-                                          Expanded(
-                                            child: Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 15),
-                                              child: new LinearPercentIndicator(
-                                                animation: true,
-                                                animationDuration: 1000,
-                                                lineHeight: 20.0,
-                                                // leading: new Text(
-                                                //   '${produit.stockinit.toStringAsFixed(produit.stockinit.truncateToDouble() == produit.stockinit ? 0 : 2)}',
-                                                // ),
-                                                trailing: new Text(
-                                                  '${produit.stock.toStringAsFixed(produit.stock.truncateToDouble() == produit.stock ? 0 : 2)}',
-                                                ),
-                                                // percent: percentProgress,
-                                                // center: new Text(
-                                                //     '${(percentProgress * 100).toStringAsFixed(1)}%'),
-                                                linearStrokeCap:
-                                                    LinearStrokeCap.roundAll,
-                                                backgroundColor:
-                                                    Colors.grey.shade300,
-                                               // progressColor: colorStock,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 15),
-                                      if (produit.approvisionnements.isNotEmpty)
-                                        Column(
-                                          children: produit.approvisionnements
-                                              .map((appro) {
-                                            return ListTile(
-                                              title: Text(
-                                                  'Fournisseur : ${appro.fournisseur.target?.nom ?? "Inconnu"}'),
-                                              subtitle: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                      'Quantité : ${appro.quantite}'),
-                                                  Text(
-                                                      'Prix unitaire : ${appro.prixAchat} DA'),
-                                                  Text(
-                                                      'Date de péremption : ${appro.datePeremption != null ? appro.datePeremption!.toLocal().toString() : "N/A"}'),
-                                                ],
-                                              ),
-                                            );
-                                          }).toList(),
-                                        )
-                                      else
-                                        Text(
-                                            'Aucun approvisionnement disponible'),
-                                    ])
-                              : GestureDetector(
-                                  onTap: () {
-                                    Navigator.of(context)
-                                        .push(MaterialPageRoute(
-                                      builder: (ctx) =>
-                                          ProduitDetailPage(produit: produit),
-                                    ));
-                                  },
-                                  onLongPress: () {
-                                    _deleteProduit(context, produit);
-                                  },
-                                  child: Container(
-                                    width: MediaQuery.of(context).size.width,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
+
+                // Calculer le total des quantités des approvisionnements
+                final totalQuantite = produit.approvisionnements
+                    .fold<double>(
+                        0,
+                        (previousValue, appro) =>
+                            previousValue + appro.quantite)
+                    .toStringAsFixed(2);
+
+                return InkWell(
+                  onTap: () {
+                    // Action lors du tap sur le produit
+                  },
+                  child: Card(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ListTile(
+                          leading: Tooltip(
+                            message: 'ID : ${produit.id}',
+                            child: GestureDetector(
+                              onDoubleTap: () {
+                                _showAllFournisseursDialog(
+                                  context,
+                                  produit, /*fournisseurs*/
+                                );
+                              },
+                              child: produit.image == null ||
+                                      produit.image!.isEmpty
+                                  ? CircleAvatar(
+                                      child: Icon(Icons.image_not_supported),
+                                    )
+                                  : Column(
                                       children: [
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 15, vertical: 8),
-                                          child: Tooltip(
-                                            message: 'ID : ${produit.id}',
-                                            child: produit.image == null ||
-                                                    produit.image!.isEmpty
-                                                ? CircleAvatar(
-                                                    child: Icon(Icons
-                                                        .image_not_supported),
-                                                  )
-                                                : Column(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      CircleAvatar(
-                                                        backgroundImage:
-                                                            CachedNetworkImageProvider(
-                                                          produit.image!,
-                                                          errorListener:
-                                                              (error) => Icon(
-                                                                  Icons.error),
-                                                        ),
-                                                      ),
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .only(top: 8),
-                                                        child: Text('Id:' +
-                                                            produit.id
-                                                                .toString()),
-                                                      ),
-                                                    ],
-                                                  ),
-                                          ),
-                                        ),
                                         Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(produit.nom),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Row(
-                                                    children: [
-                                                      // Center(
-                                                      //   child: Text(
-                                                      //     'A: ${produit.prixAchat.toStringAsFixed(2)} ',
-                                                      //   ),
-                                                      // ),
-                                                      SizedBox(
-                                                        width: 10,
-                                                      ),
-                                                      // Container(
-                                                      //   padding: EdgeInsets
-                                                      //       .symmetric(
-                                                      //           horizontal: 5,
-                                                      //           vertical: 2),
-                                                      //   decoration:
-                                                      //       BoxDecoration(
-                                                      //     gradient:
-                                                      //         LinearGradient(
-                                                      //       colors: [
-                                                      //         Colors.lightGreen,
-                                                      //         Colors.black45
-                                                      //       ], // Couleurs du dégradé
-                                                      //       begin: Alignment
-                                                      //           .topLeft, // Début du dégradé
-                                                      //       end: Alignment
-                                                      //           .bottomRight, // Fin du dégradé
-                                                      //     ), // Couleur de fond
-                                                      //     borderRadius:
-                                                      //         BorderRadius.circular(
-                                                      //             10), // Coins arrondis
-                                                      //   ),
-                                                      //   child: Center(
-                                                      //     child: Text(
-                                                      //       '${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)}',
-                                                      //       style: TextStyle(
-                                                      //           color: Colors
-                                                      //               .white),
-                                                      //     ),
-                                                      //   ),
-                                                      // ),
-                                                      SizedBox(
-                                                        width: 10,
-                                                      ),
-                                                      // Container(
-                                                      //   padding: EdgeInsets
-                                                      //       .symmetric(
-                                                      //           horizontal: 5,
-                                                      //           vertical: 2),
-                                                      //   decoration:
-                                                      //       BoxDecoration(
-                                                      //     gradient:
-                                                      //         LinearGradient(
-                                                      //       colors: [
-                                                      //         Colors.black45,
-                                                      //         colorPeremption,
-                                                      //       ], // Couleurs du dégradé
-                                                      //       begin: Alignment
-                                                      //           .topLeft, // Début du dégradé
-                                                      //       end: Alignment
-                                                      //           .bottomRight, // Fin du dégradé
-                                                      //     ), // Couleur de fond
-                                                      //     borderRadius:
-                                                      //         BorderRadius.circular(
-                                                      //             10), // Coins arrondis
-                                                      //   ),
-                                                      //   child: Center(
-                                                      //     child: Text(
-                                                      //       'Péremption : ${produit.datePeremption!.day}/${produit.datePeremption!.month}/${produit.datePeremption!.year}  Reste : ${peremption} Jours ',
-                                                      //       style: TextStyle(
-                                                      //           color: Colors
-                                                      //               .white),
-                                                      //     ),
-                                                      //   ),
-                                                      // ),
-                                                      ...produit
-                                                          .approvisionnements
-                                                          .map((appro) {
-                                                        return Padding(
-                                                          padding: EdgeInsets
-                                                              .symmetric(
-                                                                  vertical:
-                                                                      4.0),
-                                                          child: Text(
-                                                              '  - Date: ${appro.crud.target!.dateCreation}\n      Quantité: ${appro.quantite}\n      Prix d\'achat: ${appro.prixAchat}\n      Date de péremption: ${appro.datePeremption}'),
-                                                        );
-                                                      }).toList(),
-                                                    ],
-                                                  ),
-                                                  SizedBox(height: 5),
-                                                  Center(
-                                                    child: Padding(
-                                                      padding: const EdgeInsets
-                                                          .symmetric(
-                                                          horizontal: 15),
-                                                      child: Text('QR : ' +
-                                                          produit.qr
-                                                              .toString()),
-                                                    ),
-                                                  )
-                                                ],
-                                              ),
-                                              SizedBox(height: 5),
-                                              Row(
-                                                children: [
-                                                  Container(
-                                                    padding:
-                                                        EdgeInsets.symmetric(
-                                                            horizontal: 5,
-                                                            vertical: 2),
-                                                    decoration: BoxDecoration(
-                                                      gradient: LinearGradient(
-                                                        colors: [
-                                                          Colors.blue,
-                                                          Colors.black45
-                                                        ], // Couleurs du dégradé
-                                                        begin: Alignment
-                                                            .topLeft, // Début du dégradé
-                                                        end: Alignment
-                                                            .bottomRight, // Fin du dégradé
-                                                      ), // Couleur de fond
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              10), // Coins arrondis
-                                                    ),
-                                                    child: Center(
-                                                      child: Row(
-                                                        children: [
-                                                          Icon(
-                                                            Icons.add_alert,
-                                                            color: Colors.white,
-                                                            size: 15,
-                                                          ),
-                                                          SizedBox(
-                                                            width: 5,
-                                                          ),
-                                                          Padding(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .only(
-                                                                    right: 5),
-                                                            child: Text(
-                                                              '${produit.minimStock.toStringAsFixed(produit.minimStock.truncateToDouble() == produit.minimStock ? 0 : 2)}',
-                                                              style: TextStyle(
-                                                                  color: Colors
-                                                                      .white),
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  SizedBox(width: 5),
-                                                  Expanded(
-                                                    child:
-                                                        new LinearPercentIndicator(
-                                                      animation: true,
-                                                      animationDuration: 1000,
-                                                      lineHeight: 20.0,
-                                                      // leading: new Text(
-                                                      //   'Stock : ${produit.stockinit.toStringAsFixed(produit.stockinit.truncateToDouble() == produit.stockinit ? 0 : 2)}',
-                                                      // ),
-                                                      trailing: new Text(
-                                                        'Reste : ${produit.stock.toStringAsFixed(produit.stock.truncateToDouble() == produit.stock ? 0 : 2)}',
-                                                      ),
-                                                      // percent:
-                                                      //     percentProgress < 0
-                                                      //         ? 0
-                                                      //         : percentProgress,
-                                                      // center: new Text(
-                                                      //     '${(percentProgress * 100).toStringAsFixed(1)}%'),
-                                                      linearStrokeCap:
-                                                          LinearStrokeCap
-                                                              .roundAll,
-                                                      backgroundColor:
-                                                          Colors.grey.shade300,
-                                                      //progressColor: colorStock,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              SizedBox(height: 5),
-                                              _buildChipRow(context, produit),
-                                            ],
+                                          child: CircleAvatar(
+                                            backgroundImage:
+                                                CachedNetworkImageProvider(
+                                              produit.image!,
+                                              errorListener: (error) =>
+                                                  Icon(Icons.error),
+                                            ),
                                           ),
                                         ),
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 8, horizontal: 25),
-                                          child: Text(
-                                            '${produit.prixVente.toStringAsFixed(2)}',
-                                            style: TextStyle(fontSize: 20),
-                                          ),
-                                        ),
-                                        if (produit
-                                            .approvisionnements.isNotEmpty)
-                                          Column(
-                                            children: produit.approvisionnements
-                                                .map((appro) {
-                                              return ListTile(
-                                                title: Text(
-                                                    'Fournisseur : ${appro.fournisseur.target?.nom ?? "Inconnu"}'),
-                                                subtitle: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                        'Quantité : ${appro.quantite}'),
-                                                    Text(
-                                                        'Prix unitaire : ${appro.prixAchat} DA'),
-                                                    Text(
-                                                        'Date de péremption : ${appro.datePeremption != null ? appro.datePeremption!.toLocal().toString() : "N/A"}'),
-                                                  ],
-                                                ),
-                                              );
-                                            }).toList(),
-                                          )
-                                        else
-                                          Text(
-                                              'Aucun approvisionnement disponible'),
+                                        Text('Id:' + produit.id.toString()),
                                       ],
                                     ),
-                                  ),
+                            ),
+                          ),
+                          title: Row(
+                            children: [
+                              Text(produit.nom),
+                              Spacer(),
+                              SizedBox(
+                                width: 15,
+                              ),
+                              // Text('Quantité : $totalQuantite',
+                              //     overflow: TextOverflow.ellipsis,
+                              //     style: TextStyle(fontSize: 15)),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: produit.approvisionnements.isEmpty
+                                    ? Container()
+                                    : ElevatedButton(
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              double totalQuantite = 0;
+                                              double totalAmount = 0;
+
+                                              produit.approvisionnements
+                                                  .forEach((appro) {
+                                                totalQuantite += appro.quantite;
+                                                totalAmount += appro.quantite *
+                                                    appro.prixAchat;
+                                              });
+
+                                              return AlertDialog(
+                                                title:
+                                                    Text('Approvisionnements'),
+                                                content: SingleChildScrollView(
+                                                  scrollDirection:
+                                                      Axis.vertical,
+                                                  child: SingleChildScrollView(
+                                                    scrollDirection:
+                                                        Axis.horizontal,
+                                                    child: DataTable(
+                                                      columns: const <DataColumn>[
+                                                        DataColumn(
+                                                          label: Text(
+                                                            'Quantité',
+                                                            style: TextStyle(
+                                                                fontStyle:
+                                                                    FontStyle
+                                                                        .italic),
+                                                          ),
+                                                        ),
+                                                        DataColumn(
+                                                          label: Text(
+                                                            'Fournisseur',
+                                                            style: TextStyle(
+                                                                fontStyle:
+                                                                    FontStyle
+                                                                        .italic),
+                                                          ),
+                                                        ),
+                                                        DataColumn(
+                                                          label: Text(
+                                                            'Date de péremption',
+                                                            style: TextStyle(
+                                                                fontStyle:
+                                                                    FontStyle
+                                                                        .italic),
+                                                          ),
+                                                        ),
+                                                        DataColumn(
+                                                          label: Text(
+                                                            'Créé le',
+                                                            style: TextStyle(
+                                                                fontStyle:
+                                                                    FontStyle
+                                                                        .italic),
+                                                          ),
+                                                        ),
+                                                        DataColumn(
+                                                          label: Text(
+                                                            'Prix d\'achat',
+                                                            style: TextStyle(
+                                                                fontStyle:
+                                                                    FontStyle
+                                                                        .italic),
+                                                          ),
+                                                        ),
+                                                        DataColumn(
+                                                          label: Text(
+                                                            'Montant',
+                                                            style: TextStyle(
+                                                                fontStyle:
+                                                                    FontStyle
+                                                                        .italic),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                      rows: [
+                                                        ...produit
+                                                            .approvisionnements
+                                                            .map((appro) {
+                                                          final fournisseur =
+                                                              appro.fournisseur
+                                                                  .target;
+                                                          return DataRow(
+                                                            cells: <DataCell>[
+                                                              DataCell(Text(appro
+                                                                  .quantite
+                                                                  .toStringAsFixed(
+                                                                      2))),
+                                                              DataCell(Text(
+                                                                  fournisseur
+                                                                          ?.nom ??
+                                                                      'Inconnu')),
+                                                              DataCell(Text(appro
+                                                                          .datePeremption !=
+                                                                      null
+                                                                  ? DateFormat(
+                                                                          'dd/MM/yyyy')
+                                                                      .format(appro
+                                                                          .datePeremption!
+                                                                          .toLocal())
+                                                                  : "N/A")),
+                                                              DataCell(Text(DateFormat(
+                                                                      'dd/MM/yyyy')
+                                                                  .format(appro
+                                                                      .crud
+                                                                      .target!
+                                                                      .dateCreation!
+                                                                      .toLocal()))),
+                                                              DataCell(Text(appro
+                                                                  .prixAchat
+                                                                  .toStringAsFixed(
+                                                                      2))),
+                                                              DataCell(Text((appro
+                                                                          .quantite *
+                                                                      appro
+                                                                          .prixAchat)
+                                                                  .toStringAsFixed(
+                                                                      2))),
+                                                            ],
+                                                          );
+                                                        }).toList(),
+                                                        DataRow(
+                                                          cells: <DataCell>[
+                                                            DataCell(Text(
+                                                                totalQuantite
+                                                                    .toStringAsFixed(
+                                                                        2))),
+                                                            DataCell(Text('')),
+                                                            DataCell(Text('')),
+                                                            DataCell(Text('')),
+                                                            DataCell(Text('')),
+                                                            DataCell(Text(
+                                                                totalAmount
+                                                                    .toStringAsFixed(
+                                                                        2))),
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                                actions: <Widget>[
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                    },
+                                                    child: Text('Fermer'),
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          );
+                                        },
+                                        child: Text('Quantité : $totalQuantite',
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(fontSize: 15)),
+                                      ),
+                              ),
+                              Spacer(),
+                            ],
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${produit.description ?? 'N/A'}',
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              SizedBox(height: 10),
+                              Text(
+                                produit.approvisionnements.isNotEmpty
+                                    ? 'Dérnier Approvisionnement le  : ${DateFormat('dd/MM/yyyy').format(produit.approvisionnements.last.crud.target!.derniereModification ?? DateTime.now())}'
+                                    : 'No approvisionnements available',
+                              ),
+                              // Text(
+                              //     produit.approvisionnements.isNotEmpty
+                              //         ? 'Approvisionnements:'
+                              //         : '',
+                              //     style:
+                              //         TextStyle(fontWeight: FontWeight.bold)),
+
+                              // DataTable(
+                              //   columns: const <DataColumn>[
+                              //     DataColumn(
+                              //       label: Text(
+                              //         'Quantité',
+                              //         style: TextStyle(
+                              //             fontStyle: FontStyle.italic),
+                              //       ),
+                              //     ),
+                              //     DataColumn(
+                              //       label: Text(
+                              //         'Fournisseur',
+                              //         style: TextStyle(
+                              //             fontStyle: FontStyle.italic),
+                              //       ),
+                              //     ),
+                              //     DataColumn(
+                              //       label: Text(
+                              //         'Date de péremption',
+                              //         style: TextStyle(
+                              //             fontStyle: FontStyle.italic),
+                              //       ),
+                              //     ),
+                              //     DataColumn(
+                              //       label: Text(
+                              //         'Créé le',
+                              //         style: TextStyle(
+                              //             fontStyle: FontStyle.italic),
+                              //       ),
+                              //     ),
+                              //     DataColumn(
+                              //       label: Text(
+                              //         'Prix d\'achat',
+                              //         style: TextStyle(
+                              //             fontStyle: FontStyle.italic),
+                              //       ),
+                              //     ),
+                              //   ],
+                              //   rows: produit.approvisionnements.map((appro) {
+                              //     final fournisseur = appro.fournisseur.target;
+                              //     return DataRow(
+                              //       cells: <DataCell>[
+                              //         DataCell(Text(
+                              //             appro.quantite.toStringAsFixed(2))),
+                              //         DataCell(
+                              //             Text(fournisseur?.nom ?? 'Inconnu')),
+                              //         DataCell(Text(appro.datePeremption != null
+                              //             ? DateFormat('dd/MM/yyyy').format(
+                              //                 appro.datePeremption!.toLocal())
+                              //             : "N/A")),
+                              //         DataCell(Text(DateFormat('dd/MM/yyyy')
+                              //             .format(appro
+                              //                 .crud.target!.dateCreation!
+                              //                 .toLocal()))),
+                              //         DataCell(Text(
+                              //             appro.prixAchat.toStringAsFixed(2))),
+                              //       ],
+                              //     );
+                              //   }).toList(),
+                              // ),
+
+                              // ...produit.approvisionnements.map((appro) {
+                              //   final fournisseur = appro.fournisseur.target;
+                              //   return Padding(
+                              //       padding:
+                              //           EdgeInsets.symmetric(vertical: 4.0),
+                              //       child: ListTile(
+                              //         leading: CircleAvatar(
+                              //           child: Text(
+                              //             'Quantité: ${appro.quantite.toStringAsFixed(2)}',
+                              //           ),
+                              //         ),
+                              //         title: Text(
+                              //           'Fournisseur: ${fournisseur?.nom ?? 'Inconnu'}',
+                              //         ),
+                              //         subtitle: Column(
+                              //           children: [
+                              //             Text(
+                              //               'Date de péremption: ${appro.datePeremption != null ? DateFormat('dd/MM/yyyy').format(appro.datePeremption!.toLocal()) : "N/A"}',
+                              //             ),
+                              //             Text(
+                              //               'Créer le : ${DateFormat('dd/MM/yyyy').format(appro.crud.target!.dateCreation!.toLocal())}',
+                              //             ),
+                              //           ],
+                              //         ),
+                              //         trailing: Text(
+                              //           'Prix d\'achat: ${appro.prixAchat.toStringAsFixed(2)}',
+                              //         ),
+                              //       ));
+                              // }).toList(),
+                            ],
+                          ),
+                          trailing: Text(
+                            '${produit.prixVente.toStringAsFixed(2)} DZD',
+                            style: TextStyle(fontSize: 20),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Row(
+                            children: [
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 8),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.qr_code),
+                                    Text(
+                                      ' ${produit.qr}',
+                                      style: TextStyle(fontSize: 20),
+                                    ),
+                                  ],
                                 ),
-                        ));
+                              ),
+                              Spacer(),
+                              produit.qr != null
+                                  ? FlagDetector(
+                                      barcode: produit.qr!,
+                                      height: 20,
+                                      width: 30,
+                                    ) // Afficher FlagDetector avec le code-barres
+                                  : FlagDetector(
+                                      barcode: produit.qr!,
+                                      height: 20,
+                                      width: 30,
+                                    ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
               } else if (produitProvider.hasMoreProduits) {
                 return Center(child: CircularProgressIndicator());
               } else {
@@ -707,6 +801,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
           );
         },
       ),
+
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context)
@@ -718,89 +813,89 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
   }
 }
 
-Widget _buildChipRow(
-    BuildContext context, produit /*List<Fournisseur> fournisseurs*/) {
-  final List<Fournisseur> fournisseurs = produit.fournisseurs;
-  if (fournisseurs.length <= 2) {
-    return Wrap(
-      spacing: 4.0,
-      runSpacing: 0.0,
-      children: fournisseurs.map((fournisseur) {
-        return InkWell(
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (ctx) =>
-                    ProduitsFournisseurPage(fournisseur: fournisseur),
-              ),
-            );
-          },
-          child: Chip(
-            shadowColor: Colors.black,
-            backgroundColor: Theme.of(context).chipTheme.backgroundColor,
-            labelStyle: TextStyle(
-              color: Theme.of(context).chipTheme.labelStyle?.color,
-            ),
-            side: BorderSide.none,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(10)),
-            ),
-            padding: EdgeInsets.zero,
-            label: Text(
-              fournisseur.nom,
-              style: TextStyle(fontSize: 10),
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  } else {
-    return Wrap(
-      spacing: 4.0,
-      runSpacing: 0.0,
-      children: [
-        for (var i = 0; i < 2; i++)
-          InkWell(
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (ctx) =>
-                      ProduitsFournisseurPage(fournisseur: fournisseurs[i]),
-                ),
-              );
-            },
-            child: Chip(
-              shadowColor: Colors.black,
-              backgroundColor: Theme.of(context).chipTheme.backgroundColor,
-              labelStyle: TextStyle(
-                color: Theme.of(context).chipTheme.labelStyle?.color,
-              ),
-              side: BorderSide.none,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(10)),
-              ),
-              padding: EdgeInsets.zero,
-              label: Text(
-                fournisseurs[i].nom,
-                style: TextStyle(fontSize: 10),
-              ),
-            ),
-          ),
-        IconButton(
-          onPressed: () {
-            _showAllFournisseursDialog(
-              context,
-              produit, /*fournisseurs*/
-            );
-          },
-          icon: Icon(
-            Icons.add,
-          ),
-        ),
-      ],
-    );
-  }
-}
+// Widget _buildChipRow(
+//     BuildContext context, produit /*List<Fournisseur> fournisseurs*/) {
+//   final List<Fournisseur> fournisseurs = produit.fournisseurs;
+//   if (fournisseurs.length <= 2) {
+//     return Wrap(
+//       spacing: 4.0,
+//       runSpacing: 0.0,
+//       children: fournisseurs.map((fournisseur) {
+//         return InkWell(
+//           onTap: () {
+//             Navigator.of(context).push(
+//               MaterialPageRoute(
+//                 builder: (ctx) =>
+//                     ProduitsFournisseurPage(fournisseur: fournisseur),
+//               ),
+//             );
+//           },
+//           child: Chip(
+//             shadowColor: Colors.black,
+//             backgroundColor: Theme.of(context).chipTheme.backgroundColor,
+//             labelStyle: TextStyle(
+//               color: Theme.of(context).chipTheme.labelStyle?.color,
+//             ),
+//             side: BorderSide.none,
+//             shape: RoundedRectangleBorder(
+//               borderRadius: BorderRadius.all(Radius.circular(10)),
+//             ),
+//             padding: EdgeInsets.zero,
+//             label: Text(
+//               fournisseur.nom,
+//               style: TextStyle(fontSize: 10),
+//             ),
+//           ),
+//         );
+//       }).toList(),
+//     );
+//   } else {
+//     return Wrap(
+//       spacing: 4.0,
+//       runSpacing: 0.0,
+//       children: [
+//         for (var i = 0; i < 2; i++)
+//           InkWell(
+//             onTap: () {
+//               Navigator.of(context).push(
+//                 MaterialPageRoute(
+//                   builder: (ctx) =>
+//                       ProduitsFournisseurPage(fournisseur: fournisseurs[i]),
+//                 ),
+//               );
+//             },
+//             child: Chip(
+//               shadowColor: Colors.black,
+//               backgroundColor: Theme.of(context).chipTheme.backgroundColor,
+//               labelStyle: TextStyle(
+//                 color: Theme.of(context).chipTheme.labelStyle?.color,
+//               ),
+//               side: BorderSide.none,
+//               shape: RoundedRectangleBorder(
+//                 borderRadius: BorderRadius.all(Radius.circular(10)),
+//               ),
+//               padding: EdgeInsets.zero,
+//               label: Text(
+//                 fournisseurs[i].nom,
+//                 style: TextStyle(fontSize: 10),
+//               ),
+//             ),
+//           ),
+//         IconButton(
+//           onPressed: () {
+//             _showAllFournisseursDialog(
+//               context,
+//               produit, /*fournisseurs*/
+//             );
+//           },
+//           icon: Icon(
+//             Icons.add,
+//           ),
+//         ),
+//       ],
+//     );
+//   }
+// }
 
 void _showAllFournisseursDialog(
   BuildContext context,

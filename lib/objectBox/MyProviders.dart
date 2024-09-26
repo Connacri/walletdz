@@ -1,11 +1,15 @@
+import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:faker/faker.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../objectBox/pages/ProduitListSupabase.dart';
 import '../../objectbox.g.dart';
 import 'Entity.dart';
 import 'classeObjectBox.dart';
 import 'package:objectbox/objectbox.dart';
+import 'dart:isolate';
 
 class CommerceProvider extends ChangeNotifier {
   final ObjectBox _objectBox;
@@ -36,21 +40,62 @@ class CommerceProvider extends ChangeNotifier {
     getClientsFromBox();
   }
 
+  // Future<void> chargerProduits({bool reset = false}) async {
+  //   // Empêche les appels multiples simultanés
+  //   if (_isLoading) return;
+  //   _isLoading = true;
+  //   notifyListeners();
+  //   // Réinitialiser la pagination si nécessaire
+  //   if (reset) {
+  //     _currentPage = 0;
+  //     produits.clear();
+  //   }
+  //   // Créer la requête pour récupérer les produits triés par ID descendant
+  //   final query = _objectBox.produitBox.query()
+  //     ..order(Produit_.id, flags: Order.descending);
+  //   // Récupérer tous les produits (ou appliquer la pagination selon le besoin)
+  //   final allProduits = await query.build().find();
+  //   // Gérer la pagination
+  //   final startIndex = _currentPage * _pageSize;
+  //   final endIndex = startIndex + _pageSize;
+  //
+  //   if (startIndex >= allProduits.length) {
+  //     _hasMoreProduits = false;
+  //   } else {
+  //     // Sous-liste des nouveaux produits à ajouter
+  //     final newProduits = allProduits.sublist(
+  //       startIndex,
+  //       endIndex > allProduits.length ? allProduits.length : endIndex,
+  //     );
+  //
+  //     // Ajouter les nouveaux produits avec approvisionnements au fournisseur de produits
+  //     _produits.addAll(newProduits);
+  //     _currentPage++;
+  //     _hasMoreProduits = endIndex < allProduits.length;
+  //   }
+  //
+  //   _isLoading = false;
+  //   notifyListeners();
+  // }
   Future<void> chargerProduits({bool reset = false}) async {
     // Empêche les appels multiples simultanés
     if (_isLoading) return;
     _isLoading = true;
     notifyListeners();
+
     // Réinitialiser la pagination si nécessaire
     if (reset) {
       _currentPage = 0;
       produits.clear();
     }
-// Créer la requête pour récupérer les produits triés par ID descendant
+
+    // Créer la requête pour récupérer les produits triés par ID descendant
     final query = _objectBox.produitBox.query()
       ..order(Produit_.id, flags: Order.descending);
-    // Récupérer tous les produits (ou appliquer la pagination selon le besoin)
+
+    // Récupérer tous les produits
     final allProduits = await query.build().find();
+
     // Gérer la pagination
     final startIndex = _currentPage * _pageSize;
     final endIndex = startIndex + _pageSize;
@@ -64,8 +109,8 @@ class CommerceProvider extends ChangeNotifier {
         endIndex > allProduits.length ? allProduits.length : endIndex,
       );
 
-      // Ajouter les nouveaux produits avec approvisionnements au fournisseur de produits
-      _produits.addAll(newProduits);
+      // Ajouter les nouveaux produits sans restructurer
+      produits.addAll(newProduits);
       _currentPage++;
       _hasMoreProduits = endIndex < allProduits.length;
     }
@@ -407,7 +452,6 @@ class CommerceProvider extends ChangeNotifier {
         qr: faker.randomGenerator.integer(999999).toString(),
         prixVente: faker.randomGenerator.decimal(min: 50),
         minimStock: faker.randomGenerator.decimal(min: 1, scale: 2),
-
         alertPeremption: Random().nextInt(10),
       );
     });
@@ -892,5 +936,204 @@ class ClientProvider with ChangeNotifier {
     box.removeAll();
     getClientsFromBox();
     notifyListeners();
+  }
+}
+
+class FakeDataGenerator extends ChangeNotifier {
+  bool _isGenerating = false;
+  bool get isGenerating => _isGenerating;
+
+  Future<void> generateFakeData(
+      BuildContext context,
+      ObjectBox objectBox,
+      int users,
+      int clients,
+      int suppliers,
+      int products,
+      int approvisionnements) async {
+    if (_isGenerating) return;
+
+    _isGenerating = true;
+    notifyListeners();
+
+    try {
+      await Isolate.run(() => objectBox.fillWithFakeData(
+          users, clients, suppliers, products, approvisionnements));
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Données factices ajoutées avec succès !')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Erreur lors de la génération des données : $e')),
+      );
+    } finally {
+      _isGenerating = false;
+      notifyListeners();
+    }
+  }
+}
+
+class AdProvider extends ChangeNotifier {
+  static const int maxFailedLoadAttempts = 3;
+
+  InterstitialAd? _interstitialAd;
+  int _numInterstitialLoadAttempts = 0;
+
+  RewardedInterstitialAd? _rewardedInterstitialAd;
+  int _numRewardedInterstitialLoadAttempts = 0;
+
+  RewardedAd? _rewardedAd;
+  int _numRewardedLoadAttempts = 0;
+
+  bool _isInterstitialAdReady = false;
+  bool _isRewardedAdReady = false;
+  bool _isRewardedInterstitialAdReady = true;
+
+  bool get isInterstitialAdReady => _isInterstitialAdReady;
+  bool get isRewardedAdReady => _isRewardedAdReady;
+  bool get isRewardedInterstitialAdReady => _isRewardedInterstitialAdReady;
+
+  AdProvider() {
+    _createInterstitialAd();
+    _createRewardedAd();
+    _createRewardedInterstitialAd();
+  }
+
+  // Utilisez cette méthode pour créer une AdRequest sans paramètres spécifiques
+  static AdRequest get request => AdRequest();
+
+  void _createInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: Platform.isAndroid
+          ? 'ca-app-pub-2282149611905342/9541682865'
+          : 'ca-app-pub-2282149611905342/9541682865',
+      request: request,
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (InterstitialAd ad) {
+          _interstitialAd = ad;
+          _numInterstitialLoadAttempts = 0;
+          _isInterstitialAdReady = true;
+          ad.setImmersiveMode(true);
+          notifyListeners();
+        },
+        onAdFailedToLoad: (LoadAdError error) {
+          _numInterstitialLoadAttempts += 1;
+          _interstitialAd = null;
+          _isInterstitialAdReady = false;
+          if (_numInterstitialLoadAttempts < maxFailedLoadAttempts) {
+            _createInterstitialAd();
+          }
+          notifyListeners();
+        },
+      ),
+    );
+  }
+
+  void showInterstitialAd() {
+    if (_interstitialAd == null) {
+      return;
+    }
+    _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+      onAdDismissedFullScreenContent: (InterstitialAd ad) {
+        ad.dispose();
+        _createInterstitialAd();
+      },
+      onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
+        ad.dispose();
+        _createInterstitialAd();
+      },
+    );
+    _interstitialAd!.show();
+    _interstitialAd = null;
+    _isInterstitialAdReady = false;
+    notifyListeners();
+  }
+
+  void _createRewardedInterstitialAd() {
+    RewardedInterstitialAd.load(
+      adUnitId: Platform.isAndroid
+          ? 'ca-app-pub-2282149611905342/7845457819'
+          : 'ca-app-pub-2282149611905342/7845457819',
+      request: request,
+      rewardedInterstitialAdLoadCallback: RewardedInterstitialAdLoadCallback(
+        onAdLoaded: (RewardedInterstitialAd ad) {
+          _rewardedInterstitialAd = ad;
+          _numRewardedInterstitialLoadAttempts = 0;
+          _isRewardedInterstitialAdReady = true;
+          ad.setImmersiveMode(true);
+          notifyListeners();
+        },
+        onAdFailedToLoad: (LoadAdError error) {
+          _numRewardedInterstitialLoadAttempts += 1;
+          _rewardedInterstitialAd = null;
+          _isRewardedInterstitialAdReady = false;
+          if (_numRewardedInterstitialLoadAttempts < maxFailedLoadAttempts) {
+            _createRewardedInterstitialAd();
+          }
+          notifyListeners();
+        },
+      ),
+    );
+  }
+
+  void _createRewardedAd() {
+    RewardedAd.load(
+      adUnitId: Platform.isAndroid
+          ? 'ca-app-pub-2282149611905342/1761000427'
+          : 'ca-app-pub-2282149611905342/1761000427',
+      request: request,
+      rewardedAdLoadCallback: RewardedAdLoadCallback(
+        onAdLoaded: (RewardedAd ad) {
+          _rewardedAd = ad;
+          _numRewardedLoadAttempts = 0;
+          _isRewardedAdReady = true;
+          notifyListeners();
+        },
+        onAdFailedToLoad: (LoadAdError error) {
+          _rewardedAd = null;
+          _numRewardedLoadAttempts += 1;
+          _isRewardedAdReady = false;
+          if (_numRewardedLoadAttempts < maxFailedLoadAttempts) {
+            _createRewardedAd();
+          }
+          notifyListeners();
+        },
+      ),
+    );
+  }
+
+  Future<bool> showRewardedAd() async {
+    if (_rewardedAd == null) {
+      return false;
+    }
+
+    final completer = Completer<bool>();
+
+    _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
+      onAdDismissedFullScreenContent: (RewardedAd ad) {
+        ad.dispose();
+        _createRewardedAd();
+        completer.complete(false);
+      },
+      onAdFailedToShowFullScreenContent: (RewardedAd ad, AdError error) {
+        ad.dispose();
+        _createRewardedAd();
+        completer.complete(false);
+      },
+    );
+
+    _rewardedAd!.setImmersiveMode(true);
+    await _rewardedAd!.show(
+      onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
+        completer.complete(true);
+      },
+    );
+    _rewardedAd = null;
+    _isRewardedAdReady = false;
+    notifyListeners();
+
+    return completer.future;
   }
 }

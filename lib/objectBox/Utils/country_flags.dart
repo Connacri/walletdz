@@ -6,8 +6,15 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class FlagDetector extends StatefulWidget {
   final String barcode;
+  final double height;
+  final double width;
 
-  const FlagDetector({Key? key, required this.barcode}) : super(key: key);
+  const FlagDetector(
+      {Key? key,
+      required this.barcode,
+      required this.height,
+      required this.width})
+      : super(key: key);
 
   @override
   _FlagDetectorState createState() => _FlagDetectorState();
@@ -85,6 +92,8 @@ class _FlagDetectorState extends State<FlagDetector> {
     return CountryDisplay(
       country: _detectedCountry,
       isoCode: _detectedIsoCode,
+      height: widget.height,
+      width: widget.width,
     );
   }
 }
@@ -92,10 +101,14 @@ class _FlagDetectorState extends State<FlagDetector> {
 class CountryDisplay extends StatelessWidget {
   final String country;
   final String isoCode;
+  final double height;
+  final double width;
   const CountryDisplay({
     Key? key,
     required this.country,
     required this.isoCode,
+    required this.height,
+    required this.width,
   }) : super(key: key);
 
   @override
@@ -106,14 +119,18 @@ class CountryDisplay extends StatelessWidget {
         isoCode.isNotEmpty
             ? CountryFlag.fromCountryCode(
                 isoCode,
-                height: 30,
-                width: 50,
+                height: height,
+                width: width,
                 shape: const RoundedRectangle(6),
               )
             : Container(
-                height: 30,
-                width: 50,
-                child: Icon(FontAwesomeIcons.globe, color: Colors.black54)),
+                height: height,
+                width: width,
+                child: Icon(
+                  FontAwesomeIcons.globe,
+                  color: Colors.black54,
+                  size: 20,
+                )),
         const SizedBox(width: 10),
         FittedBox(
           child: Text(

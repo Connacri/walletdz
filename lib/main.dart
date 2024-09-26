@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/date_symbol_data_local.dart'; // Importez cette ligne
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,7 +18,6 @@ import 'firebase_options.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'dart:io';
 import 'dart:convert';
-
 import 'objectBox/MyApp.dart';
 import 'objectBox/hash.dart';
 
@@ -26,7 +26,11 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   initializeDateFormatting(
       'fr_FR', null); // Initialisez la localisation française
-  //MobileAds.instance.initialize(); ////////////////////////////////ads
+  if (Platform.isAndroid || Platform.isIOS) {
+    MobileAds.instance.initialize();
+  } else {
+    print("Google Mobile Ads n'est pas supporté sur cette plateforme");
+  }
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -114,9 +118,11 @@ class _MyAppState extends State<MyApp> {
   final GoogleUser2 = FirebaseAuth.instance.currentUser;
   bool _isLicenseValidated = false;
   //final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+
   @override
   void initState() {
     super.initState();
+
     _checkLicenseStatus();
   }
 
@@ -154,5 +160,10 @@ class _MyAppState extends State<MyApp> {
           //     ),
           ),
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }
