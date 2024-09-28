@@ -939,39 +939,48 @@ class ClientProvider with ChangeNotifier {
   }
 }
 
-class FakeDataGenerator extends ChangeNotifier {
+class FakeDataGenerator1 extends ChangeNotifier {
   bool _isGenerating = false;
   bool get isGenerating => _isGenerating;
+  String? _message;
+  String? get message => _message;
 
-  Future<void> generateFakeData(
-      BuildContext context,
-      ObjectBox objectBox,
-      int users,
-      int clients,
-      int suppliers,
-      int products,
-      int approvisionnements) async {
-    if (_isGenerating) return;
+  Future<void> generateFakeData(ObjectBox objectBox, int users, int clients,
+      int suppliers, int products, int approvisionnements) async {
+    print("Début de generateFakeData");
+    if (_isGenerating) {
+      print("Génération déjà en cours");
+      return;
+    }
 
     _isGenerating = true;
+    _message = null;
     notifyListeners();
+    print("Notification envoyée, début de la génération");
 
     try {
-      await Isolate.run(() => objectBox.fillWithFakeData(
-          users, clients, suppliers, products, approvisionnements));
+      print("Début de Isolate.run");
+      await Isolate.run(() {
+        print("Dans Isolate.run");
+        return objectBox.fillWithFakeData(
+            users, clients, suppliers, products, approvisionnements);
+      });
+      print("Fin de Isolate.run");
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Données factices ajoutées avec succès !')),
-      );
+      _message = 'Données factices ajoutées avec succès !';
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('Erreur lors de la génération des données : $e')),
-      );
+      print("Erreur capturée : $e");
+      _message = 'Erreur lors de la génération des données : $e';
     } finally {
       _isGenerating = false;
       notifyListeners();
+      print("Fin de generateFakeData");
     }
+  }
+
+  void clearMessage() {
+    _message = null;
+    notifyListeners();
   }
 }
 
@@ -998,7 +1007,6 @@ class AdProvider extends ChangeNotifier {
   AdProvider() {
     _createInterstitialAd();
     _createRewardedAd();
-    _createRewardedInterstitialAd();
   }
 
   // Utilisez cette méthode pour créer une AdRequest sans paramètres spécifiques
@@ -1049,33 +1057,6 @@ class AdProvider extends ChangeNotifier {
     _interstitialAd = null;
     _isInterstitialAdReady = false;
     notifyListeners();
-  }
-
-  void _createRewardedInterstitialAd() {
-    RewardedInterstitialAd.load(
-      adUnitId: Platform.isAndroid
-          ? 'ca-app-pub-2282149611905342/7845457819'
-          : 'ca-app-pub-2282149611905342/7845457819',
-      request: request,
-      rewardedInterstitialAdLoadCallback: RewardedInterstitialAdLoadCallback(
-        onAdLoaded: (RewardedInterstitialAd ad) {
-          _rewardedInterstitialAd = ad;
-          _numRewardedInterstitialLoadAttempts = 0;
-          _isRewardedInterstitialAdReady = true;
-          ad.setImmersiveMode(true);
-          notifyListeners();
-        },
-        onAdFailedToLoad: (LoadAdError error) {
-          _numRewardedInterstitialLoadAttempts += 1;
-          _rewardedInterstitialAd = null;
-          _isRewardedInterstitialAdReady = false;
-          if (_numRewardedInterstitialLoadAttempts < maxFailedLoadAttempts) {
-            _createRewardedInterstitialAd();
-          }
-          notifyListeners();
-        },
-      ),
-    );
   }
 
   void _createRewardedAd() {

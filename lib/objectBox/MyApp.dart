@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -16,6 +17,7 @@ import 'Utils/ads/InlineAdaptiveExample.dart';
 import 'Utils/ads/NativeTemplateExample.dart';
 import 'Utils/ads/WebViewExample.dart';
 import 'Utils/ads/homeExemple.dart';
+import 'Utils/excel.dart';
 import 'Utils/mobile_scanner/main.dart';
 import 'classeObjectBox.dart';
 import 'hash.dart';
@@ -76,7 +78,6 @@ class MyApp9 extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => ClientProvider(objectBox),
         ),
-        ChangeNotifierProvider(create: (_) => FakeDataGenerator()),
         ChangeNotifierProvider(create: (_) => AdProvider()),
       ],
       child: MaterialApp(
@@ -141,10 +142,14 @@ class _adaptiveHomeState extends State<adaptiveHome> {
   double prixMax = 0;
   final TextEditingController _userController =
       TextEditingController(text: '20');
-  final TextEditingController _clientController = TextEditingController();
-  final TextEditingController _supplierController = TextEditingController();
-  final TextEditingController _productController = TextEditingController();
-  final TextEditingController _approviController = TextEditingController();
+  final TextEditingController _clientController =
+      TextEditingController(text: '20');
+  final TextEditingController _supplierController =
+      TextEditingController(text: '20');
+  final TextEditingController _productController =
+      TextEditingController(text: '20');
+  final TextEditingController _approviController =
+      TextEditingController(text: '20');
 
   int lengthPin = 10;
 
@@ -152,7 +157,17 @@ class _adaptiveHomeState extends State<adaptiveHome> {
   void initState() {
     super.initState();
     _loadPrix();
+    _showInterstitialAd();
   }
+
+  //////////////////////////////////////ads////////////////////////////////////////
+  void _showInterstitialAd() {
+    final adProvider = Provider.of<AdProvider>(context, listen: false);
+    if (adProvider.isInterstitialAdReady) {
+      adProvider.showInterstitialAd();
+    }
+  }
+  //////////////////////////////////////ads////////////////////////////////////////
 
   Future<void> _savePrix() async {
     final prefs = await SharedPreferences.getInstance();
@@ -216,12 +231,10 @@ class _adaptiveHomeState extends State<adaptiveHome> {
     );
   }
 
-  void _showDialog() {
+  void _showDialogFake(ObjectBox objectBox) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        final objectBox = Provider.of<ObjectBox>(context, listen: false);
-        final fakeDataGenerator = Provider.of<FakeDataGenerator>(context);
         return AlertDialog(
           title: Text('Générer des données factices'),
           content: SingleChildScrollView(
@@ -253,33 +266,25 @@ class _adaptiveHomeState extends State<adaptiveHome> {
           ),
           actions: [
             TextButton(
-              onPressed: fakeDataGenerator.isGenerating
-                  ? null
-                  : () => Navigator.of(context).pop(),
+              onPressed: () => Navigator.of(context).pop(),
               child: Text('Annuler'),
             ),
             ElevatedButton(
-              onPressed: fakeDataGenerator.isGenerating
-                  ? null
-                  : () {
-                      final int users =
-                          int.tryParse(_userController.text) ?? 20;
-                      final int clients =
-                          int.tryParse(_clientController.text) ?? 0;
-                      final int suppliers =
-                          int.tryParse(_supplierController.text) ?? 0;
-                      final int products =
-                          int.tryParse(_productController.text) ?? 0;
-                      final int approvi =
-                          int.tryParse(_approviController.text) ?? 0;
-
-                      fakeDataGenerator.generateFakeData(context, objectBox,
-                          users, clients, suppliers, products, approvi);
-                      Navigator.of(context).pop();
-                    },
-              child: fakeDataGenerator.isGenerating
-                  ? CircularProgressIndicator()
-                  : Text('Générer'),
+              onPressed: () async {
+                final int users = int.tryParse(_userController.text) ?? 20;
+                final int clients = int.tryParse(_clientController.text) ?? 10;
+                final int suppliers =
+                    int.tryParse(_supplierController.text) ?? 10;
+                final int products =
+                    int.tryParse(_productController.text) ?? 10;
+                final int approvi = int.tryParse(_approviController.text) ?? 10;
+                objectBox.fillWithFakeData(
+                    users, clients, suppliers, products, approvi);
+                // await fakeDataGenerator.generateFakeData(
+                //     objectBox, users, clients, suppliers, products, approvi);
+                Navigator.of(context).pop();
+              },
+              child: Text('Générer'),
             ),
           ],
         );
@@ -299,6 +304,8 @@ class _adaptiveHomeState extends State<adaptiveHome> {
 
   @override
   Widget build(BuildContext context) {
+    final objectBoxi = Provider.of<ObjectBox>(context, listen: false);
+
     final randomId = Random().nextInt(100);
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
@@ -323,10 +330,17 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                 // ),
                 ElevatedButton(
                   onPressed: () async {
-                    String filePath =
-                        "C:/Users/INDRA/Documents/Articles.xls"; // Assurez-vous de mettre le bon chemin ici.
-                    await widget.objectBox
-                        .importProduitsDepuisExcel(filePath, 20, 3000, 500);
+                    if (Platform.isAndroid) {
+                      String filePath =
+                          "/storage/emulated/0/Download/Articles.xls";
+                      await widget.objectBox
+                          .importProduitsDepuisExcel(filePath, 20, 3000, 500);
+                    } else {
+                      String filePath =
+                          "C:/Users/INDRA/Documents/Articles.xls"; // Assurez-vous de mettre le bon chemin ici.
+                      await widget.objectBox
+                          .importProduitsDepuisExcel(filePath, 20, 3000, 500);
+                    }
 
                     print("Produits importés avec succès !");
                   },
@@ -339,16 +353,16 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                   },
                   icon: Icon(Icons.home, color: Colors.black),
                 ),
-                IconButton(
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (ctx) => QRScannerPage(
-                              lengthPin: 8,
-                              p4ssw0rd: 'Oran2024',
-                            )));
-                  },
-                  icon: Icon(Icons.qr_code_scanner, color: Colors.blue),
-                ),
+                // IconButton(
+                //   onPressed: () {
+                //     Navigator.of(context).push(MaterialPageRoute(
+                //         builder: (ctx) => QRScannerPage(
+                //               lengthPin: 8,
+                //               p4ssw0rd: 'Oran2024',
+                //             )));
+                //   },
+                //   icon: Icon(Icons.qr_code_scanner, color: Colors.blue),
+                // ),
                 IconButton(
                   onPressed: () {
                     Navigator.of(context)
@@ -390,13 +404,10 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                 //   icon: Icon(Icons.local_police),
                 // ),
                 IconButton(
-                  onPressed: () {
-                    // widget.objectBox.fillWithFakeData(1000, 500);
-                    // ScaffoldMessenger.of(context).showSnackBar(
-                    //   SnackBar(content: Text('Données factices ajoutées !')),
-                    // );
-                    _showDialog();
-                  },
+                  onPressed: () =>
+                      //objectBox.fillWithFakeData(20, 20, 10, 20, 20),
+
+                      _showDialogFake(objectBoxi),
                   icon: Icon(Icons.send),
                 ),
                 IconButton(
@@ -474,13 +485,13 @@ class _adaptiveHomeState extends State<adaptiveHome> {
             appBar: AppBar(
               title: Text('POS'),
               actions: [
-                IconButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                        MaterialPageRoute(builder: (ctx) => MyHomePageAds()));
-                  },
-                  icon: Icon(Icons.ads_click, color: Colors.deepPurple),
-                ),
+                // IconButton(
+                //   // onPressed: () {
+                //   //   Navigator.of(context).push(
+                //   //       MaterialPageRoute(builder: (ctx) => MyHomePageAds()));
+                //   // },
+                //   icon: Icon(Icons.ads_click, color: Colors.deepPurple),
+                // ),
                 // PopupMenuButton<String>(
                 //   onSelected: (String result) {
                 //     switch (result) {
@@ -581,28 +592,30 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                 //   ],
                 // ),
 
+                // IconButton(
+                //   onPressed: () {
+                //     Navigator.of(context).push(MaterialPageRoute(
+                //         builder: (ctx) => mobile_scanner_example()));
+                //   },
+                //   icon: Icon(Icons.home, color: Colors.black),
+                // ),
+                // IconButton(
+                //   onPressed: () {
+                //     Navigator.of(context).push(MaterialPageRoute(
+                //         builder: (ctx) => QRScannerPage(
+                //               lengthPin: 8,
+                //               p4ssw0rd: 'Oran2024',
+                //             )));
+                //   },
+                //   icon: Icon(Icons.qr_code_scanner, color: Colors.blue),
+                // ),
                 IconButton(
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (ctx) => mobile_scanner_example()));
-                  },
-                  icon: Icon(Icons.home, color: Colors.black),
-                ),
-                IconButton(
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (ctx) => QRScannerPage(
-                              lengthPin: 8,
-                              p4ssw0rd: 'Oran2024',
-                            )));
-                  },
-                  icon: Icon(Icons.qr_code_scanner, color: Colors.blue),
-                ),
-                IconButton(
-                  onPressed: () {
-                    Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (ctx) => hashPage()));
-                  },
+                  onPressed: () => showForcedRewardedAd(context, hashPage()),
+
+                  // onPressed: () {
+                  //   Navigator.of(context)
+                  //       .push(MaterialPageRoute(builder: (ctx) => hashPage()));
+                  // },
                   icon: Icon(Icons.qr_code_scanner, color: Colors.green),
                 ),
                 Platform.isAndroid || Platform.isIOS
@@ -623,13 +636,13 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                 //         },
                 //         icon: Icon(Icons.add_chart_rounded),
                 //       ),
-                IconButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                        MaterialPageRoute(builder: (ctx) => LicensePage()));
-                  },
-                  icon: Icon(Icons.account_tree_rounded),
-                ),
+                // IconButton(
+                //   onPressed: () {
+                //     Navigator.of(context).push(
+                //         MaterialPageRoute(builder: (ctx) => LicensePage()));
+                //   },
+                //   icon: Icon(Icons.account_tree_rounded),
+                // ),
                 // IconButton(
                 //   onPressed: () {
                 //     Navigator.of(context).push(
@@ -657,22 +670,16 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                 //   icon: Icon(Icons.local_police),
                 // ),
                 IconButton(
-                  onPressed: () {
-                    // widget.objectBox.fillWithFakeData(1000, 500);
-                    // ScaffoldMessenger.of(context).showSnackBar(
-                    //   SnackBar(content: Text('Données factices ajoutées !')),
-                    // );
-                    _showDialog();
-                  },
+                  onPressed: () => _showDialogFake(objectBoxi),
                   icon: Icon(Icons.send),
                 ),
-                IconButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                        MaterialPageRoute(builder: (ctx) => LottieListPage()));
-                  },
-                  icon: Icon(Icons.local_bar_outlined),
-                ),
+                // IconButton(
+                //   onPressed: () {
+                //     Navigator.of(context).push(
+                //         MaterialPageRoute(builder: (ctx) => LottieListPage()));
+                //   },
+                //   icon: Icon(Icons.local_bar_outlined),
+                // ),
               ],
             ),
             body: Consumer<CommerceProvider>(
@@ -702,42 +709,112 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                           SmallBanner: true,
                         ),
                       ),
+                      ElevatedButton(
+                        onPressed: () async {
+                          if (Platform.isAndroid) {
+                            PermissionStatus status =
+                                await Permission.storage.status;
+                            if (status.isDenied) {
+                              status = await Permission.storage.request();
+                            }
+
+                            if (status.isGranted) {
+                              String filePath =
+                                  "/storage/emulated/0/Download/Articles.xls";
+                              try {
+                                await objectBoxi.importProduitsDepuisExcel(
+                                    filePath, 20, 3000, 500);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content:
+                                          Text('Data imported successfully')),
+                                );
+                              } catch (e) {
+                                print("Error accessing file: $e");
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content:
+                                          Text('Error importing data: $e')),
+                                );
+                              }
+                            } else if (status.isPermanentlyDenied) {
+                              openAppSettings();
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content:
+                                        Text('Storage permission is required')),
+                              );
+                            }
+                          }
+                        },
+                        child: Text("Import Data"),
+                      ),
+
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 15),
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            await replaceObjectBoxDatabase(context);
+                            // Rafraîchir l'interface utilisateur ou redémarrer l'application si nécessaire
+                          },
+                          child: Text('Remplacer la base de données'),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 15),
+                        child: ElevatedButton(
+                          onPressed: () =>
+                              DatabaseUpdater.pickAndReplaceDatabase(context),
+                          child: Text('Mettre à jour la base de données'),
+                        ),
+                      ),
                       Container(
                         width: MediaQuery.of(context).size.width,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             ElevatedButton.icon(
-                                onPressed: () {
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                      builder: (_) => FacturePage()));
-                                },
+                                onPressed: () => showForcedRewardedAd(
+                                    context, FacturePage()),
+                                // onPressed: () {
+                                //   Navigator.of(context).push(MaterialPageRoute(
+                                //       builder: (_) => FacturePage()));
+                                // },
                                 label: Text('Facture Page'),
                                 icon: Icon(Icons.monetization_on_sharp)),
                             ElevatedButton.icon(
-                                onPressed: () {
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                      builder: (_) => FacturesListPage()));
-                                },
+                                onPressed: () => showForcedRewardedAd(
+                                    context, FacturesListPage()),
+                                // onPressed: () {
+                                //   Navigator.of(context).push(MaterialPageRoute(
+                                //       builder: (_) => FacturesListPage()));
+                                // },
                                 label: Text('Facture List'),
                                 icon: Icon(Icons.list_alt)),
                           ],
                         ),
                       ),
                       ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: (_) => ClientListScreen()));
-                          },
+                          onPressed: () =>
+                              showForcedRewardedAd(context, ClientListScreen()),
+                          // onPressed: () {
+                          //   Navigator.of(context).push(MaterialPageRoute(
+                          //       builder: (_) => ClientListScreen()));
+                          // },
                           label: Text('Client List'),
                           icon: Icon(Icons.account_circle)),
                       GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (context) => ClientListScreen()),
-                          );
-                        },
+                        onTap: () =>
+                            showForcedRewardedAd(context, ClientListScreen()),
+                        // onTap: () {
+                        //   Navigator.of(context).push(
+                        //     MaterialPageRoute(
+                        //         builder: (context) => ClientListScreen()),
+                        //   );
+                        // },
                         child: CardTop(
                           image:
                               'https://picsum.photos/seed/${randomId + 2}/200/100',
@@ -757,12 +834,14 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (context) => ProduitListScreen()),
-                          );
-                        },
+                        onTap: () =>
+                            showForcedRewardedAd(context, ProduitListScreen()),
+                        // onTap: () {
+                        //   Navigator.of(context).push(
+                        //     MaterialPageRoute(
+                        //         builder: (context) => ProduitListScreen()),
+                        //   );
+                        // },
                         child: CardTop(
                           image: 'https://picsum.photos/seed/$randomId/200/100',
                           text:
@@ -1034,6 +1113,17 @@ class _adaptiveHomeState extends State<adaptiveHome> {
             ),
           ),
           SizedBox(height: 18),
+          Padding(
+            padding: const EdgeInsets.all(28.0),
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (ctx) => SyncProductsPage()));
+              },
+              label: Text('Open Food Facts Correction'),
+              icon: Icon(Icons.event_seat),
+            ),
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -2365,3 +2455,35 @@ class _homeRailState extends State<homeRail> {
     );
   }
 }
+/////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////
+void showForcedRewardedAd(BuildContext context, Widget destinationPage) async {
+  final adProvider = Provider.of<AdProvider>(context, listen: false);
+  if (adProvider.isRewardedAdReady) {
+    bool rewardEarned = await adProvider.showRewardedAd();
+    if (rewardEarned) {
+      // L'utilisateur a regardé la vidéo jusqu'à la fin
+      _navigateToNextScreen(context, destinationPage);
+    } else {
+      // L'utilisateur n'a pas terminé la vidéo
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(
+                'Veuillez regarder la publicité en entier pour continuer')),
+      );
+    }
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+          content: Text('Publicité non prête. Veuillez réessayer plus tard.')),
+    );
+  }
+}
+
+void _navigateToNextScreen(BuildContext context, Widget destinationPage) {
+  Navigator.of(context).push(MaterialPageRoute(
+    builder: (context) => destinationPage,
+  ));
+}
+///////////////////////////////////////////////////////////////////////////////

@@ -100,7 +100,7 @@ class _MyHomePageAdsState extends State<MyHomePageAds> {
       bool rewardEarned = await adProvider.showRewardedAd();
       if (rewardEarned) {
         setState(() {
-          _coins += 10; // Ajouter 10 pièces pour avoir regardé la vidéo
+          _coins += 2; // Ajouter 10 pièces pour avoir regardé la vidéo
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Congratulations! You earned 10 coins!')),
@@ -120,7 +120,8 @@ class _MyHomePageAdsState extends State<MyHomePageAds> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SafeArea(child :
+      Scaffold(
       appBar: AppBar(title: Text('My App')),
       body: Center(
         child: Column(
@@ -143,13 +144,10 @@ class _MyHomePageAdsState extends State<MyHomePageAds> {
             SizedBox(
               height: 15,
             ),
-            SizedBox(
-              height: 15,
-            ),
             Expanded(
               child: ListView.builder(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
+               // shrinkWrap: true,
+             //   physics: NeverScrollableScrollPhysics(),
                 itemCount: items.length,
                 itemBuilder: (context, index) {
                   if (index > 0 && index % 5 == 0) {
@@ -204,7 +202,7 @@ class _MyHomePageAdsState extends State<MyHomePageAds> {
           ],
         ),
       ),
-    );
+    ),);
   }
 }
 

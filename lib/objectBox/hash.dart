@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:crypto/crypto.dart';
@@ -28,7 +30,10 @@ class _hashPageState extends State<hashPage> {
   bool _isShowMessage = false;
   bool _isLicenseValidated = false;
   String _statusMessage = "Entrer le Code PIN";
-  int _lengthPin = 6;
+  int _lengthPin = 10;
+  int _attempts = 0;
+  String _statusMessage2 = "";
+  bool _isInputDisabled = false;
 
   @override
   void initState() {
@@ -40,12 +45,14 @@ class _hashPageState extends State<hashPage> {
   Future<void> _initDeviceIdentifier() async {
     String? identifier = await getDeviceIdentifier();
     if (identifier != null) {
-      setState(() {
-        _deviceIdentifier = identifier;
-        _hash512 = generateHash(_deviceIdentifier, _p4ssw0rd);
-        _shortHash = generateShortHash(_hash512, _p4ssw0rd);
-        _numHash = generateNumHash(_hash512, _p4ssw0rd, _lengthPin);
-      });
+      if (mounted) {
+        setState(() {
+          _deviceIdentifier = identifier;
+          _hash512 = generateHash(_deviceIdentifier, _p4ssw0rd);
+          _shortHash = generateShortHash(_hash512, _p4ssw0rd);
+          _numHash = generateNumHash(_hash512, _p4ssw0rd, _lengthPin);
+        });
+      }
     }
   }
 
@@ -72,6 +79,19 @@ class _hashPageState extends State<hashPage> {
       _statusMessage = "Entrer le PIN (depuis l'application mobile)";
     });
   }
+
+  void _disableInput(Duration duration) {
+    setState(() {
+      _isInputDisabled = true;
+    });
+    Timer(duration, () {
+      setState(() {
+        _isInputDisabled = false;
+      });
+    });
+  }
+
+  bool _showMacAndPhoneFields = false;
 
   @override
   Widget build(BuildContext context) {
@@ -153,15 +173,17 @@ class _hashPageState extends State<hashPage> {
                 children: [
                   Text("Ce QR code doit etre scanner par un Admin"),
                   Spacer(),
-                  _hash512.isNotEmpty
-                      ? Center(
-                          child: PrettyQr(
-                            data: _hash512.toString(),
-                            size: 200.0,
-                            elementColor: Theme.of(context).hintColor,
-                          ),
-                        )
-                      : CircularProgressIndicator(),
+                  Container(
+                    child: _hash512.isNotEmpty
+                        ? Center(
+                            child: PrettyQr(
+                              data: _hash512.toString(),
+                              size: 200.0,
+                              elementColor: Theme.of(context).hintColor,
+                            ),
+                          )
+                        : CircularProgressIndicator(),
+                  ),
                   Spacer(),
                   // Divider(),
                   // SelectableText(
@@ -170,10 +192,10 @@ class _hashPageState extends State<hashPage> {
                   // ),
                   // Divider(),
                   // SelectableText(generateShortHash(_hash512, _p4ssw0rd)),
-                  Divider(),
-                  SelectableText(
-                      generateNumHash(_hash512, _p4ssw0rd, _lengthPin)),
-                  Divider(),
+                  // Divider(),
+                  // SelectableText(
+                  //     generateNumHash(_hash512, _p4ssw0rd, _lengthPin)),
+                  // Divider(),
                   Spacer(),
                   Center(
                     child: Text(
@@ -189,73 +211,166 @@ class _hashPageState extends State<hashPage> {
                     ),
                   ),
                   Spacer(),
-                  Center(
-                    child: PincodeInputFields(
-                      onChanged: (value) {
-                        setState(() {
-                          _enteredHash = value;
-                        });
-                      },
-                      // onInputComplete: () {
-                      //   if (validateNumHash(
-                      //       _enteredHash, _hash512, _p4ssw0rd)) {
-                      //     ScaffoldMessenger.of(context).showSnackBar(
-                      //       SnackBar(
-                      //           content: Text("Licence Numerique validée!")),
-                      //     );
-                      //     _saveLicenseStatus(true);
-                      //     setState(() {
-                      //       _isLicenseValidated = true;
-                      //     });
-                      //   } else {
-                      //     ScaffoldMessenger.of(context).showSnackBar(
-                      //       SnackBar(content: Text("num Hash incorrect!")),
-                      //     );
-                      //   }
-                      // },
-                      onInputComplete: () {
-                        setState(() {
-                          _statusMessage = "Validation en cours...";
-                        });
+                  // Center(
+                  //   child: PincodeInputFields(
+                  //     onChanged: (value) {
+                  //       setState(() {
+                  //         _enteredHash = value;
+                  //       });
+                  //     },
+                  //     // onInputComplete: () {
+                  //     //   if (validateNumHash(
+                  //     //       _enteredHash, _hash512, _p4ssw0rd)) {
+                  //     //     ScaffoldMessenger.of(context).showSnackBar(
+                  //     //       SnackBar(
+                  //     //           content: Text("Licence Numerique validée!")),
+                  //     //     );
+                  //     //     _saveLicenseStatus(true);
+                  //     //     setState(() {
+                  //     //       _isLicenseValidated = true;
+                  //     //     });
+                  //     //   } else {
+                  //     //     ScaffoldMessenger.of(context).showSnackBar(
+                  //     //       SnackBar(content: Text("num Hash incorrect!")),
+                  //     //     );
+                  //     //   }
+                  //     // },
+                  //     onInputComplete: () {
+                  //       setState(() {
+                  //         _statusMessage = "Validation en cours...";
+                  //       });
+                  //
+                  //       Future.delayed(Duration(seconds: 2), () {
+                  //         if (validateNumHash(
+                  //             _enteredHash, _hash512, _p4ssw0rd, _lengthPin)) {
+                  //           _saveLicenseStatus(true);
+                  //           setState(() {
+                  //             _isLicenseValidated = true;
+                  //             _statusMessage = "Licence Numérique validée!";
+                  //           });
+                  //         } else {
+                  //           setState(() {
+                  //             _statusMessage = "PIN Hash incorrect!";
+                  //           });
+                  //         }
+                  //       });
+                  //     },
+                  //     autoFocus: true,
+                  //     length: _lengthPin,
+                  //     heigth: 54,
+                  //     width: 51,
+                  //     borderRadius: BorderRadius.circular(9),
+                  //     unfocusBorder: Border.all(
+                  //       width: 1,
+                  //       color: const Color(0xFF5B6774),
+                  //     ),
+                  //     focusBorder: Border.all(
+                  //       width: 1,
+                  //       color: const Color(0xFF9B71F4),
+                  //     ),
+                  //     // cursorColor: Colors.white,
+                  //     cursorWidth: 2,
+                  //     focusFieldColor: const Color(0xFFB1B8F1),
+                  //     //unfocusFieldColor: const Color(0xFF2A2B32),
+                  //     textStyle: const TextStyle(
+                  //       color: Colors.black54,
+                  //       fontSize: 21,
+                  //     ),
+                  //   ),
+                  // ),
+                  PincodeInputFields(
+                    onChanged: (value) {
+                      setState(() {
+                        _enteredHash = value;
+                      });
+                    },
+                    onInputComplete: () {
+                      setState(() {
+                        _statusMessage = "Validation en cours...";
+                      });
 
-                        Future.delayed(Duration(seconds: 2), () {
-                          if (validateNumHash(
-                              _enteredHash, _hash512, _p4ssw0rd, _lengthPin)) {
-                            _saveLicenseStatus(true);
-                            setState(() {
-                              _isLicenseValidated = true;
-                              _statusMessage = "Licence Numérique validée!";
-                            });
+                      Future.delayed(Duration(seconds: 2), () {
+                        if (validateNumHash(
+                            _enteredHash, _hash512, _p4ssw0rd, _lengthPin)) {
+                          _saveLicenseStatus(true);
+                          setState(() {
+                            _isLicenseValidated = true;
+                            _statusMessage2 = "Licence Numérique validée!";
+                          });
+                        } else {
+                          _attempts++;
+                          if (_attempts >= 3 && _attempts < 6) {
+                            _statusMessage2 =
+                                "PIN Hash incorrect! Tentatives restantes: ${3 - _attempts}";
+                            if (_attempts == 3) {
+                              _disableInput(Duration(minutes: 1));
+                            }
+                          } else if (_attempts >= 6 && _attempts < 9) {
+                            _statusMessage2 =
+                                "PIN Hash incorrect! Tentatives restantes: ${6 - _attempts}";
+                            if (_attempts == 6) {
+                              _disableInput(Duration(minutes: 5));
+                            }
+                          } else if (_attempts >= 9) {
+                            _statusMessage2 =
+                                "Trop de tentatives échouées. Veuillez entrer votre adresse MAC et votre numéro de téléphone.";
+                            _showMacAndPhoneFields;
                           } else {
-                            setState(() {
-                              _statusMessage = "PIN Hash incorrect!";
-                            });
+                            _statusMessage2 = "PIN Hash incorrect!";
                           }
-                        });
-                      },
-                      autoFocus: true,
-                      length: _lengthPin,
-                      heigth: 54,
-                      width: 51,
-                      borderRadius: BorderRadius.circular(9),
-                      unfocusBorder: Border.all(
-                        width: 1,
-                        color: const Color(0xFF5B6774),
-                      ),
-                      focusBorder: Border.all(
-                        width: 1,
-                        color: const Color(0xFF9B71F4),
-                      ),
-                      // cursorColor: Colors.white,
-                      cursorWidth: 2,
-                      focusFieldColor: const Color(0xFFB1B8F1),
-                      //unfocusFieldColor: const Color(0xFF2A2B32),
-                      textStyle: const TextStyle(
-                        color: Colors.black54,
-                        fontSize: 21,
-                      ),
+                        }
+                      });
+                    },
+                    autoFocus: true,
+                    length: _lengthPin,
+                    heigth: 54,
+                    width: 51,
+                    borderRadius: BorderRadius.circular(9),
+                    unfocusBorder: Border.all(
+                      width: 1,
+                      color: const Color(0xFF5B6774),
                     ),
+                    focusBorder: Border.all(
+                      width: 1,
+                      color: const Color(0xFF9B71F4),
+                    ),
+                    cursorWidth: 2,
+                    focusFieldColor: const Color(0xFFB1B8F1),
+                    textStyle: const TextStyle(
+                      color: Colors.black54,
+                      fontSize: 21,
+                    ),
+                    enabled: !_isInputDisabled,
                   ),
+                  SizedBox(height: 16),
+                  Text(_statusMessage2),
+                  if (_showMacAndPhoneFields)
+                    Column(
+                      children: [
+                        TextField(
+                          decoration: InputDecoration(
+                            labelText: "Adresse MAC",
+                          ),
+                          onChanged: (value) {
+                            // Save the MAC address value
+                          },
+                        ),
+                        TextField(
+                          decoration: InputDecoration(
+                            labelText: "Numéro de téléphone",
+                          ),
+                          onChanged: (value) {
+                            // Save the phone number value
+                          },
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            // Send the MAC address and phone number to the administrator
+                          },
+                          child: Text("Envoyer"),
+                        ),
+                      ],
+                    ),
                   Spacer(),
 
                   // _isShowMessage
@@ -458,74 +573,77 @@ class _HashAdminState extends State<HashAdmin> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Scanner de QR Code'),
-      ),
-      body: Container(
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              flex: 3,
-              // child: QRView(
-              //   key: qrKey,
-              //   onQRViewCreated: _onQRViewCreated,
-              // ),
-              // Dans le widget build, remplacez QRView par MobileScanner
-              child: MobileScanner(
-                controller: controller,
-                onDetect: (capture) {
-                  final List<Barcode> barcodes = capture.barcodes;
-                  for (final barcode in barcodes) {
-                    if (barcode.rawValue != null) {
-                      setState(() {
-                        qrCodeHash = generateHash(barcode.rawValue!, _p4ssw0rd);
-                        qrCodeNumHash = generateNumHash(
-                            barcode.rawValue!, _p4ssw0rd, widget.lengthPin);
-                      });
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Scanner de QR Code'),
+        ),
+        body: Container(
+          child: Column(
+            children: <Widget>[
+              Expanded(
+                flex: 3,
+                // child: QRView(
+                //   key: qrKey,
+                //   onQRViewCreated: _onQRViewCreated,
+                // ),
+                // Dans le widget build, remplacez QRView par MobileScanner
+                child: MobileScanner(
+                  controller: controller,
+                  onDetect: (capture) {
+                    final List<Barcode> barcodes = capture.barcodes;
+                    for (final barcode in barcodes) {
+                      if (barcode.rawValue != null) {
+                        setState(() {
+                          qrCodeHash =
+                              generateHash(barcode.rawValue!, _p4ssw0rd);
+                          qrCodeNumHash = generateNumHash(
+                              barcode.rawValue!, _p4ssw0rd, widget.lengthPin);
+                        });
+                      }
                     }
-                  }
-                },
-              ),
-            ),
-            if (qrCodeHash != null)
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    //Text('Hash QR code: $qrCodeHash'),
-                    Text(
-                        'Serial PIN: $qrCodeNumHash'), // Affichage du code numérique
-                    Divider(),
-                    // SelectableText(
-                    //   generateHash(qrCodeHash!, _p4ssw0rd), //_hash512
-                    //   textAlign: TextAlign.center,
-                    // ),
-                    // Divider(),
-                    // SelectableText(generateShortHash(qrCodeHash!, _p4ssw0rd)),
-                    // Divider(),
-                    SelectableText(generateNumHash(
-                        qrCodeHash!, _p4ssw0rd, widget.lengthPin)),
-                    Divider(),
-                    // Text('Licence: ' +
-                    //     _validateHash(qrCodeHash!, _p4ssw0rd).toString()),
-                    // ElevatedButton(
-                    //   onPressed: () {
-                    //     if (_validateHash(qrCodeHash!, _p4ssw0rd)) {
-                    //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    //           content: Text("Licence validée avec succès!")));
-                    //     } else {
-                    //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    //           content:
-                    //               Text("Hash incorrect, licence invalide!")));
-                    //     }
-                    //   },
-                    //   child: Text('Valider la licence'),
-                    // ),
-                  ],
+                  },
                 ),
-              )
-          ],
+              ),
+              if (qrCodeHash != null)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      //Text('Hash QR code: $qrCodeHash'),
+                      Text(
+                          'Serial PIN: $qrCodeNumHash'), // Affichage du code numérique
+                      Divider(),
+                      // SelectableText(
+                      //   generateHash(qrCodeHash!, _p4ssw0rd), //_hash512
+                      //   textAlign: TextAlign.center,
+                      // ),
+                      // Divider(),
+                      // SelectableText(generateShortHash(qrCodeHash!, _p4ssw0rd)),
+                      // Divider(),
+                      SelectableText(generateNumHash(
+                          qrCodeHash!, _p4ssw0rd, widget.lengthPin)),
+                      Divider(),
+                      // Text('Licence: ' +
+                      //     _validateHash(qrCodeHash!, _p4ssw0rd).toString()),
+                      // ElevatedButton(
+                      //   onPressed: () {
+                      //     if (_validateHash(qrCodeHash!, _p4ssw0rd)) {
+                      //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      //           content: Text("Licence validée avec succès!")));
+                      //     } else {
+                      //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      //           content:
+                      //               Text("Hash incorrect, licence invalide!")));
+                      //     }
+                      //   },
+                      //   child: Text('Valider la licence'),
+                      // ),
+                    ],
+                  ),
+                )
+            ],
+          ),
         ),
       ),
     );

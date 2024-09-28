@@ -11,13 +11,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cloud_firestore: ^5.4.2
-  firebase_messaging: ^15.1.2
-  firebase_database: ^11.1.3
-  firebase_core: ^3.5.0
-  firebase_auth: ^5.3.0
+  cloud_firestore: ^5.4.3
+  firebase_messaging: ^15.1.3
+  firebase_database: ^11.1.4
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.3.1
   firebase_storage: any
-  firebase_in_app_messaging: ^0.8.0+7
+  firebase_in_app_messaging: ^0.8.0+8
   firebase_analytics: any
   google_sign_in: ^6.2.1
   cached_network_image: any
@@ -88,6 +88,9 @@ dependencies:
   excel: ^4.0.6
   country_flags: ^3.0.0
   google_mobile_ads: ^5.1.0
+  permission_handler: ^11.3.1
+  file_picker: ^8.1.2
+
 
 
 dev_dependencies:

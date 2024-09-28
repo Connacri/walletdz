@@ -154,7 +154,11 @@ class _MyAppState extends State<MyApp> {
           debugShowCheckedModeBanner: false,
           title: 'Ramzi',
           themeMode: ThemeMode.dark,
-          home: _isLicenseValidated ? MyMain() : hashPage()
+          home: Platform.isAndroid || Platform.isIOS
+              ? MyMain()
+              : _isLicenseValidated
+                  ? MyMain()
+                  : hashPage()
           // verifi_auth2(
           //     // objectBox: objectBox,
           //     ),
