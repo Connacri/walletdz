@@ -49,10 +49,26 @@ class _FlagDetectorState extends State<FlagDetector> {
     return [];
   }
 
+  // void detectCountry(String barcode) {
+  //   countries.then((data) {
+  //     setState(() {
+  //       String prefix =  barcode.length >= 3 ? barcode.substring(0, 3) : barcode;
+  //       Map<String, String> result = findCountry(prefix, data);
+  //       _detectedCountry = result['name'] ?? "Inconnu";
+  //       _detectedIsoCode = result['iso'] ?? "";
+  //     });
+  //   });
+  // }
   void detectCountry(String barcode) {
     countries.then((data) {
       setState(() {
-        String prefix = barcode.length >= 3 ? barcode.substring(0, 3) : barcode;
+        String prefix;
+        if (barcode.startsWith('1613')) {
+          prefix = '613';
+        } else {
+          prefix = barcode.length >= 3 ? barcode.substring(0, 3) : barcode;
+        }
+
         Map<String, String> result = findCountry(prefix, data);
         _detectedCountry = result['name'] ?? "Inconnu";
         _detectedIsoCode = result['iso'] ?? "";
@@ -128,15 +144,13 @@ class CountryDisplay extends StatelessWidget {
                 width: width,
                 child: Icon(
                   FontAwesomeIcons.globe,
-                  color: Colors.black54,
                   size: 20,
                 )),
         const SizedBox(width: 10),
         FittedBox(
           child: Text(
-            'Made in ' + country,
-            style: const TextStyle(fontSize: 20, color: Colors.black54),
-          ),
+              isoCode.isNotEmpty ? 'Made in ' + country : 'Pays Inconnu',
+              style: Theme.of(context).textTheme.bodyLarge),
         ),
       ],
     );

@@ -19,6 +19,7 @@ import 'Utils/ads/WebViewExample.dart';
 import 'Utils/ads/homeExemple.dart';
 import 'Utils/excel.dart';
 import 'Utils/mobile_scanner/main.dart';
+import 'Utils/supabase_sync.dart';
 import 'classeObjectBox.dart';
 import 'hash.dart';
 import 'hash2.dart';
@@ -79,34 +80,41 @@ class MyApp9 extends StatelessWidget {
           create: (_) => ClientProvider(objectBox),
         ),
         ChangeNotifierProvider(create: (_) => AdProvider()),
+        ChangeNotifierProvider(
+          create: (_) => ThemeProvider(),
+        ),
       ],
-      child: MaterialApp(
-        title: 'POS',
-        theme: ThemeData(
-          fontFamily: 'oswald',
-          brightness: Brightness.light,
-          primarySwatch: Colors.blue,
-          chipTheme: ChipThemeData(
-            backgroundColor: Colors.grey[300]!,
-            labelStyle: TextStyle(color: Colors.black),
+      child: Consumer<ThemeProvider>(builder: (context, themeProvider, child) {
+        return MaterialApp(
+          title: 'POS',
+          theme: ThemeData(
+            fontFamily: 'oswald',
+            brightness: Brightness.light,
+            primarySwatch: Colors.blue,
+            chipTheme: ChipThemeData(
+              backgroundColor: Colors.grey[300]!,
+              labelStyle: TextStyle(color: Colors.black),
+            ),
           ),
-        ),
-        darkTheme: ThemeData(
-          fontFamily: 'oswald',
-          brightness: Brightness.dark,
-          chipTheme: ChipThemeData(
-            backgroundColor: Colors.grey[800]!,
-            labelStyle: TextStyle(color: Colors.white),
+          darkTheme: ThemeData(
+            fontFamily: 'oswald',
+            brightness: Brightness.dark,
+            primaryColor: Colors.blueGrey,
+            chipTheme: ChipThemeData(
+              backgroundColor: Colors.grey[800]!,
+              labelStyle: TextStyle(color: Colors.white),
+            ),
           ),
-        ),
-        themeMode: ThemeMode.system,
+          themeMode:
+              themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
 
-        //darkTheme: ThemeData.dark(),
+          //darkTheme: ThemeData.dark(),
 
-        home: /*showPlatform*/ adaptiveHome(
-          objectBox: objectBox,
-        ),
-      ),
+          home: /*showPlatform*/ adaptiveHome(
+            objectBox: objectBox,
+          ),
+        );
+      }),
     );
   }
 }
@@ -157,7 +165,7 @@ class _adaptiveHomeState extends State<adaptiveHome> {
   void initState() {
     super.initState();
     _loadPrix();
-    _showInterstitialAd();
+    // _showInterstitialAd();
   }
 
   //////////////////////////////////////ads////////////////////////////////////////
@@ -314,6 +322,14 @@ class _adaptiveHomeState extends State<adaptiveHome> {
             appBar: AppBar(
               title: Text('POS'),
               actions: [
+                // Switch pour basculer entre les thèmes
+                Switch(
+                  value: Provider.of<ThemeProvider>(context).isDarkTheme,
+                  onChanged: (value) {
+                    Provider.of<ThemeProvider>(context, listen: false)
+                        .toggleTheme();
+                  },
+                ),
                 IconButton(
                   onPressed: () {
                     Navigator.of(context).push(
@@ -394,15 +410,15 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                 SizedBox(
                   width: 50,
                 ),
-                // IconButton(
-                //   onPressed: () {
-                //     Navigator.of(context).push(MaterialPageRoute(
-                //         builder: (ctx) => supa.ProduitListPage(
-                //             supabase: Supabase.instance.client,
-                //             objectboxStore: widget.objectBox.store)));
-                //   },
-                //   icon: Icon(Icons.local_police),
-                // ),
+                IconButton(
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (ctx) => ProduitListPage(
+                            supabase: Supabase.instance.client,
+                            objectboxStore: widget.objectBox.store)));
+                  },
+                  icon: Icon(Icons.local_police),
+                ),
                 IconButton(
                   onPressed: () =>
                       //objectBox.fillWithFakeData(20, 20, 10, 20, 20),
@@ -481,491 +497,491 @@ class _adaptiveHomeState extends State<adaptiveHome> {
             ),
           );
         } else {
-          return Scaffold(
-            appBar: AppBar(
-              title: Text('POS'),
-              actions: [
-                // IconButton(
-                //   // onPressed: () {
-                //   //   Navigator.of(context).push(
-                //   //       MaterialPageRoute(builder: (ctx) => MyHomePageAds()));
-                //   // },
-                //   icon: Icon(Icons.ads_click, color: Colors.deepPurple),
-                // ),
-                // PopupMenuButton<String>(
-                //   onSelected: (String result) {
-                //     switch (result) {
-                //       case interstitialButtonText:
-                //         _showInterstitialAd();
-                //         break;
-                //       case rewardedButtonText:
-                //         _showRewardedAd();
-                //         break;
-                //       case rewardedInterstitialButtonText:
-                //         _showRewardedInterstitialAd();
-                //         break;
-                //       case fluidButtonText:
-                //         Navigator.push(
-                //           context,
-                //           MaterialPageRoute(
-                //               builder: (context) => FluidExample()),
-                //         );
-                //         break;
-                //       case inlineAdaptiveButtonText:
-                //         Navigator.push(
-                //           context,
-                //           MaterialPageRoute(
-                //               builder: (context) => InlineAdaptiveExample()),
-                //         );
-                //         break;
-                //       case anchoredAdaptiveButtonText:
-                //         Navigator.push(
-                //           context,
-                //           MaterialPageRoute(
-                //               builder: (context) => AnchoredAdaptiveExample()),
-                //         );
-                //         break;
-                //       case nativeTemplateButtonText:
-                //         Navigator.push(
-                //           context,
-                //           MaterialPageRoute(
-                //               builder: (context) => NativeTemplateExample()),
-                //         );
-                //         break;
-                //       case webviewExampleButtonText:
-                //         Navigator.push(
-                //           context,
-                //           MaterialPageRoute(
-                //               builder: (context) => WebViewExample()),
-                //         );
-                //         break;
-                //       case adInspectorButtonText:
-                //         MobileAds.instance.openAdInspector((error) => log(
-                //             ('Ad Inspector ' +
-                //                     (error == null
-                //                         ? 'opened.'
-                //                         : 'error: ' + (error.message ?? '')))
-                //                 as num)); /////////////////*********************hna pas sure
-                //         break;
-                //       default:
-                //         throw AssertionError('unexpected button: $result');
-                //     }
-                //   },
-                //   itemBuilder: (BuildContext context) =>
-                //       <PopupMenuEntry<String>>[
-                //     PopupMenuItem<String>(
-                //       value: interstitialButtonText,
-                //       child: Text(interstitialButtonText),
-                //     ),
-                //     PopupMenuItem<String>(
-                //       value: rewardedButtonText,
-                //       child: Text(rewardedButtonText),
-                //     ),
-                //     PopupMenuItem<String>(
-                //       value: rewardedInterstitialButtonText,
-                //       child: Text(rewardedInterstitialButtonText),
-                //     ),
-                //     PopupMenuItem<String>(
-                //       value: fluidButtonText,
-                //       child: Text(fluidButtonText),
-                //     ),
-                //     PopupMenuItem<String>(
-                //       value: inlineAdaptiveButtonText,
-                //       child: Text(inlineAdaptiveButtonText),
-                //     ),
-                //     PopupMenuItem<String>(
-                //       value: anchoredAdaptiveButtonText,
-                //       child: Text(anchoredAdaptiveButtonText),
-                //     ),
-                //     PopupMenuItem<String>(
-                //       value: nativeTemplateButtonText,
-                //       child: Text(nativeTemplateButtonText),
-                //     ),
-                //     PopupMenuItem<String>(
-                //       value: webviewExampleButtonText,
-                //       child: Text(webviewExampleButtonText),
-                //     ),
-                //     PopupMenuItem<String>(
-                //       value: adInspectorButtonText,
-                //       child: Text(adInspectorButtonText),
-                //     ),
-                //   ],
-                // ),
+          return SafeArea(
+            child: Scaffold(
+              appBar: AppBar(
+                title: Text('POS'),
+                actions: [
+                  // IconButton(
+                  //   // onPressed: () {
+                  //   //   Navigator.of(context).push(
+                  //   //       MaterialPageRoute(builder: (ctx) => MyHomePageAds()));
+                  //   // },
+                  //   icon: Icon(Icons.ads_click, color: Colors.deepPurple),
+                  // ),
+                  // PopupMenuButton<String>(
+                  //   onSelected: (String result) {
+                  //     switch (result) {
+                  //       case interstitialButtonText:
+                  //         _showInterstitialAd();
+                  //         break;
+                  //       case rewardedButtonText:
+                  //         _showRewardedAd();
+                  //         break;
+                  //       case rewardedInterstitialButtonText:
+                  //         _showRewardedInterstitialAd();
+                  //         break;
+                  //       case fluidButtonText:
+                  //         Navigator.push(
+                  //           context,
+                  //           MaterialPageRoute(
+                  //               builder: (context) => FluidExample()),
+                  //         );
+                  //         break;
+                  //       case inlineAdaptiveButtonText:
+                  //         Navigator.push(
+                  //           context,
+                  //           MaterialPageRoute(
+                  //               builder: (context) => InlineAdaptiveExample()),
+                  //         );
+                  //         break;
+                  //       case anchoredAdaptiveButtonText:
+                  //         Navigator.push(
+                  //           context,
+                  //           MaterialPageRoute(
+                  //               builder: (context) => AnchoredAdaptiveExample()),
+                  //         );
+                  //         break;
+                  //       case nativeTemplateButtonText:
+                  //         Navigator.push(
+                  //           context,
+                  //           MaterialPageRoute(
+                  //               builder: (context) => NativeTemplateExample()),
+                  //         );
+                  //         break;
+                  //       case webviewExampleButtonText:
+                  //         Navigator.push(
+                  //           context,
+                  //           MaterialPageRoute(
+                  //               builder: (context) => WebViewExample()),
+                  //         );
+                  //         break;
+                  //       case adInspectorButtonText:
+                  //         MobileAds.instance.openAdInspector((error) => log(
+                  //             ('Ad Inspector ' +
+                  //                     (error == null
+                  //                         ? 'opened.'
+                  //                         : 'error: ' + (error.message ?? '')))
+                  //                 as num)); /////////////////*********************hna pas sure
+                  //         break;
+                  //       default:
+                  //         throw AssertionError('unexpected button: $result');
+                  //     }
+                  //   },
+                  //   itemBuilder: (BuildContext context) =>
+                  //       <PopupMenuEntry<String>>[
+                  //     PopupMenuItem<String>(
+                  //       value: interstitialButtonText,
+                  //       child: Text(interstitialButtonText),
+                  //     ),
+                  //     PopupMenuItem<String>(
+                  //       value: rewardedButtonText,
+                  //       child: Text(rewardedButtonText),
+                  //     ),
+                  //     PopupMenuItem<String>(
+                  //       value: rewardedInterstitialButtonText,
+                  //       child: Text(rewardedInterstitialButtonText),
+                  //     ),
+                  //     PopupMenuItem<String>(
+                  //       value: fluidButtonText,
+                  //       child: Text(fluidButtonText),
+                  //     ),
+                  //     PopupMenuItem<String>(
+                  //       value: inlineAdaptiveButtonText,
+                  //       child: Text(inlineAdaptiveButtonText),
+                  //     ),
+                  //     PopupMenuItem<String>(
+                  //       value: anchoredAdaptiveButtonText,
+                  //       child: Text(anchoredAdaptiveButtonText),
+                  //     ),
+                  //     PopupMenuItem<String>(
+                  //       value: nativeTemplateButtonText,
+                  //       child: Text(nativeTemplateButtonText),
+                  //     ),
+                  //     PopupMenuItem<String>(
+                  //       value: webviewExampleButtonText,
+                  //       child: Text(webviewExampleButtonText),
+                  //     ),
+                  //     PopupMenuItem<String>(
+                  //       value: adInspectorButtonText,
+                  //       child: Text(adInspectorButtonText),
+                  //     ),
+                  //   ],
+                  // ),
 
-                // IconButton(
-                //   onPressed: () {
-                //     Navigator.of(context).push(MaterialPageRoute(
-                //         builder: (ctx) => mobile_scanner_example()));
-                //   },
-                //   icon: Icon(Icons.home, color: Colors.black),
-                // ),
-                // IconButton(
-                //   onPressed: () {
-                //     Navigator.of(context).push(MaterialPageRoute(
-                //         builder: (ctx) => QRScannerPage(
-                //               lengthPin: 8,
-                //               p4ssw0rd: 'Oran2024',
-                //             )));
-                //   },
-                //   icon: Icon(Icons.qr_code_scanner, color: Colors.blue),
-                // ),
-                IconButton(
-                  onPressed: () => showForcedRewardedAd(context, hashPage()),
+                  // IconButton(
+                  //   onPressed: () {
+                  //     Navigator.of(context).push(MaterialPageRoute(
+                  //         builder: (ctx) => mobile_scanner_example()));
+                  //   },
+                  //   icon: Icon(Icons.home, color: Colors.black),
+                  // ),
+                  // IconButton(
+                  //   onPressed: () {
+                  //     Navigator.of(context).push(MaterialPageRoute(
+                  //         builder: (ctx) => QRScannerPage(
+                  //               lengthPin: 8,
+                  //               p4ssw0rd: 'Oran2024',
+                  //             )));
+                  //   },
+                  //   icon: Icon(Icons.qr_code_scanner, color: Colors.blue),
+                  // ),
+                  IconButton(
+                    onPressed: () => showForcedRewardedAd(context, hashPage()),
 
-                  // onPressed: () {
-                  //   Navigator.of(context)
-                  //       .push(MaterialPageRoute(builder: (ctx) => hashPage()));
-                  // },
-                  icon: Icon(Icons.qr_code_scanner, color: Colors.green),
-                ),
-                Platform.isAndroid || Platform.isIOS
-                    ? IconButton(
-                        onPressed: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (ctx) => HashAdmin(
-                                    lengthPin: lengthPin,
-                                  )));
-                        },
-                        icon: Icon(Icons.add_chart_rounded),
-                      )
-                    : Container(),
-                // IconButton(
-                //         onPressed: () {
-                //           Navigator.of(context)
-                //               .push(MaterialPageRoute(builder: (ctx) => hashPage()));
-                //         },
-                //         icon: Icon(Icons.add_chart_rounded),
-                //       ),
-                // IconButton(
-                //   onPressed: () {
-                //     Navigator.of(context).push(
-                //         MaterialPageRoute(builder: (ctx) => LicensePage()));
-                //   },
-                //   icon: Icon(Icons.account_tree_rounded),
-                // ),
-                // IconButton(
-                //   onPressed: () {
-                //     Navigator.of(context).push(
-                //         MaterialPageRoute(builder: (ctx) => FacturesListPage()));
-                //   },
-                //   icon: Icon(Icons.hail_outlined),
-                // ),
-                // IconButton(
-                //   onPressed: () {
-                //     Navigator.of(context)
-                //         .push(MaterialPageRoute(builder: (ctx) => FacturePage()));
-                //   },
-                //   icon: Icon(Icons.invert_colors_off),
-                // ),
-                // SizedBox(
-                //   width: 50,
-                // ),
-                // IconButton(
-                //   onPressed: () {
-                //     Navigator.of(context).push(MaterialPageRoute(
-                //         builder: (ctx) => supa.ProduitListPage(
-                //             supabase: Supabase.instance.client,
-                //             objectboxStore: widget.objectBox.store)));
-                //   },
-                //   icon: Icon(Icons.local_police),
-                // ),
-                IconButton(
-                  onPressed: () => _showDialogFake(objectBoxi),
-                  icon: Icon(Icons.send),
-                ),
-                // IconButton(
-                //   onPressed: () {
-                //     Navigator.of(context).push(
-                //         MaterialPageRoute(builder: (ctx) => LottieListPage()));
-                //   },
-                //   icon: Icon(Icons.local_bar_outlined),
-                // ),
-              ],
-            ),
-            body: Consumer<CommerceProvider>(
-                builder: (context, produitProvider, child) {
-              int totalProduits = produitProvider.getTotalProduits();
-              List<Produit> produitsFiltres =
-                  produitProvider.getProduitsBetweenPrices(prixMin, prixMax);
-              // var produitsLowStock = produitProvider.getProduitsLowStock(5.0);
-              // var produitsLowStock0 = produitProvider.getProduitsLowStock(0.0);
-              return Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: ListView(
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (context) => FournisseurListScreen()),
-                          );
-                        },
-                        child: CardTop(
-                          image:
-                              'https://picsum.photos/seed/${randomId + 8}/200/100',
-                          text:
-                              '${produitProvider.fournisseurs.length} Fournisseurs',
-                          provider: produitProvider,
-                          SmallBanner: true,
-                        ),
-                      ),
-                      ElevatedButton(
-                        onPressed: () async {
-                          if (Platform.isAndroid) {
-                            PermissionStatus status =
-                                await Permission.storage.status;
-                            if (status.isDenied) {
-                              status = await Permission.storage.request();
-                            }
-
-                            if (status.isGranted) {
-                              String filePath =
-                                  "/storage/emulated/0/Download/Articles.xls";
-                              try {
-                                await objectBoxi.importProduitsDepuisExcel(
-                                    filePath, 20, 3000, 500);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content:
-                                          Text('Data imported successfully')),
-                                );
-                              } catch (e) {
-                                print("Error accessing file: $e");
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content:
-                                          Text('Error importing data: $e')),
-                                );
-                              }
-                            } else if (status.isPermanentlyDenied) {
-                              openAppSettings();
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content:
-                                        Text('Storage permission is required')),
-                              );
-                            }
-                          }
-                        },
-                        child: Text("Import Data"),
-                      ),
-
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 15),
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            await replaceObjectBoxDatabase(context);
-                            // Rafraîchir l'interface utilisateur ou redémarrer l'application si nécessaire
-                          },
-                          child: Text('Remplacer la base de données'),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 15),
-                        child: ElevatedButton(
-                          onPressed: () =>
-                              DatabaseUpdater.pickAndReplaceDatabase(context),
-                          child: Text('Mettre à jour la base de données'),
-                        ),
-                      ),
-                      Container(
-                        width: MediaQuery.of(context).size.width,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            ElevatedButton.icon(
-                                onPressed: () => showForcedRewardedAd(
-                                    context, FacturePage()),
-                                // onPressed: () {
-                                //   Navigator.of(context).push(MaterialPageRoute(
-                                //       builder: (_) => FacturePage()));
-                                // },
-                                label: Text('Facture Page'),
-                                icon: Icon(Icons.monetization_on_sharp)),
-                            ElevatedButton.icon(
-                                onPressed: () => showForcedRewardedAd(
-                                    context, FacturesListPage()),
-                                // onPressed: () {
-                                //   Navigator.of(context).push(MaterialPageRoute(
-                                //       builder: (_) => FacturesListPage()));
-                                // },
-                                label: Text('Facture List'),
-                                icon: Icon(Icons.list_alt)),
-                          ],
-                        ),
-                      ),
-                      ElevatedButton.icon(
-                          onPressed: () =>
-                              showForcedRewardedAd(context, ClientListScreen()),
-                          // onPressed: () {
-                          //   Navigator.of(context).push(MaterialPageRoute(
-                          //       builder: (_) => ClientListScreen()));
-                          // },
-                          label: Text('Client List'),
-                          icon: Icon(Icons.account_circle)),
-                      GestureDetector(
-                        onTap: () =>
-                            showForcedRewardedAd(context, ClientListScreen()),
-                        // onTap: () {
-                        //   Navigator.of(context).push(
-                        //     MaterialPageRoute(
-                        //         builder: (context) => ClientListScreen()),
-                        //   );
-                        // },
-                        child: CardTop(
-                          image:
-                              'https://picsum.photos/seed/${randomId + 2}/200/100',
-                          text:
-                              '${produitProvider.getTotalClientsCount()} Clients',
-                          provider: produitProvider,
-                          // button: ElevatedButton(
-                          //   onPressed: () {
-                          //     Navigator.of(context).push(
-                          //       MaterialPageRoute(
-                          //           builder: (context) => ProduitListScreen()),
-                          //     );
-                          //   },
-                          //   child: Text('Voir plus'),
-                          // ),
-                          SmallBanner: false,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () =>
-                            showForcedRewardedAd(context, ProduitListScreen()),
-                        // onTap: () {
-                        //   Navigator.of(context).push(
-                        //     MaterialPageRoute(
-                        //         builder: (context) => ProduitListScreen()),
-                        //   );
-                        // },
-                        child: CardTop(
-                          image: 'https://picsum.photos/seed/$randomId/200/100',
-                          text:
-                              '${produitProvider.getTotalProduits()} Produits',
-                          provider: produitProvider,
-                          // button: ElevatedButton(
-                          //   onPressed: () {
-                          //     Navigator.of(context).push(
-                          //       MaterialPageRoute(
-                          //           builder: (context) => ProduitListScreen()),
-                          //     );
-                          //   },
-                          //   child: Text('Voir plus'),
-                          // ),
-                          SmallBanner: false,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => _ouvrirDialogAjustementPrix(context),
-                        child: CardTop(
-                          image:
-                              'https://picsum.photos/seed/${randomId + 1}/200/100',
-                          text:
-                              '${produitsFiltres.length} Produits\nentre ${prixMin.toStringAsFixed(2)} DZD et ${prixMax.toStringAsFixed(2)} DZD',
-                          provider: produitProvider,
-                          button: produitsFiltres.length == 0
-                              ? ElevatedButton(
-                                  onPressed: null,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors
-                                        .grey[300], // Couleur de fond grise
-                                    foregroundColor: Colors
-                                        .grey[600], // Couleur du texte grise
-                                    disabledBackgroundColor: Colors.grey[
-                                        300], // Assure que la couleur reste grise même désactivé
-                                    disabledForegroundColor: Colors.grey[
-                                        600], // Assure que la couleur du texte reste grise même désactivé
-                                  ),
-                                  child: Text(('Liste Vide')))
-                              : ElevatedButton.icon(
-                                  onPressed: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              ProduitListInterval(
-                                                produitsFiltres:
-                                                    produitsFiltres,
-                                              )),
-                                    );
-                                  },
-                                  label: Text(('Voire La List'))),
-                          SmallBanner: false,
-                        ),
-                      ),
-                      // CardAlert(
-                      //   image:
-                      //       'https://picsum.photos/seed/${randomId + 3}/200/100',
-                      //   text:
-                      //       'Alert stock < 5\n${produitsLowStock['count']} Produits\n\nRupture de stock\n${produitsLowStock0['count']} Produits',
-                      //   provider: produitProvider,
-                      //   button: produitsLowStock['count'] == 0 &&
-                      //           produitsLowStock0['count'] == 0
-                      //       ? null
-                      //       : ElevatedButton(
-                      //           onPressed: () {
-                      //             Navigator.of(context).push(
-                      //               MaterialPageRoute(
-                      //                 builder: (context) => LowStockList(
-                      //                     produitsLowStock: produitsLowStock),
-                      //                 // ProduitListInterval(
-                      //                 //   produitsFiltres:
-                      //                 //       produitsFiltres,
-                      //                 // ),
-                      //               ),
-                      //             );
-                      //           },
-                      //           child: Text(('Voire La List'))),
-                      //   Color1: Colors.red,
-                      //   Color2: Colors.black,
-                      // ),
-                      SizedBox(height: 18),
-                      ElevatedButton.icon(
+                    // onPressed: () {
+                    //   Navigator.of(context)
+                    //       .push(MaterialPageRoute(builder: (ctx) => hashPage()));
+                    // },
+                    icon: Icon(Icons.add_chart_rounded, color: Colors.green),
+                  ),
+                  Platform.isAndroid || Platform.isIOS
+                      ? IconButton(
                           onPressed: () {
                             Navigator.of(context).push(MaterialPageRoute(
-                                builder: (_) => add_Produit()));
+                                builder: (ctx) => HashAdmin(
+                                      lengthPin: lengthPin,
+                                    )));
                           },
-                          label: Text('Ajouter  Produit'),
-                          icon: Icon(Icons.add)),
-                      ElevatedButton.icon(
-                          onPressed: () {
-                            showModalBottomSheet(
-                              context: context,
-                              isScrollControlled:
-                                  true, // Permet de redimensionner en fonction de la hauteur du contenu
-                              builder: (context) => AddFournisseurForm(),
+                          icon: Icon(Icons.qr_code_scanner),
+                        )
+                      : Container(),
+                  // IconButton(
+                  //         onPressed: () {
+                  //           Navigator.of(context)
+                  //               .push(MaterialPageRoute(builder: (ctx) => hashPage()));
+                  //         },
+                  //         icon: Icon(Icons.add_chart_rounded),
+                  //       ),
+                  // IconButton(
+                  //   onPressed: () {
+                  //     Navigator.of(context).push(
+                  //         MaterialPageRoute(builder: (ctx) => LicensePage()));
+                  //   },
+                  //   icon: Icon(Icons.account_tree_rounded),
+                  // ),
+                  // IconButton(
+                  //   onPressed: () {
+                  //     Navigator.of(context).push(
+                  //         MaterialPageRoute(builder: (ctx) => FacturesListPage()));
+                  //   },
+                  //   icon: Icon(Icons.hail_outlined),
+                  // ),
+                  // IconButton(
+                  //   onPressed: () {
+                  //     Navigator.of(context)
+                  //         .push(MaterialPageRoute(builder: (ctx) => FacturePage()));
+                  //   },
+                  //   icon: Icon(Icons.invert_colors_off),
+                  // ),
+                  // SizedBox(
+                  //   width: 50,
+                  // ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (ctx) => ProduitListPage(
+                              supabase: Supabase.instance.client,
+                              objectboxStore: widget.objectBox.store)));
+                    },
+                    icon: Icon(Icons.local_police),
+                  ),
+                  IconButton(
+                    onPressed: () => _showDialogFake(objectBoxi),
+                    icon: Icon(Icons.send),
+                  ),
+                  // IconButton(
+                  //   onPressed: () {
+                  //     Navigator.of(context).push(
+                  //         MaterialPageRoute(builder: (ctx) => LottieListPage()));
+                  //   },
+                  //   icon: Icon(Icons.local_bar_outlined),
+                  // ),
+                ],
+              ),
+              body: Consumer<CommerceProvider>(
+                  builder: (context, produitProvider, child) {
+                int totalProduits = produitProvider.getTotalProduits();
+                List<Produit> produitsFiltres =
+                    produitProvider.getProduitsBetweenPrices(prixMin, prixMax);
+                // var produitsLowStock = produitProvider.getProduitsLowStock(5.0);
+                // var produitsLowStock0 = produitProvider.getProduitsLowStock(0.0);
+                return Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: ListView(
+                      children: [
+                        Switch(
+                          value:
+                              Provider.of<ThemeProvider>(context).isDarkTheme,
+                          onChanged: (value) {
+                            Provider.of<ThemeProvider>(context, listen: false)
+                                .toggleTheme();
+                          },
+                        ),
+                        SizedBox(height: 20),
+                        // Padding(
+                        //   padding: const EdgeInsets.all(18.0),
+                        //   child: Center(
+                        //     child: Text(
+                        //       'Mode ${Provider.of<ThemeProvider>(context).isDarkTheme ? "Sombre" : "Clair"}',
+                        //       style: Theme.of(context).textTheme.bodyLarge,
+                        //     ),
+                        //   ),
+                        // ),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      FournisseurListScreen()),
                             );
                           },
-                          label: Text('Ajouter Fournisseur'),
-                          icon: Icon(Icons.send)),
-                      SizedBox(height: 18),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red, // Couleur de fond grise
-                          foregroundColor:
-                              Colors.grey[300], // Couleur du texte grise
-                          disabledBackgroundColor: Colors.grey[
-                              300], // Assure que la couleur reste grise même désactivé
-                          disabledForegroundColor: Colors.grey[
-                              600], // Assure que la couleur du texte reste grise même désactivé
+                          child: CardTop(
+                            image:
+                                'https://picsum.photos/seed/${randomId + 8}/200/100',
+                            text:
+                                '${produitProvider.fournisseurs.length} Fournisseurs',
+                            provider: produitProvider,
+                            SmallBanner: true,
+                          ),
                         ),
-                        child: Text('Delete all'),
-                        onPressed: () {
-                          widget.objectBox.deleteDatabase();
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content:
-                                    Text('Base de Données Vider avec succes!')),
-                          );
-                        },
-                      ),
-                    ],
-                  ));
-            }),
+                        // Padding(
+                        //   padding: const EdgeInsets.symmetric(
+                        //       horizontal: 8, vertical: 15),
+                        //   child: ElevatedButton(
+                        //     onPressed: () async {
+                        //       await replaceObjectBoxDatabase(context);
+                        //       // Rafraîchir l'interface utilisateur ou redémarrer l'application si nécessaire
+                        //     },
+                        //     child: Text('Remplacer la base de données'),
+                        //   ),
+                        // ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 15),
+                          child: ElevatedButton(
+                            onPressed: () =>
+                                DatabaseUpdater.pickAndReplaceDatabase(context),
+                            child: Text(
+                                'Remplacer Afin de Mettre à jour la base de données'),
+                          ),
+                        ),
+                        Container(
+                          width: MediaQuery.of(context).size.width,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              ElevatedButton.icon(
+                                  onPressed: () => showForcedRewardedAd(
+                                      context, FacturePage()),
+                                  // onPressed: () {
+                                  //   Navigator.of(context).push(MaterialPageRoute(
+                                  //       builder: (_) => FacturePage()));
+                                  // },
+                                  label: Text('Facture Page'),
+                                  icon: Icon(Icons.monetization_on_sharp)),
+                              ElevatedButton.icon(
+                                  onPressed: () => showForcedRewardedAd(
+                                      context, FacturesListPage()),
+                                  // onPressed: () {
+                                  //   Navigator.of(context).push(MaterialPageRoute(
+                                  //       builder: (_) => FacturesListPage()));
+                                  // },
+                                  label: Text('Facture List'),
+                                  icon: Icon(Icons.list_alt)),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                    builder: (context) => UserListScreen()),
+                              );
+                            },
+                            child: CardTop(
+                              image:
+                                  'https://picsum.photos/seed/${randomId + 4}/200/100',
+                              text: '${produitProvider.users.length} Users',
+                              provider: produitProvider,
+                              SmallBanner: true,
+                            ),
+                          ),
+                        ),
+                        ElevatedButton.icon(
+                            onPressed: () => showForcedRewardedAd(
+                                context, ClientListScreen()),
+                            // onPressed: () {
+                            //   Navigator.of(context).push(MaterialPageRoute(
+                            //       builder: (_) => ClientListScreen()));
+                            // },
+                            label: Text('Client List'),
+                            icon: Icon(Icons.account_circle)),
+                        GestureDetector(
+                          onTap: () =>
+                              showForcedRewardedAd(context, ClientListScreen()),
+                          // onTap: () {
+                          //   Navigator.of(context).push(
+                          //     MaterialPageRoute(
+                          //         builder: (context) => ClientListScreen()),
+                          //   );
+                          // },
+                          child: CardTop(
+                            image:
+                                'https://picsum.photos/seed/${randomId + 2}/200/100',
+                            text:
+                                '${produitProvider.getTotalClientsCount()} Clients',
+                            provider: produitProvider,
+                            // button: ElevatedButton(
+                            //   onPressed: () {
+                            //     Navigator.of(context).push(
+                            //       MaterialPageRoute(
+                            //           builder: (context) => ProduitListScreen()),
+                            //     );
+                            //   },
+                            //   child: Text('Voir plus'),
+                            // ),
+                            SmallBanner: false,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => showForcedRewardedAd(
+                              context, ProduitListScreen()),
+                          // onTap: () {
+                          //   Navigator.of(context).push(
+                          //     MaterialPageRoute(
+                          //         builder: (context) => ProduitListScreen()),
+                          //   );
+                          // },
+                          child: CardTop(
+                            image:
+                                'https://picsum.photos/seed/$randomId/200/100',
+                            text:
+                                '${produitProvider.getTotalProduits()} Produits',
+                            provider: produitProvider,
+                            // button: ElevatedButton(
+                            //   onPressed: () {
+                            //     Navigator.of(context).push(
+                            //       MaterialPageRoute(
+                            //           builder: (context) => ProduitListScreen()),
+                            //     );
+                            //   },
+                            //   child: Text('Voir plus'),
+                            // ),
+                            SmallBanner: false,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => _ouvrirDialogAjustementPrix(context),
+                          child: CardTop(
+                            image:
+                                'https://picsum.photos/seed/${randomId + 1}/200/100',
+                            text:
+                                '${produitsFiltres.length} Produits\nentre ${prixMin.toStringAsFixed(2)} DZD et ${prixMax.toStringAsFixed(2)} DZD',
+                            provider: produitProvider,
+                            button: produitsFiltres.length == 0
+                                ? ElevatedButton(
+                                    onPressed: null,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors
+                                          .grey[300], // Couleur de fond grise
+                                      foregroundColor: Colors
+                                          .grey[600], // Couleur du texte grise
+                                      disabledBackgroundColor: Colors.grey[
+                                          300], // Assure que la couleur reste grise même désactivé
+                                      disabledForegroundColor: Colors.grey[
+                                          600], // Assure que la couleur du texte reste grise même désactivé
+                                    ),
+                                    child: Text(('Liste Vide')))
+                                : ElevatedButton.icon(
+                                    onPressed: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                ProduitListInterval(
+                                                  produitsFiltres:
+                                                      produitsFiltres,
+                                                )),
+                                      );
+                                    },
+                                    label: Text(('Voire La List'))),
+                            SmallBanner: false,
+                          ),
+                        ),
+                        // CardAlert(
+                        //   image:
+                        //       'https://picsum.photos/seed/${randomId + 3}/200/100',
+                        //   text:
+                        //       'Alert stock < 5\n${produitsLowStock['count']} Produits\n\nRupture de stock\n${produitsLowStock0['count']} Produits',
+                        //   provider: produitProvider,
+                        //   button: produitsLowStock['count'] == 0 &&
+                        //           produitsLowStock0['count'] == 0
+                        //       ? null
+                        //       : ElevatedButton(
+                        //           onPressed: () {
+                        //             Navigator.of(context).push(
+                        //               MaterialPageRoute(
+                        //                 builder: (context) => LowStockList(
+                        //                     produitsLowStock: produitsLowStock),
+                        //                 // ProduitListInterval(
+                        //                 //   produitsFiltres:
+                        //                 //       produitsFiltres,
+                        //                 // ),
+                        //               ),
+                        //             );
+                        //           },
+                        //           child: Text(('Voire La List'))),
+                        //   Color1: Colors.red,
+                        //   Color2: Colors.black,
+                        // ),
+                        SizedBox(height: 18),
+                        ElevatedButton.icon(
+                            onPressed: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (_) => add_Produit()));
+                            },
+                            label: Text('Ajouter  Produit'),
+                            icon: Icon(Icons.add)),
+                        ElevatedButton.icon(
+                            onPressed: () {
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled:
+                                    true, // Permet de redimensionner en fonction de la hauteur du contenu
+                                builder: (context) => AddFournisseurForm(),
+                              );
+                            },
+                            label: Text('Ajouter Fournisseur'),
+                            icon: Icon(Icons.send)),
+                        SizedBox(height: 18),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                Colors.red, // Couleur de fond grise
+                            foregroundColor:
+                                Colors.grey[300], // Couleur du texte grise
+                            disabledBackgroundColor: Colors.grey[
+                                300], // Assure que la couleur reste grise même désactivé
+                            disabledForegroundColor: Colors.grey[
+                                600], // Assure que la couleur du texte reste grise même désactivé
+                          ),
+                          child: Text('Delete all'),
+                          onPressed: () {
+                            widget.objectBox.deleteDatabase();
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text(
+                                      'Base de Données Vider avec succes!')),
+                            );
+                          },
+                        ),
+                      ],
+                    ));
+              }),
+            ),
           );
         }
       },
@@ -988,6 +1004,23 @@ class _adaptiveHomeState extends State<adaptiveHome> {
             padding: const EdgeInsets.all(18.0),
             child: Row(
               children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) => UserListScreen()),
+                      );
+                    },
+                    child: CardTop(
+                      image:
+                          'https://picsum.photos/seed/${randomId + 4}/200/100',
+                      text: '${produitProvider.users.length} Users',
+                      provider: produitProvider,
+                      SmallBanner: true,
+                    ),
+                  ),
+                ),
                 Expanded(
                   child: GestureDetector(
                     onTap: () {
@@ -2250,10 +2283,10 @@ class CardTop extends StatelessWidget {
       color: Colors.white70,
       child: SizedBox(
         height: Platform.isWindows || Platform.isMacOS || Platform.isLinux
-            ? MediaQuery.of(context).size.width * 0.15
+            ? MediaQuery.of(context).size.height * 0.25
             : SmallBanner
-                ? MediaQuery.of(context).size.width * 0.15
-                : MediaQuery.of(context).size.width * 0.55,
+                ? MediaQuery.of(context).size.height * 0.15
+                : MediaQuery.of(context).size.height * 0.55,
         width: MediaQuery.of(context).size.width * 0.30,
         child: Stack(
           fit: StackFit.passthrough,
@@ -2474,10 +2507,11 @@ void showForcedRewardedAd(BuildContext context, Widget destinationPage) async {
       );
     }
   } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-          content: Text('Publicité non prête. Veuillez réessayer plus tard.')),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    // SnackBar(
+    //     content: Text('Publicité non prête. Veuillez réessayer plus tard.')),
+    //);
+    _navigateToNextScreen(context, destinationPage);
   }
 }
 

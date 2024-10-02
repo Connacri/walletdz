@@ -606,42 +606,48 @@ class _HashAdminState extends State<HashAdmin> {
                 ),
               ),
               if (qrCodeHash != null)
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      //Text('Hash QR code: $qrCodeHash'),
-                      Text(
-                          'Serial PIN: $qrCodeNumHash'), // Affichage du code numérique
-                      Divider(),
-                      // SelectableText(
-                      //   generateHash(qrCodeHash!, _p4ssw0rd), //_hash512
-                      //   textAlign: TextAlign.center,
-                      // ),
-                      // Divider(),
-                      // SelectableText(generateShortHash(qrCodeHash!, _p4ssw0rd)),
-                      // Divider(),
-                      SelectableText(generateNumHash(
-                          qrCodeHash!, _p4ssw0rd, widget.lengthPin)),
-                      Divider(),
-                      // Text('Licence: ' +
-                      //     _validateHash(qrCodeHash!, _p4ssw0rd).toString()),
-                      // ElevatedButton(
-                      //   onPressed: () {
-                      //     if (_validateHash(qrCodeHash!, _p4ssw0rd)) {
-                      //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      //           content: Text("Licence validée avec succès!")));
-                      //     } else {
-                      //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      //           content:
-                      //               Text("Hash incorrect, licence invalide!")));
-                      //     }
-                      //   },
-                      //   child: Text('Valider la licence'),
-                      // ),
-                    ],
+                Expanded(
+                  flex: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(18.0),
+                        child: Column(
+                          children: [
+                            //Text('Hash QR code: $qrCodeHash'),
+                            Text(
+                                'Serial PIN: $qrCodeNumHash'), // Affichage du code numérique
+                            Divider(),
+                            // SelectableText(
+                            //   generateHash(qrCodeHash!, _p4ssw0rd), //_hash512
+                            //   textAlign: TextAlign.center,
+                            // ),
+                            // Divider(),
+                            // SelectableText(generateShortHash(qrCodeHash!, _p4ssw0rd)),
+                            // Divider(),
+
+                            // Text('Licence: ' +
+                            //     _validateHash(qrCodeHash!, _p4ssw0rd).toString()),
+                            // ElevatedButton(
+                            //   onPressed: () {
+                            //     if (_validateHash(qrCodeHash!, _p4ssw0rd)) {
+                            //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            //           content: Text("Licence validée avec succès!")));
+                            //     } else {
+                            //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            //           content:
+                            //               Text("Hash incorrect, licence invalide!")));
+                            //     }
+                            //   },
+                            //   child: Text('Valider la licence'),
+                            // ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                )
+                ),
             ],
           ),
         ),

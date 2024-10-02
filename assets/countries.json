@@ -233,7 +233,7 @@
     {
       "nom": "Algérie",
       "iso": "DZ",
-      "prefixes": ["613"]
+      "prefixes": ["613", "1613"]
     },
     {
       "nom": "Nigeria",

@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dart_date/dart_date.dart';
+import 'package:faker/faker.dart';
 import 'package:flutter/material.dart';
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -17,6 +18,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:percent_indicator/percent_indicator.dart';
 import 'add_Produit.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class ProduitListScreen extends StatefulWidget {
   @override
@@ -25,6 +27,8 @@ class ProduitListScreen extends StatefulWidget {
 
 class _ProduitListScreenState extends State<ProduitListScreen> {
   final ScrollController _scrollController = ScrollController();
+  NativeAd? _nativeAd;
+  bool _nativeAdIsLoaded = false;
 
   @override
   void initState() {
@@ -33,9 +37,45 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Create the ad objects and load ads.
+    _nativeAd = NativeAd(
+      adUnitId: 'ca-app-pub-2282149611905342/2166057043',
+      request: AdRequest(),
+      listener: NativeAdListener(
+        onAdLoaded: (Ad ad) {
+          print('$NativeAd loaded.');
+          setState(() {
+            _nativeAdIsLoaded = true;
+          });
+        },
+        onAdFailedToLoad: (Ad ad, LoadAdError error) {
+          print('$NativeAd failedToLoad: $error');
+          ad.dispose();
+        },
+        onAdOpened: (Ad ad) => print('$NativeAd onAdOpened.'),
+        onAdClosed: (Ad ad) => print('$NativeAd onAdClosed.'),
+      ),
+      nativeTemplateStyle: NativeTemplateStyle(
+        templateType: TemplateType.medium,
+        mainBackgroundColor: Colors.white12,
+        callToActionTextStyle: NativeTemplateTextStyle(
+          size: 16.0,
+        ),
+        primaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.black38,
+          backgroundColor: Colors.white70,
+        ),
+      ),
+    )..load();
+  }
+
+  @override
   void dispose() {
-    _scrollController.dispose();
     super.dispose();
+    _nativeAd?.dispose();
+    _scrollController.dispose();
   }
 
   void _onScroll() {
@@ -46,41 +86,84 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
     }
   }
 
+  void createUsersAndUpdateRelations(ObjectBox objectbox) {
+    final faker = Faker();
+
+    // Création des utilisateurs
+    List<int> userIds = [];
+    for (int i = 0; i < 20; i++) {
+      User newUser = User(
+        id: 0, // ID = 0 pour que ObjectBox génère un nouvel ID unique
+        username: faker.person.firstName() +
+            faker.randomGenerator.numberOfLength(3).toString(),
+        password: faker.internet.password(),
+        email: faker.internet.email(),
+        role: 'default_role',
+        phone: faker.phoneNumber.random.toString(),
+        photo: faker.image.image(),
+      );
+      objectbox.userBox.put(newUser);
+      userIds.add(newUser.id);
+      print('Utilisateur créé : ${newUser.username}');
+    }
+    print('20 utilisateurs ont été créés.');
+
+    // Récupération des produits existants
+    final produits =
+        objectbox.produitBox.getAll(); // Récupère tous les produits
+    final cruds =
+        objectbox.crudBox.getAll(); // Récupère tous les objets Crud existants
+
+    // Mise à jour des produits et approvisionnements avec leurs relations
+    for (int i = 0; i < produits.length; i++) {
+      // Créer un objet Crud si aucun n'existe
+      Crud crud;
+      if (i < cruds.length) {
+        crud = cruds[i]; // Récupérer le Crud existant
+      } else {
+        crud = Crud(
+          createdBy: userIds[i % userIds.length],
+          updatedBy: userIds[(i + 1) % userIds.length],
+          derniereModification: DateTime.now(),
+        );
+        objectbox.crudBox.put(crud);
+      }
+
+      // Associer le CRUD au produit existant
+      Produit produit = produits[i];
+      produit.crud.target = crud; // Associer le produit avec l'objet Crud
+      objectbox.produitBox.put(produit); // Mettre à jour le produit
+
+      // Créer ou mettre à jour l'approvisionnement
+      Approvisionnement approvisionnement = Approvisionnement(
+        quantite: faker.randomGenerator.integer(100).toDouble(),
+        prixAchat: faker.randomGenerator.decimal(min: 5),
+        datePeremption: DateTime.now()
+            .add(Duration(days: faker.randomGenerator.integer(365))),
+      );
+      approvisionnement.produit.target = produit;
+      approvisionnement.crud.target =
+          crud; // Associer le CRUD à l'approvisionnement
+      objectbox.approvisionnementBox.put(
+          approvisionnement); // Mettre à jour ou ajouter l'approvisionnement
+
+      print(
+          'Produit ${produit.nom} mis à jour avec Crud ID ${crud.id} et approvisionnement créé.');
+    }
+
+    print('Les produits et approvisionnements ont été mis à jour.');
+  }
+
+  void deleteAllUsers(ObjectBox objectbox) {
+    // Supprimer tous les utilisateurs de la boîte User
+    objectbox.userBox.removeAll();
+
+    print('Tous les utilisateurs ont été supprimés.');
+  }
+
   @override
   Widget build(BuildContext context) {
-    final double largeur;
-    if (kIsWeb || Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-      // Pour le web
-      largeur = 1 / 10;
-    } else if (Platform.isAndroid || Platform.isIOS) {
-      // Pour Android et iOS
-      largeur = 0.5;
-    } else {
-      // Pour les autres plateformes (Desktop)
-      largeur = 1 / 10;
-    }
-    Color getColorBasedOnPeremption(int peremption, double alert) {
-      if (peremption <= 0) {
-        return Colors.red;
-      } else if (peremption > 0 && peremption <= alert) {
-        return Colors.orange;
-      } else {
-        return Colors.green;
-      }
-    }
-
-    Color getColorBasedOnStock(double stock, double stockInit, double alert) {
-      if (stock <= 0) {
-        return Colors.grey;
-      } else if (stock > 0 && stock <= alert) {
-        return Colors.red;
-      } else if (stock <= alert && stock > stockInit * 0.30) {
-        return Colors.orange;
-      } else {
-        return Colors.green;
-      }
-    }
-
+    final objectBox = Provider.of<ObjectBox>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         title: Consumer<CommerceProvider>(
@@ -93,6 +176,13 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
         }),
         actions: [
           IconButton(
+            icon: Icon(Icons.sync),
+            onPressed: () async {
+              createUsersAndUpdateRelations(objectBox);
+              // deleteAllUsers(objectBox);
+            },
+          ),
+          IconButton(
             icon: Icon(Icons.search),
             onPressed: () async {
               final produitProvider =
@@ -102,7 +192,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                 delegate: ProduitSearchDelegateMain(produitProvider),
               );
             },
-          )
+          ),
         ],
       ),
       // body: Consumer<CommerceProvider>(
@@ -406,6 +496,19 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
             controller: _scrollController,
             itemCount: produitProvider.produits.length + 1,
             itemBuilder: (context, index) {
+              if (index == 5 && _nativeAd != null && _nativeAdIsLoaded) {
+                return Align(
+                    alignment: Alignment.center,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        minWidth: 300,
+                        minHeight: 350,
+                        maxHeight: 400,
+                        maxWidth: 450,
+                      ),
+                      child: AdWidget(ad: _nativeAd!),
+                    ));
+              }
               if (index < produitProvider.produits.length) {
                 final produit = produitProvider.produits[index];
 
@@ -426,6 +529,9 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         ListTile(
+                          onLongPress: () {
+                            _deleteProduit(context, produit);
+                          },
                           leading: Tooltip(
                             message: 'ID : ${produit.id}',
                             child: GestureDetector(
@@ -979,23 +1085,17 @@ void _deleteProduit(BuildContext context, Produit produit) {
                   icon: Icon(Icons.cancel),
                 ),
                 ElevatedButton.icon(
-                    onPressed: () {
-                      context
-                          .read<CommerceProvider>()
-                          .supprimerProduit(produit);
-                      // .removeProduit(produit.id, produit.image);
-                      Navigator.of(context).pop();
-                    },
-                    label: Text(
-                      'Supprimer',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    icon: Icon(Icons.delete),
-                    style: ButtonStyle(
-                      iconColor: WidgetStateProperty.all<Color>(Colors.white),
-                      backgroundColor:
-                          WidgetStateProperty.all<Color>(Colors.red),
-                    ))
+                  onPressed: () {
+                    context.read<CommerceProvider>().supprimerProduit(produit);
+                    // .removeProduit(produit.id, produit.image);
+                    Navigator.of(context).pop();
+                  },
+                  label: Text(
+                    'Supprimer',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  icon: Icon(Icons.delete),
+                )
               ],
             ),
             SizedBox(
@@ -1133,8 +1233,8 @@ class ProduitDetailPage extends StatelessWidget {
                     SizedBox(height: 10),
                     SizedBox(height: 10),
                     SizedBox(height: 10),
-                    Text('Derniere Modification : ' +
-                        produit.crud.target!.derniereModification.toString()),
+                    // Text('Derniere Modification : ' +
+                    //     produit.crud.target!.derniereModification.toString()),
                     SizedBox(height: 10),
                     SizedBox(
                       height: 16,

@@ -138,22 +138,35 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => googleSignInProvider(),
-
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => googleSignInProvider(),
+        ),
+      ],
       //lazy: true,
       child: MaterialApp(
           theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-              useMaterial3: true,
-              fontFamily: 'OSWALD'),
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+            useMaterial3: true,
+            fontFamily: 'OSWALD',
+            textTheme: TextTheme(
+              bodyLarge: TextStyle(color: Colors.black87),
+            ),
+          ),
           locale: const Locale('fr', 'CA'),
 
           //scaffoldMessengerKey: Utils.messengerKey,
           navigatorKey: navigatorKey,
           debugShowCheckedModeBanner: false,
           title: 'Ramzi',
-          themeMode: ThemeMode.dark,
+          darkTheme: ThemeData(
+            brightness: Brightness.dark,
+            primaryColor: Colors.blueGrey,
+            textTheme: TextTheme(
+              bodyLarge: TextStyle(color: Colors.white),
+            ),
+          ),
           home: Platform.isAndroid || Platform.isIOS
               ? MyMain()
               : _isLicenseValidated
@@ -171,3 +184,5 @@ class _MyAppState extends State<MyApp> {
     super.dispose();
   }
 }
+
+class ThemeProvider {}

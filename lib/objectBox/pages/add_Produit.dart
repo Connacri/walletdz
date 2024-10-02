@@ -873,7 +873,7 @@ class _add_ProduitState extends State<add_Produit> {
             textAlign: TextAlign.center,
             keyboardType: TextInputType.text,
             decoration: InputDecoration(
-              fillColor: _isFirstFieldFilled ? Colors.green.shade100 : null,
+              //  fillColor: _isFirstFieldFilled ? Colors.green.shade100 : null,
               suffixIcon: !_showDescription
                   ? Padding(
                       padding: const EdgeInsets.all(4.0),
@@ -1259,9 +1259,9 @@ class _add_ProduitState extends State<add_Produit> {
                               textAlign: TextAlign.center,
                               keyboardType: TextInputType.text,
                               decoration: InputDecoration(
-                                fillColor: _isFirstFieldFilled
-                                    ? Colors.yellow.shade200
-                                    : null,
+                                // fillColor: _isFirstFieldFilled
+                                //     ? Colors.yellow.shade200
+                                //     : null,
                                 labelText: 'Date de Péremption',
                                 suffixIcon: IconButton(
                                   icon: const Icon(Icons.date_range),

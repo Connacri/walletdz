@@ -4,18 +4,31 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:faker/faker.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import '../objectBox/pages/ProduitListSupabase.dart';
 import '../../objectbox.g.dart';
 import 'Entity.dart';
 import 'classeObjectBox.dart';
 import 'package:objectbox/objectbox.dart';
 import 'dart:isolate';
 
+class ThemeProvider with ChangeNotifier {
+  // Par défaut, le thème est clair
+  bool _isDarkTheme = false;
+
+  bool get isDarkTheme => _isDarkTheme;
+
+  // Fonction pour changer le thème
+  void toggleTheme() {
+    _isDarkTheme = !_isDarkTheme;
+    notifyListeners(); // Notifie les auditeurs que l'état a changé
+  }
+}
+
 class CommerceProvider extends ChangeNotifier {
   final ObjectBox _objectBox;
 
   List<Produit> _produits = [];
   List<Fournisseur> _fournisseurs = [];
+  List<User> _users = [];
   List<Approvisionnement> _approvisionnements = [];
   List<Approvisionnement> _approvisionnementTemporaire = [];
   List<Client> _clients = [];
@@ -31,12 +44,14 @@ class CommerceProvider extends ChangeNotifier {
 
   bool get hasMoreProduits => _hasMoreProduits;
   List<Fournisseur> get fournisseurs => _fournisseurs;
+  List<User> get users => _users;
   bool get isLoading => _isLoading;
   List<Client> get clients => _clients;
 
   CommerceProvider(this._objectBox) {
     chargerProduits();
     _chargerFournisseurs();
+    chargerUsers();
     getClientsFromBox();
   }
 
@@ -155,6 +170,11 @@ class CommerceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void chargerUsers() {
+    _users = _objectBox.userBox.getAll().reversed.toList();
+    notifyListeners();
+  }
+
   Produit? getProduitById(int id) {
     return _objectBox.produitBox.get(id);
   }
@@ -209,7 +229,7 @@ class CommerceProvider extends ChangeNotifier {
     // Enregistrer chaque approvisionnement temporaire
     final boxApprovisionnement = _objectBox.approvisionnementBox;
     final boxFournisseur = _objectBox.fournisseurBox;
-    final boxCrudApprovisionnement = _objectBox.crud;
+    final boxCrudApprovisionnement = _objectBox.crudBox;
 
     for (var approvisionnementTemp in _approvisionnementTemporaire) {
       // a. Vérifier ou créer le fournisseur

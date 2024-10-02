@@ -15,7 +15,7 @@ import 'package:permission_handler/permission_handler.dart';
 class ObjectBox {
   late final Store store;
   late final Box<User> userBox;
-  late final Box<Crud> crud;
+  late final Box<Crud> crudBox;
   late final Box<Produit> produitBox;
   late final Box<Approvisionnement> approvisionnementBox;
   late final Box<Fournisseur> fournisseurBox;
@@ -36,7 +36,7 @@ class ObjectBox {
     if (!Store.isOpen('${dir.path}/objectbox')) {
       store = await openStore(directory: '${dir.path}/objectbox');
       userBox = Box<User>(store);
-      crud = Box<Crud>(store);
+      crudBox = Box<Crud>(store);
       produitBox = Box<Produit>(store);
       approvisionnementBox = Box<Approvisionnement>(store);
       fournisseurBox = Box<Fournisseur>(store);

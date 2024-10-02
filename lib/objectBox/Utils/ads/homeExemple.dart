@@ -120,89 +120,89 @@ class _MyHomePageAdsState extends State<MyHomePageAds> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(child :
-      Scaffold(
-      appBar: AppBar(title: Text('My App')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Center(
-                child: FittedBox(
-                    child: Text(
-              'Welcome to My App',
-              style: TextStyle(fontSize: 80),
-            ))),
-            Text('Click count: $_clickCount'),
-            SizedBox(
-              height: 15,
-            ),
-            ElevatedButton(
-              onPressed: _onButtonClick,
-              child: Text('Click me'),
-            ),
-            SizedBox(
-              height: 15,
-            ),
-            Expanded(
-              child: ListView.builder(
-               // shrinkWrap: true,
-             //   physics: NeverScrollableScrollPhysics(),
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  if (index > 0 && index % 5 == 0) {
-                    return Column(
-                      children: [
-                        ListTile(title: Text(items[index])),
-                        _buildAdWidget(context),
-                      ],
-                    );
-                  }
-                  return ListTile(title: Text(items[index]));
-                },
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(title: Text('My App')),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Center(
+                  child: FittedBox(
+                      child: Text(
+                'Welcome to My App',
+                style: TextStyle(fontSize: 80),
+              ))),
+              Text('Click count: $_clickCount'),
+              SizedBox(height: 15),
+              ElevatedButton(
+                onPressed: _onButtonClick,
+                child: Text('Click me'),
               ),
-            ),
-            SizedBox(
-              height: 15,
-            ),
-            Center(
-              child: ElevatedButton(
-                onPressed: () => _showForcedRewardedAd(context),
-                child: Text('Watch Ad to Continue'),
+              SizedBox(
+                height: 15,
               ),
-            ),
-            SizedBox(
-              height: 15,
-            ),
-            Center(
-              child: Container(
-                padding:
-                    EdgeInsets.all(10.0), // Espacement à l'intérieur du cadre
-                decoration: BoxDecoration(
-                  //      color: Colors.grey, // Couleur de fond
-                  borderRadius: BorderRadius.circular(8.0), // Bords arrondis
-                  border: Border.all(
-                    color: Colors.grey, // Couleur de la bordure
-                    width: 1.0, // Épaisseur de la bordure
+              Expanded(
+                child: ListView.builder(
+                  // shrinkWrap: true,
+                  //   physics: NeverScrollableScrollPhysics(),
+                  itemCount: items.length,
+                  itemBuilder: (context, index) {
+                    if (index > 0 && index % 5 == 0) {
+                      return Column(
+                        children: [
+                          ListTile(title: Text(items[index])),
+                          _buildAdWidget(context),
+                        ],
+                      );
+                    }
+                    return ListTile(title: Text(items[index]));
+                  },
+                ),
+              ),
+              SizedBox(
+                height: 15,
+              ),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () => _showForcedRewardedAd(context),
+                  child: Text('Watch Ad to Continue'),
+                ),
+              ),
+              SizedBox(
+                height: 15,
+              ),
+              Center(
+                child: Container(
+                  padding:
+                      EdgeInsets.all(10.0), // Espacement à l'intérieur du cadre
+                  decoration: BoxDecoration(
+                    //      color: Colors.grey, // Couleur de fond
+                    borderRadius: BorderRadius.circular(8.0), // Bords arrondis
+                    border: Border.all(
+                      color: Colors.grey, // Couleur de la bordure
+                      width: 1.0, // Épaisseur de la bordure
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Your Coins: $_coins',
+                          style: TextStyle(fontSize: 24)),
+                      SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () => _showCoinRewardedAd(context),
+                        child: Text('Watch Ad for Coins'),
+                      ),
+                    ],
                   ),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('Your Coins: $_coins', style: TextStyle(fontSize: 24)),
-                    SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () => _showCoinRewardedAd(context),
-                      child: Text('Watch Ad for Coins'),
-                    ),
-                  ],
-                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),);
+    );
   }
 }
 
