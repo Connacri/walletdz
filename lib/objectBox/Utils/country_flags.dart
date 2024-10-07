@@ -133,26 +133,186 @@ class CountryDisplay extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         isoCode.isNotEmpty
-            ? CountryFlag.fromCountryCode(
+            ? FittedBox(
+                child: CountryFlag.fromCountryCode(
+                  isoCode,
+                  height: height,
+                  width: width,
+                  shape: const RoundedRectangle(6),
+                ),
+              )
+            : FittedBox(
+                child: Container(
+                    height: height,
+                    width: width,
+                    child: Icon(
+                      FontAwesomeIcons.globe,
+                      size: 20,
+                    )),
+              ),
+        const SizedBox(width: 10),
+        FittedBox(
+          child: Text(
+              isoCode.isNotEmpty ? 'Made in ' + country : 'Pays Inconnu',
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodyLarge),
+        ),
+      ],
+    );
+  }
+}
+
+class CircularFlagDetector extends StatelessWidget {
+  final String barcode;
+  final double size;
+
+  const CircularFlagDetector({
+    Key? key,
+    required this.barcode,
+    this.size = 40,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipOval(
+      child: Container(
+        width: size,
+        height: size,
+        child: FlagDetectorOnlyFlag(
+          barcode: barcode,
+          height: size,
+          width: size,
+        ),
+      ),
+    );
+  }
+}
+
+class FlagDetectorOnlyFlag extends StatefulWidget {
+  final String barcode;
+  final double height;
+  final double width;
+
+  const FlagDetectorOnlyFlag({
+    Key? key,
+    required this.barcode,
+    required this.height,
+    required this.width,
+  }) : super(key: key);
+
+  @override
+  _FlagDetectorOnlyFlagState createState() => _FlagDetectorOnlyFlagState();
+}
+
+class _FlagDetectorOnlyFlagState extends State<FlagDetectorOnlyFlag> {
+  late Future<List<dynamic>> countries;
+  String _detectedIsoCode = "";
+
+  @override
+  void initState() {
+    super.initState();
+    countries = loadCountries();
+    detectCountry(widget.barcode);
+  }
+
+  @override
+  void didUpdateWidget(FlagDetectorOnlyFlag oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.barcode != oldWidget.barcode) {
+      detectCountry(widget.barcode);
+    }
+  }
+
+  Future<List<dynamic>> loadCountries() async {
+    String jsonString = await DefaultAssetBundle.of(context)
+        .loadString('assets/countries.json');
+    Map<String, dynamic> jsonResponse = jsonDecode(jsonString);
+    return jsonResponse['pays'] ?? [];
+  }
+
+  void detectCountry(String barcode) {
+    countries.then((data) {
+      setState(() {
+        String prefix = barcode.startsWith('1613')
+            ? '613'
+            : (barcode.length >= 3 ? barcode.substring(0, 3) : barcode);
+
+        Map<String, String> result = findCountry(prefix, data);
+        _detectedIsoCode = result['iso'] ?? "";
+      });
+    });
+  }
+
+  Map<String, String> findCountry(String prefix, List<dynamic> countries) {
+    if (prefix.isEmpty) {
+      return {'name': "Inconnu", 'iso': ""};
+    }
+    int code = int.tryParse(prefix) ?? -1;
+    if (code == -1) {
+      return {'name': "Inconnu", 'iso': ""};
+    }
+    for (var country in countries) {
+      for (String range in country['prefixes']) {
+        if (range.contains('-')) {
+          List<String> parts = range.split('-');
+          int start = int.parse(parts[0]);
+          int end = int.parse(parts[1]);
+          if (code >= start && code <= end) {
+            return {'name': country['nom'], 'iso': country['iso']};
+          }
+        } else {
+          if (code == int.parse(range)) {
+            return {'name': country['nom'], 'iso': country['iso']};
+          }
+        }
+      }
+    }
+    return {'name': "Inconnu", 'iso': ""};
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CountryDisplayOnlyFlag(
+      isoCode: _detectedIsoCode,
+      height: widget.height,
+      width: widget.width,
+    );
+  }
+}
+
+class CountryDisplayOnlyFlag extends StatelessWidget {
+  final String isoCode;
+  final double height;
+  final double width;
+
+  const CountryDisplayOnlyFlag({
+    Key? key,
+    required this.isoCode,
+    required this.height,
+    required this.width,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: isoCode.isNotEmpty
+          ? FittedBox(
+              child: CountryFlag.fromCountryCode(
                 isoCode,
                 height: height,
                 width: width,
-                shape: const RoundedRectangle(6),
-              )
-            : Container(
+              ),
+            )
+          : FittedBox(
+              child: Container(
                 height: height,
                 width: width,
                 child: Icon(
                   FontAwesomeIcons.globe,
                   size: 20,
-                )),
-        const SizedBox(width: 10),
-        FittedBox(
-          child: Text(
-              isoCode.isNotEmpty ? 'Made in ' + country : 'Pays Inconnu',
-              style: Theme.of(context).textTheme.bodyLarge),
-        ),
-      ],
+                ),
+              ),
+            ),
     );
   }
 }

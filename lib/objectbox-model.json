@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:1607491491677936871",
-      "lastPropertyId": "11:3848006787260901234",
+      "lastPropertyId": "13:4779008141956767120",
       "name": "Fournisseur",
       "properties": [
         {
@@ -43,13 +43,18 @@
           "flags": 520,
           "indexId": "14:7929166363009161217",
           "relationTarget": "Crud"
+        },
+        {
+          "id": "13:4779008141956767120",
+          "name": "derniereModification",
+          "type": 10
         }
       ],
       "relations": []
     },
     {
       "id": "2:8606136097133066204",
-      "lastPropertyId": "21:756056403567528122",
+      "lastPropertyId": "24:2777806409493290922",
       "name": "Produit",
       "properties": [
         {
@@ -102,13 +107,29 @@
           "flags": 520,
           "indexId": "15:6599275986272761304",
           "relationTarget": "Crud"
+        },
+        {
+          "id": "23:6464151985494045530",
+          "name": "derniereModification",
+          "type": 10
+        },
+        {
+          "id": "24:2777806409493290922",
+          "name": "qrCodeList",
+          "type": 30
         }
       ],
-      "relations": []
+      "relations": [
+        {
+          "id": "2:4545419348761092860",
+          "name": "qrcodes",
+          "targetId": "11:3443064098621496820"
+        }
+      ]
     },
     {
       "id": "3:7968206822164606643",
-      "lastPropertyId": "13:8071587812397237522",
+      "lastPropertyId": "15:4136216909705007359",
       "name": "Client",
       "properties": [
         {
@@ -149,13 +170,18 @@
           "flags": 520,
           "indexId": "11:3197865575425084963",
           "relationTarget": "Crud"
+        },
+        {
+          "id": "15:4136216909705007359",
+          "name": "derniereModification",
+          "type": 10
         }
       ],
       "relations": []
     },
     {
       "id": "4:1285774936409385946",
-      "lastPropertyId": "9:3233551067305536959",
+      "lastPropertyId": "11:1535173712481404531",
       "name": "Facture",
       "properties": [
         {
@@ -194,13 +220,18 @@
           "flags": 520,
           "indexId": "13:4799214949334452013",
           "relationTarget": "Crud"
+        },
+        {
+          "id": "11:1535173712481404531",
+          "name": "derniereModification",
+          "type": 10
         }
       ],
       "relations": []
     },
     {
       "id": "5:615909935097060499",
-      "lastPropertyId": "5:2176273511660132623",
+      "lastPropertyId": "7:5597323246222841857",
       "name": "LigneFacture",
       "properties": [
         {
@@ -234,13 +265,18 @@
           "id": "5:2176273511660132623",
           "name": "prixUnitaire",
           "type": 8
+        },
+        {
+          "id": "7:5597323246222841857",
+          "name": "derniereModification",
+          "type": 10
         }
       ],
       "relations": []
     },
     {
       "id": "7:4476248726244800597",
-      "lastPropertyId": "11:6451279107967271452",
+      "lastPropertyId": "13:1404231877362453953",
       "name": "DeletedProduct",
       "properties": [
         {
@@ -281,13 +317,18 @@
           "flags": 520,
           "indexId": "12:7365983068633329326",
           "relationTarget": "Crud"
+        },
+        {
+          "id": "13:1404231877362453953",
+          "name": "derniereModification",
+          "type": 10
         }
       ],
       "relations": []
     },
     {
       "id": "8:4487301589449865946",
-      "lastPropertyId": "8:4130946251832316438",
+      "lastPropertyId": "13:2473173780032287588",
       "name": "User",
       "properties": [
         {
@@ -327,19 +368,24 @@
           "type": 9
         },
         {
-          "id": "8:4130946251832316438",
+          "id": "12:4833160626898496718",
           "name": "crudId",
           "type": 11,
           "flags": 520,
-          "indexId": "16:1359581493053979498",
+          "indexId": "19:752249656180889003",
           "relationTarget": "Crud"
+        },
+        {
+          "id": "13:2473173780032287588",
+          "name": "derniereModification",
+          "type": 10
         }
       ],
       "relations": []
     },
     {
       "id": "9:5406683045265354164",
-      "lastPropertyId": "8:9118065618411486750",
+      "lastPropertyId": "10:5497082426338993749",
       "name": "Approvisionnement",
       "properties": [
         {
@@ -386,6 +432,11 @@
           "flags": 520,
           "indexId": "10:5642106981620853966",
           "relationTarget": "Crud"
+        },
+        {
+          "id": "10:5497082426338993749",
+          "name": "derniereModification",
+          "type": 10
         }
       ],
       "relations": []
@@ -433,11 +484,35 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "11:3443064098621496820",
+      "lastPropertyId": "3:7892746565150206372",
+      "name": "QrCode",
+      "properties": [
+        {
+          "id": "1:221992503793589292",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:8114817508930789153",
+          "name": "serial",
+          "type": 9
+        },
+        {
+          "id": "3:7892746565150206372",
+          "name": "type",
+          "type": 9
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "10:8291227482886202026",
-  "lastIndexId": "18:7055039884597715807",
-  "lastRelationId": "1:2832941486252609678",
+  "lastEntityId": "11:3443064098621496820",
+  "lastIndexId": "19:752249656180889003",
+  "lastRelationId": "2:4545419348761092860",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,
@@ -446,7 +521,8 @@
   ],
   "retiredIndexUids": [
     7680843215305245682,
-    720122404314208774
+    720122404314208774,
+    1359581493053979498
   ],
   "retiredPropertyUids": [
     8976483595831028651,
@@ -486,7 +562,18 @@
     4773469945258199278,
     6070155937091833855,
     3618662337063473621,
-    7598222863889683261
+    7598222863889683261,
+    4130946251832316438,
+    954308828359282192,
+    4941871603543648876,
+    6304311856860433598,
+    5823148951982151747,
+    8060566595666176906,
+    7027322212778181854,
+    6063531051077271532,
+    3164935352830575671,
+    510917551575483361,
+    6450200723927042371
   ],
   "retiredRelationUids": [
     2832941486252609678

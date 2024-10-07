@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dart_date/dart_date.dart';
 import 'package:faker/faker.dart';
@@ -86,53 +88,93 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
     }
   }
 
-  void createUsersAndUpdateRelations(ObjectBox objectbox) {
+  Future<void> createUsersAndUpdateRelationsIsolate(ObjectBox objectbox) async {
+    final result = await Isolate.run(() {
+      return _createUsersAndUpdateRelations(objectbox);
+    });
+
+    print(result);
+  }
+
+  String _createUsersAndUpdateRelations(ObjectBox objectbox) {
     final faker = Faker();
+    StringBuffer log = StringBuffer();
+    log.writeln(
+        'Début de la création des utilisateurs et de la mise à jour des relations...');
 
     // Création des utilisateurs
-    List<int> userIds = [];
-    for (int i = 0; i < 20; i++) {
+    List<User> newUsers = [];
+    for (int i = 0; i < 5; i++) {
       User newUser = User(
-        id: 0, // ID = 0 pour que ObjectBox génère un nouvel ID unique
+        id: 0,
         username: faker.person.firstName() +
             faker.randomGenerator.numberOfLength(3).toString(),
         password: faker.internet.password(),
         email: faker.internet.email(),
         role: 'default_role',
-        phone: faker.phoneNumber.random.toString(),
+        phone: faker.phoneNumber.toString(),
         photo: faker.image.image(),
+        derniereModification: DateTime.now(),
       );
-      objectbox.userBox.put(newUser);
-      userIds.add(newUser.id);
-      print('Utilisateur créé : ${newUser.username}');
+      int userId = objectbox.userBox.put(newUser);
+      newUser.id = userId;
+      newUsers.add(newUser);
+      log.writeln(
+          'Utilisateur créé : ID=${newUser.id}, Username=${newUser.username}, Email=${newUser.email}');
     }
-    print('20 utilisateurs ont été créés.');
+    log.writeln('5 utilisateurs ont été créés avec succès.');
 
     // Récupération des produits existants
-    final produits =
-        objectbox.produitBox.getAll(); // Récupère tous les produits
-    final cruds =
-        objectbox.crudBox.getAll(); // Récupère tous les objets Crud existants
+    final produits = objectbox.produitBox.getAll();
+    log.writeln('Nombre de produits existants : ${produits.length}');
 
     // Mise à jour des produits et approvisionnements avec leurs relations
+    log.writeln(
+        'Début de la mise à jour des produits et approvisionnements...');
     for (int i = 0; i < produits.length; i++) {
-      // Créer un objet Crud si aucun n'existe
+      Produit produit = produits[i];
+      log.writeln(
+          '\nTraitement du produit : ID=${produit.id}, Nom=${produit.nom}');
+
+      // Choisir aléatoirement un utilisateur pour chaque rôle dans Crud
+      User createdByUser =
+          newUsers[faker.randomGenerator.integer(newUsers.length)];
+      User updatedByUser =
+          newUsers[faker.randomGenerator.integer(newUsers.length)];
+      User? deletedByUser = faker.randomGenerator.boolean()
+          ? newUsers[faker.randomGenerator.integer(newUsers.length)]
+          : null;
+
+      // Créer ou mettre à jour l'objet Crud
       Crud crud;
-      if (i < cruds.length) {
-        crud = cruds[i]; // Récupérer le Crud existant
+      if (produit.crud.target != null) {
+        crud = produit.crud.target!;
+        log.writeln('Mise à jour du Crud existant : ID=${crud.id}');
       } else {
         crud = Crud(
-          createdBy: userIds[i % userIds.length],
-          updatedBy: userIds[(i + 1) % userIds.length],
+          createdBy: createdByUser.id,
+          updatedBy: updatedByUser.id,
+          deletedBy: deletedByUser?.id,
+          dateCreation: DateTime.now(),
           derniereModification: DateTime.now(),
+          dateDeleting: deletedByUser != null ? DateTime.now() : null,
         );
-        objectbox.crudBox.put(crud);
+        log.writeln('Création d\'un nouveau Crud pour le produit');
       }
 
-      // Associer le CRUD au produit existant
-      Produit produit = produits[i];
-      produit.crud.target = crud; // Associer le produit avec l'objet Crud
-      objectbox.produitBox.put(produit); // Mettre à jour le produit
+      // Mise à jour des valeurs du CRUD
+      crud.createdBy = createdByUser.id;
+      crud.updatedBy = updatedByUser.id;
+      crud.deletedBy = deletedByUser?.id;
+      crud.derniereModification = DateTime.now();
+
+      log.writeln(
+          'Crud mis à jour : createdBy=${crud.createdBy}, updatedBy=${crud.updatedBy}, deletedBy=${crud.deletedBy}');
+
+      // Associer le CRUD au produit
+      produit.crud.target = crud;
+      objectbox.produitBox.put(produit);
+      log.writeln('Produit mis à jour avec le nouveau Crud');
 
       // Créer ou mettre à jour l'approvisionnement
       Approvisionnement approvisionnement = Approvisionnement(
@@ -140,18 +182,22 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
         prixAchat: faker.randomGenerator.decimal(min: 5),
         datePeremption: DateTime.now()
             .add(Duration(days: faker.randomGenerator.integer(365))),
+        derniereModification: DateTime.now(),
       );
       approvisionnement.produit.target = produit;
-      approvisionnement.crud.target =
-          crud; // Associer le CRUD à l'approvisionnement
-      objectbox.approvisionnementBox.put(
-          approvisionnement); // Mettre à jour ou ajouter l'approvisionnement
-
-      print(
-          'Produit ${produit.nom} mis à jour avec Crud ID ${crud.id} et approvisionnement créé.');
+      approvisionnement.crud.target = crud;
+      int approvId = objectbox.approvisionnementBox.put(approvisionnement);
+      log.writeln(
+          'Approvisionnement créé/mis à jour : ID=${approvId}, Quantité=${approvisionnement.quantite}, Prix d\'achat=${approvisionnement.prixAchat}');
     }
 
-    print('Les produits et approvisionnements ont été mis à jour.');
+    log.writeln(
+        '\nLa mise à jour des produits et approvisionnements est terminée.');
+    log.writeln('Nombre total de produits traités : ${produits.length}');
+    log.writeln(
+        'Fin de l\'opération de création des utilisateurs et de mise à jour des relations.');
+
+    return log.toString();
   }
 
   void deleteAllUsers(ObjectBox objectbox) {
@@ -178,8 +224,14 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
           IconButton(
             icon: Icon(Icons.sync),
             onPressed: () async {
-              createUsersAndUpdateRelations(objectBox);
+              _createUsersAndUpdateRelations(objectBox);
               // deleteAllUsers(objectBox);
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.delete, color: Colors.red),
+            onPressed: () async {
+              deleteAllUsers(objectBox);
             },
           ),
           IconButton(
@@ -758,6 +810,12 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                     ? 'Dérnier Approvisionnement le  : ${DateFormat('dd/MM/yyyy').format(produit.approvisionnements.last.crud.target!.derniereModification ?? DateTime.now())}'
                                     : 'No approvisionnements available',
                               ),
+                              Text(
+                                  'Users createdBy : ${produit.crud.target!.createdBy}'),
+                              Text(
+                                  'Users updatedBy : ${produit.crud.target!.updatedBy}'),
+                              Text(
+                                  'Users deletedBy : ${produit.crud.target!.deletedBy}'),
                               // Text(
                               //     produit.approvisionnements.isNotEmpty
                               //         ? 'Approvisionnements:'

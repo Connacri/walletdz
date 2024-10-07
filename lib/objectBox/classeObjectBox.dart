@@ -72,7 +72,9 @@ class ObjectBox {
         username: faker.person.name(),
         password: faker.internet.password(),
         email: faker.internet.email(),
-        role: roles.first, // Assigner le premier rôle après mélange
+        role: roles.first,
+        derniereModification:
+            DateTime.now(), // Assigner le premier rôle après mélange
       );
     });
 
@@ -91,10 +93,12 @@ class ObjectBox {
         phone: faker.phoneNumber.us(),
         adresse: faker.address.streetAddress(),
         qr: uniqueQr, // QR unique
+        derniereModification:
+            faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
       )..crud.target = Crud(
-          createdBy: 0,
-          updatedBy: 0,
-          deletedBy: 0,
+          createdBy: 1,
+          updatedBy: 1,
+          deletedBy: 1,
           dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
           derniereModification:
               faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
@@ -119,10 +123,12 @@ class ObjectBox {
         qr: uniqueQr, // QR unique
         minimStock: faker.randomGenerator.decimal(min: 1, scale: 2),
         alertPeremption: random.nextInt(5),
+        derniereModification:
+            faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
       )..crud.target = Crud(
-          createdBy: 0,
-          updatedBy: 0,
-          deletedBy: 0,
+          createdBy: 1,
+          updatedBy: 1,
+          deletedBy: 1,
           dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
           derniereModification:
               faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
@@ -141,11 +147,13 @@ class ObjectBox {
         prixAchat: faker.randomGenerator.decimal(min: 100, scale: 2),
         datePeremption:
             faker.date.dateTimeBetween(DateTime.now(), DateTime(2025, 12, 31)),
+        derniereModification:
+            faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
       )
         ..crud.target = Crud(
-          createdBy: 0,
-          updatedBy: 0,
-          deletedBy: 0,
+          createdBy: 1,
+          updatedBy: 1,
+          deletedBy: 1,
           dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
           derniereModification:
               faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
@@ -170,10 +178,12 @@ class ObjectBox {
         phone: faker.phoneNumber.us(),
         adresse: faker.address.streetAddress(),
         description: faker.lorem.sentence(),
+        derniereModification:
+            faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
       )..crud.target = Crud(
-          createdBy: 0,
-          updatedBy: 0,
-          deletedBy: 0,
+          createdBy: 1,
+          updatedBy: 1,
+          deletedBy: 1,
           dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
           derniereModification:
               faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
@@ -196,10 +206,12 @@ class ObjectBox {
           qr: uniqueQr, // QR unique
           impayer: faker.randomGenerator.decimal(min: 0, scale: 2),
           date: faker.date.dateTime(minYear: 2010, maxYear: 2024),
+          derniereModification:
+              faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
         )..crud.target = Crud(
-            createdBy: 0,
-            updatedBy: 0,
-            deletedBy: 0,
+            createdBy: 1,
+            updatedBy: 1,
+            deletedBy: 1,
             dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
             derniereModification: faker.date
                 .dateTime(minYear: 2000, maxYear: DateTime.now().year),
@@ -212,6 +224,8 @@ class ObjectBox {
           final ligneFacture = LigneFacture(
             quantite: faker.randomGenerator.decimal(min: 1, scale: 10),
             prixUnitaire: produit.prixVente,
+            derniereModification: faker.date
+                .dateTime(minYear: 2000, maxYear: DateTime.now().year),
           );
           ligneFacture.produit.target = produit;
           ligneFacture.facture.target = facture;
@@ -250,13 +264,8 @@ class ObjectBox {
         password: faker.internet.password(),
         email: faker.internet.email(),
         role: roles.first,
-      )..crud.target = Crud(
-          createdBy: 0,
-          updatedBy: 0,
-          deletedBy: 0,
-          dateCreation: DateTime.now(),
-          derniereModification: DateTime.now(),
-        );
+        derniereModification: DateTime.now(),
+      );
     });
     await userBox.putMany(users);
 
@@ -268,10 +277,12 @@ class ObjectBox {
         phone: faker.phoneNumber.us(),
         adresse: faker.address.streetAddress(),
         qr: faker.randomGenerator.integer(999999).toString(),
+        derniereModification:
+            faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
       )..crud.target = Crud(
-          createdBy: 0,
-          updatedBy: 0,
-          deletedBy: 0,
+          createdBy: 1,
+          updatedBy: 1,
+          deletedBy: 1,
           dateCreation: faker.date.dateTime(minYear: 2010, maxYear: now.year),
           derniereModification:
               faker.date.dateTime(minYear: 2000, maxYear: now.year),
@@ -299,6 +310,8 @@ class ObjectBox {
           prixVente: prixVente,
           minimStock: faker.randomGenerator.decimal(min: 1, scale: 2),
           alertPeremption: Random().nextInt(1000),
+          derniereModification:
+              faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
         )..crud.target = Crud(
             createdBy: faker.randomGenerator.integer(1000),
             updatedBy: faker.randomGenerator.integer(1000),
@@ -319,6 +332,8 @@ class ObjectBox {
             prixAchat: prixAchat,
             datePeremption: faker.date.dateTime(
                 minYear: DateTime.now().year, maxYear: DateTime.now().year + 2),
+            derniereModification: faker.date
+                .dateTime(minYear: 2000, maxYear: DateTime.now().year),
           )
             ..produit.target = produit
             ..fournisseur.target = fournisseur
@@ -345,10 +360,12 @@ class ObjectBox {
         phone: faker.phoneNumber.us(),
         adresse: faker.address.streetAddress(),
         description: faker.lorem.sentence(),
+        derniereModification:
+            faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
       )..crud.target = Crud(
-          createdBy: 0,
-          updatedBy: 0,
-          deletedBy: 0,
+          createdBy: 1,
+          updatedBy: 1,
+          deletedBy: 1,
           dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
           derniereModification:
               faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
@@ -385,10 +402,12 @@ class ObjectBox {
       qr: faker.randomGenerator.integer(999999).toString(),
       impayer: faker.randomGenerator.decimal(min: 0, scale: 2),
       date: faker.date.dateTime(minYear: 2010, maxYear: 2024),
+      derniereModification:
+          faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
     )..crud.target = Crud(
-        createdBy: 0,
-        updatedBy: 0,
-        deletedBy: 0,
+        createdBy: 1,
+        updatedBy: 1,
+        deletedBy: 1,
         dateCreation: faker.date.dateTime(minYear: 2010, maxYear: 2024),
         derniereModification:
             faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
@@ -404,6 +423,8 @@ class ObjectBox {
         final ligneFacture = LigneFacture(
           quantite: faker.randomGenerator.decimal(min: 1, scale: 10),
           prixUnitaire: produit.prixVente,
+          derniereModification:
+              faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
         );
         ligneFacture.produit.target = produit;
         ligneFacture.facture.target = facture;

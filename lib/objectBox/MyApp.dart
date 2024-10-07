@@ -2,12 +2,15 @@ import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:lottie/lottie.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:walletdz/objectBox/pages/addProduct.dart';
 import '../objectBox/pages/ClientListScreen.dart';
 import '../objectBox/pages/FactureListScreen.dart';
+import '../objectBox/tests/cruds.dart' as cruds;
 import '../../MyListLotties.dart';
 import 'Entity.dart';
 import 'MyProviders.dart';
@@ -68,6 +71,7 @@ class MyApp9 extends StatelessWidget {
     }
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => CrudProvider(objectBox)),
         ChangeNotifierProvider(
           create: (_) => CommerceProvider(
             objectBox,
@@ -318,182 +322,184 @@ class _adaptiveHomeState extends State<adaptiveHome> {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         if (constraints.maxWidth > 600) {
-          return Scaffold(
-            appBar: AppBar(
-              title: Text('POS'),
-              actions: [
-                // Switch pour basculer entre les thèmes
-                Switch(
-                  value: Provider.of<ThemeProvider>(context).isDarkTheme,
-                  onChanged: (value) {
-                    Provider.of<ThemeProvider>(context, listen: false)
-                        .toggleTheme();
-                  },
-                ),
-                IconButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                        MaterialPageRoute(builder: (ctx) => MyHomePageAds()));
-                  },
-                  icon: Icon(Icons.ads_click, color: Colors.deepPurple),
-                ),
-                // IconButton(
-                //   onPressed: () {
-                //     // Appelez la méthode ici sans essayer d'utiliser sa valeur de retour
-                //     widget.objectBox..ajouterQuantitesAleatoires();
-                //   },
-                //  icon: Icon(Icons.qr_code_scanner, color: Colors.blue),
-                // ),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (Platform.isAndroid) {
-                      String filePath =
-                          "/storage/emulated/0/Download/Articles.xls";
-                      await widget.objectBox
-                          .importProduitsDepuisExcel(filePath, 20, 3000, 500);
-                    } else {
-                      String filePath =
-                          "C:/Users/INDRA/Documents/Articles.xls"; // Assurez-vous de mettre le bon chemin ici.
-                      await widget.objectBox
-                          .importProduitsDepuisExcel(filePath, 20, 3000, 500);
-                    }
+          return SafeArea(
+            child: Scaffold(
+              appBar: AppBar(
+                title: Text('POS'),
+                actions: [
+                  // Switch pour basculer entre les thèmes
+                  Switch(
+                    value: Provider.of<ThemeProvider>(context).isDarkTheme,
+                    onChanged: (value) {
+                      Provider.of<ThemeProvider>(context, listen: false)
+                          .toggleTheme();
+                    },
+                  ),
+                  // IconButton(
+                  //   onPressed: () {
+                  //     Navigator.of(context).push(
+                  //         MaterialPageRoute(builder: (ctx) => MyHomePageAds()));
+                  //   },
+                  //   icon: Icon(Icons.ads_click, color: Colors.deepPurple),
+                  // ),
+                  // IconButton(
+                  //   onPressed: () {
+                  //     // Appelez la méthode ici sans essayer d'utiliser sa valeur de retour
+                  //     widget.objectBox..ajouterQuantitesAleatoires();
+                  //   },
+                  //  icon: Icon(Icons.qr_code_scanner, color: Colors.blue),
+                  // ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      if (Platform.isAndroid) {
+                        String filePath =
+                            "/storage/emulated/0/Download/Articles.xls";
+                        await widget.objectBox
+                            .importProduitsDepuisExcel(filePath, 20, 3000, 500);
+                      } else {
+                        String filePath =
+                            "C:/Users/INDRA/Documents/Articles.xls"; // Assurez-vous de mettre le bon chemin ici.
+                        await widget.objectBox
+                            .importProduitsDepuisExcel(filePath, 20, 3000, 500);
+                      }
 
-                    print("Produits importés avec succès !");
-                  },
-                  child: Text("Importer Produits"),
-                ),
-                IconButton(
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (ctx) => mobile_scanner_example()));
-                  },
-                  icon: Icon(Icons.home, color: Colors.black),
-                ),
-                // IconButton(
-                //   onPressed: () {
-                //     Navigator.of(context).push(MaterialPageRoute(
-                //         builder: (ctx) => QRScannerPage(
-                //               lengthPin: 8,
-                //               p4ssw0rd: 'Oran2024',
-                //             )));
-                //   },
-                //   icon: Icon(Icons.qr_code_scanner, color: Colors.blue),
-                // ),
-                IconButton(
-                  onPressed: () {
-                    Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (ctx) => hashPage()));
-                  },
-                  icon: Icon(Icons.qr_code_scanner, color: Colors.green),
-                ),
-                IconButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                        MaterialPageRoute(builder: (ctx) => LicensePage()));
-                  },
-                  icon: Icon(Icons.account_tree_rounded),
-                ),
-                IconButton(
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (ctx) => FacturesListPage()));
-                  },
-                  icon: Icon(Icons.hail_outlined),
-                ),
-                IconButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                        MaterialPageRoute(builder: (ctx) => FacturePage()));
-                  },
-                  icon: Icon(Icons.invert_colors_off),
-                ),
-                SizedBox(
-                  width: 50,
-                ),
-                IconButton(
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (ctx) => ProduitListPage(
-                            supabase: Supabase.instance.client,
-                            objectboxStore: widget.objectBox.store)));
-                  },
-                  icon: Icon(Icons.local_police),
-                ),
-                IconButton(
-                  onPressed: () =>
-                      //objectBox.fillWithFakeData(20, 20, 10, 20, 20),
+                      print("Produits importés avec succès !");
+                    },
+                    child: Text("Importer Produits"),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (ctx) => mobile_scanner_example()));
+                    },
+                    icon: Icon(Icons.home, color: Colors.black),
+                  ),
+                  // IconButton(
+                  //   onPressed: () {
+                  //     Navigator.of(context).push(MaterialPageRoute(
+                  //         builder: (ctx) => QRScannerPage(
+                  //               lengthPin: 8,
+                  //               p4ssw0rd: 'Oran2024',
+                  //             )));
+                  //   },
+                  //   icon: Icon(Icons.qr_code_scanner, color: Colors.blue),
+                  // ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                          MaterialPageRoute(builder: (ctx) => hashPage()));
+                    },
+                    icon: Icon(Icons.qr_code_scanner, color: Colors.green),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                          MaterialPageRoute(builder: (ctx) => LicensePage()));
+                    },
+                    icon: Icon(Icons.account_tree_rounded),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (ctx) => FacturesListPage()));
+                    },
+                    icon: Icon(Icons.hail_outlined),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                          MaterialPageRoute(builder: (ctx) => FacturePage()));
+                    },
+                    icon: Icon(Icons.invert_colors_off),
+                  ),
+                  SizedBox(
+                    width: 50,
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (ctx) => ProduitListPage(
+                              supabase: Supabase.instance.client,
+                              objectboxStore: widget.objectBox.store)));
+                    },
+                    icon: Icon(Icons.local_police),
+                  ),
+                  IconButton(
+                    onPressed: () =>
+                        //objectBox.fillWithFakeData(20, 20, 10, 20, 20),
 
-                      _showDialogFake(objectBoxi),
-                  icon: Icon(Icons.send),
-                ),
-                IconButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                        MaterialPageRoute(builder: (ctx) => LottieListPage()));
-                  },
-                  icon: Icon(Icons.local_bar_outlined),
-                ),
-                SizedBox(
-                  width: 50,
-                )
-              ],
-            ),
-            body: Consumer<CommerceProvider>(
-              builder: (context, produitProvider, child) {
-                int totalProduits = produitProvider.getTotalProduits();
-                List<Produit> produitsFiltres =
-                    produitProvider.getProduitsBetweenPrices(prixMin, prixMax);
-                // var produitsLowStock = produitProvider.getProduitsLowStock(5.0);
-                // var produitsLowStock0 =
-                //     produitProvider.getProduitsLowStock(0.0);
+                        _showDialogFake(objectBoxi),
+                    icon: Icon(Icons.send),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (ctx) => LottieListPage()));
+                    },
+                    icon: Icon(Icons.local_bar_outlined),
+                  ),
+                  SizedBox(
+                    width: 50,
+                  )
+                ],
+              ),
+              body: Consumer<CommerceProvider>(
+                builder: (context, produitProvider, child) {
+                  int totalProduits = produitProvider.getTotalProduits();
+                  List<Produit> produitsFiltres = produitProvider
+                      .getProduitsBetweenPrices(prixMin, prixMax);
+                  // var produitsLowStock = produitProvider.getProduitsLowStock(5.0);
+                  // var produitsLowStock0 =
+                  //     produitProvider.getProduitsLowStock(0.0);
 
-                return Row(
-                  children: [
-                    NavigationRail(
-                      selectedIndex: _selectedIndex,
-                      onDestinationSelected: (int index) {
-                        setState(() {
-                          _selectedIndex = index;
-                        });
-                      },
-                      labelType: NavigationRailLabelType.selected,
-                      destinations: [
-                        NavigationRailDestination(
-                          icon: Icon(Icons.home),
-                          selectedIcon: Icon(Icons.home_filled),
-                          label: Text('Home'),
-                        ),
-                        NavigationRailDestination(
-                          icon: Icon(Icons.shopping_basket),
-                          selectedIcon: Icon(Icons.shopping_cart),
-                          label: Text('Caisse'),
-                        ),
-                        NavigationRailDestination(
-                          icon: Icon(Icons.account_box),
-                          selectedIcon: Icon(Icons.account_circle_sharp),
-                          label: Text('Clients'),
-                        ),
-                      ],
-                    ),
-                    _selectedIndex == 0
-                        ? buildExpanded(
-                            context,
-                            randomId,
-                            produitProvider,
-                            produitsFiltres,
-                            // produitsLowStock,
-                            // produitsLowStock0,
-                          )
-                        : _selectedIndex == 1
-                            ? Expanded(flex: 2, child: FacturePage())
-                            : Expanded(flex: 1, child: ClientListScreen()),
-                    Expanded(
-                      flex: 1,
-                      child: _widgetOptions()[_selectedIndex],
-                    ),
-                  ],
-                );
-              },
+                  return Row(
+                    children: [
+                      NavigationRail(
+                        selectedIndex: _selectedIndex,
+                        onDestinationSelected: (int index) {
+                          setState(() {
+                            _selectedIndex = index;
+                          });
+                        },
+                        labelType: NavigationRailLabelType.selected,
+                        destinations: [
+                          NavigationRailDestination(
+                            icon: Icon(Icons.home),
+                            selectedIcon: Icon(Icons.home_filled),
+                            label: Text('Home'),
+                          ),
+                          NavigationRailDestination(
+                            icon: Icon(Icons.shopping_basket),
+                            selectedIcon: Icon(Icons.shopping_cart),
+                            label: Text('Caisse'),
+                          ),
+                          NavigationRailDestination(
+                            icon: Icon(Icons.account_box),
+                            selectedIcon: Icon(Icons.account_circle_sharp),
+                            label: Text('Clients'),
+                          ),
+                        ],
+                      ),
+                      _selectedIndex == 0
+                          ? buildExpanded(
+                              context,
+                              randomId,
+                              produitProvider,
+                              produitsFiltres,
+                              // produitsLowStock,
+                              // produitsLowStock0,
+                            )
+                          : _selectedIndex == 1
+                              ? Expanded(flex: 2, child: FacturePage())
+                              : Expanded(flex: 1, child: ClientListScreen()),
+                      Expanded(
+                        flex: 1,
+                        child: _widgetOptions()[_selectedIndex],
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
           );
         } else {
@@ -626,6 +632,16 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                   //   },
                   //   icon: Icon(Icons.qr_code_scanner, color: Colors.blue),
                   // ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Switch(
+                      value: Provider.of<ThemeProvider>(context).isDarkTheme,
+                      onChanged: (value) {
+                        Provider.of<ThemeProvider>(context, listen: false)
+                            .toggleTheme();
+                      },
+                    ),
+                  ),
                   IconButton(
                     onPressed: () => showForcedRewardedAd(context, hashPage()),
 
@@ -710,15 +726,6 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                     padding: const EdgeInsets.all(5.0),
                     child: ListView(
                       children: [
-                        Switch(
-                          value:
-                              Provider.of<ThemeProvider>(context).isDarkTheme,
-                          onChanged: (value) {
-                            Provider.of<ThemeProvider>(context, listen: false)
-                                .toggleTheme();
-                          },
-                        ),
-                        SizedBox(height: 20),
                         // Padding(
                         //   padding: const EdgeInsets.all(18.0),
                         //   child: Center(
@@ -728,24 +735,103 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                         //     ),
                         //   ),
                         // ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      FournisseurListScreen()),
-                            );
-                          },
-                          child: CardTop(
-                            image:
-                                'https://picsum.photos/seed/${randomId + 8}/200/100',
-                            text:
-                                '${produitProvider.fournisseurs.length} Fournisseurs',
-                            provider: produitProvider,
-                            SmallBanner: true,
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: GestureDetector(
+                            onTap: () => showForcedRewardedAd(
+                                context, ProduitListScreen()),
+                            // onTap: () {
+                            //   Navigator.of(context).push(
+                            //     MaterialPageRoute(
+                            //         builder: (context) => ProduitListScreen()),
+                            //   );
+                            // },
+                            child: CardTop(
+                              image:
+                                  'https://picsum.photos/seed/$randomId/200/100',
+                              text:
+                                  '${produitProvider.getTotalProduits()} Produits',
+                              provider: produitProvider,
+                              // button: ElevatedButton(
+                              //   onPressed: () {
+                              //     Navigator.of(context).push(
+                              //       MaterialPageRoute(
+                              //           builder: (context) => ProduitListScreen()),
+                              //     );
+                              //   },
+                              //   child: Text('Voir plus'),
+                              // ),
+                              SmallBanner: false,
+                            ),
                           ),
                         ),
-
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: ElevatedButton.icon(
+                                    style: ElevatedButton.styleFrom(
+                                      foregroundColor: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary,
+                                      backgroundColor:
+                                          Theme.of(context).colorScheme.primary,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(15.0),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                              builder: (_) => add_Produit()));
+                                    },
+                                    label: Text(
+                                      'Produit',
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    icon: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 50),
+                                      child: Icon(Icons.add),
+                                    )),
+                              ),
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: ElevatedButton.icon(
+                                    style: ElevatedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(15.0),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      showModalBottomSheet(
+                                        context: context,
+                                        isScrollControlled:
+                                            true, // Permet de redimensionner en fonction de la hauteur du contenu
+                                        builder: (context) =>
+                                            AddFournisseurForm(),
+                                      );
+                                    },
+                                    label: Text(
+                                      'Fournisseur',
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    icon: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 50),
+                                      child: Icon(Icons.add),
+                                    )),
+                              ),
+                            ),
+                          ],
+                        ),
                         // Padding(
                         //   padding: const EdgeInsets.symmetric(
                         //       horizontal: 8, vertical: 15),
@@ -759,46 +845,113 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                         // ),
                         Padding(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 15),
-                          child: ElevatedButton(
-                            onPressed: () =>
-                                DatabaseUpdater.pickAndReplaceDatabase(context),
-                            child: Text(
-                                'Remplacer Afin de Mettre à jour la base de données'),
-                          ),
+                              horizontal: 18, vertical: 20),
+                          child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                foregroundColor:
+                                    Theme.of(context).colorScheme.onPrimary,
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15.0),
+                                ),
+                              ),
+                              onPressed: () {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (ctx) => addProduct()));
+                              },
+                              label: Text('Add Product'),
+                              icon: Icon(Icons.add)),
+                        ),
+
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 50, vertical: 15),
+                          child: ElevatedButton.icon(
+                              onPressed: () =>
+                                  DatabaseUpdater.pickAndReplaceDatabase(
+                                      context),
+                              label: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 8),
+                                child: Text(
+                                  'Upload DB',
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              icon: Icon(
+                                Icons.download,
+                                color: Colors.blue,
+                              )),
                         ),
                         Container(
                           width: MediaQuery.of(context).size.width,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          padding: EdgeInsets.all(
+                              15.0), // Espacement à l'intérieur du cadre
+                          decoration: BoxDecoration(
+                            //      color: Colors.grey, // Couleur de fond
+                            borderRadius:
+                                BorderRadius.circular(8.0), // Bords arrondis
+                            border: Border.all(
+                              color: Colors.grey, // Couleur de la bordure
+                              width: 1.0, // Épaisseur de la bordure
+                            ),
+                          ),
+                          child: Column(
                             children: [
-                              ElevatedButton.icon(
-                                  onPressed: () => showForcedRewardedAd(
-                                      context, FacturePage()),
-                                  // onPressed: () {
-                                  //   Navigator.of(context).push(MaterialPageRoute(
-                                  //       builder: (_) => FacturePage()));
-                                  // },
-                                  label: Text('Facture Page'),
-                                  icon: Icon(Icons.monetization_on_sharp)),
-                              ElevatedButton.icon(
-                                  onPressed: () => showForcedRewardedAd(
-                                      context, FacturesListPage()),
-                                  // onPressed: () {
-                                  //   Navigator.of(context).push(MaterialPageRoute(
-                                  //       builder: (_) => FacturesListPage()));
-                                  // },
-                                  label: Text('Facture List'),
-                                  icon: Icon(Icons.list_alt)),
+                              Text('Factures'),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: ElevatedButton.icon(
+                                          onPressed: () => showForcedRewardedAd(
+                                              context, FacturePage()),
+                                          // onPressed: () {
+                                          //   Navigator.of(context).push(MaterialPageRoute(
+                                          //       builder: (_) => FacturePage()));
+                                          // },
+                                          label: Text(
+                                            'Ajouter',
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          icon: Icon(Icons.add)),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: ElevatedButton.icon(
+                                          onPressed: () => showForcedRewardedAd(
+                                              context, FacturesListPage()),
+                                          // onPressed: () {
+                                          //   Navigator.of(context).push(MaterialPageRoute(
+                                          //       builder: (_) => FacturesListPage()));
+                                          // },
+                                          label: Text(
+                                            'List',
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          icon: Icon(Icons.list_alt)),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                         ),
-                        Expanded(
+
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
                           child: GestureDetector(
                             onTap: () {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
-                                    builder: (context) => UserListScreen()),
+                                    builder: (context) =>
+                                        cruds.UserListScreen()),
                               );
                             },
                             child: CardTop(
@@ -810,104 +963,106 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                             ),
                           ),
                         ),
-                        ElevatedButton.icon(
-                            onPressed: () => showForcedRewardedAd(
+                        // Padding(
+                        //   padding: const EdgeInsets.all(8.0),
+                        //   child: ElevatedButton.icon(
+                        //       onPressed: () => showForcedRewardedAd(
+                        //           context, ClientListScreen()),
+                        //       // onPressed: () {
+                        //       //   Navigator.of(context).push(MaterialPageRoute(
+                        //       //       builder: (_) => ClientListScreen()));
+                        //       // },
+                        //       label: Text('Client List'),
+                        //       icon: Icon(Icons.account_circle)),
+                        // ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        FournisseurListScreen()),
+                              );
+                            },
+                            child: CardTop(
+                              image:
+                                  'https://picsum.photos/seed/${randomId + 8}/200/100',
+                              text:
+                                  '${produitProvider.fournisseurs.length} Fournisseurs',
+                              provider: produitProvider,
+                              SmallBanner: true,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: GestureDetector(
+                            onTap: () => showForcedRewardedAd(
                                 context, ClientListScreen()),
-                            // onPressed: () {
-                            //   Navigator.of(context).push(MaterialPageRoute(
-                            //       builder: (_) => ClientListScreen()));
+                            // onTap: () {
+                            //   Navigator.of(context).push(
+                            //     MaterialPageRoute(
+                            //         builder: (context) => ClientListScreen()),
+                            //   );
                             // },
-                            label: Text('Client List'),
-                            icon: Icon(Icons.account_circle)),
-                        GestureDetector(
-                          onTap: () =>
-                              showForcedRewardedAd(context, ClientListScreen()),
-                          // onTap: () {
-                          //   Navigator.of(context).push(
-                          //     MaterialPageRoute(
-                          //         builder: (context) => ClientListScreen()),
-                          //   );
-                          // },
-                          child: CardTop(
-                            image:
-                                'https://picsum.photos/seed/${randomId + 2}/200/100',
-                            text:
-                                '${produitProvider.getTotalClientsCount()} Clients',
-                            provider: produitProvider,
-                            // button: ElevatedButton(
-                            //   onPressed: () {
-                            //     Navigator.of(context).push(
-                            //       MaterialPageRoute(
-                            //           builder: (context) => ProduitListScreen()),
-                            //     );
-                            //   },
-                            //   child: Text('Voir plus'),
-                            // ),
-                            SmallBanner: false,
+                            child: CardTop(
+                              image:
+                                  'https://picsum.photos/seed/${randomId + 2}/200/100',
+                              text:
+                                  '${produitProvider.getTotalClientsCount()} Clients',
+                              provider: produitProvider,
+                              // button: ElevatedButton(
+                              //   onPressed: () {
+                              //     Navigator.of(context).push(
+                              //       MaterialPageRoute(
+                              //           builder: (context) => ProduitListScreen()),
+                              //     );
+                              //   },
+                              //   child: Text('Voir plus'),
+                              // ),
+                              SmallBanner: false,
+                            ),
                           ),
                         ),
-                        GestureDetector(
-                          onTap: () => showForcedRewardedAd(
-                              context, ProduitListScreen()),
-                          // onTap: () {
-                          //   Navigator.of(context).push(
-                          //     MaterialPageRoute(
-                          //         builder: (context) => ProduitListScreen()),
-                          //   );
-                          // },
-                          child: CardTop(
-                            image:
-                                'https://picsum.photos/seed/$randomId/200/100',
-                            text:
-                                '${produitProvider.getTotalProduits()} Produits',
-                            provider: produitProvider,
-                            // button: ElevatedButton(
-                            //   onPressed: () {
-                            //     Navigator.of(context).push(
-                            //       MaterialPageRoute(
-                            //           builder: (context) => ProduitListScreen()),
-                            //     );
-                            //   },
-                            //   child: Text('Voir plus'),
-                            // ),
-                            SmallBanner: false,
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () => _ouvrirDialogAjustementPrix(context),
-                          child: CardTop(
-                            image:
-                                'https://picsum.photos/seed/${randomId + 1}/200/100',
-                            text:
-                                '${produitsFiltres.length} Produits\nentre ${prixMin.toStringAsFixed(2)} DZD et ${prixMax.toStringAsFixed(2)} DZD',
-                            provider: produitProvider,
-                            button: produitsFiltres.length == 0
-                                ? ElevatedButton(
-                                    onPressed: null,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors
-                                          .grey[300], // Couleur de fond grise
-                                      foregroundColor: Colors
-                                          .grey[600], // Couleur du texte grise
-                                      disabledBackgroundColor: Colors.grey[
-                                          300], // Assure que la couleur reste grise même désactivé
-                                      disabledForegroundColor: Colors.grey[
-                                          600], // Assure que la couleur du texte reste grise même désactivé
-                                    ),
-                                    child: Text(('Liste Vide')))
-                                : ElevatedButton.icon(
-                                    onPressed: () {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                ProduitListInterval(
-                                                  produitsFiltres:
-                                                      produitsFiltres,
-                                                )),
-                                      );
-                                    },
-                                    label: Text(('Voire La List'))),
-                            SmallBanner: false,
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: GestureDetector(
+                            onTap: () => _ouvrirDialogAjustementPrix(context),
+                            child: CardTop(
+                              image:
+                                  'https://picsum.photos/seed/${randomId + 1}/200/100',
+                              text:
+                                  '${produitsFiltres.length} Produits\nentre ${prixMin.toStringAsFixed(2)} DZD et ${prixMax.toStringAsFixed(2)} DZD',
+                              provider: produitProvider,
+                              button: produitsFiltres.length == 0
+                                  ? ElevatedButton(
+                                      onPressed: null,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors
+                                            .grey[300], // Couleur de fond grise
+                                        foregroundColor: Colors.grey[
+                                            600], // Couleur du texte grise
+                                        disabledBackgroundColor: Colors.grey[
+                                            300], // Assure que la couleur reste grise même désactivé
+                                        disabledForegroundColor: Colors.grey[
+                                            600], // Assure que la couleur du texte reste grise même désactivé
+                                      ),
+                                      child: Text(('Liste Vide')))
+                                  : ElevatedButton.icon(
+                                      onPressed: () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  ProduitListInterval(
+                                                    produitsFiltres:
+                                                        produitsFiltres,
+                                                  )),
+                                        );
+                                      },
+                                      label: Text(('Voire La List'))),
+                              SmallBanner: false,
+                            ),
                           ),
                         ),
                         // CardAlert(
@@ -936,47 +1091,37 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                         //   Color1: Colors.red,
                         //   Color2: Colors.black,
                         // ),
-                        SizedBox(height: 18),
-                        ElevatedButton.icon(
+
+                        Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: TextButton.icon(
                             onPressed: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (_) => add_Produit()));
-                            },
-                            label: Text('Ajouter  Produit'),
-                            icon: Icon(Icons.add)),
-                        ElevatedButton.icon(
-                            onPressed: () {
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled:
-                                    true, // Permet de redimensionner en fonction de la hauteur du contenu
-                                builder: (context) => AddFournisseurForm(),
+                              widget.objectBox.deleteDatabase();
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                        'Base de Données Vider avec succes!')),
                               );
                             },
-                            label: Text('Ajouter Fournisseur'),
-                            icon: Icon(Icons.send)),
-                        SizedBox(height: 18),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                Colors.red, // Couleur de fond grise
-                            foregroundColor:
-                                Colors.grey[300], // Couleur du texte grise
-                            disabledBackgroundColor: Colors.grey[
-                                300], // Assure que la couleur reste grise même désactivé
-                            disabledForegroundColor: Colors.grey[
-                                600], // Assure que la couleur du texte reste grise même désactivé
-                          ),
-                          child: Text('Delete all'),
-                          onPressed: () {
-                            widget.objectBox.deleteDatabase();
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15.0),
+                              ),
+                              // Couleur de fond grise
 
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content: Text(
-                                      'Base de Données Vider avec succes!')),
-                            );
-                          },
+                              backgroundColor:
+                                  Colors.red, // Couleur de fond grise
+                              foregroundColor:
+                                  Colors.grey[300], // Couleur du texte grise
+                              disabledBackgroundColor: Colors.grey[
+                                  300], // Assure que la couleur reste grise même désactivé
+                              disabledForegroundColor: Colors.grey[
+                                  600], // Assure que la couleur du texte reste grise même désactivé
+                            ),
+                            icon: Icon(Icons.delete_outline_sharp),
+                            label: Text('DB Erase'),
+                          ),
                         ),
                       ],
                     ));
@@ -1009,7 +1154,7 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                            builder: (context) => UserListScreen()),
+                            builder: (context) => cruds.UserListScreen()),
                       );
                     },
                     child: CardTop(
@@ -1150,12 +1295,40 @@ class _adaptiveHomeState extends State<adaptiveHome> {
             padding: const EdgeInsets.all(28.0),
             child: ElevatedButton.icon(
               onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (ctx) => cruds.CrudListScreen()));
+              },
+              label: Text('CrudListScreen'),
+              icon: Icon(Icons.event_seat),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(28.0),
+            child: ElevatedButton.icon(
+              onPressed: () {
                 Navigator.of(context).push(
                     MaterialPageRoute(builder: (ctx) => SyncProductsPage()));
               },
               label: Text('Open Food Facts Correction'),
               icon: Icon(Icons.event_seat),
             ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+            child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (ctx) => addProduct()));
+                },
+                label: Text('Add Product'),
+                icon: Icon(Icons.add)),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,

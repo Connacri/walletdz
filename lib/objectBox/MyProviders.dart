@@ -55,43 +55,6 @@ class CommerceProvider extends ChangeNotifier {
     getClientsFromBox();
   }
 
-  // Future<void> chargerProduits({bool reset = false}) async {
-  //   // Empêche les appels multiples simultanés
-  //   if (_isLoading) return;
-  //   _isLoading = true;
-  //   notifyListeners();
-  //   // Réinitialiser la pagination si nécessaire
-  //   if (reset) {
-  //     _currentPage = 0;
-  //     produits.clear();
-  //   }
-  //   // Créer la requête pour récupérer les produits triés par ID descendant
-  //   final query = _objectBox.produitBox.query()
-  //     ..order(Produit_.id, flags: Order.descending);
-  //   // Récupérer tous les produits (ou appliquer la pagination selon le besoin)
-  //   final allProduits = await query.build().find();
-  //   // Gérer la pagination
-  //   final startIndex = _currentPage * _pageSize;
-  //   final endIndex = startIndex + _pageSize;
-  //
-  //   if (startIndex >= allProduits.length) {
-  //     _hasMoreProduits = false;
-  //   } else {
-  //     // Sous-liste des nouveaux produits à ajouter
-  //     final newProduits = allProduits.sublist(
-  //       startIndex,
-  //       endIndex > allProduits.length ? allProduits.length : endIndex,
-  //     );
-  //
-  //     // Ajouter les nouveaux produits avec approvisionnements au fournisseur de produits
-  //     _produits.addAll(newProduits);
-  //     _currentPage++;
-  //     _hasMoreProduits = endIndex < allProduits.length;
-  //   }
-  //
-  //   _isLoading = false;
-  //   notifyListeners();
-  // }
   Future<void> chargerProduits({bool reset = false}) async {
     // Empêche les appels multiples simultanés
     if (_isLoading) return;
@@ -237,8 +200,10 @@ class CommerceProvider extends ChangeNotifier {
         (f) =>
             f.nom.toLowerCase() ==
             approvisionnementTemp.fournisseur.target!.nom.toLowerCase(),
-        orElse: () =>
-            Fournisseur(nom: approvisionnementTemp.fournisseur.target!.nom),
+        orElse: () => Fournisseur(
+          nom: approvisionnementTemp.fournisseur.target!.nom,
+          derniereModification: DateTime.now(),
+        ),
       );
 
       if (fournisseur.id == 0) {
@@ -258,6 +223,7 @@ class CommerceProvider extends ChangeNotifier {
         quantite: approvisionnementTemp.quantite,
         prixAchat: approvisionnementTemp.prixAchat,
         datePeremption: approvisionnementTemp.datePeremption,
+        derniereModification: DateTime.now(),
       );
 
       // Lier les relations
@@ -286,79 +252,10 @@ class CommerceProvider extends ChangeNotifier {
     _chargerFournisseurs();
   }
 
-  // void ajouterProduit(Produit produit, List<Fournisseur> fournisseurs,
-  //     List<Approvisionnement> approvisionnements, ) {
-  //   // Mettre à jour ou ajouter les fournisseurs
-  //   _ajouterOuMettreAJourFournisseurs(fournisseurs);
-  //
-  //   // Associer les fournisseurs au produit
-  //   produit.fournisseurs
-  //       .clear(); // Clear existing relations to avoid duplicates
-  //   produit.fournisseurs.addAll(fournisseurs);
-  //
-  //   // Ajouter ou mettre à jour les approvisionnements
-  //
-  //   for (var approvisionnement in approvisionnements) {
-  //     if (!_approvisionnements.contains(approvisionnement)) {
-  //       // Vérifier les doublons
-  //       approvisionnement.produit.target = produit;
-  //       _objectBox.approvisionnementBox.put(approvisionnement);
-  //     }
-  //   }
-  //   // Associer l'entité Crud au produit pour gérer les métadonnées
-  //   // produit.crud.target = crud;
-  //
-  //   // Sauvegarder le produit avec les relations
-  //   _objectBox.produitBox.put(produit);
-  //
-  //   // Recharger les produits et les fournisseurs après mise à jour
-  //   chargerProduits(reset: true);
-  //   _chargerFournisseurs();
-  // }
-
   void updateProduit(Produit produit) {
     _objectBox.produitBox.put(produit);
     chargerProduits(reset: true);
   }
-
-  // void updateProductStock(int productId, double newStock) {
-  //   final index = _produits.indexWhere((p) => p.id == productId);
-  //   if (index != -1) {
-  //     _produits[index].stock = newStock;
-  //     _objectBox.produitBox.put(_produits[index]);
-  //     notifyListeners();
-  //   }
-  // }
-  //
-  // void updateProduitById(int id, Produit updatedProduit,
-  //     {List<Fournisseur>? fournisseurs}) {
-  //   final produit = getProduitById(id);
-  //   if (produit != null) {
-  //     produit
-  //       ..nom = updatedProduit.nom
-  //       ..description = updatedProduit.description
-  //       ..prixAchat = updatedProduit.prixAchat
-  //       ..prixVente = updatedProduit.prixVente
-  //       ..stock = updatedProduit.stock
-  //       ..qr = updatedProduit.qr
-  //       ..image = updatedProduit.image
-  //       ..minimStock = updatedProduit.minimStock
-  //       // ..dateCreation = updatedProduit.dateCreation
-  //       ..stockUpdate = updatedProduit.stockUpdate
-  //       ..stockinit = updatedProduit.stockinit;
-  //
-  //     if (fournisseurs != null) {
-  //       _ajouterOuMettreAJourFournisseurs(fournisseurs);
-  //       produit.fournisseurs.clear();
-  //       produit.fournisseurs.addAll(fournisseurs);
-  //     }
-  //
-  //     _objectBox.produitBox.put(produit);
-  //     chargerProduits(reset: true);
-  //     _chargerFournisseurs();
-  //     notifyListeners();
-  //   }
-  // }
 
   void supprimerProduit(Produit produit) {
     _objectBox.produitBox.remove(produit.id);
@@ -379,19 +276,6 @@ class CommerceProvider extends ChangeNotifier {
         .query(Produit_.prixVente.between(minPrice, maxPrice));
     return query.build().find();
   }
-
-  // Map<String, dynamic> getProduitsLowStock(qtt) {
-  //   final query = _objectBox.produitBox.query(Produit_.stock.lessOrEqual(qtt));
-  //   final lowStockProduits = query.build().find();
-  //
-  //   return //lowStockProduits.length;
-  //       {
-  //     'count': lowStockProduits.length,
-  //     'produits': lowStockProduits,
-  //   };
-  // }
-
-//////////////////////////////////// Fournisseur ///////////////////////////////////////////
 
   void addFournisseur(Fournisseur fournisseur) {
     _objectBox.fournisseurBox.put(fournisseur);
@@ -438,6 +322,7 @@ class CommerceProvider extends ChangeNotifier {
         prixAchat: prixAchats[i],
         datePeremption:
             null, // Ajouter si tu as besoin de gérer la date de péremption
+        derniereModification: DateTime.now(),
       );
 
       // Définir les relations produit et fournisseur
@@ -473,6 +358,7 @@ class CommerceProvider extends ChangeNotifier {
         prixVente: faker.randomGenerator.decimal(min: 50),
         minimStock: faker.randomGenerator.decimal(min: 1, scale: 2),
         alertPeremption: Random().nextInt(10),
+        derniereModification: DateTime.now(),
       );
     });
 
@@ -482,6 +368,7 @@ class CommerceProvider extends ChangeNotifier {
         quantite: faker.randomGenerator.decimal(min: 100, scale: 15),
         prixAchat: faker.randomGenerator.decimal(min: 10),
         datePeremption: faker.date.dateTime(minYear: 2025),
+        derniereModification: DateTime.now(),
       );
 
       // Définir les relations entre l'approvisionnement, le produit et le fournisseur
@@ -525,6 +412,7 @@ class CommerceProvider extends ChangeNotifier {
           quantite: 0, // Définir la quantité initiale
           prixAchat: 0, // Ajuster le prix d'achat si nécessaire
           datePeremption: null, // Définir la date de péremption si nécessaire
+          derniereModification: DateTime.now(),
         );
 
         // Établir les relations
@@ -633,6 +521,41 @@ class CommerceProvider extends ChangeNotifier {
       print('Erreur lors de la suppression du fournisseur du produit : $e');
     }
   }
+
+  // Méthode pour mettre à jour les fournisseurId de tous les approvisionnements
+  Future<void> updateFournisseurIdsInApprovisionnements() async {
+    // Récupérer tous les fournisseurs existants
+    final List<Fournisseur> fournisseurs = _objectBox.fournisseurBox.getAll();
+
+    if (fournisseurs.isEmpty) {
+      return; // Assurez-vous qu'il y a des fournisseurs disponibles
+    }
+
+    // Récupérer tous les approvisionnements
+    final List<Approvisionnement> approvisionnements =
+        _objectBox.approvisionnementBox.getAll();
+
+    for (var approvisionnement in approvisionnements) {
+      // Vérifier si le fournisseur est assigné et existe dans la base de données
+      if (!fournisseurs
+          .any((f) => f.id == approvisionnement.fournisseur.targetId)) {
+        // Si non valide, assigner un fournisseur valide (par exemple, le premier)
+        approvisionnement.fournisseur.target = fournisseurs.first;
+
+        // Mettre à jour l'approvisionnement dans la base de données
+        _objectBox.approvisionnementBox.put(approvisionnement);
+      }
+    }
+
+    // Recharger les approvisionnements et notifier les listeners
+    _approvisionnements = _objectBox.approvisionnementBox.getAll();
+    notifyListeners();
+  }
+
+  // Exemple de méthode d'appel de cette mise à jour
+  Future<void> miseAJourDesApprovisionnements() async {
+    await updateFournisseurIdsInApprovisionnements();
+  }
 }
 
 class CartProvider with ChangeNotifier {
@@ -641,6 +564,7 @@ class CartProvider with ChangeNotifier {
     date: DateTime.now(),
     qr: '',
     impayer: 0.0,
+    derniereModification: DateTime.now(),
   );
   Client? _selectedClient;
   List<Facture> _factures = [];
@@ -689,6 +613,7 @@ class CartProvider with ChangeNotifier {
       phone: phone,
       adresse: adresse,
       description: description,
+      derniereModification: DateTime.now(),
     );
     _objectBox.clientBox.put(newClient);
     selectClient(newClient);
@@ -717,9 +642,9 @@ class CartProvider with ChangeNotifier {
     if (_selectedClient == null) {
       // Création de l'entité Crud pour le client anonyme
       final crud = Crud(
-        createdBy: 0, // Id utilisateur anonyme
-        updatedBy: 0,
-        deletedBy: 0,
+        createdBy: 1,
+        updatedBy: 1,
+        deletedBy: 1,
         dateCreation: DateTime.now(),
         derniereModification: DateTime.now(),
         dateDeleting: null,
@@ -733,6 +658,7 @@ class CartProvider with ChangeNotifier {
         phone: '',
         adresse: '',
         description: 'Client créé automatiquement',
+        derniereModification: DateTime.now(),
       );
 
       // Associer l'entité Crud au client
@@ -755,6 +681,7 @@ class CartProvider with ChangeNotifier {
       final ligneFacture = LigneFacture(
         quantite: 1,
         prixUnitaire: produit.prixVente,
+        derniereModification: DateTime.now(),
       );
       ligneFacture.produit.target = produit;
       ligneFacture.facture.target = _facture;
@@ -859,6 +786,7 @@ class CartProvider with ChangeNotifier {
       date: DateTime.now(),
       qr: '',
       impayer: 0.0,
+      derniereModification: DateTime.now(),
     );
     _selectedClient = null;
 
@@ -873,6 +801,7 @@ class CartProvider with ChangeNotifier {
       date: DateTime.now(),
       qr: '',
       impayer: 0.0,
+      derniereModification: DateTime.now(),
     );
     _selectedClient = null;
     notifyListeners();
@@ -1136,5 +1065,47 @@ class AdProvider extends ChangeNotifier {
     notifyListeners();
 
     return completer.future;
+  }
+}
+
+class CrudProvider with ChangeNotifier {
+  final ObjectBox _objectBox;
+
+  CrudProvider(this._objectBox) {
+    loadCruds();
+  }
+
+  List<Crud> _cruds = [];
+
+  List<Crud> get cruds => _cruds;
+
+  // Retourne le nombre de Cruds actuellement chargés en mémoire
+  int get crudCount => _cruds.length;
+
+  // Retourne le nombre total de Cruds dans la base de données
+  int get totalCrudCount {
+    final crudBox = _objectBox.crudBox;
+    return crudBox.count(); // Méthode ObjectBox pour obtenir le nombre total
+  }
+
+  // Charger les Cruds depuis ObjectBox
+  void loadCruds() {
+    final crudBox = _objectBox.crudBox;
+    _cruds = crudBox.getAll();
+    notifyListeners(); // Notifier l'UI que les données ont changé
+  }
+
+  // Mettre à jour un Crud et recharger la liste
+  Future<void> updateCrud(Crud crud) async {
+    final crudBox = _objectBox.crudBox;
+    crudBox.put(crud);
+    loadCruds(); // Recharger les données après mise à jour
+  }
+
+  // Supprimer tous les Cruds et recharger la liste
+  Future<void> deleteAllCruds() async {
+    final crudBox = _objectBox.crudBox;
+    crudBox.removeAll();
+    loadCruds();
   }
 }

@@ -118,10 +118,11 @@ class _AddFournisseurFormFromProduitState
                         nom: _nomController.text,
                         phone: _phoneController.text,
                         adresse: _adresseController.text,
+                        derniereModification: DateTime.now(),
                       )..crud.target = Crud(
-                          createdBy: 0,
-                          updatedBy: 0,
-                          deletedBy: 0,
+                          createdBy: 1,
+                          updatedBy: 1,
+                          deletedBy: 1,
                           dateCreation:
                               DateTime.parse(_creationController.text),
                           derniereModification: DateTime.parse(
@@ -308,6 +309,7 @@ class FournisseurSearchDelegate extends SearchDelegate<Fournisseur> {
                       0, // Valeur par défaut ou à modifier selon ton besoin
                   prixAchat:
                       0, // Valeur par défaut ou à modifier selon ton besoin
+                  derniereModification: DateTime.now(),
                 );
                 nouvelApprovisionnement.fournisseur.target = fournisseur;
 

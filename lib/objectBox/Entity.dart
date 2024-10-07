@@ -14,6 +14,7 @@ class User {
   String email;
   String? phone;
   String role;
+  DateTime derniereModification;
 
   final crud = ToOne<Crud>();
   User({
@@ -24,6 +25,7 @@ class User {
     this.phone,
     required this.email,
     required this.role,
+    required this.derniereModification,
   });
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
@@ -34,6 +36,31 @@ class User {
       email: json['email'] ?? '',
       phone: json['phone'],
       role: json['role'] ?? '',
+      derniereModification: json['derniereModification'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['derniereModification'])
+          : DateTime.now(),
+    );
+  }
+}
+
+@Entity()
+class QrCode {
+  @Id()
+  int id;
+  String serial;
+  String? type;
+
+  QrCode({
+    this.id = 0,
+    required this.serial,
+    this.type,
+  });
+
+  factory QrCode.fromJson(Map<String, dynamic> json) {
+    return QrCode(
+      id: json['id'] ?? 0,
+      serial: json['serial'] ?? '',
+      type: json['type'],
     );
   }
 }
@@ -43,17 +70,21 @@ class Produit {
   int id;
   @Unique()
   @Index() // Indexation du QR pour une recherche rapide
-  String? qr;
+  String? qr; // Stocker les QR codes comme une chaîne avec des séparateurs
   String? image;
   String nom;
   String? description;
   double prixVente;
   double minimStock;
   int alertPeremption;
+  @Property(type: PropertyType.date)
+  DateTime derniereModification;
 
   @Backlink()
   final approvisionnements = ToMany<Approvisionnement>();
+  // Correction : renommage de la relation ToMany<QrCode>
 
+  final qrcodes = ToMany<QrCode>();
   final crud = ToOne<Crud>();
 
   Produit({
@@ -65,14 +96,54 @@ class Produit {
     required this.prixVente,
     required this.minimStock,
     required this.alertPeremption,
+    required this.derniereModification,
   });
   // // Getters pour calculer les valeurs dynamiques
   // double get prixAchat => approvisionnements.isNotEmpty
   //     ? approvisionnements.map((a) => a.prixAchat).reduce((a, b) => a + b) /
   //         approvisionnements.length
   //     : 0;
+// Getter pour récupérer les QR codes sous forme de liste
+  List<String> get qrCodeList {
+    return qr != null && qr!.isNotEmpty ? qr!.split(',') : [];
+  }
+
+  // Setter pour mettre à jour les QR codes
+  set qrCodeList(List<String> codes) {
+    qr = codes.join(',');
+  }
+
+  // // Getter pour récupérer la liste des QR codes sous forme de liste
+  // List<String> get qrCodeList {
+  //   return qr != null && qr!.isNotEmpty ? List<String>.from(json.decode(qr!)) : [];
+  // }
+  //
+  // // Setter pour mettre à jour les QR codes dans le format JSON
+  // set qrCodeList(List<String> codes) {
+  //   qr = json.encode(codes);
+  // }
+  // Méthode pour ajouter un QR code à la liste existante
+  void addQrCode(String code) {
+    List<String> codes = qrCodeList;
+    codes.add(code);
+    qrCodeList = codes; // Met à jour la chaîne JSON avec la nouvelle liste
+  }
 
   double get stock => approvisionnements.fold(0, (sum, a) => sum + a.quantite);
+// Méthode pour calculer le stock total à partir des approvisionnements
+  double calculerStockTotal() {
+    // Si la liste des approvisionnements est vide, retourne 0
+    if (approvisionnements.isEmpty) {
+      return 0.0;
+    }
+
+    // Utilise fold() pour calculer la somme des quantités d'approvisionnement
+    double stockTotal = approvisionnements.fold(0.0, (total, appro) {
+      return total + appro.quantite;
+    });
+
+    return stockTotal;
+  }
 
   factory Produit.fromJson(Map<String, dynamic> json) {
     return Produit(
@@ -84,6 +155,48 @@ class Produit {
       prixVente: (json['prixVente'] ?? 0).toDouble(),
       minimStock: (json['minimStock'] ?? 0).toDouble(),
       alertPeremption: (json['alertPeremption']).toInt(),
+      derniereModification: json['derniereModification'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['derniereModification'])
+          : DateTime.now(),
+    );
+  }
+}
+
+@Entity()
+class Approvisionnement {
+  int id;
+  double quantite;
+  double prixAchat;
+  DateTime derniereModification;
+
+  @Property(type: PropertyType.date)
+  DateTime? datePeremption;
+
+  final produit = ToOne<Produit>();
+
+  // Relation vers l'entité Fournisseur
+  final fournisseur = ToOne<Fournisseur>();
+  final crud = ToOne<Crud>();
+
+  Approvisionnement({
+    this.id = 0,
+    required this.quantite,
+    required this.prixAchat,
+    this.datePeremption,
+    required this.derniereModification,
+  });
+
+  factory Approvisionnement.fromJson(Map<String, dynamic> json) {
+    return Approvisionnement(
+      id: json['id'] ?? 0,
+      quantite: (json['quantite'] ?? 0).toDouble(),
+      prixAchat: (json['prixAchat'] ?? 0).toDouble(),
+      datePeremption: json['datePeremption'] != null
+          ? DateTime.parse(json['datePeremption'])
+          : null,
+      derniereModification: json['derniereModification'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['derniereModification'])
+          : DateTime.now(),
     );
   }
 }
@@ -133,38 +246,6 @@ class Crud {
 }
 
 @Entity()
-class Approvisionnement {
-  int id;
-  double quantite;
-  double prixAchat;
-
-  @Property(type: PropertyType.date)
-  DateTime? datePeremption;
-
-  final produit = ToOne<Produit>();
-  final fournisseur = ToOne<Fournisseur>();
-  final crud = ToOne<Crud>();
-
-  Approvisionnement({
-    this.id = 0,
-    required this.quantite,
-    required this.prixAchat,
-    this.datePeremption,
-  });
-
-  factory Approvisionnement.fromJson(Map<String, dynamic> json) {
-    return Approvisionnement(
-      id: json['id'] ?? 0,
-      quantite: (json['quantite'] ?? 0).toDouble(),
-      prixAchat: (json['prixAchat'] ?? 0).toDouble(),
-      datePeremption: json['datePeremption'] != null
-          ? DateTime.parse(json['datePeremption'])
-          : null,
-    );
-  }
-}
-
-@Entity()
 class Fournisseur {
   int id;
   @Unique()
@@ -172,6 +253,7 @@ class Fournisseur {
   String nom;
   String? phone;
   String? adresse;
+  DateTime derniereModification;
 
   final crud = ToOne<Crud>();
 
@@ -184,6 +266,7 @@ class Fournisseur {
     required this.nom,
     this.phone,
     this.adresse,
+    required this.derniereModification,
   });
   factory Fournisseur.fromJson(Map<String, dynamic> json) {
     return Fournisseur(
@@ -192,6 +275,9 @@ class Fournisseur {
       nom: json['nom'] ?? '',
       phone: json['phone'],
       adresse: json['adresse'],
+      derniereModification: json['derniereModification'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['derniereModification'])
+          : DateTime.now(),
     );
   }
 }
@@ -204,6 +290,7 @@ class Client {
   String phone;
   String adresse;
   String? description;
+  DateTime derniereModification;
 
   @Backlink()
   final factures = ToMany<Facture>();
@@ -217,6 +304,7 @@ class Client {
     required this.phone,
     required this.adresse,
     this.description,
+    required this.derniereModification,
   });
   factory Client.fromJson(Map<String, dynamic> json) {
     return Client(
@@ -226,6 +314,9 @@ class Client {
       phone: json['phone'] ?? '',
       adresse: json['adresse'] ?? '',
       description: json['description'] ?? '',
+      derniereModification: json['derniereModification'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['derniereModification'])
+          : DateTime.now(),
     );
   }
 }
@@ -235,6 +326,7 @@ class Facture {
   int id;
   String qr;
   double? impayer;
+  DateTime derniereModification;
 
   @Property(type: PropertyType.date)
   DateTime date;
@@ -249,6 +341,7 @@ class Facture {
     required this.date,
     required this.qr,
     required this.impayer,
+    required this.derniereModification,
   });
   factory Facture.fromJson(Map<String, dynamic> json) {
     return Facture(
@@ -256,6 +349,9 @@ class Facture {
       qr: json['qr'] ?? '',
       impayer: (json['impayer'] ?? 0).toDouble(),
       date: DateTime.parse(json['date']),
+      derniereModification: json['derniereModification'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['derniereModification'])
+          : DateTime.now(),
     );
   }
 }
@@ -267,17 +363,22 @@ class LigneFacture {
   final facture = ToOne<Facture>();
   double quantite;
   double prixUnitaire;
+  DateTime derniereModification;
 
   LigneFacture({
     this.id = 0,
     required this.quantite,
     required this.prixUnitaire,
+    required this.derniereModification,
   });
   factory LigneFacture.fromJson(Map<String, dynamic> json) {
     return LigneFacture(
       id: json['id'] ?? 0,
       quantite: (json['quantite'] ?? 0).toDouble(),
       prixUnitaire: (json['prixUnitaire'] ?? 0).toDouble(),
+      derniereModification: json['derniereModification'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['derniereModification'])
+          : DateTime.now(),
     );
   }
 }
@@ -292,6 +393,7 @@ class DeletedProduct {
   double price;
   int quantity;
   int delaisPeremption;
+  DateTime derniereModification;
 
   final crud = ToOne<Crud>();
 
@@ -301,6 +403,7 @@ class DeletedProduct {
     required this.price,
     required this.quantity,
     required this.delaisPeremption,
+    required this.derniereModification,
   });
   factory DeletedProduct.fromJson(Map<String, dynamic> json) {
     return DeletedProduct(
@@ -309,6 +412,9 @@ class DeletedProduct {
       price: (json['price'] ?? 0).toDouble(),
       quantity: (json['quantity'] ?? 0).toInt(),
       delaisPeremption: (json['delaisPeremption']).toInt(),
+      derniereModification: json['derniereModification'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['derniereModification'])
+          : DateTime.now(),
     );
   }
 }

@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../Entity.dart';
 import '../MyProviders.dart';
+import '../classeObjectBox.dart';
 import 'ProduitListScreen.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:timeago/timeago.dart' as timeago;
 import 'add_Produit.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'dart:isolate';
 
 class FournisseurListScreen extends StatefulWidget {
   final Produit? produit;
@@ -31,6 +33,18 @@ class _FournisseurListScreenState extends State<FournisseurListScreen> {
         title: Text('Fournisseurs'),
         actions: [
           IconButton(
+            icon: Icon(Icons.update, color: Colors.lightGreen),
+            onPressed: () async {
+              final commerceProvider =
+                  Provider.of<CommerceProvider>(context, listen: false);
+              await commerceProvider.miseAJourDesApprovisionnements();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                    content: Text('Approvisionnements mis à jour avec succès')),
+              );
+            },
+          ),
+          IconButton(
             icon: Icon(Icons.search),
             onPressed: () async {
               final fournisseurProvider =
@@ -41,7 +55,8 @@ class _FournisseurListScreenState extends State<FournisseurListScreen> {
                     fournisseurProvider.fournisseurs),
               );
             },
-          )
+          ),
+          SizedBox(width: 120),
         ],
       ),
       body: Consumer<CommerceProvider>(
@@ -141,182 +156,6 @@ class _FournisseurListScreenState extends State<FournisseurListScreen> {
         },
         child: Icon(Icons.add),
       ),
-    );
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Create the ad objects and load ads.
-    _nativeAd = NativeAd(
-      adUnitId: 'ca-app-pub-2282149611905342/3007902409',
-      request: AdRequest(),
-      listener: NativeAdListener(
-        onAdLoaded: (Ad ad) {
-          print('$NativeAd loaded.');
-          setState(() {
-            _nativeAdIsLoaded = true;
-          });
-        },
-        onAdFailedToLoad: (Ad ad, LoadAdError error) {
-          print('$NativeAd failedToLoad: $error');
-          ad.dispose();
-        },
-        onAdOpened: (Ad ad) => print('$NativeAd onAdOpened.'),
-        onAdClosed: (Ad ad) => print('$NativeAd onAdClosed.'),
-      ),
-      nativeTemplateStyle: NativeTemplateStyle(
-        templateType: TemplateType.medium,
-        mainBackgroundColor: Colors.white12,
-        callToActionTextStyle: NativeTemplateTextStyle(
-          size: 16.0,
-        ),
-        primaryTextStyle: NativeTemplateTextStyle(
-          textColor: Colors.black38,
-          backgroundColor: Colors.white70,
-        ),
-      ),
-    )..load();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _nativeAd?.dispose();
-  }
-}
-
-class UserListScreen extends StatefulWidget {
-  final Produit? produit;
-
-  UserListScreen({Key? key, this.produit}) : super(key: key);
-
-  @override
-  State<UserListScreen> createState() => _UserListScreenState();
-}
-
-class _UserListScreenState extends State<UserListScreen> {
-  NativeAd? _nativeAd;
-
-  bool _nativeAdIsLoaded = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Users'),
-        actions: [
-          // IconButton(
-          //   icon: Icon(Icons.search),
-          //   onPressed: () async {
-          //     final userProvider =
-          //     Provider.of<CommerceProvider>(context, listen: false);
-          //     showSearch(
-          //       context: context,
-          //       delegate: UserSearchDelegateMain(
-          //           userProvider.users),
-          //     );
-          //   },
-          // )
-        ],
-      ),
-      body: Consumer<CommerceProvider>(
-        builder: (context, userProvider, child) {
-          return ListView.builder(
-            itemCount: userProvider.users.length,
-            itemBuilder: (context, index) {
-              if (index == 5 && _nativeAd != null && _nativeAdIsLoaded) {
-                return Align(
-                    alignment: Alignment.center,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        minWidth: 300,
-                        minHeight: 350,
-                        maxHeight: 400,
-                        maxWidth: 450,
-                      ),
-                      child: AdWidget(ad: _nativeAd!),
-                    ));
-              }
-              final user = userProvider.users[index];
-              return Card(
-                child: ListTile(
-                  // onLongPress: () {
-                  //   _deleteUser(context, user);
-                  // },
-                  // onTap: () {
-                  //   Navigator.of(context).push(
-                  //     MaterialPageRoute(
-                  //       builder: (context) => ProduitsUserPage(
-                  //         user: user,
-                  //         //   produits: fournisseur.produits,
-                  //       ),
-                  //     ),
-                  //   );
-                  // },
-                  leading: CircleAvatar(
-                    child: FittedBox(
-                        child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(user.id.toString()),
-                    )),
-                  ),
-                  title: Text(user.username),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Phone : ${user.phone}'),
-                      // Text(
-                      //   'Créer le ${user.crud.target!.dateCreation!.day}-${user.crud.target!.dateCreation!.month}-${user.crud.target!.dateCreation!.year}  Modifié ${timeago.format(user.crud.target!.derniereModification, locale: 'fr')}',
-                      //   style: TextStyle(
-                      //     fontSize: 13,
-                      //     fontWeight:
-                      //         FontWeight.w300, /* fontStyle: FontStyle.italic*/
-                      //   ),
-                      // ),
-                    ],
-                  ),
-                  trailing: Container(
-                    width: 70,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        // Expanded(
-                        //   child: Text(
-                        //     fournisseur.produits.length.toString(),
-                        //     style: TextStyle(fontSize: 20),
-                        //   ),
-                        // ),
-                        Expanded(
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.edit,
-                            ),
-                            onPressed: () {
-                              //  _editUser(context, user);
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () {
-      //     showModalBottomSheet(
-      //       context: context,
-      //       isScrollControlled:
-      //       true, // Permet de redimensionner en fonction de la hauteur du contenu
-      //       builder: (context) => AddUserForm(),
-      //     );
-      //   },
-      //   child: Icon(Icons.add),
-      // ),
     );
   }
 
@@ -581,9 +420,8 @@ class ProduitsFournisseurPage extends StatelessWidget {
           SizedBox(width: 16),
           FloatingActionButton(
             onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (_) =>
-                      add_Produit(specifiquefournisseur: fournisseur)));
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (_) => add_Produit()));
             },
             child: Icon(Icons.add),
             heroTag: 'addNew',
@@ -1030,6 +868,7 @@ class _AddFournisseurFormState extends State<AddFournisseurForm> {
                       nom: _nomController.text,
                       phone: _phoneController.text,
                       adresse: _adresseController.text,
+                      derniereModification: DateTime.now(),
                     );
                     context
                         .read<CommerceProvider>()
@@ -1121,10 +960,11 @@ void _editFournisseur(BuildContext context, Fournisseur fournisseur) {
                       nom: _nomController.text,
                       phone: _phoneController.text,
                       adresse: _adresseController.text,
+                      derniereModification: DateTime.now(),
                     )..crud.target = Crud(
-                        createdBy: 0,
-                        updatedBy: 0,
-                        deletedBy: 0,
+                        createdBy: 1,
+                        updatedBy: 1,
+                        deletedBy: 1,
                         dateCreation: DateTime.parse(_creationController.text),
                         derniereModification: DateTime.now(),
                         dateDeleting: null,

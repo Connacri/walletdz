@@ -17,6 +17,9 @@ import 'dart:developer' as developer;
 import 'dart:io';
 
 import '../pages/ProduitListScreen.dart';
+import 'package:supabase/supabase.dart' as Supa;
+import 'package:objectbox/objectbox.dart';
+import 'dart:developer' as developer;
 
 class SyncException implements Exception {
   final String message;
@@ -236,67 +239,702 @@ class SyncException implements Exception {
 //     }
 //   }
 // }
+// class SupabaseSync {
+//   final Supa.SupabaseClient supabase;
+//
+//   final Store objectboxStore;
+//   DateTime? lastSyncDate;
+//
+//   SupabaseSync(this.supabase, this.objectboxStore);
+//
+//   Future<void> resolveQRCodeConflicts() async {
+//     final produitBox = objectboxStore.box<Produit>();
+//     final produits = produitBox.getAll();
+//     Map<String, List<Produit>> qrCodeMap = {};
+//     Set<String> usedQRCodes = Set<String>();
+//
+//     // Première passe : grouper les produits par QR code
+//     for (final produit in produits) {
+//       if (!qrCodeMap.containsKey(produit.qr)) {
+//         qrCodeMap[produit.qr!] = [];
+//       }
+//       qrCodeMap[produit.qr]!.add(produit);
+//     }
+//
+//     // Deuxième passe : résoudre les conflits et assurer l'unicité
+//     for (var entry in qrCodeMap.entries) {
+//       String baseQR = entry.key;
+//       List<Produit> conflictingProducts = entry.value;
+//
+//       for (int i = 0; i < conflictingProducts.length; i++) {
+//         Produit produit = conflictingProducts[i];
+//         String newQR = baseQR;
+//
+//         // Si ce n'est pas le premier produit ou si le QR est déjà utilisé, générer un nouveau QR
+//         if (i > 0 || usedQRCodes.contains(newQR)) {
+//           int suffix = 1;
+//           do {
+//             newQR = '${baseQR}_$suffix';
+//             suffix++;
+//           } while (usedQRCodes.contains(newQR));
+//         }
+//
+//         if (newQR != produit.qr) {
+//           developer.log(
+//               'Modification du QR code pour le produit ${produit.nom} (ID: ${produit.id}): ${produit.qr} -> $newQR');
+//           produit.qr = newQR;
+//           produitBox.put(produit);
+//         }
+//
+//         usedQRCodes.add(newQR);
+//       }
+//     }
+//
+//     developer.log(
+//         'Résolution des conflits de QR codes terminée. ${usedQRCodes.length} QR codes uniques assurés.');
+//   }
+//
+//   // Future<void> syncToSupabase2() async {
+//   //   developer.log('Début de syncToSupabase');
+//   //
+//   //   try {
+//   //     // await _syncProduits();
+//   //     _syncAllEntities();
+//   //     developer.log('Fin de syncToSupabase');
+//   //   } catch (e) {
+//   //     developer.log('Erreur dans syncToSupabase: $e',
+//   //         error: e, stackTrace: StackTrace.current);
+//   //     throw SyncException(
+//   //         'Erreur lors de la synchronisation vers Supabase: $e');
+//   //   }
+//   // }
+//   //
+//   // Future<void> _syncUsers() async {
+//   //   // Synchronisation des utilisateurs ici
+//   //   // Supposons que vous ayez une box pour les utilisateurs dans ObjectBox
+//   //   final userBox = objectboxStore.box<User>();
+//   //   final users = userBox.getAll();
+//   //
+//   //   for (final user in users) {
+//   //     final userData = {
+//   //       'id': user.id,
+//   //       'username': user.username,
+//   //       // Autres champs pertinents
+//   //     };
+//   //
+//   //     final result =
+//   //         await supabase.from('users').upsert([userData], onConflict: 'id');
+//   //     developer.log(
+//   //         'Résultat de la synchronisation de l\'utilisateur ${user.username}: $result');
+//   //   }
+//   // }
+//
+//   Future<void> _syncProduitsWithoutRelations() async {
+//     final produitBox = objectboxStore.box<Produit>();
+//     final produits =
+//         _filterProduitsByDerniereModification(lastSyncDate ?? DateTime(1990));
+//
+//     for (final produit in produits) {
+//       final produitData = {
+//         'id': produit.id,
+//         'qr': produit.qr,
+//         'nom': produit.nom,
+//         'description': produit.description,
+//         'prixVente': produit.prixVente,
+//         'minimStock': produit.minimStock,
+//         'alertPeremption': produit.alertPeremption,
+//       };
+//
+//       final result = await supabase
+//           .from('produits')
+//           .upsert([produitData], onConflict: 'id');
+//       developer.log(
+//           'Résultat de la synchronisation du produit ${produit.nom}: $result');
+//     }
+//   }
+//
+//   Future<void> _syncFournisseurs() async {
+//     final fournisseurBox = objectboxStore.box<Fournisseur>();
+//     final fournisseurs = fournisseurBox.getAll();
+//
+//     for (final fournisseur in fournisseurs) {
+//       final fournisseurData = {
+//         'id': fournisseur.id,
+//         'nom': fournisseur.nom,
+//         // Autres champs pertinents
+//       };
+//
+//       final result = await supabase
+//           .from('fournisseurs')
+//           .upsert([fournisseurData], onConflict: 'id');
+//       developer.log(
+//           'Résultat de la synchronisation du fournisseur ${fournisseur.nom}: $result');
+//     }
+//   }
+//
+//   Future<void> _syncApprovisionnementsWithRelations() async {
+//     final approvisionnementBox = objectboxStore.box<Approvisionnement>();
+//     final approvisionnements = approvisionnementBox.getAll();
+//
+//     for (final approvisionnement in approvisionnements) {
+//       final approvisionnementData = {
+//         'id': approvisionnement.id,
+//         'quantite': approvisionnement.quantite,
+//         'prixAchat': approvisionnement.prixAchat,
+//         'datePeremption': approvisionnement.datePeremption?.toIso8601String(),
+//         'produitId':
+//             approvisionnement.produit.target?.id, // Référence au produit
+//         'fournisseurId': approvisionnement
+//             .fournisseur.target?.id, // Référence au fournisseur
+//       };
+//
+//       final result = await supabase
+//           .from('approvisionnements')
+//           .upsert([approvisionnementData], onConflict: 'id');
+//       developer.log(
+//           'Résultat de la synchronisation de l\'approvisionnement ${approvisionnement.id}: $result');
+//     }
+//   }
+//
+//   Future<void> _syncCrud(Crud? crud) async {
+//     if (crud == null) return;
+//
+//     final crudData = {
+//       'id': crud.id,
+//       'createdBy': crud.createdBy ?? 1,
+//       'updatedBy': crud.updatedBy ?? 1,
+//       'deletedBy': crud.deletedBy ?? 1,
+//       'dateCreation': crud.dateCreation?.toIso8601String(),
+//       'derniereModification': crud.derniereModification.toIso8601String(),
+//       'dateDeleting': crud.dateDeleting?.toIso8601String(),
+//     };
+//
+//     final result =
+//         await supabase.from('cruds').upsert([crudData], onConflict: 'id');
+//     developer.log(
+//         'Résultat de la synchronisation du Crud avec ID ${crud.id}: $result');
+//   }
+//
+//   Future<void> _syncAllCruds() async {
+//     developer.log('Début de la synchronisation des Crud');
+//
+//     final produitBox = objectboxStore.box<Produit>();
+//     final approvisionnementBox = objectboxStore.box<Approvisionnement>();
+//
+//     // Synchroniser les Crud des produits
+//     final produits = produitBox.getAll();
+//     for (final produit in produits) {
+//       await _syncCrud(produit.crud.target);
+//     }
+//
+//     // Synchroniser les Crud des approvisionnements
+//     final approvisionnements = approvisionnementBox.getAll();
+//     for (final approvisionnement in approvisionnements) {
+//       await _syncCrud(approvisionnement.crud.target);
+//     }
+//
+//     developer.log('Fin de la synchronisation des Crud');
+//   }
+//
+//   ///*****************************
+//
+//   Future<void> _syncAllEntities() async {
+//     developer.log('Début de la synchronisation des entités modifiées');
+//
+//     final userBox = objectboxStore.box<User>();
+//     final produitBox = objectboxStore.box<Produit>();
+//     final approvisionnementBox = objectboxStore.box<Approvisionnement>();
+//
+//     final lastSync = lastSyncDate ?? DateTime(1990);
+//
+//     // Synchroniser les utilisateurs modifiés
+//     await _syncModifiedUsers(userBox, lastSync);
+//
+//     // Synchroniser les produits modifiés
+//     await _syncModifiedProduits(produitBox, lastSync);
+//
+//     // Synchroniser les approvisionnements modifiés
+//     await _syncModifiedApprovisionnements(approvisionnementBox, lastSync);
+//
+//     // Gérer les suppressions
+//     await _handleDeletions(lastSync);
+//
+//     lastSyncDate = DateTime.now();
+//     developer.log('Fin de la synchronisation des entités modifiées');
+//   }
+//
+//   Future<void> _syncModifiedUsers(Box<User> box, DateTime lastSync) async {
+//     final query = box
+//         .query(User_.derniereModification
+//             .greaterThan(lastSync.millisecondsSinceEpoch))
+//         .build();
+//     final modifiedUsers = query.find();
+//
+//     for (final user in modifiedUsers) {
+//       final userData = _prepareUserData(user);
+//       final result =
+//           await supabase.from('users').upsert([userData], onConflict: 'id');
+//       developer.log(
+//           'Résultat de la synchronisation de l\'utilisateur ${user.id}: $result');
+//     }
+//   }
+//
+//   Future<void> _syncModifiedProduits(
+//       Box<Produit> box, DateTime lastSync) async {
+//     try {
+//       // Récupérer tous les produits de la base de données
+//       final allProduits = box.getAll();
+//
+//       // Filtrer les produits modifiés
+//       final modifiedProduits = allProduits.where((produit) {
+//         // Assurez-vous que produit.crud.target n'est pas nul avant d'accéder à derniereModification
+//         return produit.crud.target != null &&
+//             produit.crud.target!.derniereModification.isAfter(lastSync);
+//       }).toList();
+//
+//       for (final produit in modifiedProduits) {
+//         final produitData = _prepareProduitData(produit);
+//         final result = await supabase
+//             .from('produits')
+//             .upsert([produitData], onConflict: 'id');
+//
+//         developer.log(
+//             'Résultat de la synchronisation du produit ${produit.id}: $result',
+//             name: 'Sync Produits');
+//       }
+//     } catch (e) {
+//       developer.log(
+//         'Erreur lors de la synchronisation des produits: $e',
+//         name: 'Sync Produits',
+//       );
+//     }
+//   }
+//
+//   Future<void> _syncModifiedApprovisionnements(
+//       Box<Approvisionnement> box, DateTime lastSync) async {
+//     try {
+//       // Récupérer tous les approvisionnements de la base de données
+//       final allApprovisionnements = box.getAll();
+//
+//       // Filtrer les approvisionnements modifiés
+//       final modifiedApprovisionnements =
+//           allApprovisionnements.where((approvisionnement) {
+//         // Assurez-vous que approvisionnement.crud.target n'est pas nul avant d'accéder à derniereModification
+//         return approvisionnement.crud.target != null &&
+//             approvisionnement.crud.target!.derniereModification
+//                 .isAfter(lastSync);
+//       }).toList();
+//
+//       for (final approvisionnement in modifiedApprovisionnements) {
+//         final approData = _prepareApprovisionnementData(approvisionnement);
+//         final result = await supabase
+//             .from('approvisionnements')
+//             .upsert([approData], onConflict: 'id');
+//
+//         developer.log(
+//             'Résultat de la synchronisation de l\'approvisionnement ${approvisionnement.id}: $result',
+//             name: 'Sync Approvisionnements');
+//       }
+//     } catch (e) {
+//       developer.log(
+//         'Erreur lors de la synchronisation des approvisionnements: $e',
+//         name: 'Sync Approvisionnements',
+//       );
+//     }
+//   }
+//
+//   Map<String, dynamic> _prepareUserData(User user) {
+//     return {
+//       'id': user.id,
+//       'photo': user.photo,
+//       'username': user.username,
+//       'email': user.email,
+//       'phone': user.phone,
+//       'role': user.role,
+//       'dateCreation': user.dateCreation?.toIso8601String(),
+//       'derniereModification': DateTime.now(),
+//       'dateDeleting': user.dateDeleting?.toIso8601String(),
+//     };
+//   }
+//
+//   Map<String, dynamic> _prepareProduitData(Produit produit) {
+//     return {
+//       'id': produit.id,
+//       'qr': produit.qr,
+//       'image': produit.image,
+//       'nom': produit.nom,
+//       'description': produit.description,
+//       'prixVente': produit.prixVente,
+//       'minimStock': produit.minimStock,
+//       'alertPeremption': produit.alertPeremption,
+//       'derniereModification': DateTime.now(),
+//     };
+//   }
+//
+//   Map<String, dynamic> _prepareApprovisionnementData(
+//       Approvisionnement approvisionnement) {
+//     return {
+//       'id': approvisionnement.id,
+//       'quantite': approvisionnement.quantite,
+//       'prixAchat': approvisionnement.prixAchat,
+//       'datePeremption': approvisionnement.datePeremption?.toIso8601String(),
+//       'produitId': approvisionnement.produit.target?.id,
+//       'fournisseurId': approvisionnement.fournisseur.target?.id,
+//       'derniereModification': DateTime.now(),
+//     };
+//   }
+//
+//   Future<void> _handleDeletions(DateTime lastSync) async {
+//     await _handleEntityDeletions<User>(
+//         objectboxStore.box<User>(), 'users', lastSync, (user) => user.id);
+//     await _handleEntityDeletions<Produit>(objectboxStore.box<Produit>(),
+//         'produits', lastSync, (produit) => produit.id);
+//     await _handleEntityDeletions<Approvisionnement>(
+//         objectboxStore.box<Approvisionnement>(),
+//         'approvisionnements',
+//         lastSync,
+//         (approvisionnement) => approvisionnement.id);
+//   }
+//
+//   Future<void> _handleEntityDeletions<T>(Box<T> box, String tableName,
+//       DateTime lastSync, int Function(T) getId) async {
+//     final deletedEntities = await supabase
+//         .from(tableName)
+//         .select()
+//         .gte('dateDeleting', lastSync.toIso8601String());
+//
+//     for (final deletedEntity in deletedEntities) {
+//       final localEntity = box.get(deletedEntity['id']);
+//       if (localEntity != null) {
+//         box.remove(getId(localEntity));
+//       }
+//     }
+//   }
+//
+//   ///*****************************
+//
+//   Future<void> syncToSupabase() async {
+//     developer.log('Début de syncToSupabase');
+//
+//     try {
+//       // 1. Synchroniser les utilisateurs
+//       await _syncAllEntities();
+//
+//       // 2. Synchroniser les produits sans leurs relations
+//       await _syncProduitsWithoutRelations();
+//
+//       // 3. Synchroniser les fournisseurs
+//       await _syncFournisseurs();
+//
+//       // 4. Synchroniser les approvisionnements avec leurs relations
+//       await _syncApprovisionnementsWithRelations();
+//
+//       // 5. Synchroniser les Crud pour toutes les entités principales
+//       await _syncAllCruds();
+//
+//       // Fin de la synchronisation
+//       developer.log('Fin de syncToSupabase');
+//     } catch (e) {
+//       developer.log('Erreur dans syncToSupabase: $e',
+//           error: e, stackTrace: StackTrace.current);
+//       throw SyncException(
+//           'Erreur lors de la synchronisation vers Supabase: $e');
+//     }
+//   }
+//
+//   Future<void> _syncAllEntities0() async {
+//     developer.log('Début de la synchronisation des entités');
+//
+//     final produitBox = objectboxStore.box<Produit>();
+//     final crudBox = objectboxStore.box<Crud>();
+//     final approvisionnementBox = objectboxStore.box<Approvisionnement>();
+//
+//     // Filtrer les produits modifiés après la dernière synchronisation
+//     final produits =
+//         _filterProduitsByDerniereModification(lastSyncDate ?? DateTime(1990));
+//
+//     // Synchroniser les produits et leurs Crud associés
+//     for (final produit in produits) {
+//       // Synchroniser le Crud du produit
+//       await _syncCrud(produit.crud.target);
+//
+//       // Gestion de l'image pour chaque produit
+//       final imageUrl = await _uploadProductImage(produit);
+//
+//       // Préparation des données à synchroniser avec Supabase
+//       final produitData = {
+//         'id': produit.id,
+//         'qr': produit.qr,
+//         'image': imageUrl,
+//         'nom': produit.nom,
+//         'description': produit.description,
+//         'prixVente': produit.prixVente,
+//         'minimStock': produit.minimStock,
+//         'alertPeremption': produit.alertPeremption,
+//         // 'derniereModification':
+//         //     produit.crud.target?.derniereModification?.toIso8601String(),
+//       };
+//
+//       // Synchronisation des données avec Supabase
+//       final result = await supabase.from('produits').upsert([produitData],
+//           onConflict:
+//               'id').select(); // Utilisez .select() pour récupérer les données synchronisées
+//
+//       if (result == null || result.isEmpty) {
+//         developer.log(
+//             'Aucune donnée retournée pour la synchronisation du produit ${produit.nom}');
+//       } else {
+//         developer.log(
+//             'Résultat de la synchronisation du produit ${produit.nom}: $result');
+//       }
+//
+//       developer.log(
+//           'Résultat de la synchronisation du produit ${produit.nom}: $result');
+//
+//       // Synchroniser les approvisionnements associés au produit
+//       await _syncApprovisionnements(produit.approvisionnements);
+//     }
+//
+//     // Mettre à jour la date de dernière synchronisation après succès
+//     lastSyncDate = DateTime.now();
+//   }
+//
+// // Méthode de synchronisation des Crud
+//   Future<void> _syncCrud1(Crud? crud) async {
+//     if (crud == null) return;
+//
+//     final crudData = {
+//       'id': crud.id,
+//       'createdBy': crud.createdBy ?? 1,
+//       'updatedBy': crud.updatedBy ?? 1,
+//       'deletedBy': crud.deletedBy ?? 1,
+//       'dateCreation': crud.dateCreation?.toIso8601String(),
+//       'derniereModification': crud.derniereModification.toIso8601String(),
+//       'dateDeleting': crud.dateDeleting?.toIso8601String(),
+//     };
+//
+//     // Synchronisation avec Supabase
+//     final result =
+//         await supabase.from('cruds').upsert([crudData], onConflict: 'id');
+//
+//     developer.log(
+//         'Résultat de la synchronisation du Crud avec ID ${crud.id}: $result');
+//   }
+//
+// // Méthode de synchronisation des approvisionnements
+//   Future<void> _syncApprovisionnements(
+//       ToMany<Approvisionnement> approvisionnements) async {
+//     for (final approvisionnement in approvisionnements) {
+//       // Synchroniser le Crud de l'approvisionnement
+//       await _syncCrud(approvisionnement.crud.target);
+//
+//       // Préparation des données à synchroniser avec Supabase
+//       final approvisionnementData = {
+//         'id': approvisionnement.id,
+//         'quantite': approvisionnement.quantite,
+//         'prixAchat': approvisionnement.prixAchat,
+//         'datePeremption': approvisionnement.datePeremption?.toIso8601String(),
+//         'produitId': approvisionnement.produit.target
+//             ?.id, // Assurez-vous d'ajouter une référence à produit
+//         'fournisseurId': approvisionnement.fournisseur.target
+//             ?.id, // Assurez-vous d'ajouter une référence à fournisseur
+//         // 'derniereModification': approvisionnement
+//         //     .crud.target?.derniereModification
+//         //     .toIso8601String(),
+//       };
+//
+//       // Synchronisation des données avec Supabase
+//       final result = await supabase
+//           .from('approvisionnements')
+//           .upsert([approvisionnementData], onConflict: 'id');
+//
+//       developer.log(
+//           'Résultat de la synchronisation de l\'approvisionnement avec ID ${approvisionnement.id}: $result');
+//     }
+//   }
+//
+// // Méthode de filtrage pour récupérer les produits modifiés après une date donnée
+//   List<Produit> _filterProduitsByDerniereModification(DateTime date) {
+//     final produitBox = objectboxStore.box<Produit>();
+//     final allProduits = produitBox.getAll();
+//
+//     return allProduits.where((produit) {
+//       final derniereModification = produit.crud.target?.derniereModification;
+//       return derniereModification != null && derniereModification.isAfter(date);
+//     }).toList();
+//   }
+//
+//   // Future<void> _syncProduits() async {
+//   //   developer.log('Début de la synchronisation des produits');
+//   //   final produitBox = objectboxStore.box<Produit>();
+//   //
+//   //   // Filtrer les produits modifiés après la dernière synchronisation
+//   //   final produits =
+//   //       _filterProduitsByDerniereModification(lastSyncDate ?? DateTime(2024));
+//   //
+//   //   for (final produit in produits) {
+//   //     // Gestion de l'image pour chaque produit
+//   //     final imageUrl = await _uploadProductImage(produit);
+//   //
+//   //     // Préparation des données à synchroniser avec Supabase
+//   //     final produitData = {
+//   //       'id': produit.id,
+//   //       'qr': produit.qr,
+//   //       'image': imageUrl, // Utilisation de l'URL de l'image
+//   //       'nom': produit.nom,
+//   //       'description': produit.description,
+//   //       'prixVente': produit.prixVente,
+//   //       'minimStock': produit.minimStock,
+//   //       'alertPeremption': produit.alertPeremption,
+//   //       // Inclure la dernière modification depuis Crud
+//   //       'derniereModification':
+//   //           produit.crud.target?.derniereModification.toIso8601String(),
+//   //     };
+//   //
+//   //     // Synchronisation des données avec Supabase
+//   //     final result = await supabase
+//   //         .from('produits')
+//   //         .upsert([produitData], onConflict: 'id');
+//   //
+//   //     developer.log(
+//   //         'Résultat de la synchronisation du produit ${produit.nom}: $result');
+//   //   }
+//   //
+//   //   // Mettre à jour la date de dernière synchronisation après succès
+//   //   lastSyncDate = DateTime.now();
+//   // }
+//
+// // Méthode de filtrage pour récupérer les produits modifiés après une date donnée
+// //   List<Produit> _filterProduitsByDerniereModification(DateTime date) {
+// //     final produitBox = objectboxStore.box<Produit>();
+// //     final allProduits = produitBox.getAll();
+// //
+// //     return allProduits.where((produit) {
+// //       // Récupérer la dernière modification du produit
+// //       final derniereModification = produit.crud.target?.derniereModification;
+// //
+// //       // Comparer avec la date fournie
+// //       return derniereModification != null && derniereModification.isAfter(date);
+// //     }).toList();
+// //   }
+//
+//   Future<String> _uploadProductImage(Produit produit) async {
+//     final String localFolderPath =
+//         r'C:\Users\INDRA\OneDrive\Documents\ImagesProduits';
+//     final String placeholderImageUrl =
+//         'https://picsum.photos/200/300?random=${produit.id}';
+//     final String supabaseBucketPath = 'products';
+//
+//     final String imageName = '${produit.qr}.jpg';
+//     final File imageFile = File(path.join(localFolderPath, imageName));
+//
+//     developer.log(
+//         'Recherche de l\'image pour le produit ${produit.nom} avec QR: ${produit.qr}');
+//     developer.log('Chemin du fichier image: ${imageFile.path}');
+//
+//     if (await imageFile.exists()) {
+//       try {
+//         final fileBytes = await imageFile.readAsBytes();
+//         final imageToUploadPath = '$supabaseBucketPath/$imageName';
+//
+//         // Vérifier si l'image existe déjà dans Supabase Storage
+//         final existsResponse = await Supa.Supabase.instance.client.storage
+//             .from(supabaseBucketPath)
+//             .list(path: imageToUploadPath);
+//
+//         if (existsResponse.isEmpty) {
+//           // Uploader l'image si elle n'existe pas déjà
+//           await Supa.Supabase.instance.client.storage
+//               .from(supabaseBucketPath)
+//               .uploadBinary(imageToUploadPath, fileBytes);
+//           developer.log(
+//               'Image uploadée avec succès pour ${produit.nom}: $imageToUploadPath');
+//         } else {
+//           developer.log(
+//               'Image déjà présente pour ${produit.nom} dans Supabase Storage: $imageToUploadPath');
+//         }
+//
+//         final String imageUrl = Supa.Supabase.instance.client.storage
+//             .from(supabaseBucketPath)
+//             .getPublicUrl(imageToUploadPath);
+//
+//         developer.log('URL de l\'image générée: $imageUrl');
+//         return imageUrl;
+//       } catch (e) {
+//         developer.log('Erreur lors de l\'upload de l\'image $imageName: $e');
+//         throw Exception('Erreur lors de l\'upload de l\'image $imageName: $e');
+//       }
+//     } else {
+//       developer.log(
+//           'Image absente pour ${produit.nom} (QR: ${produit.qr}), utilisation de l\'image factice.');
+//       return placeholderImageUrl;
+//     }
+//   }
+//
+//   Future<void> cleanProductQRCodes() async {
+//     final produitBox = objectboxStore.box<Produit>();
+//     final produits = produitBox.getAll();
+//     int updatedCount = 0;
+//
+//     for (final produit in produits) {
+//       String originalQR = produit.qr!;
+//       String cleanedQR = originalQR.trim().replaceAll(RegExp(r'\s+'), '');
+//
+//       if (cleanedQR != originalQR) {
+//         produit.qr = cleanedQR;
+//         produitBox.put(produit);
+//         updatedCount++;
+//         developer.log(
+//             'QR code nettoyé pour ${produit.nom}: "$originalQR" -> "$cleanedQR"');
+//       }
+//     }
+//
+//     developer.log(
+//         'Nettoyage des QR codes terminé. $updatedCount produits mis à jour.');
+//   }
+//
+//   Future<void> handleDuplicateQRCodes() async {
+//     final produitBox = objectboxStore.box<Produit>();
+//     final produits = produitBox.getAll();
+//     Map<String, List<Produit>> qrCodeMap = {};
+//
+//     // Grouper les produits par QR code
+//     for (final produit in produits) {
+//       if (!qrCodeMap.containsKey(produit.qr)) {
+//         qrCodeMap[produit.qr!] = [];
+//       }
+//       qrCodeMap[produit.qr]!.add(produit);
+//     }
+//
+//     // Traiter les doublons
+//     for (var entry in qrCodeMap.entries) {
+//       if (entry.value.length > 1) {
+//         developer.log('QR code en double détecté: ${entry.key}');
+//         for (int i = 1; i < entry.value.length; i++) {
+//           Produit produit = entry.value[i];
+//           String newQR = '${produit.qr}_${produit.id}';
+//           developer.log(
+//               'Modification du QR code pour le produit ${produit.nom}: ${produit.qr} -> $newQR');
+//           produit.qr = newQR;
+//           produitBox.put(produit);
+//         }
+//       }
+//     }
+//   }
+// }
+
 class SupabaseSync {
   final Supa.SupabaseClient supabase;
-
   final Store objectboxStore;
   DateTime? lastSyncDate;
 
   SupabaseSync(this.supabase, this.objectboxStore);
 
-  Future<void> resolveQRCodeConflicts() async {
-    final produitBox = objectboxStore.box<Produit>();
-    final produits = produitBox.getAll();
-    Map<String, List<Produit>> qrCodeMap = {};
-    Set<String> usedQRCodes = Set<String>();
-
-    // Première passe : grouper les produits par QR code
-    for (final produit in produits) {
-      if (!qrCodeMap.containsKey(produit.qr)) {
-        qrCodeMap[produit.qr!] = [];
-      }
-      qrCodeMap[produit.qr]!.add(produit);
-    }
-
-    // Deuxième passe : résoudre les conflits et assurer l'unicité
-    for (var entry in qrCodeMap.entries) {
-      String baseQR = entry.key;
-      List<Produit> conflictingProducts = entry.value;
-
-      for (int i = 0; i < conflictingProducts.length; i++) {
-        Produit produit = conflictingProducts[i];
-        String newQR = baseQR;
-
-        // Si ce n'est pas le premier produit ou si le QR est déjà utilisé, générer un nouveau QR
-        if (i > 0 || usedQRCodes.contains(newQR)) {
-          int suffix = 1;
-          do {
-            newQR = '${baseQR}_$suffix';
-            suffix++;
-          } while (usedQRCodes.contains(newQR));
-        }
-
-        if (newQR != produit.qr) {
-          developer.log(
-              'Modification du QR code pour le produit ${produit.nom} (ID: ${produit.id}): ${produit.qr} -> $newQR');
-          produit.qr = newQR;
-          produitBox.put(produit);
-        }
-
-        usedQRCodes.add(newQR);
-      }
-    }
-
-    developer.log(
-        'Résolution des conflits de QR codes terminée. ${usedQRCodes.length} QR codes uniques assurés.');
-  }
-
   Future<void> syncToSupabase() async {
     developer.log('Début de syncToSupabase');
-
     try {
-      // await _syncProduits();
-      _syncAllEntities();
+      await _syncRecentlyModifiedEntities();
+      lastSyncDate = DateTime.now();
       developer.log('Fin de syncToSupabase');
     } catch (e) {
       developer.log('Erreur dans syncToSupabase: $e',
@@ -306,181 +944,125 @@ class SupabaseSync {
     }
   }
 
-  Future<void> _syncAllEntities() async {
-    developer.log('Début de la synchronisation des entités');
+  Future<void> _syncRecentlyModifiedEntities() async {
+    final lastSync = lastSyncDate ?? DateTime(1990);
+    await _syncModifiedUsers(lastSync);
+    await _syncModifiedProduits(lastSync);
 
-    final produitBox = objectboxStore.box<Produit>();
-    final crudBox = objectboxStore.box<Crud>();
-    final approvisionnementBox = objectboxStore.box<Approvisionnement>();
+    await _syncModifiedFournisseurs(lastSync);
+    await _syncModifiedApprovisionnements(lastSync);
+  }
 
-    // Filtrer les produits modifiés après la dernière synchronisation
-    final produits =
-        _filterProduitsByDerniereModification(lastSyncDate ?? DateTime(1990));
+  Future<void> _syncModifiedUsers(DateTime lastSync) async {
+    final userBox = objectboxStore.box<User>();
+    final modifiedUsers = userBox
+        .query(User_.derniereModification
+            .greaterThan(lastSync.millisecondsSinceEpoch))
+        .build()
+        .find();
 
-    // Synchroniser les produits et leurs Crud associés
-    for (final produit in produits) {
-      // Synchroniser le Crud du produit
-      await _syncCrud(produit.crud.target);
-
-      // Gestion de l'image pour chaque produit
-      final imageUrl = await _uploadProductImage(produit);
-
-      // Préparation des données à synchroniser avec Supabase
-      final produitData = {
-        'id': produit.id,
-        'qr': produit.qr,
-        'image': imageUrl,
-        'nom': produit.nom,
-        'description': produit.description,
-        'prixVente': produit.prixVente,
-        'minimStock': produit.minimStock,
-        'alertPeremption': produit.alertPeremption,
-        // 'derniereModification':
-        //     produit.crud.target?.derniereModification?.toIso8601String(),
-      };
-
-      // Synchronisation des données avec Supabase
-      final result = await supabase.from('produits').upsert([produitData],
-          onConflict:
-              'id').select(); // Utilisez .select() pour récupérer les données synchronisées
-
-      if (result == null || result.isEmpty) {
-        developer.log(
-            'Aucune donnée retournée pour la synchronisation du produit ${produit.nom}');
-      } else {
-        developer.log(
-            'Résultat de la synchronisation du produit ${produit.nom}: $result');
-      }
-
-      developer.log(
-          'Résultat de la synchronisation du produit ${produit.nom}: $result');
-
-      // Synchroniser les approvisionnements associés au produit
-      await _syncApprovisionnements(produit.approvisionnements);
+    for (final user in modifiedUsers) {
+      final userData = _prepareUserData(user);
+      await supabase.from('users').upsert([userData], onConflict: 'id');
+      developer.log('User synchronisé: ${user.id}');
     }
-
-    // Mettre à jour la date de dernière synchronisation après succès
-    lastSyncDate = DateTime.now();
   }
 
-// Méthode de synchronisation des Crud
-  Future<void> _syncCrud(Crud? crud) async {
-    if (crud == null) return;
+  Future<void> _syncModifiedProduits(DateTime lastSync) async {
+    final produitBox = objectboxStore.box<Produit>();
+    final modifiedProduits = produitBox
+        .query(Produit_.derniereModification
+            .greaterThan(lastSync.millisecondsSinceEpoch))
+        .build()
+        .find();
 
-    final crudData = {
-      'id': crud.id,
-      'createdBy': crud.createdBy,
-      'updatedBy': crud.updatedBy,
-      'deletedBy': crud.deletedBy,
-      'dateCreation': crud.dateCreation?.toIso8601String(),
-      'derniereModification': crud.derniereModification.toIso8601String(),
-      'dateDeleting': crud.dateDeleting?.toIso8601String(),
-    };
-
-    // Synchronisation avec Supabase
-    final result =
-        await supabase.from('cruds').upsert([crudData], onConflict: 'id');
-
-    developer.log(
-        'Résultat de la synchronisation du Crud avec ID ${crud.id}: $result');
+    for (final produit in modifiedProduits) {
+      final produitData = await _prepareProduitData(produit);
+      await supabase.from('produits').upsert([produitData], onConflict: 'id');
+      developer.log('Produit synchronisé: ${produit.id}');
+    }
   }
 
-// Méthode de synchronisation des approvisionnements
-  Future<void> _syncApprovisionnements(
-      ToMany<Approvisionnement> approvisionnements) async {
-    for (final approvisionnement in approvisionnements) {
-      // Synchroniser le Crud de l'approvisionnement
-      await _syncCrud(approvisionnement.crud.target);
+  Future<void> _syncModifiedApprovisionnements(DateTime lastSync) async {
+    final approBox = objectboxStore.box<Approvisionnement>();
+    final modifiedAppros = approBox
+        .query(Approvisionnement_.derniereModification
+            .greaterThan(lastSync.millisecondsSinceEpoch))
+        .build()
+        .find();
 
-      // Préparation des données à synchroniser avec Supabase
-      final approvisionnementData = {
-        'id': approvisionnement.id,
-        'quantite': approvisionnement.quantite,
-        'prixAchat': approvisionnement.prixAchat,
-        'datePeremption': approvisionnement.datePeremption?.toIso8601String(),
-        'produitId': approvisionnement.produit.target
-            ?.id, // Assurez-vous d'ajouter une référence à produit
-        'fournisseurId': approvisionnement.fournisseur.target
-            ?.id, // Assurez-vous d'ajouter une référence à fournisseur
-        // 'derniereModification': approvisionnement
-        //     .crud.target?.derniereModification
-        //     .toIso8601String(),
-      };
-
-      // Synchronisation des données avec Supabase
-      final result = await supabase
+    for (final appro in modifiedAppros) {
+      final approData = _prepareApprovisionnementData(appro);
+      await supabase
           .from('approvisionnements')
-          .upsert([approvisionnementData], onConflict: 'id');
-
-      developer.log(
-          'Résultat de la synchronisation de l\'approvisionnement avec ID ${approvisionnement.id}: $result');
+          .upsert([approData], onConflict: 'id');
+      developer.log('Approvisionnement synchronisé: ${appro.id}');
     }
   }
 
-// Méthode de filtrage pour récupérer les produits modifiés après une date donnée
-  List<Produit> _filterProduitsByDerniereModification(DateTime date) {
-    final produitBox = objectboxStore.box<Produit>();
-    final allProduits = produitBox.getAll();
+  Future<void> _syncModifiedFournisseurs(DateTime lastSync) async {
+    final fournisseurBox = objectboxStore.box<Fournisseur>();
+    final modifiedFournisseurs = fournisseurBox
+        .query(Fournisseur_.derniereModification
+            .greaterThan(lastSync.millisecondsSinceEpoch))
+        .build()
+        .find();
 
-    return allProduits.where((produit) {
-      final derniereModification = produit.crud.target?.derniereModification;
-      return derniereModification != null && derniereModification.isAfter(date);
-    }).toList();
+    for (final fournisseur in modifiedFournisseurs) {
+      final fournisseurData = _prepareFournisseurData(fournisseur);
+      await supabase
+          .from('fournisseurs')
+          .upsert([fournisseurData], onConflict: 'id');
+      developer.log('Fournisseur synchronisé: ${fournisseur.id}');
+    }
   }
 
-  // Future<void> _syncProduits() async {
-  //   developer.log('Début de la synchronisation des produits');
-  //   final produitBox = objectboxStore.box<Produit>();
-  //
-  //   // Filtrer les produits modifiés après la dernière synchronisation
-  //   final produits =
-  //       _filterProduitsByDerniereModification(lastSyncDate ?? DateTime(2024));
-  //
-  //   for (final produit in produits) {
-  //     // Gestion de l'image pour chaque produit
-  //     final imageUrl = await _uploadProductImage(produit);
-  //
-  //     // Préparation des données à synchroniser avec Supabase
-  //     final produitData = {
-  //       'id': produit.id,
-  //       'qr': produit.qr,
-  //       'image': imageUrl, // Utilisation de l'URL de l'image
-  //       'nom': produit.nom,
-  //       'description': produit.description,
-  //       'prixVente': produit.prixVente,
-  //       'minimStock': produit.minimStock,
-  //       'alertPeremption': produit.alertPeremption,
-  //       // Inclure la dernière modification depuis Crud
-  //       'derniereModification':
-  //           produit.crud.target?.derniereModification.toIso8601String(),
-  //     };
-  //
-  //     // Synchronisation des données avec Supabase
-  //     final result = await supabase
-  //         .from('produits')
-  //         .upsert([produitData], onConflict: 'id');
-  //
-  //     developer.log(
-  //         'Résultat de la synchronisation du produit ${produit.nom}: $result');
-  //   }
-  //
-  //   // Mettre à jour la date de dernière synchronisation après succès
-  //   lastSyncDate = DateTime.now();
-  // }
+  Map<String, dynamic> _prepareUserData(User user) {
+    return {
+      'id': user.id,
+      'username': user.username,
+      'email': user.email,
+      'role': user.role,
+      'derniereModification': DateTime.now().toIso8601String(),
+      // Ajoutez d'autres champs pertinents ici
+    };
+  }
 
-// Méthode de filtrage pour récupérer les produits modifiés après une date donnée
-//   List<Produit> _filterProduitsByDerniereModification(DateTime date) {
-//     final produitBox = objectboxStore.box<Produit>();
-//     final allProduits = produitBox.getAll();
-//
-//     return allProduits.where((produit) {
-//       // Récupérer la dernière modification du produit
-//       final derniereModification = produit.crud.target?.derniereModification;
-//
-//       // Comparer avec la date fournie
-//       return derniereModification != null && derniereModification.isAfter(date);
-//     }).toList();
-//   }
+  Future<Map<String, dynamic>> _prepareProduitData(Produit produit) async {
+    final imageUrl = await _uploadProductImage(produit);
+    return {
+      'id': produit.id,
+      'qr': produit.qr,
+      'image': imageUrl,
+      'nom': produit.nom,
+      'description': produit.description,
+      'prixVente': produit.prixVente,
+      'minimStock': produit.minimStock,
+      'alertPeremption': produit.alertPeremption,
+      'derniereModification': DateTime.now().toIso8601String(),
+    };
+  }
+
+  Map<String, dynamic> _prepareApprovisionnementData(Approvisionnement appro) {
+    return {
+      'id': appro.id,
+      'quantite': appro.quantite,
+      'prixAchat': appro.prixAchat,
+      'datePeremption': appro.datePeremption?.toIso8601String(),
+      'produitId': appro.produit.target?.id,
+      'fournisseurId': appro.fournisseur.target?.id,
+      'derniereModification': DateTime.now().toIso8601String(),
+    };
+  }
+
+  Map<String, dynamic> _prepareFournisseurData(Fournisseur fournisseur) {
+    return {
+      'id': fournisseur.id,
+      'nom': fournisseur.nom,
+      'derniereModification': DateTime.now().toIso8601String(),
+      // Ajoutez d'autres champs pertinents ici
+    };
+  }
 
   Future<String> _uploadProductImage(Produit produit) async {
     final String localFolderPath =
@@ -532,57 +1114,6 @@ class SupabaseSync {
       developer.log(
           'Image absente pour ${produit.nom} (QR: ${produit.qr}), utilisation de l\'image factice.');
       return placeholderImageUrl;
-    }
-  }
-
-  Future<void> cleanProductQRCodes() async {
-    final produitBox = objectboxStore.box<Produit>();
-    final produits = produitBox.getAll();
-    int updatedCount = 0;
-
-    for (final produit in produits) {
-      String originalQR = produit.qr!;
-      String cleanedQR = originalQR.trim().replaceAll(RegExp(r'\s+'), '');
-
-      if (cleanedQR != originalQR) {
-        produit.qr = cleanedQR;
-        produitBox.put(produit);
-        updatedCount++;
-        developer.log(
-            'QR code nettoyé pour ${produit.nom}: "$originalQR" -> "$cleanedQR"');
-      }
-    }
-
-    developer.log(
-        'Nettoyage des QR codes terminé. $updatedCount produits mis à jour.');
-  }
-
-  Future<void> handleDuplicateQRCodes() async {
-    final produitBox = objectboxStore.box<Produit>();
-    final produits = produitBox.getAll();
-    Map<String, List<Produit>> qrCodeMap = {};
-
-    // Grouper les produits par QR code
-    for (final produit in produits) {
-      if (!qrCodeMap.containsKey(produit.qr)) {
-        qrCodeMap[produit.qr!] = [];
-      }
-      qrCodeMap[produit.qr]!.add(produit);
-    }
-
-    // Traiter les doublons
-    for (var entry in qrCodeMap.entries) {
-      if (entry.value.length > 1) {
-        developer.log('QR code en double détecté: ${entry.key}');
-        for (int i = 1; i < entry.value.length; i++) {
-          Produit produit = entry.value[i];
-          String newQR = '${produit.qr}_${produit.id}';
-          developer.log(
-              'Modification du QR code pour le produit ${produit.nom}: ${produit.qr} -> $newQR');
-          produit.qr = newQR;
-          produitBox.put(produit);
-        }
-      }
     }
   }
 }
@@ -732,46 +1263,41 @@ class _ProduitListPageState extends State<ProduitListPage>
 
     try {
       // Supprimer les lignes de la table de relation en premier
-      print('Suppression des lignes de la table produitfournisseur...');
+
       await supabase
-          .from('Produit_Fournisseur')
-          .delete()
-          .neq('produit_id', 0)
-          .neq('fournisseur_id', 0);
-      setState(() {
-        _produits.clear();
-        _successMessage = "Toutes les tables ont été vidées";
-      });
-      print('Lignes de la table produitfournisseur supprimées avec succès.');
-      await supabase
-          .from('LigneFacture')
+          .from('lignes_facture')
           .delete()
           .neq('id', 0)
           .timeout(Duration(minutes: 2));
-      print('Toutes les tables LigneFacture ont été vidées avec succès.');
+      print('Toutes les tables lignes_facture ont été vidées avec succès.');
       // Supprimer les lignes de la table produits
-      print('Suppression des lignes de la table produits...');
-
-      supabase
-          .from('produits')
-          .delete()
-          .neq('id', 0)
-          .timeout(Duration(minutes: 2));
-      print('Lignes de la table produits supprimées avec succès.');
-
+      // print('Suppression des lignes de la table produits...');
+      //
+      // supabase
+      //     .from('produits')
+      //     .delete()
+      //     .neq('id', 0)
+      //     .timeout(Duration(minutes: 2));
+      // print('Lignes de la table produits supprimées avec succès.');
+      print('Suppression des lignes de la table cruds...');
+      await supabase.from('cruds').delete().neq('id', 0);
+      print('Lignes de la table cruds supprimées avec succès.');
+      print('Suppression des lignes de la table approvisionnements...');
+      await supabase.from('approvisionnements').delete().neq('id', 0);
+      print('Lignes de la table approvisionnements supprimées avec succès.');
       // Supprimer les lignes de la table fournisseurs
       print('Suppression des lignes de la table fournisseurs...');
-      await supabase.from('Fournisseur').delete().neq('id', 0);
+      await supabase.from('fournisseurs').delete().neq('id', 0);
       print('Lignes de la table fournisseurs supprimées avec succès.');
 
       print('Toutes les tables ont été vidées avec succès.');
-      await supabase.from('Facture').delete().neq('id', 0);
+      await supabase.from('factures').delete().neq('id', 0);
       print('Toutes les tables Facture ont été vidées avec succès.');
-      await supabase.from('User').delete().neq('id', 0);
+      await supabase.from('users').delete().neq('id', 0);
       print('Toutes les tables Facture ont été vidées avec succès.');
-      await supabase.from('Client').delete().neq('id', 0);
+      await supabase.from('clients').delete().neq('id', 0);
       print('Toutes les tables Client ont été vidées avec succès.');
-      await supabase.from('DeletedProduct').delete().neq('id', 0);
+      await supabase.from('deleted_products').delete().neq('id', 0);
       print(
           'Toutes les tables DeletedProductClient ont été vidées avec succès.');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -808,6 +1334,39 @@ class _ProduitListPageState extends State<ProduitListPage>
     } else {
       return Colors.green;
     }
+  }
+
+  Future<void> updateObjectBoxRelationships() async {
+    developer.log('Début de la mise à jour des relations ObjectBox');
+
+    // Get all Approvisionnement entities
+    final approvisionnementBox = widget.objectboxStore.box<Approvisionnement>();
+    final approvisionnements = approvisionnementBox.getAll();
+
+    // Get all Fournisseur entities
+    final fournisseurBox = widget.objectboxStore.box<Fournisseur>();
+    final fournisseurs = fournisseurBox.getAll();
+
+    // Create a map of Fournisseur entities for quick lookup
+    final fournisseurMap = Map.fromIterable(
+      fournisseurs,
+      key: (fournisseur) => fournisseur.id,
+      value: (fournisseur) => fournisseur,
+    );
+
+    // Update Approvisionnement entities with valid Fournisseur references
+    for (final approvisionnement in approvisionnements) {
+      final fournisseurId = approvisionnement.fournisseur.targetId;
+      if (fournisseurId != null && !fournisseurMap.containsKey(fournisseurId)) {
+        // Remove the invalid reference
+        approvisionnement.fournisseur.target = null;
+        approvisionnementBox.put(approvisionnement);
+        developer.log(
+            'Relation invalide supprimée pour l\'approvisionnement avec ID: ${approvisionnement.id}');
+      }
+    }
+
+    developer.log('Fin de la mise à jour des relations ObjectBox');
   }
 
   @override
@@ -912,6 +1471,13 @@ class _ProduitListPageState extends State<ProduitListPage>
             icon: Icon(Icons.delete_forever, color: Colors.red),
             onPressed: clearAllTables,
           ),
+          ElevatedButton(
+            onPressed: () async {
+              await updateObjectBoxRelationships();
+              // Perform synchronization or any other action after updating relationships
+            },
+            child: Text('Update Relationships'),
+          ),
           kIsWeb ||
                   Platform.isWindows ||
                   Platform.isLinux ||
@@ -919,7 +1485,7 @@ class _ProduitListPageState extends State<ProduitListPage>
               ? SizedBox(
                   width: 50,
                 )
-              : Container()
+              : Container(),
         ],
         bottom: TabBar(
           controller: _tabController,

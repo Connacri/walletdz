@@ -450,10 +450,10 @@ class _add_ProduitState extends State<add_Produit> {
     } else {
       // Ajouter un nouvel approvisionnement
       Approvisionnement nouveauApprovisionnement = Approvisionnement(
-        quantite: quantite,
-        prixAchat: prixAchat,
-        datePeremption: datePeremption,
-      );
+          quantite: quantite,
+          prixAchat: prixAchat,
+          datePeremption: datePeremption,
+          derniereModification: DateTime.now());
       ajouterApprovisionnementTemporaire(nouveauApprovisionnement);
       _stockController.clear();
       _prixAchatController.clear();
@@ -503,17 +503,18 @@ class _add_ProduitState extends State<add_Produit> {
 
           // Création du produit s'il n'existe pas déjà
           final produit = Produit(
-            qr: _serialController.text,
-            image: imageUrl,
-            nom: _nomController.text,
-            description: _descriptionController.text,
-            prixVente: double.parse(_prixVenteController.text),
-            alertPeremption: int.parse(_alertPeremptionController.text),
-            minimStock: double.parse(_minimStockController.text),
-          )..crud.target = Crud(
-              createdBy: 0,
-              updatedBy: 0,
-              deletedBy: 0,
+              qr: _serialController.text,
+              image: imageUrl,
+              nom: _nomController.text,
+              description: _descriptionController.text,
+              prixVente: double.parse(_prixVenteController.text),
+              alertPeremption: int.parse(_alertPeremptionController.text),
+              minimStock: double.parse(_minimStockController.text),
+              derniereModification: DateTime.now())
+            ..crud.target = Crud(
+              createdBy: 1,
+              updatedBy: 1,
+              deletedBy: 1,
               dateCreation: DateTime.now(),
               derniereModification: DateTime.now(),
               dateDeleting: null,
@@ -533,9 +534,9 @@ class _add_ProduitState extends State<add_Produit> {
 
             // Ajouter les données Crud pour chaque approvisionnement
             approvisionnement.crud.target = Crud(
-              createdBy: 0,
-              updatedBy: 0,
-              deletedBy: 0,
+              createdBy: 1,
+              updatedBy: 1,
+              deletedBy: 1,
               dateCreation: DateTime.now(),
               derniereModification: DateTime.now(),
             );
@@ -584,110 +585,6 @@ class _add_ProduitState extends State<add_Produit> {
       ),
     );
   }
-
-//   IconButton buildButton_Edit_Add(
-//       BuildContext context, CommerceProvider produitProvider, _isFinded) {
-//     return IconButton(
-//       onPressed: () async {
-//         final dateFormat = DateFormat('dd MMM yyyy', 'fr');
-//         // final datePeremption =
-//         //     dateFormat.parseLoose(_datePeremptionController.text);
-//         final produitDejaExist =
-//             await produitProvider.getProduitByQr(_serialController.text);
-//         if (_formKey.currentState!.validate()) {
-//           String imageUrl = '';
-// //******************************************************************************//
-//           if (produitDejaExist != null &&
-//               widget.specifiquefournisseur == null) {
-//             ScaffoldMessenger.of(context).showSnackBar(
-//               SnackBar(
-//                 content: Text(
-//                   'QR / Code Barre Produit existe déja !',
-//                   style: TextStyle(color: Colors.white),
-//                 ),
-//                 backgroundColor: Colors.red,
-//               ),
-//             );
-//             print('hadi produitDejaExist != null 111111111111111111');
-//           } else {
-//             if (_image != null) {
-//               imageUrl =
-//                   await uploadImageToSupabase(_image!, _existingImageUrl);
-//             } else if (_existingImageUrl != null &&
-//                 _existingImageUrl!.isNotEmpty) {
-//               imageUrl = _existingImageUrl!;
-//             }
-//             print('hadi produitDejaExist == null 2222222222222222222');
-//             print(_tempProduitId);
-//           }
-// ////////////////////////////////////////////////////////////////////////////////
-//           if (mounted) {
-//             final produit = Produit(
-//               qr: _serialController.text,
-//               image: imageUrl,
-//               nom: _nomController.text,
-//               description: _descriptionController.text,
-//               prixVente: double.parse(_prixVenteController.text),
-//               alertPeremption: int.parse(_alertPeremptionController.text),
-//               minimStock: double.parse(_minimStockController.text),
-//             )..crud.target = Crud(
-//                 createdBy: 0,
-//                 updatedBy: 0,
-//                 deletedBy: 0,
-//                 dateCreation: DateTime.now(),
-//                 derniereModification: DateTime.now(),
-//                 dateDeleting: null,
-//               );
-//
-//             if (widget.specifiquefournisseur == null) {
-//               if (produitDejaExist != null) {
-//                 return;
-//               } else {
-//                 produitProvider.ajouterProduit(
-//                   produit,
-//                   _selectedFournisseurs,
-//                   approvisionnements,
-//                 );
-//                 // await ajouterProduitToSupabase(
-//                 //     produit);
-//                 print('Nouveau produit ajouté');
-//                 print(produit);
-//               }
-//             } else {
-//               if (produitDejaExist != null) {
-//                 // Mise à jour d'un produit existant
-//                 // produitProvider.updateProduitById(
-//                 //     int.parse(_tempProduitId), produit,
-//                 //     fournisseurs: [
-//                 //       ..._selectedFournisseurs,
-//                 //       ...[widget.specifiquefournisseur!]
-//                 //     ]);
-//                 // await updateProduitToSupabase(int.parse(_tempProduitId),
-//                 //     produit);
-//                 print('Produit existant mis à jour');
-//               } else {
-//                 produitProvider.ajouterProduit(
-//                     produit,
-//                     [
-//                       ..._selectedFournisseurs,
-//                       ...[widget.specifiquefournisseur!],
-//                     ],
-//                     approvisionnements);
-//                 // await ajouterProduitToSupabase(produit);
-//                 print('Nouveau produit ajouté');
-//               }
-//             }
-//
-//             _formKey.currentState!.save();
-//             produitDejaExist != null ? null : Navigator.of(context).pop();
-//           }
-//         }
-//       },
-//       icon: Icon(
-//         _isFinded ? Icons.edit : Icons.check,
-//       ),
-//     );
-//   }
 
   Future<String> uploadImageToSupabase(File image, String? oldImageUrl) async {
     final String bucket = 'products';
