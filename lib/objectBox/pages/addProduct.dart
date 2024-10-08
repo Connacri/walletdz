@@ -105,10 +105,52 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
         builder: (context) => BarcodeScannerWithScanWindow(), //QRViewExample(),
       ),
     );
-    if (code != null) {
+    final provider = Provider.of<CommerceProvider>(context, listen: false);
+    final produit = await provider.getProduitByQr(code!);
+// Afficher une alerte avec les détails du produit existant
+    if (produit != null)
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Code QR déjà utilisé'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Le code QR est déjà associé au produit suivant :'),
+                SizedBox(height: 10),
+                Text('Nom : ${produit.nom}'),
+                Text(
+                    'Description : ${produit.description ?? "Pas de description"}'),
+                Text(
+                    'Prix de vente : ${produit.prixVente.toStringAsFixed(2)} DA'),
+                Text('Stock : ${produit.stock.toStringAsFixed(2)}'),
+                Text(
+                    'Stock Minimum : ${produit.minimStock.toStringAsFixed(2)}'),
+                produit.image != null
+                    ? Image.network(produit.image!)
+                    : Container(),
+              ],
+            ),
+            actions: [
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop(); // Fermer le dialog
+                },
+              ),
+            ],
+          );
+        },
+      );
+    // Rediriger le focus vers le TextFormField après l'ajout
+    FocusScope.of(context).requestFocus(_serialFocusNode);
+
+    if (code != null && code.isNotEmpty && !_qrCodesTemp.contains(code)) {
       setState(() {
         _serialController.text = code;
         _qrCodesTemp.add(code); // Ajout du QR code à la liste temporaire
+        _editQr = false;
       });
       // Rediriger le focus vers le TextFormField après l'ajout
       FocusScope.of(context).requestFocus(_serialFocusNode);
@@ -169,12 +211,51 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
   }
 
   // Ajouter manuellement un QR code via le TextFormField et la touche "Entrée"
-  void _addQRCodeFromText() {
+  void _addQRCodeFromText() async {
     final code = _serialController.text.trim();
+    final provider = Provider.of<CommerceProvider>(context, listen: false);
+    final produit = await provider.getProduitByQr(code);
+// Afficher une alerte avec les détails du produit existant
+    if (produit != null)
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Code QR déjà utilisé'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Le code QR est déjà associé au produit suivant :'),
+                SizedBox(height: 10),
+                Text('Nom : ${produit.nom}'),
+                Text(
+                    'Description : ${produit.description ?? "Pas de description"}'),
+                Text(
+                    'Prix de vente : ${produit.prixVente.toStringAsFixed(2)} DA'),
+                Text('Stock : ${produit.stock.toStringAsFixed(2)}'),
+                Text(
+                    'Stock Minimum : ${produit.minimStock.toStringAsFixed(2)}'),
+                produit.image != null
+                    ? Image.network(produit.image!)
+                    : Container(),
+              ],
+            ),
+            actions: [
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop(); // Fermer le dialog
+                },
+              ),
+            ],
+          );
+        },
+      );
     if (code.isNotEmpty && !_qrCodesTemp.contains(code)) {
       setState(() {
         _qrCodesTemp.add(code); // Ajouter le QR code dans la liste temporaire
         _serialController.clear(); // Effacer le champ de texte après l'ajout
+        _editQr = false;
       });
     } else {
       _serialController.clear(); // Effacer le champ de texte après l'ajout
@@ -183,18 +264,11 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
     FocusScope.of(context).requestFocus(_serialFocusNode);
   }
 
-  // Supprimer un QR code de la liste temporaire
-  void _removeQRCode(int index) {
-    setState(() {
-      _qrCodesTemp.removeAt(index);
-    });
-  }
-
   void _onSerialChanged() {
     final code = _serialController.text;
 
     // Vérifie si le champ est vide en premier lieu pour éviter des opérations inutiles.
-    if (code.isEmpty
+    if (code.isEmpty && _qrCodesTemp.isEmpty
         // || _serialController.text == ''
         /*|| code == _lastScannedCode*/) {
       _clearAllFields();
@@ -235,12 +309,6 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
     });
   }
 
-  // void _onSelectedFournisseursChanged(List<Fournisseur> fournisseurs) {
-  //   setState(() {
-  //     _selectedFournisseurs = fournisseurs;
-  //   });
-  // }
-
   Future<void> _updateProductInfo(String code) async {
     final provider = Provider.of<CommerceProvider>(context, listen: false);
     final produit = await provider.getProduitByQr(code);
@@ -268,25 +336,27 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
         _existingImageUrl = produit.image;
         _isFinded = true;
         _image = null;
+        _approvisionnementTemporaire = produit.approvisionnements.toList();
       });
-    } else {
-      if (_tempProduitId.isNotEmpty) {
-        _tempProduitId = '';
-        _nomController.clear();
-        _descriptionController.clear();
-        stockTemp = 0.0;
-        _prixAchatController.clear();
-        _prixVenteController.clear();
-        _stockController.clear();
-        _selectedFournisseurs.clear();
-        _datePeremptionController.clear();
-        _minimStockController.clear();
-        _alertPeremptionController.clear();
-        _existingImageUrl = '';
-        _isFinded = false;
-        _image = null;
-      }
     }
+    // else {
+    //   if (_tempProduitId.isNotEmpty) {
+    //     _tempProduitId = '';
+    //     _nomController.clear();
+    //     _descriptionController.clear();
+    //     stockTemp = 0.0;
+    //     _prixAchatController.clear();
+    //     _prixVenteController.clear();
+    //     _stockController.clear();
+    //     _selectedFournisseurs.clear();
+    //     _datePeremptionController.clear();
+    //     _minimStockController.clear();
+    //     _alertPeremptionController.clear();
+    //     _existingImageUrl = '';
+    //     _isFinded = false;
+    //     _image = null;
+    //   }
+    // }
   }
 
   double calculerStockGlobal() {
@@ -309,8 +379,9 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
   void startEditing(Approvisionnement approvisionnement) {
     setState(() {
       _currentApprovisionnement = approvisionnement;
-      _stockController.text = approvisionnement.quantite.toString();
-      _prixAchatController.text = approvisionnement.prixAchat.toString();
+      _stockController.text = approvisionnement.quantite.toStringAsFixed(2);
+      _prixAchatController.text =
+          approvisionnement.prixAchat.toStringAsFixed(2);
       _datePeremptionController.text = DateFormat('dd MMMM yyyy', 'fr_FR')
           .format(approvisionnement.datePeremption!);
 
@@ -345,88 +416,6 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
     });
   }
 
-  // void saveApprovisionnement() {
-  //   if (_formKey.currentState!.validate()) {
-  //     final quantite = double.parse(_stockController.text);
-  //     final prixAchat = double.parse(_prixAchatController.text);
-  //     final datePeremption = DateFormat('dd MMMM yyyy', 'fr_FR')
-  //         .parse(_datePeremptionController.text);
-  //     // Vérifiez que nous sommes en mode édition
-  //     if (_isEditing && _currentApprovisionnement != null) {
-  //       // Mise à jour de l'approvisionnement existant
-  //       setState(() {
-  //         _currentApprovisionnement?.quantite = quantite;
-  //         _currentApprovisionnement?.prixAchat = prixAchat;
-  //         _currentApprovisionnement?.datePeremption = datePeremption;
-  //         // _currentApprovisionnement?.fournisseur.target = _selectedFournisseur;
-  //         // Vérifier si un fournisseur est sélectionné avant de l'assigner
-  //         if (_selectedFournisseur != null) {
-  //           _currentApprovisionnement?.fournisseur.target =
-  //               _selectedFournisseur;
-  //         } else {
-  //           _currentApprovisionnement?.fournisseur.target =
-  //               null; // Laisser null
-  //         }
-  //         // Optionnel : mettre à jour la dernière modification si nécessaire
-  //         _currentApprovisionnement?.derniereModification = DateTime.now();
-  //
-  //         // Réinitialiser les champs après la sauvegarde
-  //         _stockController.clear();
-  //         _prixAchatController.clear();
-  //         _datePeremptionController.clear();
-  //         _currentFournisseur =
-  //             null; // Réinitialiser le fournisseur sélectionné
-  //         _selectedFournisseur =
-  //             null; // Réinitialiser la sélection du fournisseur
-  //         _isEditing = false; // Désactiver le mode édition
-  //       });
-  //     } else {
-  //       // Gestion de l'erreur ou créer un nouvel approvisionnement si nécessaire
-  //       print("Aucun approvisionnement à modifier.");
-  //     }
-  //     // Créer un nouvel approvisionnement
-  //     Approvisionnement nouveauApprovisionnement = Approvisionnement(
-  //       quantite: quantite,
-  //       prixAchat: prixAchat,
-  //       datePeremption: datePeremption,
-  //       derniereModification: DateTime.now(),
-  //     );
-  //
-  //     // Assigner le fournisseur sélectionné à l'approvisionnement
-  //     if (_currentFournisseur != null) {
-  //       nouveauApprovisionnement.fournisseur.target = _currentFournisseur;
-  //     } else {
-  //       // Gestion de l'erreur si aucun fournisseur n'est sélectionné
-  //       print("Aucun fournisseur sélectionné.");
-  //       //return; // Sortir de la méthode si aucun fournisseur n'est sélectionné
-  //       // Laisser le fournisseur à `null` si aucun n'est sélectionné
-  //       nouveauApprovisionnement.fournisseur.target = null;
-  //     }
-  //     // Assigner le fournisseur sélectionné à l'approvisionnement, ou laisser null
-  //     if (_selectedFournisseur != null) {
-  //       nouveauApprovisionnement.fournisseur.target = _selectedFournisseur;
-  //     } else {
-  //       // Laisser le fournisseur à `null` si aucun n'est sélectionné
-  //       nouveauApprovisionnement.fournisseur.target = null;
-  //     }
-  //     // Ajouter l'approvisionnement à la liste temporaire
-  //     setState(() {
-  //       _approvisionnementTemporaire.add(nouveauApprovisionnement);
-  //
-  //       // Réinitialiser les champs après sauvegarde
-  //       _stockController.clear();
-  //       _prixAchatController.clear();
-  //       _datePeremptionController.clear();
-  //       _currentFournisseur = null; // Réinitialiser le fournisseur sélectionné
-  //       _selectedFournisseur =
-  //           null; // Réinitialiser la sélection du fournisseur
-  //       _isEditing = false; // Désactiver le mode édition
-  //     });
-  //
-  //     // Mettre à jour le stock global après l'ajout
-  //     mettreAJourStockGlobal();
-  //   }
-  // }
   void saveApprovisionnement() {
     if (_formKey.currentState!.validate()) {
       final quantite = double.parse(_stockController.text);
@@ -527,44 +516,46 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        if (constraints.maxWidth < 600) {
-          // Mobile layout
-          return Scaffold(
-              resizeToAvoidBottomInset: true,
-              appBar: AppBar(),
-              body: Form(
-                key: _formKey,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: MobileLayout(),
-                ),
-              ));
-        } else if (constraints.maxWidth < 1200) {
-          // Tablet layout
-          return Scaffold(
-              appBar: AppBar(),
-              body: Form(
-                key: _formKey,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TabletLayout(),
-                ),
-              ));
-        } else {
-          // Desktop layout
-          return Scaffold(
-              appBar: AppBar(),
-              body: Form(
-                key: _formKey,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: DesktopLayout(),
-                ),
-              ));
-        }
-      },
+    return SafeArea(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < 600) {
+            // Mobile layout
+            return Scaffold(
+                resizeToAvoidBottomInset: true,
+                appBar: AppBar(),
+                body: Form(
+                  key: _formKey,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: MobileLayout(),
+                  ),
+                ));
+          } else if (constraints.maxWidth < 1200) {
+            // Tablet layout
+            return Scaffold(
+                appBar: AppBar(),
+                body: Form(
+                  key: _formKey,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TabletLayout(),
+                  ),
+                ));
+          } else {
+            // Desktop layout
+            return Scaffold(
+                appBar: AppBar(),
+                body: Form(
+                  key: _formKey,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: DesktopLayout(),
+                  ),
+                ));
+          }
+        },
+      ),
     );
   }
 
@@ -1024,7 +1015,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                       : Container()
                   : Container(
                       padding: EdgeInsets.all(
-                          10.0), // Espacement à l'intérieur du cadre
+                          8.0), // Espacement à l'intérieur du cadre
                       decoration: BoxDecoration(
                         //      color: Colors.grey, // Couleur de fond
                         borderRadius:
@@ -1394,98 +1385,108 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                             ),
                           ), //Ajouter ce Stock
                           Flexible(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Container(
-                                width: largeur,
-                                child: ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  itemCount: _approvisionnementTemporaire
-                                      .length, // Utilisation de la liste temporaire
-                                  itemBuilder: (context, index) {
-                                    // Utilisation de la liste inversée pour afficher les derniers en haut
-                                    final approvisionnement =
-                                        _approvisionnementTemporaire
-                                            .reversed // Inversion de la liste
-                                            .toList()[index];
+                            child: Container(
+                              width: largeur,
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                physics: NeverScrollableScrollPhysics(),
+                                itemCount: _approvisionnementTemporaire
+                                    .length, // Utilisation de la liste temporaire
+                                itemBuilder: (context, index) {
+                                  // Utilisation de la liste inversée pour afficher les derniers en haut
+                                  final approvisionnement =
+                                      _approvisionnementTemporaire
+                                          .reversed // Inversion de la liste
+                                          .toList()[index];
 
-                                    // Récupérer le fournisseur associé à cet approvisionnement
-                                    final fournisseur =
-                                        approvisionnement.fournisseur.target;
+                                  // Récupérer le fournisseur associé à cet approvisionnement
+                                  final fournisseur =
+                                      approvisionnement.fournisseur.target;
 
-                                    return Card(
-                                      child: ListTile(
-                                        onTap: () {
-                                          // Démarrer l'édition de cet approvisionnement
-                                          startEditing(approvisionnement);
-                                        },
-                                        dense: true,
-                                        leading: FittedBox(
-                                          child: Text(
-                                            '${approvisionnement.quantite.toStringAsFixed(2)}',
-                                            style: TextStyle(fontSize: 15),
+                                  return Card(
+                                      child: InkWell(
+                                    onTap: () {
+                                      // Démarrer l'édition de cet approvisionnement
+                                      startEditing(approvisionnement);
+                                    },
+                                    borderRadius: BorderRadius.circular(15),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          flex: 3,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Text(
+                                              '${approvisionnement.quantite.toStringAsFixed(approvisionnement.quantite.truncateToDouble() == approvisionnement.quantite ? 0 : 2)}',
+                                              style: TextStyle(fontSize: 20),
+                                            ),
                                           ),
                                         ),
-                                        title: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              fournisseur != null
-                                                  ? fournisseur.nom
-                                                  : 'Fournisseur non spécifié', // Affichage du nom du fournisseur
-                                              style: TextStyle(
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                            Text(
-                                              approvisionnement
-                                                          .datePeremption !=
-                                                      null
-                                                  ? 'Date de péremption: ${DateFormat('dd/MM/yyyy').format(approvisionnement.datePeremption!)}'
-                                                  : 'Date de péremption non spécifiée',
-                                              style: TextStyle(fontSize: 15),
-                                            ),
-                                          ],
-                                        ),
-                                        trailing: Container(
-                                          width: 100,
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.end,
+                                        Expanded(
+                                          flex: 6,
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
-                                              FittedBox(
-                                                child: Text(
-                                                  '${approvisionnement.prixAchat.toStringAsFixed(2)}',
-                                                  style:
-                                                      TextStyle(fontSize: 15),
-                                                ),
+                                              Text(
+                                                fournisseur != null
+                                                    ? fournisseur.nom
+                                                    : 'Fournisseur non spécifié',
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                    fontSize: 15,
+                                                    fontWeight:
+                                                        FontWeight.bold),
                                               ),
-                                              IconButton(
-                                                icon: Icon(
-                                                  Icons.delete,
-                                                  color: Colors.red,
-                                                  size: 15,
+                                              Text(
+                                                approvisionnement
+                                                            .datePeremption !=
+                                                        null
+                                                    ? 'Expire le : ${DateFormat('dd/MM/yyyy').format(approvisionnement.datePeremption!)}'
+                                                    : 'Date de Expiration non spécifiée',
+                                                style: TextStyle(
+                                                  fontSize: 12,
                                                 ),
-                                                onPressed: () {
-                                                  // Appeler la méthode pour supprimer l'approvisionnement
-                                                  setState(() {
-                                                    supprimerApprovisionnementTemporaire(
-                                                        approvisionnement);
-                                                    stockGlobale -=
-                                                        approvisionnement
-                                                            .quantite;
-                                                  });
-                                                },
                                               ),
                                             ],
                                           ),
                                         ),
-                                      ),
-                                    );
-                                  },
-                                ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 8),
+                                              child: Text(
+                                                '${approvisionnement.prixAchat.toStringAsFixed(2)}',
+                                                style: TextStyle(fontSize: 20),
+                                              ),
+                                            ),
+                                            IconButton(
+                                              padding: EdgeInsets.zero,
+                                              icon: Icon(
+                                                Icons.delete,
+                                                color: Colors.red,
+                                                size: 15,
+                                              ),
+                                              onPressed: () {
+                                                // Appeler la méthode pour supprimer l'approvisionnement
+                                                setState(() {
+                                                  supprimerApprovisionnementTemporaire(
+                                                      approvisionnement);
+                                                  stockGlobale -=
+                                                      approvisionnement
+                                                          .quantite;
+                                                });
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ));
+                                },
                               ),
                             ),
                           ), //Liste des approvisionnements
