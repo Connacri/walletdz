@@ -210,6 +210,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
   @override
   Widget build(BuildContext context) {
     final objectBox = Provider.of<ObjectBox>(context, listen: false);
+
     return Scaffold(
       appBar: AppBar(
         title: Consumer<CommerceProvider>(
@@ -571,7 +572,15 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                         (previousValue, appro) =>
                             previousValue + appro.quantite)
                     .toStringAsFixed(2);
+// Exemple d'attribut produit.qr
+                String? qrCodesString = produit.qr; // Exemple : "QR1,QR2,QR3"
 
+// Vérifiez que produit.qr n'est pas vide ou null
+                List<String> qrCodes =
+                    qrCodesString != null && qrCodesString.isNotEmpty
+                        ? qrCodesString
+                            .split(',') // Sépare les QR codes par la virgule
+                        : []; // Si null ou vide, on crée une liste vide
                 return InkWell(
                   onTap: () {
                     // Action lors du tap sur le produit
@@ -935,9 +944,63 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                 child: Row(
                                   children: [
                                     Icon(Icons.qr_code),
-                                    Text(
-                                      ' ${produit.qr}',
-                                      style: TextStyle(fontSize: 20),
+                                    // Text(
+                                    //   ' ${produit.qr}',
+                                    //   style: TextStyle(fontSize: 20),
+                                    // ),
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        // Affichage des QR codes
+                                        // Text(
+                                        //   'QR Codes :',
+                                        //   style: TextStyle(
+                                        //       fontSize: 18,
+                                        //       fontWeight: FontWeight.bold),
+                                        // ),
+                                        // if (produit.qr != null)
+                                        //   ...produit.qr!
+                                        //       .split(',')
+                                        //       .map((qr) => Text(
+                                        //             qr,
+                                        //             style:
+                                        //                 TextStyle(fontSize: 20),
+                                        //           ))
+                                        //       .toList(),
+                                        // Affichage des QR codes dans un Wrap
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Wrap(
+                                            spacing:
+                                                8.0, // Espacement horizontal entre les Chips
+                                            runSpacing:
+                                                7.0, // Espacement vertical entre les Chips
+                                            children: qrCodes
+                                                .map((code) => Chip(
+                                                      padding: EdgeInsets.zero,
+                                                      backgroundColor: Colors
+                                                          .blueAccent
+                                                          .withOpacity(0.2),
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                                20.0), // Coins arrondis
+                                                      ),
+                                                      avatar:
+                                                          CircularFlagDetector(
+                                                        barcode: code,
+                                                        size:
+                                                            25, // Adjust the size as needed
+                                                      ),
+                                                      label: Text(
+                                                          code), // Affiche le QR code dans le Chip
+                                                    ))
+                                                .toList(),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),

@@ -615,7 +615,7 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                                     onPressed: () {
                                       Navigator.of(context).push(
                                           MaterialPageRoute(
-                                              builder: (_) => add_Produit()));
+                                              builder: (_) => addProduct()));
                                     },
                                     label: Text(
                                       'Produit',
@@ -671,26 +671,26 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                         //     child: Text('Remplacer la base de données'),
                         //   ),
                         // ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 18, vertical: 20),
-                          child: ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                foregroundColor:
-                                    Theme.of(context).colorScheme.onPrimary,
-                                backgroundColor:
-                                    Theme.of(context).colorScheme.primary,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15.0),
-                                ),
-                              ),
-                              onPressed: () {
-                                Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (ctx) => addProduct()));
-                              },
-                              label: Text('Add Product'),
-                              icon: Icon(Icons.add)),
-                        ),
+                        // Padding(
+                        //   padding: const EdgeInsets.symmetric(
+                        //       horizontal: 18, vertical: 20),
+                        //   child: ElevatedButton.icon(
+                        //       style: ElevatedButton.styleFrom(
+                        //         foregroundColor:
+                        //             Theme.of(context).colorScheme.onPrimary,
+                        //         backgroundColor:
+                        //             Theme.of(context).colorScheme.primary,
+                        //         shape: RoundedRectangleBorder(
+                        //           borderRadius: BorderRadius.circular(15.0),
+                        //         ),
+                        //       ),
+                        //       onPressed: () {
+                        //         Navigator.of(context).push(MaterialPageRoute(
+                        //             builder: (ctx) => add_Produit()));
+                        //       },
+                        //       label: Text('Add Product'),
+                        //       icon: Icon(Icons.add)),
+                        // ),
 
                         Padding(
                           padding: const EdgeInsets.symmetric(
@@ -1497,17 +1497,17 @@ class _adaptiveHomeState extends State<adaptiveHome> {
             ),
           ),
           SizedBox(height: 18),
-          Padding(
-            padding: const EdgeInsets.all(28.0),
-            child: ElevatedButton.icon(
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (ctx) => cruds.CrudListScreen()));
-              },
-              label: Text('CrudListScreen'),
-              icon: Icon(Icons.event_seat),
-            ),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.all(28.0),
+          //   child: ElevatedButton.icon(
+          //     onPressed: () {
+          //       Navigator.of(context).push(MaterialPageRoute(
+          //           builder: (ctx) => cruds.CrudListScreen()));
+          //     },
+          //     label: Text('CrudListScreen'),
+          //     icon: Icon(Icons.event_seat),
+          //   ),
+          // ),
           Padding(
             padding: const EdgeInsets.all(28.0),
             child: ElevatedButton.icon(
@@ -1520,46 +1520,41 @@ class _adaptiveHomeState extends State<adaptiveHome> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
-            child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                          MaterialPageRoute(builder: (ctx) => addProduct()));
+                    },
+                    label: Text('Ajouter Produit'),
+                    icon: Icon(Icons.safety_check_rounded),
                   ),
                 ),
-                onPressed: () {
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (ctx) => addProduct()));
-                },
-                label: Text('Add Product'),
-                icon: Icon(Icons.add)),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              ElevatedButton.icon(
-                  onPressed: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled:
-                          true, // Permet de redimensionner en fonction de la hauteur du contenu
-                      builder: (context) => AddFournisseurForm(),
-                    );
-                  },
-                  label: Text('Ajouter Un Fournisseur'),
-                  icon: Icon(Icons.add)),
-              SizedBox(width: 18),
-              ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (ctx) => add_Produit()));
-                },
-                label: Text('Ajouter Produit'),
-                icon: Icon(Icons.safety_check_rounded),
-              ),
-            ],
+                ElevatedButton.icon(
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled:
+                            true, // Permet de redimensionner en fonction de la hauteur du contenu
+                        builder: (context) => AddFournisseurForm(),
+                      );
+                    },
+                    label: Text('Ajouter Un Fournisseur'),
+                    icon: Icon(Icons.add)),
+              ],
+            ),
           ),
           SizedBox(height: 18),
           Container(
@@ -1584,14 +1579,14 @@ class _adaptiveHomeState extends State<adaptiveHome> {
             ),
           ),
           SizedBox(height: 18),
-          ElevatedButton.icon(
-              onPressed: () {
-                Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => ClientListScreen()));
-              },
-              label: Text('Client List'),
-              icon: Icon(Icons.account_circle)),
-          SizedBox(height: 18),
+          // ElevatedButton.icon(
+          //     onPressed: () {
+          //       Navigator.of(context).push(
+          //           MaterialPageRoute(builder: (_) => ClientListScreen()));
+          //     },
+          //     label: Text('Client List'),
+          //     icon: Icon(Icons.account_circle)),
+          // SizedBox(height: 18),
           GestureDetector(
             onTap: () {
               Navigator.of(context).push(

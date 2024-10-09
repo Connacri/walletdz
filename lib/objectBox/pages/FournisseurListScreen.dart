@@ -106,7 +106,8 @@ class _FournisseurListScreenState extends State<FournisseurListScreen> {
                     children: [
                       Text('Phone : ${fournisseur.phone}'),
                       Text(
-                        'Créer le ${fournisseur.crud.target!.dateCreation!.day}-${fournisseur.crud.target!.dateCreation!.month}-${fournisseur.crud.target!.dateCreation!.year}  Modifié ${timeago.format(fournisseur.crud.target!.derniereModification, locale: 'fr')}',
+                        'Créer le ${(fournisseur.crud.target?.dateCreation != null) ? '${fournisseur.crud.target!.dateCreation!.day}-${fournisseur.crud.target!.dateCreation!.month}-${fournisseur.crud.target!.dateCreation!.year}' : 'Date inconnue'} '
+                        'Modifié ${(fournisseur.crud.target?.derniereModification != null) ? timeago.format(fournisseur.crud.target!.derniereModification, locale: 'fr') : 'Modification inconnue'}',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight:

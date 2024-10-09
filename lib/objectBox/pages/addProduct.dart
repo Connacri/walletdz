@@ -602,6 +602,22 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
     }
   }
 
+  @override
+  void dispose() {
+    _serialController.removeListener(_onSerialChanged);
+    _serialController.removeListener(_checkFirstField);
+    _serialController.dispose();
+    _nomController.dispose();
+    _descriptionController.dispose();
+    _prixAchatController.dispose();
+    _prixVenteController.dispose();
+    _stockController.dispose();
+    _alertPeremptionController.dispose();
+    _datePeremptionController.dispose();
+    _serialFocusNode.dispose();
+    super.dispose();
+  }
+
   IconButton buildButton_Edit_Add(
       BuildContext context, CommerceProvider produitProvider, bool _isFinded) {
     return IconButton(
@@ -619,18 +635,19 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
               _existingImageUrl!.isNotEmpty) {
             imageUrl = _existingImageUrl!;
           }
-
-          // Création du produit s'il n'existe pas déjà
+          final code = _serialController.text.trim();
+          code.isEmpty || code == '' ? null : _qrCodesTemp.add(code);
+          // Création du produit
           final produit = Produit(
-              qr: _serialController.text,
-              image: imageUrl,
-              nom: _nomController.text,
-              description: _descriptionController.text,
-              prixVente: double.parse(_prixVenteController.text),
-              alertPeremption: int.parse(_alertPeremptionController.text),
-              minimStock: double.parse(_minimStockController.text),
-              derniereModification: DateTime.now())
-            ..crud.target = Crud(
+            qr: _qrCodesTemp.join(',').toString(),
+            image: imageUrl,
+            nom: _nomController.text,
+            description: _descriptionController.text,
+            prixVente: double.parse(_prixVenteController.text),
+            alertPeremption: int.parse(_alertPeremptionController.text),
+            minimStock: double.parse(_minimStockController.text),
+            derniereModification: DateTime.now(),
+          )..crud.target = Crud(
               createdBy: 1,
               updatedBy: 1,
               deletedBy: 1,
@@ -661,42 +678,18 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
             );
           }
 
-          // Vérification si le fournisseur est spécifique
-          if (widget.specifiquefournisseur == null) {
-            if (produitDejaExist == null) {
-              // Nouveau produit
-              produitProvider.ajouterProduit(
-                  produit, _selectedFournisseurs, _approvisionnementTemporaire);
-              print('Nouveau produit ajouté');
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('QR / Code Barre Produit existe déjà !'),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
+          // Vérification si un produit existe déjà
+          if (produitDejaExist == null) {
+            // Nouveau produit
+            produitProvider.ajouterProduit(
+                produit, _selectedFournisseurs, _approvisionnementTemporaire);
+            print('Nouveau produit ajouté');
           } else {
-            if (produitDejaExist == null) {
-              // Nouveau produit avec fournisseur spécifique
-              produitProvider.ajouterProduit(
-                produit,
-                [
-                  ..._selectedFournisseurs,
-                  widget.specifiquefournisseur!,
-                ],
-                _approvisionnementTemporaire,
-              );
-              print('Nouveau produit ajouté avec fournisseur spécifique');
-            } else {
-              // Mise à jour d'un produit existant
-              // produitProvider.updateProduit(produitDejaExist, produit, _approvisionnementTemporaire);
-              print('Produit existant mis à jour');
-            }
+            print('Produit deja existe');
           }
 
           _formKey.currentState!.save();
-          produitDejaExist == null ? Navigator.of(context).pop() : null;
+          Navigator.of(context).pop();
         }
       },
       icon: Icon(
@@ -706,23 +699,9 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
   }
 
   @override
-  void dispose() {
-    _serialController.removeListener(_onSerialChanged);
-    _serialController.removeListener(_checkFirstField);
-    _serialController.dispose();
-    _nomController.dispose();
-    _descriptionController.dispose();
-    _prixAchatController.dispose();
-    _prixVenteController.dispose();
-    _stockController.dispose();
-    _alertPeremptionController.dispose();
-    _datePeremptionController.dispose();
-    _serialFocusNode.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final produitProvider =
+        Provider.of<CommerceProvider>(context, listen: false);
     return SafeArea(
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -730,7 +709,11 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
             // Mobile layout
             return Scaffold(
                 resizeToAvoidBottomInset: true,
-                appBar: AppBar(),
+                appBar: AppBar(
+                  actions: [
+                    buildButton_Edit_Add(context, produitProvider, _isFinded)
+                  ],
+                ),
                 body: Form(
                   key: _formKey,
                   child: Padding(
@@ -741,7 +724,12 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
           } else if (constraints.maxWidth < 1200) {
             // Tablet layout
             return Scaffold(
-                appBar: AppBar(),
+                resizeToAvoidBottomInset: true,
+                appBar: AppBar(
+                  actions: [
+                    buildButton_Edit_Add(context, produitProvider, _isFinded)
+                  ],
+                ),
                 body: Form(
                   key: _formKey,
                   child: Padding(
@@ -752,7 +740,12 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
           } else {
             // Desktop layout
             return Scaffold(
-                appBar: AppBar(),
+                resizeToAvoidBottomInset: true,
+                appBar: AppBar(
+                  actions: [
+                    buildButton_Edit_Add(context, produitProvider, _isFinded)
+                  ],
+                ),
                 body: Form(
                   key: _formKey,
                   child: Padding(
@@ -779,7 +772,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
     return Row(
       children: [
         Expanded(child: _buildColumn()),
-        Expanded(child: _buildColumn()),
+        //Expanded(child: _buildColumn()),
       ],
     );
   }
@@ -788,13 +781,15 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
     return Row(
       children: [
         Expanded(child: _buildColumn()),
-        Expanded(child: _buildColumn()),
+        // Expanded(child: _buildColumn()),
       ],
     );
   }
 
   SingleChildScrollView _buildColumn() {
     var largeur = MediaQuery.of(context).size.width;
+    final produitProvider =
+        Provider.of<CommerceProvider>(context, listen: false);
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
