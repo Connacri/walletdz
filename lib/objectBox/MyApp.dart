@@ -321,188 +321,8 @@ class _adaptiveHomeState extends State<adaptiveHome> {
     final randomId = Random().nextInt(100);
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        if (constraints.maxWidth > 600) {
-          return SafeArea(
-            child: Scaffold(
-              appBar: AppBar(
-                title: Text('POS'),
-                actions: [
-                  // Switch pour basculer entre les thèmes
-                  Switch(
-                    value: Provider.of<ThemeProvider>(context).isDarkTheme,
-                    onChanged: (value) {
-                      Provider.of<ThemeProvider>(context, listen: false)
-                          .toggleTheme();
-                    },
-                  ),
-                  // IconButton(
-                  //   onPressed: () {
-                  //     Navigator.of(context).push(
-                  //         MaterialPageRoute(builder: (ctx) => MyHomePageAds()));
-                  //   },
-                  //   icon: Icon(Icons.ads_click, color: Colors.deepPurple),
-                  // ),
-                  // IconButton(
-                  //   onPressed: () {
-                  //     // Appelez la méthode ici sans essayer d'utiliser sa valeur de retour
-                  //     widget.objectBox..ajouterQuantitesAleatoires();
-                  //   },
-                  //  icon: Icon(Icons.qr_code_scanner, color: Colors.blue),
-                  // ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (Platform.isAndroid) {
-                        String filePath =
-                            "/storage/emulated/0/Download/Articles.xls";
-                        await widget.objectBox
-                            .importProduitsDepuisExcel(filePath, 20, 3000, 500);
-                      } else {
-                        String filePath =
-                            "C:/Users/INDRA/Documents/Articles.xls"; // Assurez-vous de mettre le bon chemin ici.
-                        await widget.objectBox
-                            .importProduitsDepuisExcel(filePath, 20, 3000, 500);
-                      }
-
-                      print("Produits importés avec succès !");
-                    },
-                    child: Text("Importer Produits"),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (ctx) => mobile_scanner_example()));
-                    },
-                    icon: Icon(Icons.home, color: Colors.black),
-                  ),
-                  // IconButton(
-                  //   onPressed: () {
-                  //     Navigator.of(context).push(MaterialPageRoute(
-                  //         builder: (ctx) => QRScannerPage(
-                  //               lengthPin: 8,
-                  //               p4ssw0rd: 'Oran2024',
-                  //             )));
-                  //   },
-                  //   icon: Icon(Icons.qr_code_scanner, color: Colors.blue),
-                  // ),
-                  IconButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                          MaterialPageRoute(builder: (ctx) => hashPage()));
-                    },
-                    icon: Icon(Icons.qr_code_scanner, color: Colors.green),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                          MaterialPageRoute(builder: (ctx) => LicensePage()));
-                    },
-                    icon: Icon(Icons.account_tree_rounded),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (ctx) => FacturesListPage()));
-                    },
-                    icon: Icon(Icons.hail_outlined),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                          MaterialPageRoute(builder: (ctx) => FacturePage()));
-                    },
-                    icon: Icon(Icons.invert_colors_off),
-                  ),
-                  SizedBox(
-                    width: 50,
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (ctx) => ProduitListPage(
-                              supabase: Supabase.instance.client,
-                              objectboxStore: widget.objectBox.store)));
-                    },
-                    icon: Icon(Icons.local_police),
-                  ),
-                  IconButton(
-                    onPressed: () =>
-                        //objectBox.fillWithFakeData(20, 20, 10, 20, 20),
-
-                        _showDialogFake(objectBoxi),
-                    icon: Icon(Icons.send),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (ctx) => LottieListPage()));
-                    },
-                    icon: Icon(Icons.local_bar_outlined),
-                  ),
-                  SizedBox(
-                    width: 50,
-                  )
-                ],
-              ),
-              body: Consumer<CommerceProvider>(
-                builder: (context, produitProvider, child) {
-                  int totalProduits = produitProvider.getTotalProduits();
-                  List<Produit> produitsFiltres = produitProvider
-                      .getProduitsBetweenPrices(prixMin, prixMax);
-                  // var produitsLowStock = produitProvider.getProduitsLowStock(5.0);
-                  // var produitsLowStock0 =
-                  //     produitProvider.getProduitsLowStock(0.0);
-
-                  return Row(
-                    children: [
-                      NavigationRail(
-                        selectedIndex: _selectedIndex,
-                        onDestinationSelected: (int index) {
-                          setState(() {
-                            _selectedIndex = index;
-                          });
-                        },
-                        labelType: NavigationRailLabelType.selected,
-                        destinations: [
-                          NavigationRailDestination(
-                            icon: Icon(Icons.home),
-                            selectedIcon: Icon(Icons.home_filled),
-                            label: Text('Home'),
-                          ),
-                          NavigationRailDestination(
-                            icon: Icon(Icons.shopping_basket),
-                            selectedIcon: Icon(Icons.shopping_cart),
-                            label: Text('Caisse'),
-                          ),
-                          NavigationRailDestination(
-                            icon: Icon(Icons.account_box),
-                            selectedIcon: Icon(Icons.account_circle_sharp),
-                            label: Text('Clients'),
-                          ),
-                        ],
-                      ),
-                      _selectedIndex == 0
-                          ? buildExpanded(
-                              context,
-                              randomId,
-                              produitProvider,
-                              produitsFiltres,
-                              // produitsLowStock,
-                              // produitsLowStock0,
-                            )
-                          : _selectedIndex == 1
-                              ? Expanded(flex: 2, child: FacturePage())
-                              : Expanded(flex: 1, child: ClientListScreen()),
-                      Expanded(
-                        flex: 1,
-                        child: _widgetOptions()[_selectedIndex],
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-          );
-        } else {
+        if (constraints.maxWidth < 600) {
+          // Mobile layout
           return SafeArea(
             child: Scaffold(
               appBar: AppBar(
@@ -640,17 +460,25 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                         Provider.of<ThemeProvider>(context, listen: false)
                             .toggleTheme();
                       },
+                      inactiveThumbImage: CachedNetworkImageProvider(
+                          'https://img.freepik.com/free-vector/natural-landscape-background-video-conferencing_23-2148653740.jpg?semt=ais_hybrid'),
+                      activeThumbImage: CachedNetworkImageProvider(
+                          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSdyzjpBSojo_zxZ535JaX7d9dVC-aF-fPr3A&s'),
                     ),
                   ),
-                  IconButton(
-                    onPressed: () => showForcedRewardedAd(context, hashPage()),
+                  Platform.isAndroid || Platform.isIOS
+                      ? Container()
+                      : IconButton(
+                          onPressed: () =>
+                              showForcedRewardedAd(context, hashPage()),
 
-                    // onPressed: () {
-                    //   Navigator.of(context)
-                    //       .push(MaterialPageRoute(builder: (ctx) => hashPage()));
-                    // },
-                    icon: Icon(Icons.add_chart_rounded, color: Colors.green),
-                  ),
+                          // onPressed: () {
+                          //   Navigator.of(context)
+                          //       .push(MaterialPageRoute(builder: (ctx) => hashPage()));
+                          // },
+                          icon: Icon(Icons.add_chart_rounded,
+                              color: Colors.green),
+                        ),
                   Platform.isAndroid || Platform.isIOS
                       ? IconButton(
                           onPressed: () {
@@ -1029,7 +857,7 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                           padding: const EdgeInsets.all(8.0),
                           child: GestureDetector(
                             onTap: () => _ouvrirDialogAjustementPrix(context),
-                            child: CardTop(
+                            child: CardTop2(
                               image:
                                   'https://picsum.photos/seed/${randomId + 1}/200/100',
                               text:
@@ -1126,6 +954,384 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                       ],
                     ));
               }),
+            ),
+          );
+        } else if (constraints.maxWidth < 1200) {
+          // Tablet layout
+          return SafeArea(
+            child: Scaffold(
+              appBar: AppBar(
+                title: Text('POS'),
+                actions: [
+                  // Switch pour basculer entre les thèmes
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Switch(
+                      value: Provider.of<ThemeProvider>(context).isDarkTheme,
+                      onChanged: (value) {
+                        Provider.of<ThemeProvider>(context, listen: false)
+                            .toggleTheme();
+                      },
+                      inactiveThumbImage: CachedNetworkImageProvider(
+                          'https://img.freepik.com/free-vector/natural-landscape-background-video-conferencing_23-2148653740.jpg?semt=ais_hybrid'),
+                      activeThumbImage: CachedNetworkImageProvider(
+                          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSdyzjpBSojo_zxZ535JaX7d9dVC-aF-fPr3A&s'),
+                    ),
+                  ),
+                  // IconButton(
+                  //   onPressed: () {
+                  //     Navigator.of(context).push(
+                  //         MaterialPageRoute(builder: (ctx) => MyHomePageAds()));
+                  //   },
+                  //   icon: Icon(Icons.ads_click, color: Colors.deepPurple),
+                  // ),
+                  // IconButton(
+                  //   onPressed: () {
+                  //     // Appelez la méthode ici sans essayer d'utiliser sa valeur de retour
+                  //     widget.objectBox..ajouterQuantitesAleatoires();
+                  //   },
+                  //  icon: Icon(Icons.qr_code_scanner, color: Colors.blue),
+                  // ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      if (Platform.isAndroid) {
+                        String filePath =
+                            "/storage/emulated/0/Download/Articles.xls";
+                        await widget.objectBox
+                            .importProduitsDepuisExcel(filePath, 20, 3000, 500);
+                      } else {
+                        String filePath =
+                            "C:/Users/INDRA/Documents/Articles.xls"; // Assurez-vous de mettre le bon chemin ici.
+                        await widget.objectBox
+                            .importProduitsDepuisExcel(filePath, 20, 3000, 500);
+                      }
+
+                      print("Produits importés avec succès !");
+                    },
+                    child: Text("Importer Produits"),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (ctx) => mobile_scanner_example()));
+                    },
+                    icon: Icon(Icons.home, color: Colors.black),
+                  ),
+                  // IconButton(
+                  //   onPressed: () {
+                  //     Navigator.of(context).push(MaterialPageRoute(
+                  //         builder: (ctx) => QRScannerPage(
+                  //               lengthPin: 8,
+                  //               p4ssw0rd: 'Oran2024',
+                  //             )));
+                  //   },
+                  //   icon: Icon(Icons.qr_code_scanner, color: Colors.blue),
+                  // ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                          MaterialPageRoute(builder: (ctx) => hashPage()));
+                    },
+                    icon: Icon(Icons.qr_code_scanner, color: Colors.green),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                          MaterialPageRoute(builder: (ctx) => LicensePage()));
+                    },
+                    icon: Icon(Icons.account_tree_rounded),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (ctx) => FacturesListPage()));
+                    },
+                    icon: Icon(Icons.hail_outlined),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                          MaterialPageRoute(builder: (ctx) => FacturePage()));
+                    },
+                    icon: Icon(Icons.invert_colors_off),
+                  ),
+                  SizedBox(
+                    width: 50,
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (ctx) => ProduitListPage(
+                              supabase: Supabase.instance.client,
+                              objectboxStore: widget.objectBox.store)));
+                    },
+                    icon: Icon(Icons.local_police),
+                  ),
+                  IconButton(
+                    onPressed: () =>
+                        //objectBox.fillWithFakeData(20, 20, 10, 20, 20),
+
+                        _showDialogFake(objectBoxi),
+                    icon: Icon(Icons.send),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (ctx) => LottieListPage()));
+                    },
+                    icon: Icon(Icons.local_bar_outlined),
+                  ),
+                  SizedBox(
+                    width: 50,
+                  )
+                ],
+              ),
+              body: Consumer<CommerceProvider>(
+                builder: (context, produitProvider, child) {
+                  int totalProduits = produitProvider.getTotalProduits();
+                  List<Produit> produitsFiltres = produitProvider
+                      .getProduitsBetweenPrices(prixMin, prixMax);
+                  // var produitsLowStock = produitProvider.getProduitsLowStock(5.0);
+                  // var produitsLowStock0 =
+                  //     produitProvider.getProduitsLowStock(0.0);
+
+                  return Row(
+                    children: [
+                      NavigationRail(
+                        selectedIndex: _selectedIndex,
+                        onDestinationSelected: (int index) {
+                          setState(() {
+                            _selectedIndex = index;
+                          });
+                        },
+                        labelType: NavigationRailLabelType.selected,
+                        destinations: [
+                          NavigationRailDestination(
+                            icon: Icon(Icons.home),
+                            selectedIcon: Icon(Icons.home_filled),
+                            label: Text('Home'),
+                          ),
+                          NavigationRailDestination(
+                            icon: Icon(Icons.shopping_basket),
+                            selectedIcon: Icon(Icons.shopping_cart),
+                            label: Text('Caisse'),
+                          ),
+                          NavigationRailDestination(
+                            icon: Icon(Icons.account_box),
+                            selectedIcon: Icon(Icons.account_circle_sharp),
+                            label: Text('Clients'),
+                          ),
+                        ],
+                      ),
+                      _selectedIndex == 0
+                          ? buildExpanded(
+                              context,
+                              randomId,
+                              produitProvider,
+                              produitsFiltres,
+                              // produitsLowStock,
+                              // produitsLowStock0,
+                            )
+                          : _selectedIndex == 1
+                              ? Expanded(flex: 2, child: FacturePage())
+                              : Expanded(flex: 1, child: ClientListScreen()),
+                      Expanded(
+                        flex: 1,
+                        child: _widgetOptions()[_selectedIndex],
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          );
+        } else {
+          // Desktop layout
+          return SafeArea(
+            child: Scaffold(
+              appBar: AppBar(
+                title: Text('POS'),
+                actions: [
+                  // Switch pour basculer entre les thèmes
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Switch(
+                      value: Provider.of<ThemeProvider>(context).isDarkTheme,
+                      onChanged: (value) {
+                        Provider.of<ThemeProvider>(context, listen: false)
+                            .toggleTheme();
+                      },
+                      inactiveThumbImage: CachedNetworkImageProvider(
+                          'https://img.freepik.com/free-vector/natural-landscape-background-video-conferencing_23-2148653740.jpg?semt=ais_hybrid'),
+                      activeThumbImage: CachedNetworkImageProvider(
+                          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSdyzjpBSojo_zxZ535JaX7d9dVC-aF-fPr3A&s'),
+                    ),
+                  ),
+                  // IconButton(
+                  //   onPressed: () {
+                  //     Navigator.of(context).push(
+                  //         MaterialPageRoute(builder: (ctx) => MyHomePageAds()));
+                  //   },
+                  //   icon: Icon(Icons.ads_click, color: Colors.deepPurple),
+                  // ),
+                  // IconButton(
+                  //   onPressed: () {
+                  //     // Appelez la méthode ici sans essayer d'utiliser sa valeur de retour
+                  //     widget.objectBox..ajouterQuantitesAleatoires();
+                  //   },
+                  //  icon: Icon(Icons.qr_code_scanner, color: Colors.blue),
+                  // ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      if (Platform.isAndroid) {
+                        String filePath =
+                            "/storage/emulated/0/Download/Articles.xls";
+                        await widget.objectBox
+                            .importProduitsDepuisExcel(filePath, 20, 3000, 500);
+                      } else {
+                        String filePath =
+                            "C:/Users/INDRA/Documents/Articles.xls"; // Assurez-vous de mettre le bon chemin ici.
+                        await widget.objectBox
+                            .importProduitsDepuisExcel(filePath, 20, 3000, 500);
+                      }
+
+                      print("Produits importés avec succès !");
+                    },
+                    child: Text("Importer Produits"),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (ctx) => mobile_scanner_example()));
+                    },
+                    icon: Icon(Icons.home, color: Colors.black),
+                  ),
+                  // IconButton(
+                  //   onPressed: () {
+                  //     Navigator.of(context).push(MaterialPageRoute(
+                  //         builder: (ctx) => QRScannerPage(
+                  //               lengthPin: 8,
+                  //               p4ssw0rd: 'Oran2024',
+                  //             )));
+                  //   },
+                  //   icon: Icon(Icons.qr_code_scanner, color: Colors.blue),
+                  // ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                          MaterialPageRoute(builder: (ctx) => hashPage()));
+                    },
+                    icon: Icon(Icons.qr_code_scanner, color: Colors.green),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                          MaterialPageRoute(builder: (ctx) => LicensePage()));
+                    },
+                    icon: Icon(Icons.account_tree_rounded),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (ctx) => FacturesListPage()));
+                    },
+                    icon: Icon(Icons.hail_outlined),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                          MaterialPageRoute(builder: (ctx) => FacturePage()));
+                    },
+                    icon: Icon(Icons.invert_colors_off),
+                  ),
+                  SizedBox(
+                    width: 50,
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (ctx) => ProduitListPage(
+                              supabase: Supabase.instance.client,
+                              objectboxStore: widget.objectBox.store)));
+                    },
+                    icon: Icon(Icons.local_police),
+                  ),
+                  IconButton(
+                    onPressed: () =>
+                        //objectBox.fillWithFakeData(20, 20, 10, 20, 20),
+
+                        _showDialogFake(objectBoxi),
+                    icon: Icon(Icons.send),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (ctx) => LottieListPage()));
+                    },
+                    icon: Icon(Icons.local_bar_outlined),
+                  ),
+                  SizedBox(
+                    width: 50,
+                  )
+                ],
+              ),
+              body: Consumer<CommerceProvider>(
+                builder: (context, produitProvider, child) {
+                  int totalProduits = produitProvider.getTotalProduits();
+                  List<Produit> produitsFiltres = produitProvider
+                      .getProduitsBetweenPrices(prixMin, prixMax);
+                  // var produitsLowStock = produitProvider.getProduitsLowStock(5.0);
+                  // var produitsLowStock0 =
+                  //     produitProvider.getProduitsLowStock(0.0);
+
+                  return Row(
+                    children: [
+                      NavigationRail(
+                        selectedIndex: _selectedIndex,
+                        onDestinationSelected: (int index) {
+                          setState(() {
+                            _selectedIndex = index;
+                          });
+                        },
+                        labelType: NavigationRailLabelType.selected,
+                        destinations: [
+                          NavigationRailDestination(
+                            icon: Icon(Icons.home),
+                            selectedIcon: Icon(Icons.home_filled),
+                            label: Text('Home'),
+                          ),
+                          NavigationRailDestination(
+                            icon: Icon(Icons.shopping_basket),
+                            selectedIcon: Icon(Icons.shopping_cart),
+                            label: Text('Caisse'),
+                          ),
+                          NavigationRailDestination(
+                            icon: Icon(Icons.account_box),
+                            selectedIcon: Icon(Icons.account_circle_sharp),
+                            label: Text('Clients'),
+                          ),
+                        ],
+                      ),
+                      _selectedIndex == 0
+                          ? buildExpanded(
+                              context,
+                              randomId,
+                              produitProvider,
+                              produitsFiltres,
+                              // produitsLowStock,
+                              // produitsLowStock0,
+                            )
+                          : _selectedIndex == 1
+                              ? Expanded(flex: 2, child: FacturePage())
+                              : Expanded(flex: 1, child: ClientListScreen()),
+                      Expanded(
+                        flex: 1,
+                        child: _widgetOptions()[_selectedIndex],
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
           );
         }
@@ -2428,6 +2634,111 @@ class LowStockList extends StatelessWidget {
 
 class CardTop extends StatelessWidget {
   const CardTop({
+    Key? key,
+    this.text,
+    required this.provider,
+    this.button,
+    this.filtre,
+    required this.image,
+    required this.SmallBanner,
+  }) : super(key: key);
+
+  final String? text;
+  final CommerceProvider provider;
+  final ElevatedButton? button;
+  final bool? filtre;
+  final image;
+  final bool SmallBanner;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      clipBehavior: Clip.antiAliasWithSaveLayer,
+      elevation: 2,
+      semanticContainer: true,
+      color: Colors.white70,
+      child: SizedBox(
+        height: Platform.isWindows || Platform.isMacOS || Platform.isLinux
+            ? MediaQuery.of(context).size.height * 0.25
+            : SmallBanner
+                ? MediaQuery.of(context).size.height * 0.15
+                : MediaQuery.of(context).size.height * 0.35,
+        width: MediaQuery.of(context).size.width * 0.30,
+        child: Stack(
+          fit: StackFit.passthrough,
+          children: [
+            ShaderMask(
+              shaderCallback: (rect) {
+                return const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.transparent, Colors.black],
+                ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
+              },
+              blendMode: BlendMode.darken,
+              child: CachedNetworkImage(
+                width: 250,
+                height: 150,
+                fit: BoxFit.cover,
+                imageUrl: image,
+                placeholder: (context, url) => Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Colors.blue, Colors.black],
+                    ),
+                  ),
+                ),
+                errorWidget: (context, url, error) => const Icon(Icons.error),
+              ),
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Center(
+                  child: FittedBox(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        text!,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          shadows: [
+                            Shadow(
+                              blurRadius: 2.0,
+                              color: Colors.black,
+                              offset: Offset(0.5, 0.5),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                button != null
+                    ? SizedBox(
+                        height: 15,
+                      )
+                    : Container(),
+                button != null ? FittedBox(child: button) : Container(),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class CardTop2 extends StatelessWidget {
+  const CardTop2({
     Key? key,
     this.text,
     required this.provider,

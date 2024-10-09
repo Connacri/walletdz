@@ -617,7 +617,12 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                           ),
                           title: Row(
                             children: [
-                              Text(produit.nom),
+                              Expanded(
+                                child: Text(
+                                  produit.nom,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
                               Spacer(),
                               SizedBox(
                                 width: 15,

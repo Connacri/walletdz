@@ -1,11 +1,12 @@
 import 'dart:io';
-
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:path/path.dart' as path;
 import '../Entity.dart';
 import '../MyProviders.dart';
 import '../Utils/country_flags.dart';
@@ -116,20 +117,59 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
             title: Text('Code QR déjà utilisé'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment:
+                  CrossAxisAlignment.start, // Alignement des widgets à gauche
               children: [
-                Text('Le code QR est déjà associé au produit suivant :'),
+                Text(
+                  'Le code ${code} est déjà associé au produit suivant :',
+                  textAlign: TextAlign.start, // Alignement du texte à gauche
+                ),
                 SizedBox(height: 10),
-                Text('Nom : ${produit.nom}'),
                 Text(
-                    'Description : ${produit.description ?? "Pas de description"}'),
+                  'Nom : ${produit.nom}',
+                  textAlign: TextAlign.start,
+                ),
                 Text(
-                    'Prix de vente : ${produit.prixVente.toStringAsFixed(2)} DA'),
-                Text('Stock : ${produit.stock.toStringAsFixed(2)}'),
+                  'Description : ${produit.description ?? "Pas de description"}',
+                  textAlign: TextAlign.start,
+                ),
                 Text(
-                    'Stock Minimum : ${produit.minimStock.toStringAsFixed(2)}'),
-                produit.image != null
-                    ? Image.network(produit.image!)
-                    : Container(),
+                  'Prix de vente : ${produit.prixVente.toStringAsFixed(2)} DA',
+                  textAlign: TextAlign.start,
+                ),
+                Text(
+                  'Stock : ${produit.stock.toStringAsFixed(2)}',
+                  textAlign: TextAlign.start,
+                ),
+                Text(
+                  'Last Edit : ${produit.derniereModification.format('yMMMMd', 'fr_FR')}',
+                  textAlign: TextAlign.start,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(
+                    child: produit.image != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(
+                                8.0), // Optionnel : pour arrondir les coins
+                            child: AspectRatio(
+                              aspectRatio:
+                                  1, // Ratio 1:1 pour forcer l'image à être carrée
+                              child: CachedNetworkImage(
+                                imageUrl: produit.image!,
+                                fit: BoxFit.cover, // Centrer l'image
+                                placeholder: (context, url) => Center(
+                                  child:
+                                      CircularProgressIndicator(), // Indicateur de chargement
+                                ),
+                                errorWidget: (context, url, error) =>
+                                    Icon(Icons.error), // Widget en cas d'erreur
+                              ),
+                            ),
+                          )
+                        : Container(),
+                  ),
+                ),
               ],
             ),
             actions: [
@@ -143,6 +183,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
           );
         },
       );
+
     // Rediriger le focus vers le TextFormField après l'ajout
     FocusScope.of(context).requestFocus(_serialFocusNode);
 
@@ -224,20 +265,59 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
             title: Text('Code QR déjà utilisé'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment:
+                  CrossAxisAlignment.start, // Alignement des widgets à gauche
               children: [
-                Text('Le code QR est déjà associé au produit suivant :'),
+                Text(
+                  'Le code QR est déjà associé au produit suivant :',
+                  textAlign: TextAlign.start, // Alignement du texte à gauche
+                ),
                 SizedBox(height: 10),
-                Text('Nom : ${produit.nom}'),
                 Text(
-                    'Description : ${produit.description ?? "Pas de description"}'),
+                  'Nom : ${produit.nom}',
+                  textAlign: TextAlign.start,
+                ),
                 Text(
-                    'Prix de vente : ${produit.prixVente.toStringAsFixed(2)} DA'),
-                Text('Stock : ${produit.stock.toStringAsFixed(2)}'),
+                  'Description : ${produit.description ?? "Pas de description"}',
+                  textAlign: TextAlign.start,
+                ),
                 Text(
-                    'Stock Minimum : ${produit.minimStock.toStringAsFixed(2)}'),
-                produit.image != null
-                    ? Image.network(produit.image!)
-                    : Container(),
+                  'Prix de vente : ${produit.prixVente.toStringAsFixed(2)} DA',
+                  textAlign: TextAlign.start,
+                ),
+                Text(
+                  'Stock : ${produit.stock.toStringAsFixed(2)}',
+                  textAlign: TextAlign.start,
+                ),
+                Text(
+                  'Last Edit : ${produit.derniereModification.format('yMMMMd', 'fr_FR')}',
+                  textAlign: TextAlign.start,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(
+                    child: produit.image != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(
+                                8.0), // Optionnel : pour arrondir les coins
+                            child: AspectRatio(
+                              aspectRatio:
+                                  1, // Ratio 1:1 pour forcer l'image à être carrée
+                              child: CachedNetworkImage(
+                                imageUrl: produit.image!,
+                                fit: BoxFit.cover, // Centrer l'image
+                                placeholder: (context, url) => Center(
+                                  child:
+                                      CircularProgressIndicator(), // Indicateur de chargement
+                                ),
+                                errorWidget: (context, url, error) =>
+                                    Icon(Icons.error), // Widget en cas d'erreur
+                              ),
+                            ),
+                          )
+                        : Container(),
+                  ),
+                ),
               ],
             ),
             actions: [
@@ -251,6 +331,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
           );
         },
       );
+
     if (code.isNotEmpty && !_qrCodesTemp.contains(code)) {
       setState(() {
         _qrCodesTemp.add(code); // Ajouter le QR code dans la liste temporaire
@@ -496,6 +577,132 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
       // Mettre à jour le stock global après modification ou ajout
       mettreAJourStockGlobal();
     }
+  }
+
+  Future<String> uploadImageToSupabase(File image, String? oldImageUrl) async {
+    final String bucket = 'products';
+    final supabase = Supabase.instance.client;
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final fileName =
+        '${_prixVenteController.text}${_stockController.text}$timestamp${path.extension(image.path)}';
+
+    try {
+      await supabase.storage.from(bucket).upload(fileName, image);
+
+      final imageUrl = supabase.storage.from(bucket).getPublicUrl(fileName);
+      if (oldImageUrl != null && oldImageUrl.isNotEmpty) {
+        final oldFileName = Uri.parse(oldImageUrl).pathSegments.last;
+        await supabase.storage.from(bucket).remove([oldFileName]);
+      }
+
+      return imageUrl;
+    } catch (e) {
+      print('Erreur lors du téléchargement de l\'image : $e');
+      return '';
+    }
+  }
+
+  IconButton buildButton_Edit_Add(
+      BuildContext context, CommerceProvider produitProvider, bool _isFinded) {
+    return IconButton(
+      onPressed: () async {
+        final produitDejaExist =
+            await produitProvider.getProduitByQr(_serialController.text);
+
+        if (_formKey.currentState!.validate()) {
+          String imageUrl = '';
+
+          // Gestion de l'image du produit
+          if (_image != null) {
+            imageUrl = await uploadImageToSupabase(_image!, _existingImageUrl);
+          } else if (_existingImageUrl != null &&
+              _existingImageUrl!.isNotEmpty) {
+            imageUrl = _existingImageUrl!;
+          }
+
+          // Création du produit s'il n'existe pas déjà
+          final produit = Produit(
+              qr: _serialController.text,
+              image: imageUrl,
+              nom: _nomController.text,
+              description: _descriptionController.text,
+              prixVente: double.parse(_prixVenteController.text),
+              alertPeremption: int.parse(_alertPeremptionController.text),
+              minimStock: double.parse(_minimStockController.text),
+              derniereModification: DateTime.now())
+            ..crud.target = Crud(
+              createdBy: 1,
+              updatedBy: 1,
+              deletedBy: 1,
+              dateCreation: DateTime.now(),
+              derniereModification: DateTime.now(),
+              dateDeleting: null,
+            );
+
+          // Ajout des approvisionnements depuis _approvisionnementTemporaire
+          for (int i = 0; i < _approvisionnementTemporaire.length; i++) {
+            var approvisionnement = _approvisionnementTemporaire[i];
+
+            // Associer le produit à chaque approvisionnement
+            approvisionnement.produit.target = produit;
+
+            // Associer le fournisseur correspondant à chaque approvisionnement
+            if (i < _selectedFournisseurs.length) {
+              approvisionnement.fournisseur.target = _selectedFournisseurs[i];
+            }
+
+            // Ajouter les données Crud pour chaque approvisionnement
+            approvisionnement.crud.target = Crud(
+              createdBy: 1,
+              updatedBy: 1,
+              deletedBy: 1,
+              dateCreation: DateTime.now(),
+              derniereModification: DateTime.now(),
+            );
+          }
+
+          // Vérification si le fournisseur est spécifique
+          if (widget.specifiquefournisseur == null) {
+            if (produitDejaExist == null) {
+              // Nouveau produit
+              produitProvider.ajouterProduit(
+                  produit, _selectedFournisseurs, _approvisionnementTemporaire);
+              print('Nouveau produit ajouté');
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('QR / Code Barre Produit existe déjà !'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          } else {
+            if (produitDejaExist == null) {
+              // Nouveau produit avec fournisseur spécifique
+              produitProvider.ajouterProduit(
+                produit,
+                [
+                  ..._selectedFournisseurs,
+                  widget.specifiquefournisseur!,
+                ],
+                _approvisionnementTemporaire,
+              );
+              print('Nouveau produit ajouté avec fournisseur spécifique');
+            } else {
+              // Mise à jour d'un produit existant
+              // produitProvider.updateProduit(produitDejaExist, produit, _approvisionnementTemporaire);
+              print('Produit existant mis à jour');
+            }
+          }
+
+          _formKey.currentState!.save();
+          produitDejaExist == null ? Navigator.of(context).pop() : null;
+        }
+      },
+      icon: Icon(
+        _isFinded ? Icons.edit : Icons.check,
+      ),
+    );
   }
 
   @override
