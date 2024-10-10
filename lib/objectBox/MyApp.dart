@@ -328,6 +328,26 @@ class _adaptiveHomeState extends State<adaptiveHome> {
               appBar: AppBar(
                 title: Text('POS'),
                 actions: [
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      if (Platform.isAndroid) {
+                        String filePath =
+                            "/storage/emulated/0/Download/Articles.xls";
+                        await widget.objectBox
+                            .importProduitsDepuisExcel(filePath, 20, 3000, 500);
+                      } else {
+                        String filePath =
+                            "C:/Users/INDRA/Documents/Articles.xls"; // Assurez-vous de mettre le bon chemin ici.
+                        await widget.objectBox
+                            .importProduitsDepuisExcel(filePath, 20, 3000, 500);
+                      }
+
+                      print("Produits importés avec succès !");
+                    },
+                    label: Text("Excel"),
+                    icon: Icon(Icons.download),
+                  ),
+
                   // IconButton(
                   //   // onPressed: () {
                   //   //   Navigator.of(context).push(
@@ -992,7 +1012,7 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                   //   },
                   //  icon: Icon(Icons.qr_code_scanner, color: Colors.blue),
                   // ),
-                  ElevatedButton(
+                  ElevatedButton.icon(
                     onPressed: () async {
                       if (Platform.isAndroid) {
                         String filePath =
@@ -1008,7 +1028,8 @@ class _adaptiveHomeState extends State<adaptiveHome> {
 
                       print("Produits importés avec succès !");
                     },
-                    child: Text("Importer Produits"),
+                    label: Text("Excel"),
+                    icon: Icon(Icons.download),
                   ),
                   IconButton(
                     onPressed: () {
@@ -1150,7 +1171,7 @@ class _adaptiveHomeState extends State<adaptiveHome> {
           return SafeArea(
             child: Scaffold(
               appBar: AppBar(
-                title: Text('POS'),
+                title: Text('POS Desktop'),
                 actions: [
                   // Switch pour basculer entre les thèmes
                   Padding(
@@ -1181,7 +1202,7 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                   //   },
                   //  icon: Icon(Icons.qr_code_scanner, color: Colors.blue),
                   // ),
-                  ElevatedButton(
+                  ElevatedButton.icon(
                     onPressed: () async {
                       if (Platform.isAndroid) {
                         String filePath =
@@ -1197,7 +1218,8 @@ class _adaptiveHomeState extends State<adaptiveHome> {
 
                       print("Produits importés avec succès !");
                     },
-                    child: Text("Importer Produits"),
+                    label: Text("Excel"),
+                    icon: Icon(Icons.download),
                   ),
                   IconButton(
                     onPressed: () {

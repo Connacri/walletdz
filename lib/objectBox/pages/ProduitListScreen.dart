@@ -655,7 +655,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                                   .forEach((appro) {
                                                 totalQuantite += appro.quantite;
                                                 totalAmount += appro.quantite *
-                                                    appro.prixAchat;
+                                                    appro.prixAchat!;
                                               });
 
                                               return AlertDialog(
@@ -758,13 +758,13 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                                                       .dateCreation!
                                                                       .toLocal()))),
                                                               DataCell(Text(appro
-                                                                  .prixAchat
+                                                                  .prixAchat!
                                                                   .toStringAsFixed(
                                                                       2))),
                                                               DataCell(Text((appro
                                                                           .quantite *
                                                                       appro
-                                                                          .prixAchat)
+                                                                          .prixAchat!)
                                                                   .toStringAsFixed(
                                                                       2))),
                                                             ],

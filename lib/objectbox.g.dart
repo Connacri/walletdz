@@ -74,7 +74,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(2, 8606136097133066204),
       name: 'Produit',
-      lastPropertyId: const obx_int.IdUid(24, 2777806409493290922),
+      lastPropertyId: const obx_int.IdUid(26, 5893296646474378066),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -134,6 +134,16 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(24, 2777806409493290922),
             name: 'qrCodeList',
             type: 30,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(25, 6126043269540820132),
+            name: 'qtyPartiel',
+            type: 8,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(26, 5893296646474378066),
+            name: 'pricePartielVente',
+            type: 8,
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[
@@ -406,7 +416,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(9, 5406683045265354164),
       name: 'Approvisionnement',
-      lastPropertyId: const obx_int.IdUid(10, 5497082426338993749),
+      lastPropertyId: const obx_int.IdUid(12, 8159454970821468214),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -622,7 +632,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
         6063531051077271532,
         3164935352830575671,
         510917551575483361,
-        6450200723927042371
+        6450200723927042371,
+        5959659676638121576,
+        8159454970821468214
       ],
       retiredRelationUids: const [2832941486252609678],
       modelVersion: 5,
@@ -717,7 +729,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
               : fbb.writeString(object.description!);
           final qrCodeListOffset = fbb.writeList(
               object.qrCodeList.map(fbb.writeString).toList(growable: false));
-          fbb.startTable(25);
+          fbb.startTable(27);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, qrOffset);
           fbb.addOffset(2, imageOffset);
@@ -729,6 +741,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addInt64(20, object.crud.targetId);
           fbb.addInt64(22, object.derniereModification.millisecondsSinceEpoch);
           fbb.addOffset(23, qrCodeListOffset);
+          fbb.addFloat64(24, object.qtyPartiel);
+          fbb.addFloat64(25, object.pricePartielVente);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -748,10 +762,14 @@ obx_int.ModelDefinition getObjectBoxModel() {
                   .vTableGetNullable(buffer, rootOffset, 12);
           final prixVenteParam =
               const fb.Float64Reader().vTableGet(buffer, rootOffset, 16, 0);
-          final minimStockParam =
-              const fb.Float64Reader().vTableGet(buffer, rootOffset, 32, 0);
+          final qtyPartielParam = const fb.Float64Reader()
+              .vTableGetNullable(buffer, rootOffset, 52);
+          final pricePartielVenteParam = const fb.Float64Reader()
+              .vTableGetNullable(buffer, rootOffset, 54);
+          final minimStockParam = const fb.Float64Reader()
+              .vTableGetNullable(buffer, rootOffset, 32);
           final alertPeremptionParam =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 42, 0);
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 42);
           final derniereModificationParam = DateTime.fromMillisecondsSinceEpoch(
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 48, 0));
           final object = Produit(
@@ -761,6 +779,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
               nom: nomParam,
               description: descriptionParam,
               prixVente: prixVenteParam,
+              qtyPartiel: qtyPartielParam,
+              pricePartielVente: pricePartielVenteParam,
               minimStock: minimStockParam,
               alertPeremption: alertPeremptionParam,
               derniereModification: derniereModificationParam)
@@ -1074,7 +1094,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           object.id = id;
         },
         objectToFB: (Approvisionnement object, fb.Builder fbb) {
-          fbb.startTable(11);
+          fbb.startTable(13);
           fbb.addInt64(0, object.id);
           fbb.addFloat64(1, object.quantite);
           fbb.addInt64(3, object.datePeremption?.millisecondsSinceEpoch);
@@ -1082,7 +1102,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addInt64(5, object.fournisseur.targetId);
           fbb.addFloat64(6, object.prixAchat);
           fbb.addInt64(7, object.crud.targetId);
-          fbb.addInt64(9, object.derniereModification.millisecondsSinceEpoch);
+          fbb.addInt64(9, object.derniereModification?.millisecondsSinceEpoch);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -1091,17 +1111,20 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final rootOffset = buffer.derefObject(0);
           final datePeremptionValue =
               const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 10);
+          final derniereModificationValue =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 22);
           final idParam =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
           final quantiteParam =
               const fb.Float64Reader().vTableGet(buffer, rootOffset, 6, 0);
-          final prixAchatParam =
-              const fb.Float64Reader().vTableGet(buffer, rootOffset, 16, 0);
+          final prixAchatParam = const fb.Float64Reader()
+              .vTableGetNullable(buffer, rootOffset, 16);
           final datePeremptionParam = datePeremptionValue == null
               ? null
               : DateTime.fromMillisecondsSinceEpoch(datePeremptionValue);
-          final derniereModificationParam = DateTime.fromMillisecondsSinceEpoch(
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 22, 0));
+          final derniereModificationParam = derniereModificationValue == null
+              ? null
+              : DateTime.fromMillisecondsSinceEpoch(derniereModificationValue);
           final object = Approvisionnement(
               id: idParam,
               quantite: quantiteParam,
@@ -1292,6 +1315,14 @@ class Produit_ {
   /// See [Produit.qrCodeList].
   static final qrCodeList =
       obx.QueryStringVectorProperty<Produit>(_entities[1].properties[10]);
+
+  /// See [Produit.qtyPartiel].
+  static final qtyPartiel =
+      obx.QueryDoubleProperty<Produit>(_entities[1].properties[11]);
+
+  /// See [Produit.pricePartielVente].
+  static final pricePartielVente =
+      obx.QueryDoubleProperty<Produit>(_entities[1].properties[12]);
 
   /// see [Produit.qrcodes]
   static final qrcodes =

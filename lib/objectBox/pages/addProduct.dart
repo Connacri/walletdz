@@ -50,22 +50,16 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
   final _formKey = GlobalKey<FormState>();
 
   final _nomController = TextEditingController();
-
   final _descriptionController = TextEditingController();
-
   final _prixAchatController = TextEditingController();
-
   final _prixVenteController = TextEditingController();
-
   final _stockController = TextEditingController();
-
   final _serialController = TextEditingController();
-
   final _datePeremptionController = TextEditingController();
-
   final _minimStockController = TextEditingController();
-
   final _alertPeremptionController = TextEditingController();
+  final _qtyPartielController = TextEditingController();
+  final _pricePartielVenteController = TextEditingController();
 
   final FocusNode _serialFocusNode =
       FocusNode(); // FocusNode pour garder le curseur dans le TextFormField
@@ -207,7 +201,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
           _prixVenteController.text = produit.prixVente.toStringAsFixed(2);
           _stockController.text = produit.stock.toStringAsFixed(2);
           stockTemp = double.parse(produit.stock.toStringAsFixed(2));
-          _minimStockController.text = produit.minimStock.toStringAsFixed(2);
+          _minimStockController.text = produit.minimStock!.toStringAsFixed(2);
           _alertPeremptionController.text = produit.alertPeremption.toString();
           // _datePeremptionController.text = produit
           //     .approvisionnements.first.datePeremption!
@@ -408,7 +402,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
         //   _prixAchatController.text = produit.prixAchat.toStringAsFixed(2);
         _prixVenteController.text = produit.prixVente.toStringAsFixed(2);
         _stockController.text = produit.stock.toStringAsFixed(2);
-        _minimStockController.text = produit.minimStock.toStringAsFixed(2);
+        _minimStockController.text = produit.minimStock!.toStringAsFixed(2);
         stockTemp = double.parse(produit.stock.toStringAsFixed(2));
         // _datePeremptionController.text =
         //     produit.datePeremption!.format('yMMMMd', 'fr_FR');
@@ -462,7 +456,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
       _currentApprovisionnement = approvisionnement;
       _stockController.text = approvisionnement.quantite.toStringAsFixed(2);
       _prixAchatController.text =
-          approvisionnement.prixAchat.toStringAsFixed(2);
+          approvisionnement.prixAchat!.toStringAsFixed(2);
       _datePeremptionController.text = DateFormat('dd MMMM yyyy', 'fr_FR')
           .format(approvisionnement.datePeremption!);
 
@@ -644,6 +638,8 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
             nom: _nomController.text,
             description: _descriptionController.text,
             prixVente: double.parse(_prixVenteController.text),
+            qtyPartiel: double.parse(_qtyPartielController.text),
+            pricePartielVente: double.parse(_pricePartielVenteController.text),
             alertPeremption: int.parse(_alertPeremptionController.text),
             minimStock: double.parse(_minimStockController.text),
             derniereModification: DateTime.now(),
@@ -1095,109 +1091,213 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
             ), // prix de vente
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: TextFormField(
-                      enabled: _isFirstFieldFilled || _qrCodesTemp.isNotEmpty,
-                      controller: _minimStockController,
-                      textAlign: TextAlign.center,
-                      decoration: InputDecoration(
-                        labelText: 'Stock Alert',
+              child: Container(
+                width: largeur,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    // _editQr == true
+                    //     ? GestureDetector(
+                    //         onTap: () {
+                    //           _stockController.text =
+                    //               stockTemp.toString();
+                    //         },
+                    //         child: CircleAvatar(
+                    //           child: FittedBox(
+                    //               child: Padding(
+                    //             padding:
+                    //                 const EdgeInsets.all(5.0),
+                    //             child:
+                    //                 // Text(
+                    //                 //   _stockController.text.toString(),
+                    //                 // ),
+                    //                 Text(
+                    //                     '${double.parse(_stockController.text).toStringAsFixed(2)}'),
+                    //           )),
+                    //         ),
+                    //       )
+                    //     : Container(),
+                    // SizedBox(
+                    //   width: 8,
+                    // ),
+                    Expanded(
+                      flex: 5,
+                      child: TextFormField(
+                        enabled: _isFirstFieldFilled || _qrCodesTemp.isNotEmpty,
+                        controller: _stockController,
+                        textAlign: TextAlign.center,
+                        decoration: InputDecoration(
+                          labelText: 'Stock',
+                          // suffixIcon: Padding(
+                          //   padding: const EdgeInsets.all(4.0),
+                          //   child: IconButton(
+                          //       onPressed: _showAddQuantityDialog,
+                          //       icon: Icon(Icons.add)),
+                          // ),
 
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide.none, // Supprime le contour
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide.none, // Supprime le contour
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide
+                                .none, // Supprime le contour en état normal
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide
+                                .none, // Supprime le contour en état focus
+                          ),
+                          //border: InputBorder.none,
+                          filled: true,
+                          contentPadding: EdgeInsets.all(15),
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide
-                              .none, // Supprime le contour en état normal
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide
-                              .none, // Supprime le contour en état focus
-                        ),
-                        //border: InputBorder.none,
-                        filled: true,
-                        contentPadding: EdgeInsets.all(15),
+                        keyboardType: TextInputType.number,
+                        // validator: (value) {
+                        //   if (value == null || value.isEmpty) {
+                        //     return 'Veuillez entrer le stock';
+                        //   }
+                        //   return null;
+                        // },
                       ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Veuillez entrer le Stock Minimal';
-                        }
-                        return null;
-                      },
                     ),
-                  ), // stock alert
-                  SizedBox(width: 10),
-                  Expanded(
-                    flex: 2,
-                    child: TextFormField(
-                      enabled: _isFirstFieldFilled || _qrCodesTemp.isNotEmpty,
-                      controller: _alertPeremptionController,
-                      textAlign: TextAlign.center,
-                      decoration: InputDecoration(
-                        labelText: 'Alert Péremption',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide.none, // Supprime le contour
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide
-                              .none, // Supprime le contour en état normal
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide
-                              .none, // Supprime le contour en état focus
-                        ),
-                        //border: InputBorder.none,
-                        filled: true,
-                        contentPadding: EdgeInsets.all(15),
-                      ),
-                      // keyboardType: TextInputType.number,
-                      //  validator: (value) {
-                      //    if (value == null || value.isEmpty) {
-                      //      return 'Veuillez entrer le prix d\'achat';
-                      //    }
-                      //    return null;
-                      //  },
-                      keyboardType:
-                          TextInputType.numberWithOptions(decimal: false),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                            RegExp(r'^\d+\.?\d{0,2}')),
-                      ],
-                      // onChanged: (value) {
-                      //   if (value.isNotEmpty) {
-                      //     double? parsed = double.tryParse(value);
-                      //     if (parsed != null) {
-                      //       _prixAchatController.text = parsed.toStringAsFixed(2);
-                      //       _prixAchatController.selection =
-                      //           TextSelection.fromPosition(
-                      //         TextPosition(
-                      //             offset: _prixAchatController.text.length),
-                      //       );
-                      //     }
-                      //   }
-                      // },
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Veuillez entrer Le nombre de jours pour alerter la date de peremption';
-                        }
-                        // if (double.tryParse(value) == null) {
-                        //   return 'Veuillez entrer un prix valide';
-                        // }
-                        // return null;
-                      },
-                    ),
+
+                    // stock alert
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  //      color: Colors.grey, // Couleur de fond
+                  borderRadius: BorderRadius.circular(8.0), // Bords arrondis
+                  border: Border.all(
+                    color: Colors.grey, // Couleur de la bordure
+                    width: 1.0, // Épaisseur de la bordure
                   ),
-                ],
+                ),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Center(
+                        child: Text('Alert'),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              enabled: _isFirstFieldFilled ||
+                                  _qrCodesTemp.isNotEmpty,
+                              controller: _minimStockController,
+                              textAlign: TextAlign.center,
+                              decoration: InputDecoration(
+                                labelText: 'Stock',
+
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  borderSide:
+                                      BorderSide.none, // Supprime le contour
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  borderSide: BorderSide
+                                      .none, // Supprime le contour en état normal
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  borderSide: BorderSide
+                                      .none, // Supprime le contour en état focus
+                                ),
+                                //border: InputBorder.none,
+                                filled: true,
+                                contentPadding: EdgeInsets.all(15),
+                              ),
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Veuillez entrer le Stock Minimal';
+                                }
+                                return null;
+                              },
+                            ),
+                          ), // stock alert
+                          SizedBox(width: 10),
+                          Expanded(
+                            child: TextFormField(
+                              enabled: _isFirstFieldFilled ||
+                                  _qrCodesTemp.isNotEmpty,
+                              controller: _alertPeremptionController,
+                              textAlign: TextAlign.center,
+                              decoration: InputDecoration(
+                                labelText: 'Expiration',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  borderSide:
+                                      BorderSide.none, // Supprime le contour
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  borderSide: BorderSide
+                                      .none, // Supprime le contour en état normal
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  borderSide: BorderSide
+                                      .none, // Supprime le contour en état focus
+                                ),
+                                //border: InputBorder.none,
+                                filled: true,
+                                contentPadding: EdgeInsets.all(15),
+                              ),
+                              // keyboardType: TextInputType.number,
+                              //  validator: (value) {
+                              //    if (value == null || value.isEmpty) {
+                              //      return 'Veuillez entrer le prix d\'achat';
+                              //    }
+                              //    return null;
+                              //  },
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: false),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                    RegExp(r'^\d+\.?\d{0,2}')),
+                              ],
+                              // onChanged: (value) {
+                              //   if (value.isNotEmpty) {
+                              //     double? parsed = double.tryParse(value);
+                              //     if (parsed != null) {
+                              //       _prixAchatController.text = parsed.toStringAsFixed(2);
+                              //       _prixAchatController.selection =
+                              //           TextSelection.fromPosition(
+                              //         TextPosition(
+                              //             offset: _prixAchatController.text.length),
+                              //       );
+                              //     }
+                              //   }
+                              // },
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Veuillez entrer Le nombre de jours pour alerter la date de peremption';
+                                }
+                                // if (double.tryParse(value) == null) {
+                                //   return 'Veuillez entrer un prix valide';
+                                // }
+                                // return null;
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ), // alert stock
 
@@ -1311,94 +1411,6 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                                   ),
                                 ),
                               ), //prix d'achat
-                              Flexible(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Container(
-                                    width: largeur,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        // _editQr == true
-                                        //     ? GestureDetector(
-                                        //         onTap: () {
-                                        //           _stockController.text =
-                                        //               stockTemp.toString();
-                                        //         },
-                                        //         child: CircleAvatar(
-                                        //           child: FittedBox(
-                                        //               child: Padding(
-                                        //             padding:
-                                        //                 const EdgeInsets.all(5.0),
-                                        //             child:
-                                        //                 // Text(
-                                        //                 //   _stockController.text.toString(),
-                                        //                 // ),
-                                        //                 Text(
-                                        //                     '${double.parse(_stockController.text).toStringAsFixed(2)}'),
-                                        //           )),
-                                        //         ),
-                                        //       )
-                                        //     : Container(),
-                                        // SizedBox(
-                                        //   width: 8,
-                                        // ),
-                                        Expanded(
-                                          flex: 5,
-                                          child: TextFormField(
-                                            enabled: _isFirstFieldFilled ||
-                                                _qrCodesTemp.isNotEmpty,
-                                            controller: _stockController,
-                                            textAlign: TextAlign.center,
-                                            decoration: InputDecoration(
-                                              labelText: 'Stock',
-                                              // suffixIcon: Padding(
-                                              //   padding: const EdgeInsets.all(4.0),
-                                              //   child: IconButton(
-                                              //       onPressed: _showAddQuantityDialog,
-                                              //       icon: Icon(Icons.add)),
-                                              // ),
-
-                                              border: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(8.0),
-                                                borderSide: BorderSide
-                                                    .none, // Supprime le contour
-                                              ),
-                                              enabledBorder: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(8.0),
-                                                borderSide: BorderSide
-                                                    .none, // Supprime le contour en état normal
-                                              ),
-                                              focusedBorder: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(8.0),
-                                                borderSide: BorderSide
-                                                    .none, // Supprime le contour en état focus
-                                              ),
-                                              //border: InputBorder.none,
-                                              filled: true,
-                                              contentPadding:
-                                                  EdgeInsets.all(15),
-                                            ),
-                                            keyboardType: TextInputType.number,
-                                            // validator: (value) {
-                                            //   if (value == null || value.isEmpty) {
-                                            //     return 'Veuillez entrer le stock';
-                                            //   }
-                                            //   return null;
-                                            // },
-                                          ),
-                                        ),
-
-                                        // stock alert
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
                             ],
                           ), // stock
                           Flexible(
@@ -1661,7 +1673,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                                               padding: const EdgeInsets.only(
                                                   left: 8),
                                               child: Text(
-                                                '${approvisionnement.prixAchat.toStringAsFixed(2)}',
+                                                '${approvisionnement.prixAchat!.toStringAsFixed(2)}',
                                                 style: TextStyle(fontSize: 20),
                                               ),
                                             ),

@@ -75,8 +75,10 @@ class Produit {
   String nom;
   String? description;
   double prixVente;
-  double minimStock;
-  int alertPeremption;
+  double? qtyPartiel;
+  double? pricePartielVente;
+  double? minimStock;
+  int? alertPeremption;
   @Property(type: PropertyType.date)
   DateTime derniereModification;
 
@@ -94,8 +96,10 @@ class Produit {
     required this.nom,
     this.description,
     required this.prixVente,
-    required this.minimStock,
-    required this.alertPeremption,
+    this.qtyPartiel,
+    this.pricePartielVente,
+    this.minimStock,
+    this.alertPeremption,
     required this.derniereModification,
   });
   // // Getters pour calculer les valeurs dynamiques
@@ -153,6 +157,8 @@ class Produit {
       nom: json['nom'] ?? '',
       description: json['description'] ?? '',
       prixVente: (json['prixVente'] ?? 0).toDouble(),
+      qtyPartiel: (json['qtyPartiel'] ?? 0).toDouble(),
+      pricePartielVente: (json['pricePartielVente'] ?? 0.0).toDouble(),
       minimStock: (json['minimStock'] ?? 0).toDouble(),
       alertPeremption: (json['alertPeremption']).toInt(),
       derniereModification: json['derniereModification'] != null
@@ -166,8 +172,9 @@ class Produit {
 class Approvisionnement {
   int id;
   double quantite;
-  double prixAchat;
-  DateTime derniereModification;
+
+  double? prixAchat;
+  DateTime? derniereModification;
 
   @Property(type: PropertyType.date)
   DateTime? datePeremption;
@@ -181,9 +188,9 @@ class Approvisionnement {
   Approvisionnement({
     this.id = 0,
     required this.quantite,
-    required this.prixAchat,
+    this.prixAchat,
     this.datePeremption,
-    required this.derniereModification,
+    this.derniereModification,
   });
 
   factory Approvisionnement.fromJson(Map<String, dynamic> json) {

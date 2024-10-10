@@ -1654,7 +1654,7 @@ class _ProduitListPageState extends State<ProduitListPage>
                                     ),
                                     child: Center(
                                       child: Text(
-                                        '${produit.minimStock.toStringAsFixed(produit.minimStock.truncateToDouble() == produit.minimStock ? 0 : 2)}',
+                                        '${produit.minimStock!.toStringAsFixed(produit.minimStock!.truncateToDouble() == produit.minimStock ? 0 : 2)}',
                                         // '${(produit.minimStock).toStringAsFixed(2)}',
                                         style: TextStyle(color: Colors.white),
                                       ),
@@ -1851,7 +1851,7 @@ class _ProduitListPageState extends State<ProduitListPage>
                                             ),
                                             child: Center(
                                               child: Text(
-                                                '${produit.minimStock.toStringAsFixed(produit.minimStock.truncateToDouble() == produit.minimStock ? 0 : 2)}',
+                                                '${produit.minimStock!.toStringAsFixed(produit.minimStock!.truncateToDouble() == produit.minimStock ? 0 : 2)}',
                                                 style: TextStyle(
                                                     color: Colors.white),
                                               ),

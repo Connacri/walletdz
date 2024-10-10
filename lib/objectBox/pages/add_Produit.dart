@@ -187,7 +187,7 @@ class _add_ProduitState extends State<add_Produit> {
           _prixVenteController.text = produit.prixVente.toStringAsFixed(2);
           _stockController.text = produit.stock.toStringAsFixed(2);
           stockTemp = double.parse(produit.stock.toStringAsFixed(2));
-          _minimStockController.text = produit.minimStock.toStringAsFixed(2);
+          _minimStockController.text = produit.minimStock!.toStringAsFixed(2);
           _alertPeremptionController.text = produit.alertPeremption.toString();
           // _datePeremptionController.text = produit
           //     .approvisionnements.first.datePeremption!
@@ -295,7 +295,7 @@ class _add_ProduitState extends State<add_Produit> {
         //   _prixAchatController.text = produit.prixAchat.toStringAsFixed(2);
         _prixVenteController.text = produit.prixVente.toStringAsFixed(2);
         _stockController.text = produit.stock.toStringAsFixed(2);
-        _minimStockController.text = produit.minimStock.toStringAsFixed(2);
+        _minimStockController.text = produit.minimStock!.toStringAsFixed(2);
         stockTemp = double.parse(produit.stock.toStringAsFixed(2));
         // _datePeremptionController.text =
         //     produit.datePeremption!.format('yMMMMd', 'fr_FR');
@@ -1444,7 +1444,7 @@ class _add_ProduitState extends State<add_Produit> {
                                       children: [
                                         FittedBox(
                                           child: Text(
-                                            '${approvisionnement.prixAchat.toStringAsFixed(2)}',
+                                            '${approvisionnement.prixAchat!.toStringAsFixed(2)}',
                                             style: TextStyle(fontSize: 15),
                                           ),
                                         ),
