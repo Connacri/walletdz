@@ -549,7 +549,10 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
             controller: _scrollController,
             itemCount: produitProvider.produits.length + 1,
             itemBuilder: (context, index) {
-              if (index == 5 && _nativeAd != null && _nativeAdIsLoaded) {
+              if (index != 0 &&
+                  index % 5 == 0 &&
+                  _nativeAd != null &&
+                  _nativeAdIsLoaded) {
                 return Align(
                     alignment: Alignment.center,
                     child: ConstrainedBox(
@@ -581,447 +584,450 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                         ? qrCodesString
                             .split(',') // Sépare les QR codes par la virgule
                         : []; // Si null ou vide, on crée une liste vide
-                return InkWell(
-                  onTap: () {
-                    // Action lors du tap sur le produit
-                  },
-                  child: Card(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ListTile(
-                          onLongPress: () {
-                            _deleteProduit(context, produit);
-                          },
-                          leading: Tooltip(
-                            message: 'ID : ${produit.id}',
-                            child: GestureDetector(
-                              onDoubleTap: () {
-                                _showAllFournisseursDialog(
-                                  context,
-                                  produit, /*fournisseurs*/
-                                );
-                              },
-                              child: produit.image == null ||
-                                      produit.image!.isEmpty
-                                  ? CircleAvatar(
-                                      child: Icon(Icons.image_not_supported),
-                                    )
-                                  : Column(
-                                      children: [
-                                        Expanded(
-                                          child: CircleAvatar(
-                                            backgroundImage:
-                                                CachedNetworkImageProvider(
-                                              produit.image!,
-                                              errorListener: (error) =>
-                                                  Icon(Icons.error),
+                return Card(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ListTile(
+                        onTap: () async {
+                          await Navigator.of(context).push(MaterialPageRoute(
+                              builder: (ctx) => ProduitDetailPage(
+                                    produit: produit,
+                                  )));
+                        },
+                        onLongPress: () {
+                          _deleteProduit(context, produit);
+                        },
+                        leading: Tooltip(
+                          message: 'ID : ${produit.id}',
+                          child: GestureDetector(
+                            onDoubleTap: () {
+                              _showAllFournisseursDialog(
+                                context,
+                                produit, /*fournisseurs*/
+                              );
+                            },
+                            child:
+                                produit.image == null || produit.image!.isEmpty
+                                    ? CircleAvatar(
+                                        child: Icon(Icons.image_not_supported),
+                                      )
+                                    : Column(
+                                        children: [
+                                          Expanded(
+                                            child: CircleAvatar(
+                                              backgroundImage:
+                                                  CachedNetworkImageProvider(
+                                                produit.image!,
+                                                errorListener: (error) =>
+                                                    Icon(Icons.error),
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        Text('Id:' + produit.id.toString()),
-                                      ],
-                                    ),
-                            ),
+                                          Text('Id:' + produit.id.toString()),
+                                        ],
+                                      ),
                           ),
-                          title: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  produit.nom,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              Spacer(),
-                              SizedBox(
-                                width: 15,
-                              ),
-                              // Text('Quantité : $totalQuantite',
-                              //     overflow: TextOverflow.ellipsis,
-                              //     style: TextStyle(fontSize: 15)),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: produit.approvisionnements.isEmpty
-                                    ? Container()
-                                    : ElevatedButton(
-                                        onPressed: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              double totalQuantite = 0;
-                                              double totalAmount = 0;
+                        ),
+                        title: Text(
+                          produit.nom,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${produit.description ?? 'N/A'}',
+                              overflow: TextOverflow.ellipsis,
+                            ),
 
-                                              produit.approvisionnements
-                                                  .forEach((appro) {
-                                                totalQuantite += appro.quantite;
-                                                totalAmount += appro.quantite *
-                                                    appro.prixAchat!;
-                                              });
+                            // Text(
+                            //     'Users createdBy : ${produit.crud.target!.createdBy}'),
+                            Text(
+                                'Modifier par : ${produit.crud.target!.updatedBy}'),
+                            // Text(
+                            //     'Users deletedBy : ${produit.crud.target!.deletedBy}'),
+                            // Text(
+                            //     produit.approvisionnements.isNotEmpty
+                            //         ? 'Approvisionnements:'
+                            //         : '',
+                            //     style:
+                            //         TextStyle(fontWeight: FontWeight.bold)),
 
-                                              return AlertDialog(
-                                                title:
-                                                    Text('Approvisionnements'),
-                                                content: SingleChildScrollView(
+                            // DataTable(
+                            //   columns: const <DataColumn>[
+                            //     DataColumn(
+                            //       label: Text(
+                            //         'Quantité',
+                            //         style: TextStyle(
+                            //             fontStyle: FontStyle.italic),
+                            //       ),
+                            //     ),
+                            //     DataColumn(
+                            //       label: Text(
+                            //         'Fournisseur',
+                            //         style: TextStyle(
+                            //             fontStyle: FontStyle.italic),
+                            //       ),
+                            //     ),
+                            //     DataColumn(
+                            //       label: Text(
+                            //         'Date de péremption',
+                            //         style: TextStyle(
+                            //             fontStyle: FontStyle.italic),
+                            //       ),
+                            //     ),
+                            //     DataColumn(
+                            //       label: Text(
+                            //         'Créé le',
+                            //         style: TextStyle(
+                            //             fontStyle: FontStyle.italic),
+                            //       ),
+                            //     ),
+                            //     DataColumn(
+                            //       label: Text(
+                            //         'Prix d\'achat',
+                            //         style: TextStyle(
+                            //             fontStyle: FontStyle.italic),
+                            //       ),
+                            //     ),
+                            //   ],
+                            //   rows: produit.approvisionnements.map((appro) {
+                            //     final fournisseur = appro.fournisseur.target;
+                            //     return DataRow(
+                            //       cells: <DataCell>[
+                            //         DataCell(Text(
+                            //             appro.quantite.toStringAsFixed(2))),
+                            //         DataCell(
+                            //             Text(fournisseur?.nom ?? 'Inconnu')),
+                            //         DataCell(Text(appro.datePeremption != null
+                            //             ? DateFormat('dd/MM/yyyy').format(
+                            //                 appro.datePeremption!.toLocal())
+                            //             : "N/A")),
+                            //         DataCell(Text(DateFormat('dd/MM/yyyy')
+                            //             .format(appro
+                            //                 .crud.target!.dateCreation!
+                            //                 .toLocal()))),
+                            //         DataCell(Text(
+                            //             appro.prixAchat.toStringAsFixed(2))),
+                            //       ],
+                            //     );
+                            //   }).toList(),
+                            // ),
+
+                            // ...produit.approvisionnements.map((appro) {
+                            //   final fournisseur = appro.fournisseur.target;
+                            //   return Padding(
+                            //       padding:
+                            //           EdgeInsets.symmetric(vertical: 4.0),
+                            //       child: ListTile(
+                            //         leading: CircleAvatar(
+                            //           child: Text(
+                            //             'Quantité: ${appro.quantite.toStringAsFixed(2)}',
+                            //           ),
+                            //         ),
+                            //         title: Text(
+                            //           'Fournisseur: ${fournisseur?.nom ?? 'Inconnu'}',
+                            //         ),
+                            //         subtitle: Column(
+                            //           children: [
+                            //             Text(
+                            //               'Date de péremption: ${appro.datePeremption != null ? DateFormat('dd/MM/yyyy').format(appro.datePeremption!.toLocal()) : "N/A"}',
+                            //             ),
+                            //             Text(
+                            //               'Créer le : ${DateFormat('dd/MM/yyyy').format(appro.crud.target!.dateCreation!.toLocal())}',
+                            //             ),
+                            //           ],
+                            //         ),
+                            //         trailing: Text(
+                            //           'Prix d\'achat: ${appro.prixAchat.toStringAsFixed(2)}',
+                            //         ),
+                            //       ));
+                            // }).toList(),
+                          ],
+                        ),
+                        trailing: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                '${produit.prixVente.toStringAsFixed(2)} DZD',
+                                style: TextStyle(fontSize: 20),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            Expanded(
+                              child: produit.approvisionnements.isEmpty
+                                  ? Container()
+                                  : ElevatedButton(
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            double totalQuantite = 0;
+                                            double totalAmount = 0;
+
+                                            produit.approvisionnements
+                                                .forEach((appro) {
+                                              totalQuantite += appro.quantite;
+                                              totalAmount += appro.quantite *
+                                                  appro.prixAchat!;
+                                            });
+
+                                            return AlertDialog(
+                                              title: Text('Approvisionnements'),
+                                              content: SingleChildScrollView(
+                                                scrollDirection: Axis.vertical,
+                                                child: SingleChildScrollView(
                                                   scrollDirection:
-                                                      Axis.vertical,
-                                                  child: SingleChildScrollView(
-                                                    scrollDirection:
-                                                        Axis.horizontal,
-                                                    child: DataTable(
-                                                      columns: const <DataColumn>[
-                                                        DataColumn(
-                                                          label: Text(
-                                                            'Quantité',
-                                                            style: TextStyle(
-                                                                fontStyle:
-                                                                    FontStyle
-                                                                        .italic),
-                                                          ),
+                                                      Axis.horizontal,
+                                                  child: DataTable(
+                                                    columns: const <DataColumn>[
+                                                      DataColumn(
+                                                        label: Text(
+                                                          'Quantité',
+                                                          style: TextStyle(
+                                                              fontStyle:
+                                                                  FontStyle
+                                                                      .italic),
                                                         ),
-                                                        DataColumn(
-                                                          label: Text(
-                                                            'Fournisseur',
-                                                            style: TextStyle(
-                                                                fontStyle:
-                                                                    FontStyle
-                                                                        .italic),
-                                                          ),
+                                                      ),
+                                                      DataColumn(
+                                                        label: Text(
+                                                          'Fournisseur',
+                                                          style: TextStyle(
+                                                              fontStyle:
+                                                                  FontStyle
+                                                                      .italic),
                                                         ),
-                                                        DataColumn(
-                                                          label: Text(
-                                                            'Date de péremption',
-                                                            style: TextStyle(
-                                                                fontStyle:
-                                                                    FontStyle
-                                                                        .italic),
-                                                          ),
+                                                      ),
+                                                      DataColumn(
+                                                        label: Text(
+                                                          'Date de péremption',
+                                                          style: TextStyle(
+                                                              fontStyle:
+                                                                  FontStyle
+                                                                      .italic),
                                                         ),
-                                                        DataColumn(
-                                                          label: Text(
-                                                            'Créé le',
-                                                            style: TextStyle(
-                                                                fontStyle:
-                                                                    FontStyle
-                                                                        .italic),
-                                                          ),
+                                                      ),
+                                                      DataColumn(
+                                                        label: Text(
+                                                          'Créé le',
+                                                          style: TextStyle(
+                                                              fontStyle:
+                                                                  FontStyle
+                                                                      .italic),
                                                         ),
-                                                        DataColumn(
-                                                          label: Text(
-                                                            'Prix d\'achat',
-                                                            style: TextStyle(
-                                                                fontStyle:
-                                                                    FontStyle
-                                                                        .italic),
-                                                          ),
+                                                      ),
+                                                      DataColumn(
+                                                        label: Text(
+                                                          'Prix d\'achat',
+                                                          style: TextStyle(
+                                                              fontStyle:
+                                                                  FontStyle
+                                                                      .italic),
                                                         ),
-                                                        DataColumn(
-                                                          label: Text(
-                                                            'Montant',
-                                                            style: TextStyle(
-                                                                fontStyle:
-                                                                    FontStyle
-                                                                        .italic),
-                                                          ),
+                                                      ),
+                                                      DataColumn(
+                                                        label: Text(
+                                                          'Montant',
+                                                          style: TextStyle(
+                                                              fontStyle:
+                                                                  FontStyle
+                                                                      .italic),
                                                         ),
-                                                      ],
-                                                      rows: [
-                                                        ...produit
-                                                            .approvisionnements
-                                                            .map((appro) {
-                                                          final fournisseur =
-                                                              appro.fournisseur
-                                                                  .target;
-                                                          return DataRow(
-                                                            cells: <DataCell>[
-                                                              DataCell(Text(appro
-                                                                  .quantite
-                                                                  .toStringAsFixed(
-                                                                      2))),
-                                                              DataCell(Text(
-                                                                  fournisseur
-                                                                          ?.nom ??
-                                                                      'Inconnu')),
-                                                              DataCell(Text(appro
-                                                                          .datePeremption !=
-                                                                      null
-                                                                  ? DateFormat(
-                                                                          'dd/MM/yyyy')
-                                                                      .format(appro
-                                                                          .datePeremption!
-                                                                          .toLocal())
-                                                                  : "N/A")),
-                                                              DataCell(Text(DateFormat(
-                                                                      'dd/MM/yyyy')
-                                                                  .format(appro
-                                                                      .crud
-                                                                      .target!
-                                                                      .dateCreation!
-                                                                      .toLocal()))),
-                                                              DataCell(Text(appro
-                                                                  .prixAchat!
-                                                                  .toStringAsFixed(
-                                                                      2))),
-                                                              DataCell(Text((appro
-                                                                          .quantite *
-                                                                      appro
-                                                                          .prixAchat!)
-                                                                  .toStringAsFixed(
-                                                                      2))),
-                                                            ],
-                                                          );
-                                                        }).toList(),
-                                                        DataRow(
+                                                      ),
+                                                    ],
+                                                    rows: [
+                                                      ...produit
+                                                          .approvisionnements
+                                                          .map((appro) {
+                                                        final fournisseur =
+                                                            appro.fournisseur
+                                                                .target;
+                                                        return DataRow(
                                                           cells: <DataCell>[
+                                                            DataCell(Text(appro
+                                                                .quantite
+                                                                .toStringAsFixed(
+                                                                    2))),
                                                             DataCell(Text(
-                                                                totalQuantite
-                                                                    .toStringAsFixed(
-                                                                        2))),
-                                                            DataCell(Text('')),
-                                                            DataCell(Text('')),
-                                                            DataCell(Text('')),
-                                                            DataCell(Text('')),
-                                                            DataCell(Text(
-                                                                totalAmount
-                                                                    .toStringAsFixed(
-                                                                        2))),
+                                                                fournisseur
+                                                                        ?.nom ??
+                                                                    'Inconnu')),
+                                                            DataCell(Text(appro
+                                                                        .datePeremption !=
+                                                                    null
+                                                                ? DateFormat(
+                                                                        'dd/MM/yyyy')
+                                                                    .format(appro
+                                                                        .datePeremption!
+                                                                        .toLocal())
+                                                                : "N/A")),
+                                                            DataCell(Text(DateFormat(
+                                                                    'dd/MM/yyyy')
+                                                                .format(appro
+                                                                    .crud
+                                                                    .target!
+                                                                    .dateCreation!
+                                                                    .toLocal()))),
+                                                            DataCell(Text(appro
+                                                                .prixAchat!
+                                                                .toStringAsFixed(
+                                                                    2))),
+                                                            DataCell(Text((appro
+                                                                        .quantite *
+                                                                    appro
+                                                                        .prixAchat!)
+                                                                .toStringAsFixed(
+                                                                    2))),
                                                           ],
-                                                        ),
-                                                      ],
-                                                    ),
+                                                        );
+                                                      }).toList(),
+                                                      DataRow(
+                                                        cells: <DataCell>[
+                                                          DataCell(Text(
+                                                              totalQuantite
+                                                                  .toStringAsFixed(
+                                                                      2))),
+                                                          DataCell(Text('')),
+                                                          DataCell(Text('')),
+                                                          DataCell(Text('')),
+                                                          DataCell(Text('')),
+                                                          DataCell(Text(totalAmount
+                                                              .toStringAsFixed(
+                                                                  2))),
+                                                        ],
+                                                      ),
+                                                    ],
                                                   ),
                                                 ),
-                                                actions: <Widget>[
-                                                  TextButton(
-                                                    onPressed: () {
-                                                      Navigator.of(context)
-                                                          .pop();
-                                                    },
-                                                    child: Text('Fermer'),
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          );
-                                        },
-                                        child: Text('Quantité : $totalQuantite',
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(fontSize: 15)),
-                                      ),
-                              ),
-                              Spacer(),
-                            ],
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${produit.description ?? 'N/A'}',
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              SizedBox(height: 10),
-                              Text(
+                                              ),
+                                              actions: <Widget>[
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: Text('Fermer'),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                      },
+                                      child: Text('Qty : $totalQuantite',
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(fontSize: 15)),
+                                    ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 15.0, vertical: 8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Text(
                                 produit.approvisionnements.isNotEmpty
                                     ? 'Dérnier Approvisionnement le  : ${DateFormat('dd/MM/yyyy').format(produit.approvisionnements.last.crud.target!.derniereModification ?? DateTime.now())}'
                                     : 'No approvisionnements available',
                               ),
-                              Text(
-                                  'Users createdBy : ${produit.crud.target!.createdBy}'),
-                              Text(
-                                  'Users updatedBy : ${produit.crud.target!.updatedBy}'),
-                              Text(
-                                  'Users deletedBy : ${produit.crud.target!.deletedBy}'),
-                              // Text(
-                              //     produit.approvisionnements.isNotEmpty
-                              //         ? 'Approvisionnements:'
-                              //         : '',
-                              //     style:
-                              //         TextStyle(fontWeight: FontWeight.bold)),
-
-                              // DataTable(
-                              //   columns: const <DataColumn>[
-                              //     DataColumn(
-                              //       label: Text(
-                              //         'Quantité',
-                              //         style: TextStyle(
-                              //             fontStyle: FontStyle.italic),
-                              //       ),
-                              //     ),
-                              //     DataColumn(
-                              //       label: Text(
-                              //         'Fournisseur',
-                              //         style: TextStyle(
-                              //             fontStyle: FontStyle.italic),
-                              //       ),
-                              //     ),
-                              //     DataColumn(
-                              //       label: Text(
-                              //         'Date de péremption',
-                              //         style: TextStyle(
-                              //             fontStyle: FontStyle.italic),
-                              //       ),
-                              //     ),
-                              //     DataColumn(
-                              //       label: Text(
-                              //         'Créé le',
-                              //         style: TextStyle(
-                              //             fontStyle: FontStyle.italic),
-                              //       ),
-                              //     ),
-                              //     DataColumn(
-                              //       label: Text(
-                              //         'Prix d\'achat',
-                              //         style: TextStyle(
-                              //             fontStyle: FontStyle.italic),
-                              //       ),
-                              //     ),
-                              //   ],
-                              //   rows: produit.approvisionnements.map((appro) {
-                              //     final fournisseur = appro.fournisseur.target;
-                              //     return DataRow(
-                              //       cells: <DataCell>[
-                              //         DataCell(Text(
-                              //             appro.quantite.toStringAsFixed(2))),
-                              //         DataCell(
-                              //             Text(fournisseur?.nom ?? 'Inconnu')),
-                              //         DataCell(Text(appro.datePeremption != null
-                              //             ? DateFormat('dd/MM/yyyy').format(
-                              //                 appro.datePeremption!.toLocal())
-                              //             : "N/A")),
-                              //         DataCell(Text(DateFormat('dd/MM/yyyy')
-                              //             .format(appro
-                              //                 .crud.target!.dateCreation!
-                              //                 .toLocal()))),
-                              //         DataCell(Text(
-                              //             appro.prixAchat.toStringAsFixed(2))),
-                              //       ],
-                              //     );
-                              //   }).toList(),
-                              // ),
-
-                              // ...produit.approvisionnements.map((appro) {
-                              //   final fournisseur = appro.fournisseur.target;
-                              //   return Padding(
-                              //       padding:
-                              //           EdgeInsets.symmetric(vertical: 4.0),
-                              //       child: ListTile(
-                              //         leading: CircleAvatar(
-                              //           child: Text(
-                              //             'Quantité: ${appro.quantite.toStringAsFixed(2)}',
-                              //           ),
-                              //         ),
-                              //         title: Text(
-                              //           'Fournisseur: ${fournisseur?.nom ?? 'Inconnu'}',
-                              //         ),
-                              //         subtitle: Column(
-                              //           children: [
-                              //             Text(
-                              //               'Date de péremption: ${appro.datePeremption != null ? DateFormat('dd/MM/yyyy').format(appro.datePeremption!.toLocal()) : "N/A"}',
-                              //             ),
-                              //             Text(
-                              //               'Créer le : ${DateFormat('dd/MM/yyyy').format(appro.crud.target!.dateCreation!.toLocal())}',
-                              //             ),
-                              //           ],
-                              //         ),
-                              //         trailing: Text(
-                              //           'Prix d\'achat: ${appro.prixAchat.toStringAsFixed(2)}',
-                              //         ),
-                              //       ));
-                              // }).toList(),
-                            ],
-                          ),
-                          trailing: Text(
-                            '${produit.prixVente.toStringAsFixed(2)} DZD',
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(15.0),
-                          child: Row(
-                            children: [
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8),
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.qr_code),
-                                    // Text(
-                                    //   ' ${produit.qr}',
-                                    //   style: TextStyle(fontSize: 20),
-                                    // ),
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        // Affichage des QR codes
-                                        // Text(
-                                        //   'QR Codes :',
-                                        //   style: TextStyle(
-                                        //       fontSize: 18,
-                                        //       fontWeight: FontWeight.bold),
-                                        // ),
-                                        // if (produit.qr != null)
-                                        //   ...produit.qr!
-                                        //       .split(',')
-                                        //       .map((qr) => Text(
-                                        //             qr,
-                                        //             style:
-                                        //                 TextStyle(fontSize: 20),
-                                        //           ))
-                                        //       .toList(),
-                                        // Affichage des QR codes dans un Wrap
-                                        Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Wrap(
-                                            spacing:
-                                                8.0, // Espacement horizontal entre les Chips
-                                            runSpacing:
-                                                7.0, // Espacement vertical entre les Chips
-                                            children: qrCodes
-                                                .map((code) => Chip(
-                                                      padding: EdgeInsets.zero,
-                                                      backgroundColor: Colors
-                                                          .blueAccent
-                                                          .withOpacity(0.2),
-                                                      shape:
-                                                          RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                                20.0), // Coins arrondis
-                                                      ),
-                                                      avatar:
-                                                          CircularFlagDetector(
-                                                        barcode: code,
-                                                        size:
-                                                            25, // Adjust the size as needed
-                                                      ),
-                                                      label: Text(
-                                                          code), // Affiche le QR code dans le Chip
-                                                    ))
-                                                .toList(),
+                            ),
+                            Row(
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 8),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.qr_code),
+                                      // Text(
+                                      //   ' ${produit.qr}',
+                                      //   style: TextStyle(fontSize: 20),
+                                      // ),
+                                      Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          // Affichage des QR codes
+                                          // Text(
+                                          //   'QR Codes :',
+                                          //   style: TextStyle(
+                                          //       fontSize: 18,
+                                          //       fontWeight: FontWeight.bold),
+                                          // ),
+                                          // if (produit.qr != null)
+                                          //   ...produit.qr!
+                                          //       .split(',')
+                                          //       .map((qr) => Text(
+                                          //             qr,
+                                          //             style:
+                                          //                 TextStyle(fontSize: 20),
+                                          //           ))
+                                          //       .toList(),
+                                          // Affichage des QR codes dans un Wrap
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Wrap(
+                                              spacing:
+                                                  8.0, // Espacement horizontal entre les Chips
+                                              runSpacing:
+                                                  7.0, // Espacement vertical entre les Chips
+                                              children: qrCodes
+                                                  .map((code) => Chip(
+                                                        padding:
+                                                            EdgeInsets.zero,
+                                                        backgroundColor: Colors
+                                                            .blueAccent
+                                                            .withOpacity(0.2),
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                  20.0), // Coins arrondis
+                                                        ),
+                                                        avatar:
+                                                            CircularFlagDetector(
+                                                          barcode: code,
+                                                          size:
+                                                              25, // Adjust the size as needed
+                                                        ),
+                                                        label: Text(
+                                                            code), // Affiche le QR code dans le Chip
+                                                      ))
+                                                  .toList(),
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              Spacer(),
-                              produit.qr != null
-                                  ? FlagDetector(
-                                      barcode: produit.qr!,
-                                      height: 20,
-                                      width: 30,
-                                    ) // Afficher FlagDetector avec le code-barres
-                                  : FlagDetector(
-                                      barcode: produit.qr!,
-                                      height: 20,
-                                      width: 30,
-                                    ),
-                            ],
-                          ),
+                                Spacer(),
+                                produit.qr != null
+                                    ? FlagDetector(
+                                        barcode: produit.qr!,
+                                        height: 20,
+                                        width: 30,
+                                      ) // Afficher FlagDetector avec le code-barres
+                                    : FlagDetector(
+                                        barcode: produit.qr!,
+                                        height: 20,
+                                        width: 30,
+                                      ),
+                              ],
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 );
               } else if (produitProvider.hasMoreProduits) {

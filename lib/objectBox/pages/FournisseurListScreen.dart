@@ -64,18 +64,19 @@ class _FournisseurListScreenState extends State<FournisseurListScreen> {
           return ListView.builder(
             itemCount: fournisseurProvider.fournisseurs.length,
             itemBuilder: (context, index) {
-              if (index == 5 && _nativeAd != null && _nativeAdIsLoaded) {
+              if (index != 0 && index % 5 == 0 && _nativeAd != null && _nativeAdIsLoaded) {
                 return Align(
-                    alignment: Alignment.center,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        minWidth: 300,
-                        minHeight: 350,
-                        maxHeight: 400,
-                        maxWidth: 450,
-                      ),
-                      child: AdWidget(ad: _nativeAd!),
-                    ));
+                  alignment: Alignment.center,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      minWidth: 300,
+                      minHeight: 350,
+                      maxHeight: 400,
+                      maxWidth: 450,
+                    ),
+                    child: AdWidget(ad: _nativeAd!),
+                  ),
+                );
               }
               final fournisseur = fournisseurProvider.fournisseurs[index];
               return Card(

@@ -276,7 +276,7 @@ class ObjectBox {
         nom: faker.company.name(),
         phone: faker.phoneNumber.us(),
         adresse: faker.address.streetAddress(),
-        qr: faker.randomGenerator.integer(999999).toString(),
+        qr: faker.randomGenerator.integer(999999999).toString(),
         derniereModification:
             faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
       )..crud.target = Crud(
@@ -349,6 +349,11 @@ class ObjectBox {
         }
 
         await produitBox.put(produit);
+        print(produit.id.toString() +
+            ' ===> ' +
+            produit.nom +
+            ' ===> ' +
+            produit.qr.toString());
       }
     }
 

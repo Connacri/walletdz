@@ -450,10 +450,10 @@ packages:
     dependency: transitive
     description:
       name: fading_edge_scrollview
-      sha256: c25c2231652ce774cc31824d0112f11f653881f43d7f5302c05af11942052031
+      sha256: "1f84fe3ea8e251d00d5735e27502a6a250e4aa3d3b330d3fdcb475af741464ef"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0"
+    version: "4.1.1"
   fake_async:
     dependency: transitive
     description:
@@ -1254,10 +1254,10 @@ packages:
     dependency: "direct main"
     description:
       name: marquee
-      sha256: "4b5243d2804373bdc25fc93d42c3b402d6ec1f4ee8d0bb72276edd04ae7addb8"
+      sha256: a87e7e80c5d21434f90ad92add9f820cf68be374b226404fe881d2bba7be0862
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.3"
+    version: "2.3.0"
   matcher:
     dependency: transitive
     description:
@@ -1302,10 +1302,10 @@ packages:
     dependency: "direct main"
     description:
       name: mobile_scanner
-      sha256: "145500ef1cdaa569c26d626336048fd0b0a9d00014e69af67baf632295fd8b40"
+      sha256: e93461298494a3e5475dd2b41068012823b8fe2caf8d47ba545faca2aa3767d6
       url: "https://pub.dev"
     source: hosted
-    version: "6.0.0"
+    version: "6.0.1"
   msix:
     dependency: "direct main"
     description:
@@ -1334,10 +1334,10 @@ packages:
     dependency: "direct main"
     description:
       name: network_info_plus
-      sha256: "6a31fa47c1f6e240f1b60de0a57d65a092ac1af7515247660f03643576984eb8"
+      sha256: "158fa0c29c97e2513b3f5b2b7706ca637687e97a318a42a934d89c8cb47d4b74"
       url: "https://pub.dev"
     source: hosted
-    version: "6.0.1"
+    version: "6.0.2"
   network_info_plus_platform_interface:
     dependency: transitive
     description:
@@ -1730,6 +1730,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.3"
+  screen_retriever:
+    dependency: transitive
+    description:
+      name: screen_retriever
+      sha256: "6ee02c8a1158e6dae7ca430da79436e3b1c9563c8cf02f524af997c201ac2b90"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.9"
   screenshot:
     dependency: "direct main"
     description:
@@ -2019,10 +2027,10 @@ packages:
     dependency: "direct main"
     description:
       name: url_launcher
-      sha256: "21b704ce5fa560ea9f3b525b43601c678728ba46725bab9b01187b4831377ed3"
+      sha256: "9d06212b1362abc2f0f0d78e6f09f726608c74e3b9462e8368bb03314aa8d603"
       url: "https://pub.dev"
     source: hosted
-    version: "6.3.0"
+    version: "6.3.1"
   url_launcher_android:
     dependency: transitive
     description:
@@ -2123,18 +2131,18 @@ packages:
     dependency: "direct main"
     description:
       name: vibration
-      sha256: fe8f90e1827f86a4f722b819799ecac8a24789a39c6d562ea316bcaeb8b1ec61
+      sha256: f0af02af2d63132135ae0332a3e54d5de718e214ee94c4f082176ef6ce624a4b
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.1"
   vibration_platform_interface:
     dependency: transitive
     description:
       name: vibration_platform_interface
-      sha256: "735a5fef0f284de0ad9449a5ed7d36ba017c6f59b5b20ac64418af4a6bd35ee7"
+      sha256: f66b39aab2447038978c16f3d6f77228e49ef5717556e3da02313e044e4a7600
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1"
+    version: "0.0.2"
   video_player:
     dependency: "direct main"
     description:
@@ -2267,10 +2275,10 @@ packages:
     dependency: "direct main"
     description:
       name: win32
-      sha256: "4d45dc9069dba4619dc0ebd93c7cec5e66d8482cb625a370ac806dcc8165f2ec"
+      sha256: e5c39a90447e7c81cfec14b041cdbd0d0916bd9ebbc7fe02ab69568be703b9bd
       url: "https://pub.dev"
     source: hosted
-    version: "5.5.5"
+    version: "5.6.0"
   win32_registry:
     dependency: transitive
     description:
@@ -2279,6 +2287,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.4"
+  window_manager:
+    dependency: "direct main"
+    description:
+      name: window_manager
+      sha256: ab8b2a7f97543d3db2b506c9d875e637149d48ee0c6a5cb5f5fd6e0dac463792
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.2"
   wkt_parser:
     dependency: transitive
     description:

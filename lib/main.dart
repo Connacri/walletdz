@@ -12,6 +12,7 @@ import 'package:intl/date_symbol_data_local.dart'; // Importez cette ligne
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:window_manager/window_manager.dart';
 import 'Oauth/Ogoogle/googleSignInProvider.dart';
 import 'Oauth/verifi_auth2.dart';
 import 'firebase_options.dart';
@@ -24,6 +25,26 @@ import 'objectBox/hash.dart';
 //late ObjectBox objectbox;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+// Vérifier que la plateforme est desktop avant d'initialiser window_manager
+  if (!Platform.isAndroid && !Platform.isIOS) {
+    // Initialiser window_manager uniquement pour les plateformes desktop
+    await windowManager.ensureInitialized();
+
+    // Désactiver le redimensionnement
+    WindowOptions windowOptions = const WindowOptions(
+      size: Size(1920, 1080), // Taille initiale (mode desktop)
+      center: true,
+      backgroundColor: Colors.transparent,
+      titleBarStyle: TitleBarStyle.normal,
+    );
+
+    windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager
+          .setResizable(false); // Désactiver redimensionnement manuel
+      await windowManager.show();
+    });
+  }
+
   initializeDateFormatting(
       'fr_FR', null); // Initialisez la localisation française
   if (Platform.isAndroid || Platform.isIOS) {

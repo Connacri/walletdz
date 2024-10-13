@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:lottie/lottie.dart';
@@ -41,45 +41,39 @@ class _LottieListPageState extends State<LottieListPage> {
       appBar: AppBar(
         title: Text('List of Lottie Animations'),
       ),
-      body: ListView.builder(
+      body: GridView.builder(
         itemCount: lottieFileNames.length,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: MediaQuery.of(context).size.width < 600
+              ? 2 // Si la largeur est inférieure à 600, 2 colonnes
+              : (Platform.isAndroid || Platform.isIOS)
+                  ? 2 // Pour Android/iOS, 2 colonnes
+                  : 6, // Pour les autres plateformes, 6 colonnes          childAspectRatio: 1.0, // Proportion largeur/hauteur des éléments
+        ),
         itemBuilder: (context, index) {
           final lottieFileName = lottieFileNames[index];
-          final lottieFilePath = 'assets/lotties/$lottieFileName';
+          final lottieFilePath = '$lottieFileName';
 
           return Padding(
             padding: const EdgeInsets.all(8.0),
             child: Card(
               elevation: 2.0,
-              child: ListTile(
-                  title: Text(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
                     lottieFileName,
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
-                  subtitle: Center(
-                    child: SizedBox(
-                        height: 100,
-                        width: 100,
-                        child: Lottie.asset('${lottieFileName}')),
-                  )
-                  // FutureBuilder(
-                  //   future: rootBundle.loadString(lottieFilePath),
-                  //   builder: (context, snapshot) {
-                  //     if (snapshot.connectionState == ConnectionState.waiting) {
-                  //       return CircularProgressIndicator();
-                  //     } else if (snapshot.hasError) {
-                  //       return Text('Error loading Lottie');
-                  //     } else {
-                  //       return LottieBuilder.asset(
-                  //         lottieFilePath,
-                  //         width: 100,
-                  //         height: 100,
-                  //         fit: BoxFit.contain,
-                  //       );
-                  //     }
-                  //   },
-                  // ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: 100,
+                    width: 100,
+                    child: Lottie.asset(
+                        '$lottieFilePath'), // Chemin du fichier Lottie
                   ),
+                ],
+              ),
             ),
           );
         },

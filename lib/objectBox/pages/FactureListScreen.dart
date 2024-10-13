@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:objectbox/src/relations/to_many.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
@@ -895,8 +896,14 @@ class FacturesListPage extends StatefulWidget {
 
 class _FacturesListPageState extends State<FacturesListPage> {
   DateTime? _startDate;
-
+  NativeAd? _nativeAd;
+  bool _nativeAdIsLoaded = false;
   DateTime? _endDate;
+  @override
+  void dispose() {
+    super.dispose();
+    _nativeAd?.dispose();
+  }
 
   Map<String, dynamic> _totals = {
     'totalTTC': 0.0,
@@ -1042,6 +1049,24 @@ class _FacturesListPageState extends State<FacturesListPage> {
                     child: ListView.builder(
                       itemCount: factures.length,
                       itemBuilder: (context, index) {
+                        if (index != 0 &&
+                            index % 5 == 0 &&
+                            _nativeAd != null &&
+                            _nativeAdIsLoaded) {
+                          return Align(
+                            alignment: Alignment.center,
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                minWidth: 300,
+                                minHeight: 350,
+                                maxHeight: 400,
+                                maxWidth: 450,
+                              ),
+                              child: AdWidget(ad: _nativeAd!),
+                            ),
+                          );
+                        }
+
                         final facture = factures[index];
                         final client = facture.client.target;
                         return ListTile(

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:isolate';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:path/path.dart' as path;
 import 'package:supabase_flutter/supabase_flutter.dart' as Supa;
 import 'package:objectbox/objectbox.dart';
@@ -1068,14 +1069,15 @@ class SupabaseSync {
     final String localFolderPath =
         r'C:\Users\INDRA\OneDrive\Documents\ImagesProduits';
     final String placeholderImageUrl =
-        'https://picsum.photos/200/300?random=${produit.id}';
+        'https://picsum.photos/200/300?random=${produit.id.toString().trim()}';
+
     final String supabaseBucketPath = 'products';
 
-    final String imageName = '${produit.qr}.jpg';
+    final String imageName = '${produit.qr.toString().trim()}.jpg';
     final File imageFile = File(path.join(localFolderPath, imageName));
 
     developer.log(
-        'Recherche de l\'image pour le produit ${produit.nom} avec QR: ${produit.qr}');
+        'Recherche de l\'image pour le produit ${produit.nom} avec QR: ${produit.qr.toString().trim()}');
     developer.log('Chemin du fichier image: ${imageFile.path}');
 
     if (await imageFile.exists()) {
@@ -1138,7 +1140,8 @@ class _ProduitListPageState extends State<ProduitListPage>
   int _currentPage = 0;
 
   final ScrollController _scrollControllerProduits = ScrollController();
-
+  NativeAd? _nativeAd;
+  bool _nativeAdIsLoaded = false;
   late TabController _tabController;
 
   @override
@@ -1155,7 +1158,7 @@ class _ProduitListPageState extends State<ProduitListPage>
     _scrollControllerProduits.removeListener(_onScrollProduits);
 
     _scrollControllerProduits.dispose();
-
+    _nativeAd?.dispose();
     _tabController.dispose();
     super.dispose();
   }
@@ -1281,6 +1284,10 @@ class _ProduitListPageState extends State<ProduitListPage>
       // print('Lignes de la table produits supprimées avec succès.');
       print('Suppression des lignes de la table cruds...');
       await supabase.from('cruds').delete().neq('id', 0);
+      print('Suppression des lignes de la table produits...');
+      await supabase.from('produits').delete().neq('id', 0);
+      print('Lignes de la table produits supprimées avec succès.');
+
       print('Lignes de la table cruds supprimées avec succès.');
       print('Suppression des lignes de la table approvisionnements...');
       await supabase.from('approvisionnements').delete().neq('id', 0);
@@ -1506,6 +1513,24 @@ class _ProduitListPageState extends State<ProduitListPage>
             controller: _scrollControllerProduits,
             itemCount: _produits.length + 1,
             itemBuilder: (context, index) {
+              if (index != 0 &&
+                  index % 5 == 0 &&
+                  _nativeAd != null &&
+                  _nativeAdIsLoaded) {
+                return Align(
+                  alignment: Alignment.center,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      minWidth: 300,
+                      minHeight: 350,
+                      maxHeight: 400,
+                      maxWidth: 450,
+                    ),
+                    child: AdWidget(ad: _nativeAd!),
+                  ),
+                );
+              }
+
               if (index < _produits.length) {
                 final produit = _produits[index];
 

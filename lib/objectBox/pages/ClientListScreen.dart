@@ -1,11 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 
 import '../Entity.dart';
 import '../MyProviders.dart';
 import 'FactureListScreen.dart';
 
-class ClientListScreen extends StatelessWidget {
+class ClientListScreen extends StatefulWidget {
+  @override
+  State<ClientListScreen> createState() => _ClientListScreenState();
+}
+
+class _ClientListScreenState extends State<ClientListScreen> {
+  NativeAd? _nativeAd;
+
+  bool _nativeAdIsLoaded = false;
+
+  @override
+  void dispose() {
+    super.dispose();
+    _nativeAd?.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<ClientProvider>(
@@ -43,6 +59,24 @@ class ClientListScreen extends StatelessWidget {
             itemCount: clients.length,
             itemBuilder: (context, index) {
               //final client = clients[index];
+              if (index != 0 &&
+                  index % 5 == 0 &&
+                  _nativeAd != null &&
+                  _nativeAdIsLoaded) {
+                return Align(
+                  alignment: Alignment.center,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      minWidth: 300,
+                      minHeight: 350,
+                      maxHeight: 400,
+                      maxWidth: 450,
+                    ),
+                    child: AdWidget(ad: _nativeAd!),
+                  ),
+                );
+              }
+
               final client = clients[clients.length - 1 - index];
               return Card(
                 child: ListTile(

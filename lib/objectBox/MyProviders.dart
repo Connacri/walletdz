@@ -142,14 +142,35 @@ class CommerceProvider extends ChangeNotifier {
     return _objectBox.produitBox.get(id);
   }
 
+  // Future<Produit?> getProduitByQr(String qrCode) async {
+  //   final query = _objectBox.produitBox.query(Produit_.qr.equals(qrCode));
+  //   final produits = await query.build().find();
+  //
+  //   if (produits.isNotEmpty) {
+  //     return produits.first;
+  //   } else {
+  //     return null;
+  //   }
+  // }
   Future<Produit?> getProduitByQr(String qrCode) async {
-    final query = _objectBox.produitBox.query(Produit_.qr.equals(qrCode));
+    // Prépare le code QR sans le "1" au début s'il y en a un
+    String qrCodeSans1 = qrCode.startsWith('1') ? qrCode.substring(1) : qrCode;
+
+    // Prépare aussi le code QR avec un "1" au début s'il n'en a pas
+    String qrCodeAvec1 = qrCode.startsWith('1') ? qrCode : '1' + qrCode;
+
+    // Construire la requête pour vérifier les deux versions du code QR dans la base de données
+    final query = _objectBox.produitBox.query(Produit_.qr
+        .equals(qrCode)
+        .or(Produit_.qr.equals(qrCodeSans1))
+        .or(Produit_.qr.equals(qrCodeAvec1)));
+
     final produits = await query.build().find();
 
     if (produits.isNotEmpty) {
-      return produits.first;
+      return produits.first; // Retourne le premier produit trouvé
     } else {
-      return null;
+      return null; // Aucun produit trouvé
     }
   }
 
