@@ -154,7 +154,7 @@ Future<String?> downloadImage(String imageUrl, String productName) async {
     final response = await http.get(Uri.parse(imageUrl));
     if (response.statusCode == 200) {
       Directory directory = await getApplicationDocumentsDirectory();
-      String imagesPath = path.join(directory.path, 'ImagesProduits2');
+      String imagesPath = path.join(directory.path, 'ImagesProduits');
       final dir = Directory(imagesPath);
       if (!await dir.exists()) {
         await dir.create(recursive: true);

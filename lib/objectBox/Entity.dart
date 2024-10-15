@@ -160,7 +160,7 @@ class Produit {
       qtyPartiel: (json['qtyPartiel'] ?? 0).toDouble(),
       pricePartielVente: (json['pricePartielVente'] ?? 0.0).toDouble(),
       minimStock: (json['minimStock'] ?? 0).toDouble(),
-      alertPeremption: (json['alertPeremption']).toInt(),
+      alertPeremption: (json['alertPeremption'] ?? 0).toInt(),
       derniereModification: json['derniereModification'] != null
           ? DateTime.fromMillisecondsSinceEpoch(json['derniereModification'])
           : DateTime.now(),

@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:objectbox/objectbox.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:walletdz/objectBox/Entity.dart';
 import '../../objectbox.g.dart';
-import 'Entity.dart';
 import 'dart:math' show Random;
 import 'package:permission_handler/permission_handler.dart';
 
@@ -22,6 +22,8 @@ class ObjectBox {
   late final Box<Facture> factureBox;
   late final Box<LigneFacture> ligneFacture;
   late final Box<Client> clientBox;
+  late final Box<DeletedProduct> deletedProduct;
+  late final Box<QrCode> qrCode;
 
   static final ObjectBox _singleton = ObjectBox._internal();
 
@@ -43,6 +45,8 @@ class ObjectBox {
       factureBox = Box<Facture>(store);
       ligneFacture = Box<LigneFacture>(store);
       clientBox = Box<Client>(store);
+      deletedProduct = Box<DeletedProduct>(store);
+      qrCode = Box<QrCode>(store);
     }
   }
 
@@ -241,6 +245,36 @@ class ObjectBox {
     clientBox.putMany(clients);
   }
 
+  Future<void> insertOrUpdateProduit(Produit produit) async {
+    try {
+      // Vérifier si un produit avec le même QR existe déjà
+      final existingProduit =
+          produitBox.query(Produit_.qr.equals(produit.qr!)).build().findFirst();
+
+      if (existingProduit != null) {
+        // Un produit avec ce QR existe déjà, mettons à jour ses propriétés
+        existingProduit.nom = produit.nom;
+        existingProduit.description = produit.description;
+        existingProduit.prixVente = produit.prixVente;
+        existingProduit.minimStock = produit.minimStock;
+        existingProduit.alertPeremption = produit.alertPeremption;
+        existingProduit.derniereModification = DateTime.now();
+
+        // Mettre à jour le produit existant
+        produitBox.put(existingProduit);
+        print(
+            'Produit mis à jour : ${existingProduit.id} - ${existingProduit.nom}');
+      } else {
+        // Aucun produit avec ce QR n'existe, insérons le nouveau produit
+        final id = produitBox.put(produit);
+        print('Nouveau produit inséré : $id - ${produit.nom}');
+      }
+    } catch (e) {
+      print('Erreur lors de l\'insertion/mise à jour du produit : $e');
+      // Gérer l'erreur selon vos besoins (par exemple, afficher une alerte à l'utilisateur)
+    }
+  }
+
   Future<void> importProduitsDepuisExcel(
     String filePath,
     int userCount,
@@ -276,7 +310,7 @@ class ObjectBox {
         nom: faker.company.name(),
         phone: faker.phoneNumber.us(),
         adresse: faker.address.streetAddress(),
-        qr: faker.randomGenerator.integer(999999999).toString(),
+        qr: faker.randomGenerator.integer(999999).toString(),
         derniereModification:
             faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
       )..crud.target = Crud(
@@ -296,13 +330,15 @@ class ObjectBox {
         final designation = row[1]?.value?.toString() ?? faker.food.dish();
         final prixAchat = double.tryParse(row[6]?.value?.toString() ?? '') ??
             faker.randomGenerator.decimal();
-        final prixVente = prixAchat * 1.3;
+        final prixVente = double.tryParse(row[7]?.value?.toString() ?? '') ??
+            faker.randomGenerator.decimal();
         final stock = double.tryParse(row[5]?.value?.toString() ?? '') ??
             faker.randomGenerator.integer(100).toDouble();
-
+        // Nettoyage du code QR (suppression des espaces)
+        final qrCode = (row[0]?.value?.toString() ?? '').replaceAll(' ', '');
         // Création d'un produit
         final produit = Produit(
-          qr: row[10]?.value?.toString(),
+          qr: qrCode,
           image:
               'https://picsum.photos/200/300?random=${faker.randomGenerator.integer(5000)}',
           nom: designation,
@@ -328,7 +364,7 @@ class ObjectBox {
           final fournisseur = fournisseurs[random.nextInt(fournisseurs.length)];
 
           final approvisionnement = Approvisionnement(
-            quantite: faker.randomGenerator.integer(100).toDouble(),
+            quantite: stock,
             prixAchat: prixAchat,
             datePeremption: faker.date.dateTime(
                 minYear: DateTime.now().year, maxYear: DateTime.now().year + 2),
@@ -348,7 +384,9 @@ class ObjectBox {
           produit.approvisionnements.add(approvisionnement);
         }
 
-        await produitBox.put(produit);
+        //await produitBox.put(produit);
+        // Insérer ou mettre à jour le produit
+        await insertOrUpdateProduit(produit);
         print(produit.id.toString() +
             ' ===> ' +
             produit.nom +
@@ -391,6 +429,89 @@ class ObjectBox {
       (_) => _createFacture(faker),
     );
     await factureBox.putMany(facturesSansClient);
+  }
+
+  Future<void> importProduitsRestantsDepuisExcel(String filePath) async {
+    final file = File(filePath);
+    final bytes = await file.readAsBytes();
+    final excel = Excel.decodeBytes(bytes);
+    final faker = Faker();
+    final random = Random();
+
+    for (var table in excel.tables.keys) {
+      for (var row in excel.tables[table]!.rows.skip(1)) {
+        final designation = row[1]?.value?.toString() ?? faker.food.dish();
+        final prixAchat = double.tryParse(row[6]?.value?.toString() ?? '') ??
+            faker.randomGenerator.decimal();
+        final prixVente = double.tryParse(row[7]?.value?.toString() ?? '') ??
+            faker.randomGenerator.decimal();
+        final stock = double.tryParse(row[5]?.value?.toString() ?? '') ??
+            faker.randomGenerator.integer(100).toDouble();
+
+        // Nettoyage du code QR (suppression des espaces)
+        final qrCode = (row[0]?.value?.toString() ?? '').replaceAll(' ', '');
+
+        // Vérification de l'existence du produit dans ObjectBox
+        final existingProduit = await produitBox
+            .query(Produit_.qr.equals(qrCode))
+            .build()
+            .findFirst();
+
+        if (existingProduit == null) {
+          // Création d'un nouveau produit s'il n'existe pas
+          final produit = Produit(
+            qr: qrCode,
+            image:
+                'https://picsum.photos/200/300?random=${faker.randomGenerator.integer(5000)}',
+            nom: designation,
+            description: row[1]?.value?.toString() ?? faker.lorem.sentence(),
+            prixVente: prixVente,
+            minimStock: faker.randomGenerator.decimal(min: 1, scale: 2),
+            alertPeremption: random.nextInt(1000),
+            derniereModification: DateTime.now(),
+          )..crud.target = Crud(
+              createdBy: faker.randomGenerator.integer(1000),
+              updatedBy: faker.randomGenerator.integer(1000),
+              deletedBy: faker.randomGenerator.integer(1000),
+              dateCreation: DateTime.now(),
+              derniereModification: DateTime.now(),
+            );
+
+          // Création d'un approvisionnement initial pour le nouveau produit
+          final approvisionnement = Approvisionnement(
+            quantite: stock,
+            prixAchat: prixAchat,
+            datePeremption: faker.date.dateTime(
+                minYear: DateTime.now().year, maxYear: DateTime.now().year + 2),
+            derniereModification: DateTime.now(),
+          )
+            ..produit.target = produit
+            ..fournisseur.target = await getFournisseurAleatoire()
+            ..crud.target = Crud(
+              createdBy: faker.randomGenerator.integer(1000),
+              updatedBy: faker.randomGenerator.integer(1000),
+              deletedBy: faker.randomGenerator.integer(1000),
+              dateCreation: DateTime.now(),
+              derniereModification: DateTime.now(),
+            );
+
+          produit.approvisionnements.add(approvisionnement);
+
+          await produitBox.put(produit);
+          print(
+              'Nouveau produit importé: ${produit.id} - ${produit.nom} - QR: ${produit.qr}');
+        } else {
+          print(
+              'Produit déjà existant: ${existingProduit.id} - ${existingProduit.nom} - QR: ${existingProduit.qr}');
+        }
+      }
+    }
+  }
+
+  Future<Fournisseur> getFournisseurAleatoire() async {
+    final count = await fournisseurBox.count();
+    final randomId = Random().nextInt(count) + 1;
+    return fournisseurBox.get(randomId)!;
   }
 
   Future<void> checkStoragePermission() async {
@@ -442,19 +563,56 @@ class ObjectBox {
 
   Future<void> deleteDatabase() async {
     final directory = await getApplicationDocumentsDirectory();
-    print(directory);
+    print('Directory: $directory');
+
     final path = join(directory.path, 'objectbox');
-    print(path);
+    print('Path: $path');
+
     final dir = Directory(path);
-    print(dir);
+    print('Directory exists: ${await dir.exists()}');
     // if (await dir.exists()) {
     //   await dir.delete(recursive: true);
     // }
-    produitBox.removeAll();
-    fournisseurBox.removeAll();
-    clientBox.removeAll();
-    factureBox.removeAll();
+    print('Suppression des approvisionnements');
+    approvisionnementBox.removeAll();
+    print('Approvisionnements Succefully Deleted');
+
+    print('Suppression des ligneFacture');
     ligneFacture.removeAll();
+    print('ligneFacture Succefully Deleted');
+
+    print('Suppression des crudBox');
+    crudBox.removeAll();
+    print('crudBox Succefully Deleted');
+
+    print('Suppression des qrCode');
+    qrCode.removeAll();
+    print('qrCode Succefully Deleted');
+
+    print('Suppression des produitBox');
+    produitBox.removeAll();
+    print('produitBox Succefully Deleted');
+
+    print('Suppression des fournisseurBox');
+    fournisseurBox.removeAll();
+    print('fournisseurBox Succefully Deleted');
+
+    print('Suppression des clientBox');
+    clientBox.removeAll();
+    print('clientBox Succefully Deleted');
+
+    print('Suppression des userBox');
+    userBox.removeAll();
+    print('userBox Succefully Deleted');
+
+    print('Suppression des factureBox');
+    factureBox.removeAll();
+    print('factureBox Succefully Deleted');
+
+    print('Suppression des deletedProduct');
+    deletedProduct.removeAll();
+    print('deletedProduct Succefully Deleted');
+
     //await deleteDatabase();
     await init();
   }
