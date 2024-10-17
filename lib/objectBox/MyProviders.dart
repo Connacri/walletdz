@@ -153,24 +153,56 @@ class CommerceProvider extends ChangeNotifier {
   //   }
   // }
   Future<Produit?> getProduitByQr(String qrCode) async {
-    // Prépare le code QR sans le "1" au début s'il y en a un
-    String qrCodeSans1 = qrCode.startsWith('1') ? qrCode.substring(1) : qrCode;
+    // Vérifier si le QR code commence par '613' ou '1613' et le transformer si nécessaire
+    if (qrCode.startsWith('1613')) {
+      qrCode = '613' + qrCode.substring(4); // Remplace 1613 par 613
+    }
 
-    // Prépare aussi le code QR avec un "1" au début s'il n'en a pas
-    String qrCodeAvec1 = qrCode.startsWith('1') ? qrCode : '1' + qrCode;
+    // Requête pour récupérer tous les produits
+    final query = _objectBox.produitBox.query();
 
-    // Construire la requête pour vérifier les deux versions du code QR dans la base de données
-    final query = _objectBox.produitBox.query(Produit_.qr
-        .equals(qrCode)
-        .or(Produit_.qr.equals(qrCodeSans1))
-        .or(Produit_.qr.equals(qrCodeAvec1)));
-
+    // Récupérer tous les produits
     final produits = await query.build().find();
 
-    if (produits.isNotEmpty) {
-      return produits.first; // Retourne le premier produit trouvé
+    // Chercher le produit avec le QR code spécifié
+    for (var produit in produits) {
+      // Convertir la chaîne QR en liste
+      List<String> qrCodes = produit.qr!.split(','); // Séparer les QR codes
+
+      // Vérifier si le QR code existe dans la liste
+      if (qrCodes.contains(qrCode)) {
+        return produit; // Retourner le produit si le QR code est trouvé
+      }
+    }
+
+    return null; // Aucun produit trouvé avec le QR code donné
+  }
+
+  Future<void> removeQRCodeFromProduit(int produitId, String qrCode) async {
+    // Récupérer le produit par ID
+    final produit = await getProduitById(produitId);
+    if (produit != null) {
+      // Convertir la chaîne QR en liste
+      List<String> qrCodes = produit.qr!.split(
+          ','); // Supposons que les QR codes sont séparés par des virgules
+      print(qrCodes);
+      // Vérifier si le QR code existe et le supprimer
+      if (qrCodes.contains(qrCode)) {
+        qrCodes.remove(qrCode); // Supprimer le QR code
+
+        // Mettre à jour la chaîne QR du produit
+        produit.qr = qrCodes.isNotEmpty
+            ? qrCodes.join(',')
+            : ''; // Rejoindre en une seule chaîne ou le définir à une chaîne vide
+
+        // Mettre à jour le produit dans ObjectBox ou votre base de données
+        await _objectBox.produitBox.put(produit);
+        chargerProduits(reset: true);
+      } else {
+        print('Le QR code $qrCode n\'existe pas dans la liste.');
+      }
     } else {
-      return null; // Aucun produit trouvé
+      print('Produit non trouvé.');
     }
   }
 

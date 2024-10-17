@@ -21,6 +21,7 @@ import 'FournisseurListScreen.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:percent_indicator/percent_indicator.dart';
+import 'addProduct2.dart';
 import 'add_Produit.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
@@ -212,6 +213,11 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
   @override
   Widget build(BuildContext context) {
     final objectBox = Provider.of<ObjectBox>(context, listen: false);
+    void supprimerProduitsInvalides() {
+      objectBox.supprimerProduitsAvecQrCodeInvalide();
+      print(
+          'Tous les produits invalides et leurs entités associées ont été supprimés.');
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -225,18 +231,25 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
         }),
         actions: [
           IconButton(
-            icon: Icon(Icons.sync),
+            icon: Icon(Icons.dashboard),
             onPressed: () async {
-              _createUsersAndUpdateRelations(objectBox);
+              supprimerProduitsInvalides();
               // deleteAllUsers(objectBox);
             },
           ),
-          IconButton(
-            icon: Icon(Icons.delete, color: Colors.red),
-            onPressed: () async {
-              deleteAllUsers(objectBox);
-            },
-          ),
+          // IconButton(
+          //   icon: Icon(Icons.sync),
+          //   onPressed: () async {
+          //     _createUsersAndUpdateRelations(objectBox);
+          //     // deleteAllUsers(objectBox);
+          //   },
+          // ),
+          // IconButton(
+          //   icon: Icon(Icons.delete, color: Colors.red),
+          //   onPressed: () async {
+          //     deleteAllUsers(objectBox);
+          //   },
+          // ),
           IconButton(
             icon: Icon(Icons.search),
             onPressed: () async {
@@ -593,15 +606,16 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                         (previousValue, appro) =>
                             previousValue + appro.quantite)
                     .toStringAsFixed(2);
-// Exemple d'attribut produit.qr
+                // Exemple d'attribut produit.qr
                 String? qrCodesString = produit.qr; // Exemple : "QR1,QR2,QR3"
 
-// Vérifiez que produit.qr n'est pas vide ou null
+                // Vérifiez que produit.qr n'est pas vide ou null
                 List<String> qrCodes =
                     qrCodesString != null && qrCodesString.isNotEmpty
                         ? qrCodesString
                             .split(',') // Sépare les QR codes par la virgule
                         : []; // Si null ou vide, on crée une liste vide
+
                 return Card(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -964,9 +978,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                           children: qrCodes
                                               .map((code) => Chip(
                                                     padding: EdgeInsets.zero,
-                                                    backgroundColor: Colors
-                                                        .blueAccent
-                                                        .withOpacity(0.2),
+
                                                     shape:
                                                         RoundedRectangleBorder(
                                                       borderRadius:
@@ -979,10 +991,30 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                                       size:
                                                           22, // Adjust the size as needed
                                                     ),
+                                                    backgroundColor: Theme.of(
+                                                                    context)
+                                                                .brightness ==
+                                                            Brightness.dark
+                                                        ? Colors.blueAccent
+                                                            .withOpacity(
+                                                                0.2) // Couleur pour le thème sombre
+                                                        : Colors.blueAccent
+                                                            .withOpacity(
+                                                                0.6), // Couleur pour le thème clair
+                                                    visualDensity:
+                                                        VisualDensity(
+                                                            vertical: -1),
                                                     label: Text(
                                                       code,
                                                       style: TextStyle(
-                                                          fontFamily: 'oswald'),
+                                                        color: Theme.of(context)
+                                                                    .brightness ==
+                                                                Brightness.dark
+                                                            ? Colors
+                                                                .white // Couleur du texte pour le thème sombre
+                                                            : Colors
+                                                                .black, // Couleur du texte pour le thème clair
+                                                      ),
                                                     ), // Affiche le QR code dans le Chip
                                                   ))
                                               .toList(),
@@ -1024,7 +1056,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context)
-              .push(MaterialPageRoute(builder: (_) => add_Produit()));
+              .push(MaterialPageRoute(builder: (_) => addProduct2()));
         },
         child: Icon(Icons.add),
       ),

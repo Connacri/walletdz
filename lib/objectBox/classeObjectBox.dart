@@ -617,6 +617,46 @@ class ObjectBox {
     await init();
   }
 
+// Méthode pour supprimer les produits avec QR codes invalides et leurs entités associées
+  void supprimerProduitsAvecQrCodeInvalide() {
+    Iterable<Produit> produitsInvalide = getProduitsAvecQrCodeInvalide();
+
+    for (var produit in produitsInvalide) {
+      // Récupérer et supprimer les approvisionnements associés à ce produit
+      List<Approvisionnement> approvisionnements = approvisionnementBox
+          .query(Approvisionnement_.produit.equals(produit.id))
+          .build()
+          .find();
+      for (var approvisionnement in approvisionnements) {
+        approvisionnementBox.remove(approvisionnement.id);
+      }
+
+      // Supprimer l'entité Crud associée à ce produit
+
+      crudBox.remove(produit.crud.target!.id);
+
+      // Supprimer le produit lui-même
+      produitBox.remove(produit.id);
+
+      print('Produit supprimé : ${produit.nom}');
+    }
+  }
+
+  // Méthode pour récupérer les produits avec QR codes invalides
+  Iterable<Produit> getProduitsAvecQrCodeInvalide() {
+    return produitBox
+        .query()
+        .build()
+        .find()
+        .where((produit) => !_qrCodeEstValide(produit.qr!));
+  }
+
+  // Méthode de validation des QR codes (seuls les chiffres sont autorisés)
+  bool _qrCodeEstValide(String qrCode) {
+    final regex = RegExp(r'^[0-9]+$'); // Seuls les chiffres sont autorisés
+    return regex.hasMatch(qrCode);
+  }
+
   Future<void> cleanQrCodes() async {
     final produits = produitBox.getAll();
 

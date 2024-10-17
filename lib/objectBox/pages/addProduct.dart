@@ -30,18 +30,6 @@ class _addProductState extends State<addProduct> {
   }
 }
 
-class MyHomePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Responsive Layout'),
-      ),
-      body: ResponsiveLayout(),
-    );
-  }
-}
-
 class ResponsiveLayout extends StatefulWidget {
   ResponsiveLayout({super.key});
 
@@ -99,7 +87,18 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
     super.initState();
     _serialController.addListener(_onSerialChanged);
     _serialController.addListener(_checkFirstField);
-    // _clearAllFields();
+    _clearAllFields();
+    _qrCodesTemp.clear();
+    _selectedFournisseurs.clear();
+    _approvisionnementTemporaire.clear();
+    _showDescription = false;
+    _isFirstFieldFilled = false;
+    _isFinded = false;
+    _isDetail = false;
+    _isAlertShow = false;
+    _isEditing = false;
+    _editQr = true;
+    _showAppro = false;
   }
 
   Future<void> _pickImage() async {
@@ -434,7 +433,9 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
   }
 
   void _checkFirstField() {
-    //_serialController.text.isEmpty ? _clearAllFields() : null; /////// A VOIRE
+    // _serialController.text.isEmpty
+    //     ? _approvisionnementTemporaire.clear()
+    //     : null; /////// A VOIRE
     setState(() {
       _isFirstFieldFilled = _serialController.text.isNotEmpty;
     });
@@ -455,7 +456,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
       // _datePeremptionController.clear();
       _alertPeremptionController.clear();
       _existingImageUrl = '';
-      // _isFirstFieldFilled = false;
+      //_isFirstFieldFilled = false;
       _image = null;
       _approvisionnementTemporaire.clear();
     });
@@ -693,6 +694,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
     _focusNodeNom.dispose();
     _focusNodePV.dispose();
     _focusNodeStock.dispose();
+
     super.dispose();
   }
 
@@ -1291,7 +1293,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                           child: RichText(
                             text: TextSpan(
                               text: 'Ajouter Alert',
-                              style: Theme.of(context).textTheme.bodyLarge,
+                              style: Theme.of(context).textTheme.labelMedium,
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
                                   setState(() {
@@ -1323,8 +1325,9 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                                   child: RichText(
                                     text: TextSpan(
                                       text: 'Alert',
-                                      style:
-                                          Theme.of(context).textTheme.bodyLarge,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelSmall,
                                       recognizer: TapGestureRecognizer()
                                         ..onTap = () {
                                           setState(() {
@@ -1464,7 +1467,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                           child: RichText(
                             text: TextSpan(
                               text: 'Si Votre produit se Vend en Unité Détails',
-                              style: Theme.of(context).textTheme.bodyLarge,
+                              style: Theme.of(context).textTheme.labelLarge,
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
                                   setState(() {

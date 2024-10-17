@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:walletdz/objectBox/pages/addProduct.dart';
+import 'package:walletdz/objectBox/pages/addProduct2.dart';
 import 'package:window_manager/window_manager.dart';
 import '../objectBox/pages/ClientListScreen.dart';
 import '../objectBox/pages/FactureListScreen.dart';
@@ -94,12 +95,12 @@ class MyApp9 extends StatelessWidget {
         return MaterialApp(
           title: 'POS',
           theme: ThemeData(
-            fontFamily: 'oswald',
+            fontFamily: 'OSWALD',
             brightness: Brightness.light,
             primarySwatch: Colors.blue,
             chipTheme: ChipThemeData(
               backgroundColor: Colors.grey[300]!,
-              labelStyle: TextStyle(color: Colors.black),
+              labelStyle: TextStyle(fontFamily: 'oswald'),
             ),
           ),
           darkTheme: ThemeData(
@@ -108,7 +109,7 @@ class MyApp9 extends StatelessWidget {
             primaryColor: Colors.blueGrey,
             chipTheme: ChipThemeData(
               backgroundColor: Colors.grey[800]!,
-              labelStyle: TextStyle(color: Colors.white),
+              labelStyle: TextStyle(fontFamily: 'oswald'),
             ),
           ),
           themeMode:
@@ -347,26 +348,26 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                   //   value: isSwitchOn,
                   //   onChanged: _toggleWindowSize, // Bascule entre les modes
                   // ),
-                  IconButton(
-                    onPressed: () async {
-                      if (Platform.isAndroid) {
-                        String filePath =
-                            "/storage/emulated/0/Download/Articles.xls";
-                        await widget.objectBox
-                            .importProduitsRestantsDepuisExcel(filePath);
-                        //.importProduitsDepuisExcel(filePath, 20, 3000, 500);
-                      } else {
-                        String filePath =
-                            "C:/Users/INDRA/Documents/Articles.xls"; // Assurez-vous de mettre le bon chemin ici.
-                        await widget.objectBox
-                            .importProduitsRestantsDepuisExcel(filePath);
-                        //.importProduitsDepuisExcel(filePath, 20, 3000, 500);
-                      }
-
-                      print("Produits importés avec succès !");
-                    },
-                    icon: Icon(FontAwesomeIcons.fileExcel),
-                  ),
+                  // IconButton(
+                  //   onPressed: () async {
+                  //     if (Platform.isAndroid) {
+                  //       String filePath =
+                  //           "/storage/emulated/0/Download/Articles.xls";
+                  //       await widget.objectBox
+                  //           .importProduitsRestantsDepuisExcel(filePath);
+                  //       //.importProduitsDepuisExcel(filePath, 20, 3000, 500);
+                  //     } else {
+                  //       String filePath =
+                  //           "C:/Users/INDRA/Documents/Articles.xls"; // Assurez-vous de mettre le bon chemin ici.
+                  //       await widget.objectBox
+                  //           .importProduitsRestantsDepuisExcel(filePath);
+                  //       //.importProduitsDepuisExcel(filePath, 20, 3000, 500);
+                  //     }
+                  //
+                  //     print("Produits importés avec succès !");
+                  //   },
+                  //   icon: Icon(FontAwesomeIcons.fileExcel),
+                  // ),
                   // buildIconButtonClearQrCodes(),
                   // IconButton(
                   //   // onPressed: () {
@@ -574,13 +575,16 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                     onPressed: () => _showDialogFake(objectBoxi),
                     icon: Icon(Icons.send),
                   ),
-                  IconButton(
-                    onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (ctx) => LottieListPage()));
-                    },
-                    icon: Icon(Icons.local_bar_outlined),
-                  ),
+                  // IconButton(
+                  //   onPressed: () {
+                  //     Navigator.of(context).push(MaterialPageRoute(
+                  //         builder: (ctx) => LottieListPage()));
+                  //   },
+                  //   icon: Icon(Icons.local_bar_outlined),
+                  // ),
+                  SizedBox(
+                    width: 60,
+                  )
                 ],
               ),
               body: Consumer<CommerceProvider>(
@@ -652,7 +656,7 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                                     onPressed: () {
                                       Navigator.of(context).push(
                                           MaterialPageRoute(
-                                              builder: (_) => addProduct()));
+                                              builder: (_) => addProduct2()));
                                     },
                                     label: Text(
                                       'Produit',
@@ -697,6 +701,12 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                             ),
                           ],
                         ),
+                        ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (_) => addProduct2()));
+                            },
+                            child: Text('Add Product 2')),
                         // Padding(
                         //   padding: const EdgeInsets.symmetric(
                         //       horizontal: 8, vertical: 15),
@@ -1594,7 +1604,7 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                         ),
                         onPressed: () {
                           Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => addProduct()));
+                              MaterialPageRoute(builder: (_) => addProduct2()));
                         },
                         label: Text(
                           'Produit',
@@ -2170,7 +2180,7 @@ class _homeRailState extends State<homeRail> {
           IconButton(
             onPressed: () {
               Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (ctx) => add_Produit()));
+                  .push(MaterialPageRoute(builder: (ctx) => addProduct2()));
             },
             icon: Icon(Icons.add),
           ),
