@@ -55,6 +55,12 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
   File? _image;
   String? _existingImageUrl;
   String _tempProduitId = '';
+  String _produitNom = '';
+  String _produitDesignation = '';
+  String _produitImage = '';
+  String _produitQr = '';
+  double _produitStock = 0.0;
+  double _produitPV = 0.0;
   double stockTemp = 0;
   final List<String> _qrCodesTemp = [];
   List<Fournisseur> _selectedFournisseurs = [];
@@ -92,7 +98,8 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
     }
 
     if (_searchQr) {
-      _updateProductInfo(code);
+      //_updateProductInfo(code);
+      _productInfo(code);
     }
   }
 
@@ -117,7 +124,7 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
 
     if (produit != null) {
       setState(() {
-        _tempProduitId = produit.id.toString() ?? '';
+        _tempProduitId = produit.id.toString();
         _nomController.text = produit.nom;
         _descriptionController.text = produit.description ?? '';
         //   _prixAchatController.text = produit.prixAchat.toStringAsFixed(2);
@@ -152,6 +159,41 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
         _isFinded = false;
         _image = null;
       }
+    }
+  }
+
+  Future<void> _productInfo(String code) async {
+    final provider = Provider.of<CommerceProvider>(context, listen: false);
+    final produit = await provider.getProduitByQr(code);
+
+    if (produit != null) {
+      // Calculer le stock total des approvisionnements pour ce produit
+      double stockTemp = produit.calculerStockTotal();
+      print('Stock total pour le produit ${produit.nom} : $stockTemp');
+    }
+
+    if (produit != null) {
+      setState(() {
+        _tempProduitId = produit.id.toString();
+        _produitNom = produit.nom;
+        _produitDesignation = produit.description ?? '';
+        _produitPV = produit.prixVente;
+        _produitStock = produit.stock;
+        _produitQr = produit.qr!;
+        _produitImage = produit.image!;
+        _isFinded = true;
+        _image = null;
+      });
+    } else {
+      _tempProduitId = '';
+      _produitNom = '';
+      _produitDesignation = '';
+      _produitPV = 0.0;
+      _produitStock = 0.0;
+
+      _produitImage = '';
+      _isFinded = false;
+      _image = null;
     }
   }
 
@@ -277,8 +319,21 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
               height: 30,
               child: _searchQr == true
                   ? _tempProduitId.isNotEmpty
-                      ? Text('ID : ${_tempProduitId}',
-                          style: TextStyle(fontSize: 15, color: Colors.black54))
+                      ? ListTile(
+                          onTap: () {
+                            _updateProductInfo(_produitQr);
+                          },
+                          leading: CircleAvatar(
+                            child: CachedNetworkImage(imageUrl: _produitImage),
+                          ),
+                          title: Text(
+                              'ID : ${_tempProduitId} - QR : ${_produitQr} - ${_produitNom}',
+                              style: TextStyle(
+                                  fontSize: 15, color: Colors.black54)),
+                          subtitle: Text(
+                              '${_produitDesignation} - ${_produitStock.toStringAsFixed(2)}'),
+                          trailing: Text('${_produitPV.toStringAsFixed(2)}'),
+                        )
                       : Text(
                           'L\'ID du Produit n\'a pas encore été créer',
                           style: TextStyle(fontSize: 15, color: Colors.black54),
@@ -644,7 +699,7 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                                 // if (double.tryParse(value) == null) {
                                 //   return 'Veuillez entrer un prix valide';
                                 // }
-                                // return null;
+                                return null;
                               },
                             ),
                           ),

@@ -1286,23 +1286,38 @@ class ProduitDetailPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Center(
-                      child: Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 50, vertical: 16),
-                          child: ElevatedButton.icon(
-                            onPressed: () async {
-                              // final updatedProduit =
-                              //     await Navigator.of(context).push(
-                              //   MaterialPageRoute(
-                              //     builder: (ctx) => Edit_Produit(
-                              //       produit: produit,
-                              //     ),
-                              //   ),
-                              // );
-                            },
-                            label: Text('Modifier'),
-                            icon: Icon(Icons.edit),
-                          )),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: TextButton.icon(
+                              onPressed: () {
+                                _deleteProduit(context, produit);
+                              },
+                              icon: Icon(Icons.delete),
+                              label: Text('Supprimer'),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: ElevatedButton.icon(
+                              onPressed: () async {
+                                // final updatedProduit =
+                                //     await Navigator.of(context).push(
+                                //   MaterialPageRoute(
+                                //     builder: (ctx) => Edit_Produit(
+                                //       produit: produit,
+                                //     ),
+                                //   ),
+                                // );
+                              },
+                              label: Text('Modifier'),
+                              icon: Icon(Icons.edit),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     Center(
                       child: PrettyQr(
