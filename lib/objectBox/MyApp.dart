@@ -26,6 +26,7 @@ import 'Utils/ads/homeExemple.dart';
 import 'Utils/excel.dart';
 import 'Utils/mobile_scanner/main.dart';
 import 'Utils/supabase_sync.dart';
+import 'Utils/winMobile.dart';
 import 'classeObjectBox.dart';
 import 'hash.dart';
 import 'hash2.dart';
@@ -320,7 +321,7 @@ class _adaptiveHomeState extends State<adaptiveHome> {
     print("Tous les QR codes ont été nettoyés.");
   }
 
-  bool isPhoneSize = false; // Variable pour suivre le mode (desktop ou mobile)
+// Variable pour suivre le mode (desktop ou mobile)
   bool isSwitchOn = false; // État du switch
   @override
   Widget build(BuildContext context) {
@@ -336,14 +337,7 @@ class _adaptiveHomeState extends State<adaptiveHome> {
               appBar: AppBar(
                 title: Text('POS'),
                 actions: [
-                  Platform.isIOS || Platform.isAndroid
-                      ? Container()
-                      : IconButton(
-                          onPressed: _toggleWindowSize,
-                          icon: Icon(isPhoneSize
-                              ? FontAwesomeIcons.desktop
-                              : FontAwesomeIcons.mobile),
-                        ),
+                  WinMobile(),
                   // Switch(
                   //   value: isSwitchOn,
                   //   onChanged: _toggleWindowSize, // Bascule entre les modes
@@ -999,12 +993,7 @@ class _adaptiveHomeState extends State<adaptiveHome> {
               appBar: AppBar(
                 title: Text('POS'),
                 actions: [
-                  IconButton(
-                    onPressed: _toggleWindowSize,
-                    icon: Icon(isPhoneSize
-                        ? FontAwesomeIcons.desktop
-                        : FontAwesomeIcons.mobile),
-                  ),
+                  WinMobile(),
 
                   // Switch(
                   //   value: isSwitchOn,
@@ -1203,12 +1192,7 @@ class _adaptiveHomeState extends State<adaptiveHome> {
               appBar: AppBar(
                 title: Text('POS Desktop'),
                 actions: [
-                  IconButton(
-                    onPressed: _toggleWindowSize,
-                    icon: Icon(isPhoneSize
-                        ? FontAwesomeIcons.desktop
-                        : FontAwesomeIcons.mobile),
-                  ),
+                  WinMobile(),
 
                   // Switch(
                   //   value: isSwitchOn,
@@ -1768,21 +1752,6 @@ class _adaptiveHomeState extends State<adaptiveHome> {
   //     });
   //   }
   // }
-  Future<void> _toggleWindowSize() async {
-    if (isPhoneSize) {
-      // Passer en mode Desktop
-      await windowManager.setSize(const Size(1920, 1080)); // Taille Desktop
-      setState(() {
-        isPhoneSize = false; // Met à jour l'état pour refléter le mode Desktop
-      });
-    } else {
-      // Passer en mode Mobile
-      await windowManager.setSize(const Size(375, 812)); // Taille Mobile
-      setState(() {
-        isPhoneSize = true; // Met à jour l'état pour refléter le mode Mobile
-      });
-    }
-  }
 }
 
 class ProduitListInterval extends StatelessWidget {

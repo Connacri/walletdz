@@ -178,24 +178,57 @@ class CommerceProvider extends ChangeNotifier {
     return null; // Aucun produit trouvé avec le QR code donné
   }
 
+  // Future<void> removeQRCodeFromProduit(int produitId, String qrCode) async {
+  //   // Récupérer le produit par ID
+  //   final produit = await getProduitById(produitId);
+  //   if (produit != null) {
+  //     // Convertir la chaîne QR en liste
+  //     List<String> qrCodes = produit.qr!.split(',');
+  //
+  //     // Vérifier si le QR code existe et le supprimer
+  //     if (qrCodes.contains(qrCode)) {
+  //       qrCodes.remove(qrCode); // Supprimer le QR code
+  //
+  //       // Mettre à jour la chaîne QR du produit
+  //       produit.qr = qrCodes.isNotEmpty
+  //           ? qrCodes.join(',')
+  //           : ''; // Rejoindre en une seule chaîne ou le définir à une chaîne vide
+  //
+  //       // Mettre à jour le produit dans ObjectBox ou votre base de données
+  //       await _objectBox.produitBox.put(produit);
+  //       chargerProduits(reset: true);
+  //     } else {
+  //       print('Le QR code $qrCode n\'existe pas dans la liste.');
+  //     }
+  //   } else {
+  //     print('Produit non trouvé.');
+  //   }
+  // }
   Future<void> removeQRCodeFromProduit(int produitId, String qrCode) async {
     // Récupérer le produit par ID
     final produit = await getProduitById(produitId);
+
     if (produit != null) {
       // Convertir la chaîne QR en liste
-      List<String> qrCodes = produit.qr!.split(
-          ','); // Supposons que les QR codes sont séparés par des virgules
+      List<String> qrCodes = produit.qr?.split(',') ?? [];
       print(qrCodes);
+
       // Vérifier si le QR code existe et le supprimer
       if (qrCodes.contains(qrCode)) {
-        qrCodes.remove(qrCode); // Supprimer le QR code
+        qrCodes.remove(qrCode);
 
         // Mettre à jour la chaîne QR du produit
-        produit.qr = qrCodes.isNotEmpty
-            ? qrCodes.join(',')
-            : ''; // Rejoindre en une seule chaîne ou le définir à une chaîne vide
+        String newQrValue = qrCodes.join(',');
 
-        // Mettre à jour le produit dans ObjectBox ou votre base de données
+        // Vérifier si la nouvelle valeur est vide, null ou ne contient que des espaces
+        if (newQrValue.trim().isEmpty) {
+          // Si vide, utiliser le nom du produit
+          produit.qr = produit.nom;
+        } else {
+          produit.qr = newQrValue;
+        }
+
+        // Mettre à jour le produit dans ObjectBox
         await _objectBox.produitBox.put(produit);
         chargerProduits(reset: true);
       } else {

@@ -14,6 +14,7 @@ import '../../objectbox.g.dart';
 import '../Entity.dart';
 import '../MyProviders.dart';
 import '../Utils/country_flags.dart';
+import '../Utils/winMobile.dart';
 import '../classeObjectBox.dart';
 import '../tests/doublons.dart';
 import 'Edit_Produit.dart';
@@ -230,13 +231,13 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
           );
         }),
         actions: [
-          IconButton(
-            icon: Icon(Icons.dashboard),
-            onPressed: () async {
-              supprimerProduitsInvalides();
-              // deleteAllUsers(objectBox);
-            },
-          ),
+          // IconButton(
+          //   icon: Icon(Icons.dashboard),
+          //   onPressed: () async {
+          //     supprimerProduitsInvalides();
+          //     // deleteAllUsers(objectBox);
+          //   },
+          // ),
           // IconButton(
           //   icon: Icon(Icons.sync),
           //   onPressed: () async {
@@ -250,6 +251,8 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
           //     deleteAllUsers(objectBox);
           //   },
           // ),
+
+          WinMobile(),
           IconButton(
             icon: Icon(Icons.search),
             onPressed: () async {
@@ -261,19 +264,20 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
               );
             },
           ),
-          IconButton(
-            icon: Icon(Icons.close_fullscreen_rounded, color: Colors.blueGrey),
-            onPressed: () async {
-              objectBox.cleanQrCodes();
-            },
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (ctx) => DuplicateProductsListView()));
-            },
-            child: Text('Boublons Liste'),
-          ),
+
+          // IconButton(
+          //   icon: Icon(Icons.close_fullscreen_rounded, color: Colors.blueGrey),
+          //   onPressed: () async {
+          //     objectBox.cleanQrCodes();
+          //   },
+          // ),
+          // TextButton(
+          //   onPressed: () {
+          //     Navigator.of(context).push(MaterialPageRoute(
+          //         builder: (ctx) => DuplicateProductsListView()));
+          //   },
+          //   child: Text('Boublons Liste'),
+          // ),
           SizedBox(
             width: 50,
           ),
@@ -960,82 +964,50 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                     : 'No approvisionnements available',
                               ),
                             ),
-                            Row(
-                              children: [
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 8),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.qr_code),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Wrap(
-                                          spacing:
-                                              8.0, // Espacement horizontal entre les Chips
-                                          runSpacing:
-                                              7.0, // Espacement vertical entre les Chips
-                                          children: qrCodes
-                                              .map((code) => Chip(
-                                                    padding: EdgeInsets.zero,
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Wrap(
+                                spacing:
+                                    8.0, // Espacement horizontal entre les Chips
+                                runSpacing:
+                                    7.0, // Espacement vertical entre les Chips
+                                children: qrCodes
+                                    .map((code) => Chip(
+                                          padding: EdgeInsets.zero,
 
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              20.0), // Coins arrondis
-                                                    ),
-                                                    avatar:
-                                                        CircularFlagDetector(
-                                                      barcode: code,
-                                                      size:
-                                                          22, // Adjust the size as needed
-                                                    ),
-                                                    backgroundColor: Theme.of(
-                                                                    context)
-                                                                .brightness ==
-                                                            Brightness.dark
-                                                        ? Colors.blueAccent
-                                                            .withOpacity(
-                                                                0.2) // Couleur pour le thème sombre
-                                                        : Colors.blueAccent
-                                                            .withOpacity(
-                                                                0.6), // Couleur pour le thème clair
-                                                    visualDensity:
-                                                        VisualDensity(
-                                                            vertical: -1),
-                                                    label: Text(
-                                                      code,
-                                                      style: TextStyle(
-                                                        color: Theme.of(context)
-                                                                    .brightness ==
-                                                                Brightness.dark
-                                                            ? Colors
-                                                                .white // Couleur du texte pour le thème sombre
-                                                            : Colors
-                                                                .black, // Couleur du texte pour le thème clair
-                                                      ),
-                                                    ), // Affiche le QR code dans le Chip
-                                                  ))
-                                              .toList(),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                // Spacer(),
-                                // produit.qr != null
-                                //     ? FlagDetector(
-                                //         barcode: produit.qr!,
-                                //         height: 20,
-                                //         width: 30,
-                                //       ) // Afficher FlagDetector avec le code-barres
-                                //     : FlagDetector(
-                                //         barcode: produit.qr!,
-                                //         height: 20,
-                                //         width: 30,
-                                //       ),
-                              ],
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                20.0), // Coins arrondis
+                                          ),
+                                          avatar: CircularFlagDetector(
+                                            barcode: code,
+                                            size:
+                                                22, // Adjust the size as needed
+                                          ),
+                                          backgroundColor: Theme.of(context)
+                                                      .brightness ==
+                                                  Brightness.dark
+                                              ? Colors.blueAccent.withOpacity(
+                                                  0.2) // Couleur pour le thème sombre
+                                              : Colors.blueAccent.withOpacity(
+                                                  0.6), // Couleur pour le thème clair
+                                          visualDensity:
+                                              VisualDensity(vertical: -1),
+                                          label: Text(
+                                            code,
+                                            style: TextStyle(
+                                              color: Theme.of(context)
+                                                          .brightness ==
+                                                      Brightness.dark
+                                                  ? Colors
+                                                      .white // Couleur du texte pour le thème sombre
+                                                  : Colors
+                                                      .black, // Couleur du texte pour le thème clair
+                                            ),
+                                          ), // Affiche le QR code dans le Chip
+                                        ))
+                                    .toList(),
+                              ),
                             ),
                           ],
                         ),
@@ -1226,19 +1198,27 @@ void _deleteProduit(BuildContext context, Produit produit) {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
+                  style: ElevatedButton.styleFrom(
+                    // Utilise les couleurs du thème
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
+                    foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                    elevation: 2,
+                  ),
                   label: Text('Annuler'),
                   icon: Icon(Icons.cancel),
                 ),
                 ElevatedButton.icon(
                   onPressed: () {
                     context.read<CommerceProvider>().supprimerProduit(produit);
-                    // .removeProduit(produit.id, produit.image);
                     Navigator.of(context).pop();
                   },
-                  label: Text(
-                    'Supprimer',
-                    style: TextStyle(color: Colors.white),
+                  style: ElevatedButton.styleFrom(
+                    // Utilise les couleurs du thème pour le bouton de suppression
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                    foregroundColor: Theme.of(context).colorScheme.onError,
+                    elevation: 2,
                   ),
+                  label: Text('Supprimer'),
                   icon: Icon(Icons.delete),
                 )
               ],
