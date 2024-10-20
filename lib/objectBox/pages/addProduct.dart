@@ -900,6 +900,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                       style: TextStyle(fontSize: 20),
                     ),
             ), //id
+
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: Container(
@@ -930,7 +931,6 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                 ),
               ),
             ), //switch recherche auto
-
             _isFirstFieldFilled || _qrCodesTemp.isNotEmpty
                 ? Padding(
                     padding: const EdgeInsets.all(8.0),

@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'package:string_extensions/string_extensions.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
@@ -130,13 +130,14 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
         //   _prixAchatController.text = produit.prixAchat.toStringAsFixed(2);
         _prixVenteController.text = produit.prixVente.toStringAsFixed(2);
         _stockController.text = produit.stock.toStringAsFixed(2);
-        _minimStockController.text = produit.minimStock!.toStringAsFixed(2);
+        // _minimStockController.text = produit.minimStock!.toStringAsFixed(2);
         stockTemp = double.parse(produit.stock.toStringAsFixed(2));
         // _datePeremptionController.text =
         //     produit.datePeremption!.format('yMMMMd', 'fr_FR');
         _alertPeremptionController.text = produit.alertPeremption.toString();
         // _selectedFournisseurs = List.from(produit.fournisseurs);
         _existingImageUrl = produit.image;
+
         _isFinded = true;
         _image = null;
         _approvisionnementTemporaire = produit.approvisionnements.toList();
@@ -310,39 +311,70 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
     var largeur = MediaQuery.of(context).size.width;
     final produitProvider =
         Provider.of<CommerceProvider>(context, listen: false);
+    final String fallbackImage =
+        'https://source.unsplash.com/random/1920x1080/?wallpaper,landscape';
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            Container(
-              height: 30,
-              child: _searchQr == true
-                  ? _tempProduitId.isNotEmpty
-                      ? ListTile(
-                          onTap: () {
-                            _updateProductInfo(_produitQr);
-                          },
-                          leading: CircleAvatar(
-                            child: CachedNetworkImage(imageUrl: _produitImage),
+            _searchQr == true
+                ? _tempProduitId.isNotEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Card(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: ListTile(
+                                hoverColor: Colors.transparent,
+                                splashColor: Colors.transparent,
+                                focusColor: Colors.transparent,
+                                selectedColor: Colors.transparent,
+                                dense: true,
+                                contentPadding: EdgeInsets.zero,
+                                onTap: () {
+                                  _updateProductInfo(_serialController.text);
+                                },
+                                leading: CircleAvatar(
+                                    backgroundImage: CachedNetworkImageProvider(
+                                  _produitImage,
+                                  errorListener: (Object error) {
+                                    setState(() {
+                                      _produitImage =
+                                          fallbackImage; // Remplacer par l'image de secours
+                                    });
+                                  },
+                                  // Pour Web
+                                )),
+                                title: Text('${_produitNom.capitalize}',
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                        fontSize: 15, color: Colors.black54)),
+                                trailing: Text(
+                                  '${_produitPV.toStringAsFixed(2)}',
+                                  style: TextStyle(fontSize: 20),
+                                ),
+                              ),
+                            ),
                           ),
-                          title: Text(
-                              'ID : ${_tempProduitId} - QR : ${_produitQr} - ${_produitNom}',
-                              style: TextStyle(
-                                  fontSize: 15, color: Colors.black54)),
-                          subtitle: Text(
-                              '${_produitDesignation} - ${_produitStock.toStringAsFixed(2)}'),
-                          trailing: Text('${_produitPV.toStringAsFixed(2)}'),
-                        )
-                      : Text(
-                          'L\'ID du Produit n\'a pas encore été créer',
+                        ),
+                      )
+                    : ListTile(
+                        title: Text(
+                          'L\'ID du Produit n\'a pas encore été créer'
+                              .capitalize,
                           style: TextStyle(fontSize: 15, color: Colors.black54),
-                        )
-                  : Text(
-                      'Nouveau ID du produit sera créer',
+                        ),
+                      )
+                : ListTile(
+                    title: Text(
+                      'Nouveau ID du produit sera créer'.capitalize,
                       style: TextStyle(fontSize: 15, color: Colors.black54),
                     ),
-            ), //id
+                  ),
+            //id
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: Container(
@@ -367,8 +399,9 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                       child: FittedBox(
                         child: Text(
                           _searchQr
-                              ? 'Recherche par Codes-barres Activé'
-                              : 'Recherche par Codes-barres Désactivé',
+                              ? 'Recherche par Codes-barres Activé'.capitalize
+                              : 'Recherche par Codes-barres Désactivé'
+                                  .capitalize,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -426,12 +459,6 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                 },
               ),
             ), // Serial Qr Code
-            _isFirstFieldRempli || _qrCodesTemp.isNotEmpty
-                ? Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: buildColumnPicSuppliers(largeur, context),
-                  )
-                : Container(), // photo
             _qrCodesTemp.isEmpty
                 ? Container()
                 : Padding(
@@ -510,6 +537,12 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                       ],
                     ),
                   ), // wrap qrcode
+            _isFirstFieldRempli || _qrCodesTemp.isNotEmpty
+                ? Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: buildColumnPicSuppliers(largeur, context),
+                  )
+                : Container(), // photo
             _isFirstFieldRempli || _qrCodesTemp.isNotEmpty
                 ? Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -940,18 +973,39 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
           titlePadding: EdgeInsets.all(0),
           contentPadding: EdgeInsets.all(20),
           title: Padding(
-            padding: const EdgeInsets.all(28.0),
-            child: FittedBox(
-              child: Text(
-                'Code ${code}\ndéjà utilisé',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                  fontFamily: 'Oswald',
+            padding: const EdgeInsets.all(0),
+            child: Column(
+              children: [
+                Center(
+                  child: produit.image != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: AspectRatio(
+                            aspectRatio: 1,
+                            child: CachedNetworkImage(
+                              imageUrl: produit.image!,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                              errorWidget: (context, url, error) =>
+                                  Icon(Icons.error, color: Colors.red),
+                            ),
+                          ),
+                        )
+                      : Container(),
                 ),
-              ),
+                Text(
+                  'Dernière Modification : ${produit.derniereModification.format('yMMMMd', 'fr_FR')}',
+                  style: TextStyle(
+                    fontSize: 12,
+                  ),
+                ),
+                Text(
+                  '${code}\nDéjà Utilisé Dans\n${produit.nom}'.toUpperCase(),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
           content: SingleChildScrollView(
@@ -964,7 +1018,11 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                     text: TextSpan(
                       text: 'Le Code Bar ${code}'.toUpperCase(),
                       style: TextStyle(
-                        color: Colors.blueGrey,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors
+                                .white // Couleur du texte pour le thème sombre
+                            : Colors
+                                .black, // Couleur du texte pour le thème clair
                         fontSize: 20,
                         fontFamily: 'Oswald',
                       ),
@@ -973,14 +1031,12 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                           text: ' est déjà associé au : '.toUpperCase(),
                           style: TextStyle(
                             fontFamily: 'Oswald',
-                            color: Colors.black54,
                             fontSize: 20,
                           ),
                         ),
                         TextSpan(
                           text: '${produit.nom}'.toUpperCase(),
                           style: TextStyle(
-                            color: Colors.green,
                             fontFamily: 'Oswald',
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -998,41 +1054,21 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                     child: Text(
                       'Description : ${produit.description}',
                       textAlign: TextAlign.justify,
-                      style: TextStyle(fontSize: 18, color: Colors.black87),
+                      style: TextStyle(
+                        fontSize: 18,
+                      ),
                     ),
                   ),
                 Text(
                   'Prix de vente : ${produit.prixVente.toStringAsFixed(2)} DA',
-                  style: TextStyle(fontSize: 18, color: Colors.black54),
+                  style: TextStyle(
+                    fontSize: 18,
+                  ),
                 ),
                 Text(
                   'Stock : ${produit.stock.toStringAsFixed(2)}',
-                  style: TextStyle(fontSize: 18, color: Colors.black54),
-                ),
-                Text(
-                  'Dernière Modification : ${produit.derniereModification.format('yMMMMd', 'fr_FR')}',
-                  style: TextStyle(fontSize: 15, color: Colors.black54),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Center(
-                    child: produit.image != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(8.0),
-                            child: AspectRatio(
-                              aspectRatio: 1,
-                              child: CachedNetworkImage(
-                                imageUrl: produit.image!,
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) => Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                                errorWidget: (context, url, error) =>
-                                    Icon(Icons.error, color: Colors.red),
-                              ),
-                            ),
-                          )
-                        : Container(),
+                  style: TextStyle(
+                    fontSize: 18,
                   ),
                 ),
               ],
@@ -1041,7 +1077,7 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
           actions: [
             TextButton(
               style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: Text('Supprimer le QR code'),
+              child: Text('Supprimer le code'),
               onPressed: () async {
                 await provider.removeQRCodeFromProduit(produit.id, code);
                 Navigator.of(context).pop();
@@ -1242,59 +1278,65 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
   Container buildColumnPicSuppliers(double largeur, BuildContext context) {
     return Container(
       child: Center(
-        child: Container(
-          width: largeur,
-          height: Platform.isAndroid || Platform.isIOS ? 150 : 300,
-          child: _image == null
-              ? Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    _existingImageUrl != null && _existingImageUrl!.isNotEmpty
-                        ? Container(
-                            decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.circular(8.0), // Bords arrondis
-                              border: Border.all(
-                                color: Colors.grey, // Couleur de la bordure
-                                width: 1.0, // Épaisseur de la bordure
-                              ),
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8.0),
-                              child: CachedNetworkImage(
-                                imageUrl: _existingImageUrl!,
-                                fit: BoxFit.cover, // Remplir le container
-                                width: double.infinity, // Remplir en largeur
-                                height: double.infinity, // Remplir en hauteur
-                                placeholder: (context, url) => Center(
-                                  child:
-                                      CircularProgressIndicator(), // Indicateur de chargement
-                                ),
-                                errorWidget: (context, url, error) =>
-                                    Container(), // Widget en cas d'erreur
-                              ),
-                            ),
-                          )
-                        : Container(
-                            decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.circular(8.0), // Bords arrondis
-                              border: Border.all(
-                                color: Colors.grey, // Couleur de la bordure
-                                width: 1.0, // Épaisseur de la bordure
-                              ),
+        child: _image == null
+            ? Stack(
+                alignment: Alignment.center,
+                children: [
+                  _existingImageUrl != null && _existingImageUrl!.isNotEmpty
+                      ? Container(
+                          width: largeur,
+                          height:
+                              Platform.isAndroid || Platform.isIOS ? 150 : 300,
+                          decoration: BoxDecoration(
+                            borderRadius:
+                                BorderRadius.circular(8.0), // Bords arrondis
+                            border: Border.all(
+                              color: Colors.grey, // Couleur de la bordure
+                              width: 1.0, // Épaisseur de la bordure
                             ),
                           ),
-                    IconButton(
-                      onPressed: _pickImage,
-                      icon: Icon(
-                        Icons.add_a_photo,
-                        color: Colors.blue,
-                      ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: CachedNetworkImage(
+                              imageUrl: _existingImageUrl!,
+                              fit: BoxFit.cover, // Remplir le container
+                              width: double.infinity, // Remplir en largeur
+                              height: double.infinity, // Remplir en hauteur
+                              placeholder: (context, url) => Center(
+                                child:
+                                    CircularProgressIndicator(), // Indicateur de chargement
+                              ),
+                              errorWidget: (context, url, error) =>
+                                  Container(), // Widget en cas d'erreur
+                            ),
+                          ),
+                        )
+                      : Container(
+                          // width: largeur,
+                          // height:
+                          //     Platform.isAndroid || Platform.isIOS ? 150 : 300,
+                          // decoration: BoxDecoration(
+                          //   borderRadius:
+                          //       BorderRadius.circular(8.0), // Bords arrondis
+                          //   border: Border.all(
+                          //     color: Colors.grey, // Couleur de la bordure
+                          //     width: 1.0, // Épaisseur de la bordure
+                          //   ),
+                          // ),
+                          ),
+                  IconButton(
+                    onPressed: _pickImage,
+                    icon: Icon(
+                      Icons.add_a_photo,
+                      color: Colors.blue,
                     ),
-                  ],
-                )
-              : InkWell(
+                  ),
+                ],
+              )
+            : Container(
+                width: largeur,
+                height: Platform.isAndroid || Platform.isIOS ? 150 : 300,
+                child: InkWell(
                   onTap: () {
                     setState(() {
                       _image = null;
@@ -1319,7 +1361,7 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                     ],
                   ),
                 ),
-        ),
+              ),
       ),
     );
   }
