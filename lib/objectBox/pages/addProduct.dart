@@ -15,6 +15,7 @@ import '../Utils/mobile_scanner/barcode_scanner_window.dart';
 import 'AddFournisseurFormFromProduit.dart';
 import 'package:flutter/gestures.dart';
 //import 'package:vibration/vibration.dart';
+import '../Utils/winMobile.dart';
 
 class addProduct extends StatefulWidget {
   const addProduct({super.key});
@@ -794,6 +795,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                   resizeToAvoidBottomInset: true,
                   appBar: AppBar(
                     actions: [
+                      WinMobile(),
                       buildButton_Edit_Add(context, produitProvider, _isFinded)
                     ],
                   ),
@@ -812,6 +814,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                   resizeToAvoidBottomInset: true,
                   appBar: AppBar(
                     actions: [
+                      WinMobile(),
                       buildButton_Edit_Add(context, produitProvider, _isFinded)
                     ],
                   ),
@@ -830,6 +833,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                   resizeToAvoidBottomInset: true,
                   appBar: AppBar(
                     actions: [
+                      WinMobile(),
                       buildButton_Edit_Add(context, produitProvider, _isFinded)
                     ],
                   ),

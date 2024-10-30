@@ -64,22 +64,37 @@ flutter {
     source '../..'
 }
 
-//configurations {
-//    debugImplementation {
-//        exclude group: 'io.objectbox', module: 'objectbox-android'
-//    }
-//}
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation platform('com.google.firebase:firebase-bom:33.2.0')
-    implementation 'com.google.android.gms:play-services-base:18.5.0'
-    implementation 'com.google.firebase:firebase-analytics'
-    implementation 'com.android.support:multidex:1.0.3'
-//    implementation 'io.objectbox:objectbox-android-objectbrowser:3.0.1'
-//    // Ajoutez la dépendance objectbox-android-objectbrowser pour les builds de debug
-//    debugImplementation "io.objectbox:objectbox-android-objectbrowser:3.0.1" // Remplacez par la version appropriée
-
+configurations {
+    debugImplementation {
+        exclude group: 'io.objectbox', module: 'objectbox-android'
+    }
 }
+dependencies {
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version")
+    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
+    implementation("com.google.android.gms:play-services-base:18.5.0")
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("androidx.multidex:multidex:2.0.1")
+    implementation("io.objectbox:objectbox-java:4.0.3")
+    implementation("io.objectbox:objectbox-android:4.0.3")
+    debugImplementation("io.objectbox:objectbox-android-objectbrowser:4.0.3")
+}
+//dependencies {
+//    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+//    implementation platform('com.google.firebase:firebase-bom:33.5.1')
+//    implementation 'com.google.android.gms:play-services-base:18.5.0'
+//    implementation 'com.google.firebase:firebase-analytics'
+//    implementation 'com.android.support:multidex:1.0.3'
+//    implementation 'io.objectbox:objectbox-java:4.0.3'
+//    implementation 'io.objectbox:objectbox-android:4.0.3'
+//    implementation 'io.objectbox:objectbox-android-objectbrowser:3.7.1' // Pour le debug
+//    debugImplementation("io.objectbox:objectbox-android-objectbrowser:4.0.3")
+//
+////    implementation 'io.objectbox:objectbox-android-objectbrowser:4.0.3'
+//    // Ajoutez la dépendance objectbox-android-objectbrowser pour les builds de debug
+//   // debugImplementation "io.objectbox:objectbox-android-objectbrowser:3.0.1" // Remplacez par la version appropriée
+//
+//}
 
 
 

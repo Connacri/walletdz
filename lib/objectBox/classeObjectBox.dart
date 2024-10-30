@@ -24,12 +24,11 @@ class ObjectBox {
   late final Box<Client> clientBox;
   late final Box<DeletedProduct> deletedProduct;
   late final Box<QrCode> qrCode;
+  Admin? admin; // Admin optionnel
 
   static final ObjectBox _singleton = ObjectBox._internal();
+  factory ObjectBox() => _singleton;
 
-  factory ObjectBox() {
-    return _singleton;
-  }
   final random = Random();
   ObjectBox._internal();
 
@@ -47,10 +46,24 @@ class ObjectBox {
       clientBox = Box<Client>(store);
       deletedProduct = Box<DeletedProduct>(store);
       qrCode = Box<QrCode>(store);
+
+      // Démarre Admin si disponible et vérifie son statut
+      if (Admin.isAvailable()) {
+        admin = Admin(store);
+        print(
+            'Admin a démarré avec succès et est accessible à http://127.0.0.1:8090');
+      } else {
+        print('Admin n\'est pas disponible.');
+      }
     }
   }
 
+  bool isAdminAvailable() {
+    return admin != null; // Retourne vrai si Admin est initialisé
+  }
+
   void close() {
+    admin?.close(); // Ferme Admin si initialisé
     store.close();
   }
 

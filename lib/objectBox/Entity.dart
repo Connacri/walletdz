@@ -15,8 +15,11 @@ class User {
   String? phone;
   String role;
   DateTime derniereModification;
+  bool isSynced;
+  DateTime syncedAt;
 
   final crud = ToOne<Crud>();
+
   User({
     this.id = 0,
     this.photo,
@@ -26,7 +29,9 @@ class User {
     required this.email,
     required this.role,
     required this.derniereModification,
-  });
+    this.isSynced = false,
+    DateTime? syncedAt,
+  }) : syncedAt = syncedAt ?? DateTime.now();
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'] ?? 0,
@@ -49,12 +54,16 @@ class QrCode {
   int id;
   String serial;
   String? type;
+  bool isSynced;
+  DateTime syncedAt;
 
   QrCode({
     this.id = 0,
     required this.serial,
     this.type,
-  });
+    this.isSynced = false,
+  DateTime? syncedAt,
+}) : syncedAt = syncedAt ?? DateTime.now();
 
   factory QrCode.fromJson(Map<String, dynamic> json) {
     return QrCode(
@@ -79,6 +88,9 @@ class Produit {
   double? pricePartielVente;
   double? minimStock;
   int? alertPeremption;
+  bool isSynced;
+  DateTime syncedAt;
+
   @Property(type: PropertyType.date)
   DateTime derniereModification;
 
@@ -101,8 +113,9 @@ class Produit {
     this.minimStock,
     this.alertPeremption,
     required this.derniereModification,
-  });
-  // // Getters pour calculer les valeurs dynamiques
+    this.isSynced = false,
+DateTime? syncedAt,
+}) : syncedAt = syncedAt ?? DateTime.now();  // // Getters pour calculer les valeurs dynamiques
   // double get prixAchat => approvisionnements.isNotEmpty
   //     ? approvisionnements.map((a) => a.prixAchat).reduce((a, b) => a + b) /
   //         approvisionnements.length
@@ -172,9 +185,10 @@ class Produit {
 class Approvisionnement {
   int id;
   double quantite;
-
+  bool isSynced;
   double? prixAchat;
   DateTime? derniereModification;
+  DateTime syncedAt;
 
   @Property(type: PropertyType.date)
   DateTime? datePeremption;
@@ -191,8 +205,9 @@ class Approvisionnement {
     this.prixAchat,
     this.datePeremption,
     this.derniereModification,
-  });
-
+    this.isSynced = false,
+DateTime? syncedAt,
+}) : syncedAt = syncedAt ?? DateTime.now();
   factory Approvisionnement.fromJson(Map<String, dynamic> json) {
     return Approvisionnement(
       id: json['id'] ?? 0,
@@ -214,9 +229,10 @@ class Crud {
   int? createdBy;
   int updatedBy;
   int? deletedBy;
-
+  bool isSynced;
   @Property(type: PropertyType.date)
   DateTime? dateCreation;
+  DateTime syncedAt;
 
   @Property(type: PropertyType.date)
   DateTime derniereModification;
@@ -232,8 +248,9 @@ class Crud {
     this.dateCreation,
     required this.derniereModification,
     this.dateDeleting,
-  });
-  factory Crud.fromJson(Map<String, dynamic> json) {
+    this.isSynced = false,
+DateTime? syncedAt,
+}) : syncedAt = syncedAt ?? DateTime.now();  factory Crud.fromJson(Map<String, dynamic> json) {
     return Crud(
       id: json['id'] ?? 0,
       createdBy: (json['createdBy']).toInt(),
@@ -261,6 +278,8 @@ class Fournisseur {
   String? phone;
   String? adresse;
   DateTime derniereModification;
+  bool isSynced;
+  DateTime syncedAt;
 
   final crud = ToOne<Crud>();
 
@@ -274,8 +293,9 @@ class Fournisseur {
     this.phone,
     this.adresse,
     required this.derniereModification,
-  });
-  factory Fournisseur.fromJson(Map<String, dynamic> json) {
+    this.isSynced = false,
+DateTime? syncedAt,
+}) : syncedAt = syncedAt ?? DateTime.now();  factory Fournisseur.fromJson(Map<String, dynamic> json) {
     return Fournisseur(
       id: json['id'] ?? 0,
       qr: json['qr'],
@@ -298,6 +318,8 @@ class Client {
   String adresse;
   String? description;
   DateTime derniereModification;
+  bool isSynced;
+  DateTime syncedAt;
 
   @Backlink()
   final factures = ToMany<Facture>();
@@ -312,8 +334,9 @@ class Client {
     required this.adresse,
     this.description,
     required this.derniereModification,
-  });
-  factory Client.fromJson(Map<String, dynamic> json) {
+    this.isSynced = false,
+DateTime? syncedAt,
+}) : syncedAt = syncedAt ?? DateTime.now();  factory Client.fromJson(Map<String, dynamic> json) {
     return Client(
       id: json['id'] ?? 0,
       qr: json['qr'] ?? '',
@@ -334,6 +357,8 @@ class Facture {
   String qr;
   double? impayer;
   DateTime derniereModification;
+  bool isSynced;
+  DateTime syncedAt;
 
   @Property(type: PropertyType.date)
   DateTime date;
@@ -349,8 +374,9 @@ class Facture {
     required this.qr,
     required this.impayer,
     required this.derniereModification,
-  });
-  factory Facture.fromJson(Map<String, dynamic> json) {
+    this.isSynced = false,
+DateTime? syncedAt,
+}) : syncedAt = syncedAt ?? DateTime.now();  factory Facture.fromJson(Map<String, dynamic> json) {
     return Facture(
       id: json['id'] ?? 0,
       qr: json['qr'] ?? '',
@@ -366,18 +392,23 @@ class Facture {
 @Entity()
 class LigneFacture {
   int id;
-  final produit = ToOne<Produit>();
-  final facture = ToOne<Facture>();
   double quantite;
   double prixUnitaire;
   DateTime derniereModification;
+  bool isSynced;
+  DateTime syncedAt;
+
+  final produit = ToOne<Produit>();
+  final facture = ToOne<Facture>();
 
   LigneFacture({
     this.id = 0,
     required this.quantite,
     required this.prixUnitaire,
     required this.derniereModification,
-  });
+    this.isSynced = false,
+DateTime? syncedAt,
+}) : syncedAt = syncedAt ?? DateTime.now();
   factory LigneFacture.fromJson(Map<String, dynamic> json) {
     return LigneFacture(
       id: json['id'] ?? 0,
@@ -394,13 +425,14 @@ class LigneFacture {
 class DeletedProduct {
   @Id()
   int id = 0;
-
   String name;
   String description;
   double price;
   int quantity;
   int delaisPeremption;
   DateTime derniereModification;
+  bool isSynced;
+  DateTime syncedAt;
 
   final crud = ToOne<Crud>();
 
@@ -411,8 +443,9 @@ class DeletedProduct {
     required this.quantity,
     required this.delaisPeremption,
     required this.derniereModification,
-  });
-  factory DeletedProduct.fromJson(Map<String, dynamic> json) {
+    this.isSynced = false,
+    DateTime? syncedAt,
+}) : syncedAt = syncedAt ?? DateTime.now();  factory DeletedProduct.fromJson(Map<String, dynamic> json) {
     return DeletedProduct(
       name: json['name'] ?? '',
       description: json['description'] ?? '',

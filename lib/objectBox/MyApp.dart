@@ -48,6 +48,9 @@ class MyMain extends StatelessWidget {
         final objectBox = ObjectBox();
         try {
           await objectBox.init();
+          if (objectBox.isAdminAvailable()) {
+            print('isAdminAvailable');
+          }
         } catch (e) {
           print('Error initializing ObjectBox: $e');
           return null;

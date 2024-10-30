@@ -1294,6 +1294,7 @@ class ProduitDetailPage extends StatelessWidget {
                             child: TextButton.icon(
                               onPressed: () {
                                 _deleteProduit(context, produit);
+                                Navigator.of(context).pop();
                               },
                               icon: Icon(Icons.delete),
                               label: Text('Supprimer'),
