@@ -598,6 +598,10 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                       onFieldSubmitted: (_) {
                         _focusNodePV.requestFocus(); // Passe au champ 2
                       },
+                      onChanged: (value) {
+                        // Force la validation à chaque changement
+                        _formKey.currentState?.validate();
+                      },
                       decoration: InputDecoration(
                         //  fillColor: _isFirstFieldFilled ? Colors.green.shade100 : null,
                         suffixIcon: !_showDescription
@@ -720,6 +724,10 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                               onFieldSubmitted: (_) {
                                 _focusNodeStock
                                     .requestFocus(); // Passe au champ 2
+                              },
+                              onChanged: (value) {
+                                // Force la validation à chaque changement
+                                _formKey.currentState?.validate();
                               },
                               decoration: InputDecoration(
                                 labelText: 'Prix de vente',
@@ -1320,49 +1328,170 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
       return '';
     }
   }
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Étape 1 : Validation et Préparation des Données
+
+  Future<bool> _validateForm() async {
+    final isValid = await _formKey.currentState?.validate() ?? false;
+    return isValid;
+  }
+
+  Future<String> _prepareImageUrl() async {
+    if (_image != null) {
+      return await uploadImageToSupabase(_image!, _existingImageUrl);
+    } else if (_existingImageUrl?.isNotEmpty ?? false) {
+      return _existingImageUrl!;
+    }
+    return '';
+  }
+
+  void _addQrCodeIfNotExists() {
+    final code = _serialController.text.trim();
+    if (code.isNotEmpty && !_qrCodesTemp.contains(code)) {
+      _qrCodesTemp.add(code);
+    }
+  }
+
+//Étape 2 : Construction et Sauvegarde du Produit
+
+  Produit _createProduit(String imageUrl) {
+    return Produit(
+      qr: _qrCodesTemp.toSet().toList().join(','),
+      image: imageUrl,
+      nom: _nomController.text,
+      description: _descriptionController.text,
+      prixVente: double.parse(_prixVenteController.text),
+      qtyPartiel: double.parse(_qtyPartielController.text),
+      pricePartielVente: double.parse(_pricePartielVenteController.text),
+      derniereModification: DateTime.now(),
+    )..crud.target = Crud(
+        createdBy: 1,
+        updatedBy: 1,
+        deletedBy: 1,
+        dateCreation: DateTime.now(),
+        derniereModification: DateTime.now(),
+      );
+  }
+
+  void _assignApprovisionnementsToProduit(Produit produit) {
+    for (int i = 0; i < _approvisionnementTemporaire.length; i++) {
+      final approvisionnement = _approvisionnementTemporaire[i];
+      approvisionnement.produit.target = produit;
+      if (i < _selectedFournisseurs.length) {
+        approvisionnement.fournisseur.target = _selectedFournisseurs[i];
+      }
+      approvisionnement.crud.target = Crud(
+        createdBy: 1,
+        updatedBy: 1,
+        deletedBy: 1,
+        dateCreation: DateTime.now(),
+        derniereModification: DateTime.now(),
+      );
+    }
+  }
+
+//Étape 3 : Gestion des Erreurs et du Retour UI
+
+  void _showSnackBar(BuildContext context, String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: color,
+      ),
+    );
+  }
+
+// Étape 4 :Combinaison des Étapes
 
   IconButton buildButton_Edit_Add(
+    BuildContext context,
+    CommerceProvider produitProvider,
+    bool isFinded,
+  ) {
+    return IconButton(
+      onPressed: () async {
+        if (!mounted) return;
+
+        // Validation du formulaire
+        if (!await _validateForm()) return;
+
+        // Vérifier si le produit existe déjà avant d'afficher le ProgressDialog
+        final existingProduct =
+            await produitProvider.getProduitByQr(_serialController.text);
+        if (existingProduct != null) {
+          print('Produit existant détecté');
+          showExistingProductDialog(context, _serialController.text,
+              existingProduct, produitProvider);
+          _showSnackBar(context, 'Produit déjà existant', Colors.orange);
+          return; // Arrêter ici si le produit existe déjà
+        }
+
+        // Affichage du ProgressDialog uniquement pour un produit non existant
+        setState(() => _isLoadingSauv = true);
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const ProgressDialog(),
+        );
+
+        try {
+          final imageUrl = await _prepareImageUrl();
+          _addQrCodeIfNotExists();
+
+          final produit = _createProduit(imageUrl);
+          _assignApprovisionnementsToProduit(produit);
+
+          // Sauvegarde du nouveau produit
+          produitProvider.ajouterProduit(
+              produit, _selectedFournisseurs, _approvisionnementTemporaire);
+          _formKey.currentState?.save();
+          setState(() => _isLoadingSauv = false);
+          _showSnackBar(context, 'Produit ajouté avec succès', Colors.green);
+
+          //  Navigator.pop(context); // Ferme la page du formulaire
+        } catch (e) {
+          _showSnackBar(
+              context, 'Erreur lors de la sauvegarde : $e', Colors.red);
+        } finally {
+          if (mounted) {
+            setState(() => _isLoadingSauv = false);
+            //Navigator.pop(context); // Ferme le ProgressDialog
+          }
+        }
+      },
+      icon: _isLoadingSauv
+          ? const CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+            )
+          : Icon(isFinded && _serialController.text == _produitQr
+              ? Icons.edit
+              : Icons.check),
+    );
+  }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+  IconButton buildButton_Edit_Add1(
       BuildContext context, CommerceProvider produitProvider, bool isFinded) {
     return IconButton(
       onPressed: () async {
         if (!mounted) return;
 
-        // Variable pour tracker si le contexte est toujours valide
-        bool isContextValid = true;
+        // Validation préalable
+        final isValid = await _formKey.currentState!.validate();
+        if (!isValid) return;
 
-        // Afficher le dialog de progression
+        bool isContextValid = true;
+        // Affichage du dialog de progression
         BuildContext dialogContext = context;
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            dialogContext = context; // Capture le contexte du dialog
-            return PopScope(
-              onPopInvokedWithResult: (bool, dynamic) async =>
-                  false, // Empêche la fermeture par le retour
-              child: Dialog(
-                backgroundColor: Colors.black.withOpacity(0.5),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        "Sauvegarde en cours...",
-                        style: TextStyle(color: Colors.white, fontSize: 16),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        );
+
+        _isFinded
+            ? null
+            : showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => const ProgressDialog(),
+              );
 
         setState(() => _isLoadingSauv = true);
 
@@ -1370,105 +1499,106 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
           final existingProduct =
               await produitProvider.getProduitByQr(_serialController.text);
 
-          if (_formKey.currentState!.validate()) {
-            String imageUrl = '';
+          // Validation préalable
+          final isValid = await _formKey.currentState!.validate();
+          if (!isValid) return;
 
-            // Gestion de l'image du produit
-            if (_image != null) {
-              imageUrl =
-                  await uploadImageToSupabase(_image!, _existingImageUrl);
-            } else if (_existingImageUrl != null &&
-                _existingImageUrl!.isNotEmpty) {
-              imageUrl = _existingImageUrl!;
-            }
+          // Initialisation de l'URL de l'image
+          String imageUrl = '';
 
-            final code = _serialController.text.trim();
-            if (code.isNotEmpty) _qrCodesTemp.add(code);
+          // Gestion de l'image du produit
+          if (_image != null) {
+            imageUrl = await uploadImageToSupabase(_image!, _existingImageUrl);
+          } else if (_existingImageUrl != null &&
+              _existingImageUrl!.isNotEmpty) {
+            imageUrl = _existingImageUrl!;
+          }
 
-            // Initialisation du produit
-            final produit = Produit(
-              qr: _qrCodesTemp.toSet().toList().join(','),
-              image: imageUrl,
-              nom: _nomController.text,
-              description: _descriptionController.text,
-              prixVente: double.parse(_prixVenteController.text),
-              qtyPartiel: double.parse(_qtyPartielController.text),
-              pricePartielVente:
-                  double.parse(_pricePartielVenteController.text),
+          // Gestion du code QR
+          final code = _serialController.text.trim();
+          if (code.isNotEmpty && !_isFinded && !_qrCodesTemp.contains(code)) {
+            _qrCodesTemp.add(code);
+          }
+
+          // Initialisation du produit
+          final produit = Produit(
+            qr: _qrCodesTemp.toSet().toList().join(','),
+            image: imageUrl,
+            nom: _nomController.text,
+            description: _descriptionController.text,
+            prixVente: double.parse(_prixVenteController.text),
+            qtyPartiel: double.parse(_qtyPartielController.text),
+            pricePartielVente: double.parse(_pricePartielVenteController.text),
+            derniereModification: DateTime.now(),
+          )..crud.target = Crud(
+              createdBy: 1,
+              updatedBy: 1,
+              deletedBy: 1,
+              dateCreation: DateTime.now(),
               derniereModification: DateTime.now(),
-            )..crud.target = Crud(
-                createdBy: 1,
-                updatedBy: 1,
-                deletedBy: 1,
-                dateCreation: DateTime.now(),
-                derniereModification: DateTime.now(),
-              );
+            );
 
-            // Gestion des approvisionnements avec vérification de validité
-            for (int i = 0; i < _approvisionnementTemporaire.length; i++) {
-              if (!isContextValid)
-                break; // Sort si le contexte n'est plus valide
-              final approvisionnement = _approvisionnementTemporaire[i];
-              approvisionnement.produit.target = produit;
-              if (i < _selectedFournisseurs.length) {
-                approvisionnement.fournisseur.target = _selectedFournisseurs[i];
-              }
-              approvisionnement.crud.target = Crud(
-                createdBy: 1,
-                updatedBy: 1,
-                deletedBy: 1,
-                dateCreation: DateTime.now(),
-                derniereModification: DateTime.now(),
+          // Gestion des approvisionnements
+          for (int i = 0; i < _approvisionnementTemporaire.length; i++) {
+            if (!isContextValid) break;
+            final approvisionnement = _approvisionnementTemporaire[i];
+            approvisionnement.produit.target = produit;
+            if (i < _selectedFournisseurs.length) {
+              approvisionnement.fournisseur.target = _selectedFournisseurs[i];
+            }
+            approvisionnement.crud.target = Crud(
+              createdBy: 1,
+              updatedBy: 1,
+              deletedBy: 1,
+              dateCreation: DateTime.now(),
+              derniereModification: DateTime.now(),
+            );
+          }
+
+          // Sauvegarde ou mise à jour du produit
+          if (existingProduct == null) {
+            produitProvider.ajouterProduit(
+                produit, _selectedFournisseurs, _approvisionnementTemporaire);
+            if (isContextValid) {
+              _formKey.currentState?.save();
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Produit ajouté avec succès'),
+                  backgroundColor: Colors.green,
+                ),
               );
             }
-
-            if (existingProduct == null) {
-              produitProvider.ajouterProduit(
-                  produit, _selectedFournisseurs, _approvisionnementTemporaire);
-              if (isContextValid) {
-                _formKey.currentState?.save();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Center(child: Text('Produit ajouté avec succès')),
-                    backgroundColor: Colors.green,
-                    padding: EdgeInsets.symmetric(vertical: 50),
-                  ),
-                );
+            Navigator.pop(context);
+            setState(() => _isLoadingSauv = false);
+            // Fermeture du dialog de progression
+            if (isContextValid && Navigator.canPop(dialogContext)) {
+              Navigator.pop(dialogContext);
+            }
+          } else {
+            if (isContextValid && !isFinded) {
+              _addQRCodeFromText();
+              setState(() => _isLoadingSauv = false);
+              // Fermeture du dialog de progression
+              if (isContextValid && Navigator.canPop(dialogContext)) {
+                Navigator.pop(dialogContext);
               }
-            } else {
-              if (isContextValid) {
-                _addQRCodeFromText();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Center(child: Text('Le produit a été mis à jour')),
-                    backgroundColor: Colors.blue,
-                    padding: EdgeInsets.symmetric(vertical: 50),
-                  ),
-                );
-              }
+              return;
             }
           }
         } catch (e) {
           if (isContextValid) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content:
-                    Center(child: Text('Erreur lors de la sauvegarde : $e')),
+                content: Text('Erreur lors de la sauvegarde : $e'),
                 backgroundColor: Colors.red,
               ),
             );
           }
         } finally {
-          // Utilise le contexte capturé du dialog pour le fermer
-          if (isContextValid && Navigator.canPop(dialogContext)) {
-            Navigator.pop(dialogContext);
-          }
-          if (mounted) {
-            setState(() => _isLoadingSauv = false);
-            if (Navigator.of(context).canPop()) {
-              Navigator.of(context).pop(); // Ferme le dialog de progression
-            }
-          }
+          // if (mounted) {
+          setState(() => _isLoadingSauv = false);
+          // }
         }
       },
       icon: _isLoadingSauv
@@ -2015,9 +2145,10 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
       // Vérification ajoutée ici
       final pickedFile = await ImagePicker().pickImage(
         source: source,
-        maxHeight: 1080,
-        maxWidth: 1920,
-        imageQuality: 40,
+        maxHeight: 720, // Hauteur réduite pour les écrans mobiles
+        maxWidth: 1280, // Largeur ajustée
+        imageQuality:
+            50, // Augmentation légère de la qualité pour un meilleur rendu
       );
 
       if (pickedFile != null && mounted) {
@@ -2261,4 +2392,41 @@ class _FournisseurSelectionScreenState
       ),
     );
   }
+}
+
+class ProgressDialog extends StatelessWidget {
+  const ProgressDialog({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor:
+          Colors.black.withOpacity(DialogConstants.opacityBackground),
+      child: Padding(
+        padding: const EdgeInsets.all(DialogConstants.padding),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+            SizedBox(height: DialogConstants.padding),
+            Text(
+              DialogConstants.savingMessage,
+              style: TextStyle(
+                  color: Colors.white, fontSize: DialogConstants.fontSize),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class DialogConstants {
+  static const double opacityBackground = 0.5;
+  static const double padding = 16.0;
+  static const double fontSize = 16.0;
+  static const String savingMessage = "Sauvegarde en cours...";
 }

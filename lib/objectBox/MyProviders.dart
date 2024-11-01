@@ -223,7 +223,7 @@ class CommerceProvider extends ChangeNotifier {
         // Vérifier si la nouvelle valeur est vide, null ou ne contient que des espaces
         if (newQrValue.trim().isEmpty) {
           // Si vide, utiliser le nom du produit
-          produit.qr = produit.nom;
+          produit.qr = produit.nom + produit.id.toString();
         } else {
           produit.qr = newQrValue;
         }
