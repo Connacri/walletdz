@@ -219,17 +219,17 @@ class _FacturePageState extends State<FacturePage> {
     return AppBar(
       title: Text('Facture'),
       actions: [
-        Center(
-          child: ElevatedButton(
-            onPressed: () async {
-              await ObjectBox().cleanQrCodes().whenComplete(() =>
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('QR codes nettoyés avec succès.')),
-                  ));
-            },
-            child: Text('Nettoyer les QR Codes'),
-          ),
-        ),
+        // Center(
+        //   child: ElevatedButton(
+        //     onPressed: () async {
+        //       await ObjectBox().cleanQrCodes().whenComplete(() =>
+        //           ScaffoldMessenger.of(context).showSnackBar(
+        //             SnackBar(content: Text('QR codes nettoyés avec succès.')),
+        //           ));
+        //     },
+        //     child: Text('Nettoyer les QR Codes'),
+        //   ),
+        // ),
         IconButton(
           icon: Icon(Icons.search),
           onPressed: () {

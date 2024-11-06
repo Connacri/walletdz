@@ -601,10 +601,10 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                       onFieldSubmitted: (_) {
                         _focusNodePV.requestFocus(); // Passe au champ 2
                       },
-                      onChanged: (value) {
-                        // Force la validation à chaque changement
-                        _formKey.currentState?.validate();
-                      },
+                      // onChanged: (value) {
+                      //   // Force la validation à chaque changement
+                      //   _formKey.currentState?.validate();
+                      // },
                       decoration: InputDecoration(
                         //  fillColor: _isFirstFieldFilled ? Colors.green.shade100 : null,
                         suffixIcon: !_showDescription
@@ -730,10 +730,10 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                                 _focusNodeStock
                                     .requestFocus(); // Passe au champ 2
                               },
-                              onChanged: (value) {
-                                // Force la validation à chaque changement
-                                _formKey.currentState?.validate();
-                              },
+                              // onChanged: (value) {
+                              //   // Force la validation à chaque changement
+                              //   _formKey.currentState?.validate();
+                              // },
                               decoration: InputDecoration(
                                 labelText: 'Prix de vente',
                                 border: OutlineInputBorder(
@@ -763,11 +763,12 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                               //   return null;
                               // },
                               keyboardType: TextInputType.numberWithOptions(
-                                  decimal: true),
-                              // inputFormatters: [
-                              //   FilteringTextInputFormatter.allow(
-                              //       RegExp(r'^\d+\.?\d{0,2}')),
-                              // ],
+                                  decimal: true, signed: true),
+
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                    RegExp(r'^\d+\.?\d{0,2}')),
+                              ],
                               // onChanged: (value) {
                               //   if (value.isNotEmpty) {
                               //     double? parsed = double.tryParse(value);
@@ -793,7 +794,55 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                             ),
                           ),
                         ), // prix de vente
+                        _showAppro
+                            ? Container()
+                            : Expanded(
+                                child: TextFormField(
+                                  enabled: !_isLoadingSauv,
+                                  controller: _stockController,
+                                  textAlign: TextAlign.center,
+                                  decoration: InputDecoration(
+                                    labelText: 'Stock',
+                                    // suffixIcon: Padding(
+                                    //   padding: const EdgeInsets.all(4.0),
+                                    //   child: IconButton(
+                                    //       onPressed: _showAddQuantityDialog,
+                                    //       icon: Icon(Icons.add)),
+                                    // ),
 
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      borderSide: BorderSide
+                                          .none, // Supprime le contour
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      borderSide: BorderSide
+                                          .none, // Supprime le contour en état normal
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      borderSide: BorderSide
+                                          .none, // Supprime le contour en état focus
+                                    ),
+                                    //border: InputBorder.none,
+                                    filled: true,
+                                    contentPadding: EdgeInsets.all(15),
+                                  ),
+                                  keyboardType: TextInputType.numberWithOptions(
+                                      decimal: true, signed: true),
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.allow(
+                                        RegExp(r'^\d+\.?\d{0,2}')),
+                                  ],
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Veuillez entrer le stock';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
                         // stock alert
                       ],
                     ),
@@ -949,7 +998,13 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                                             filled: true,
                                             contentPadding: EdgeInsets.all(15),
                                           ),
-                                          keyboardType: TextInputType.number,
+                                          keyboardType:
+                                              TextInputType.numberWithOptions(
+                                                  decimal: true, signed: true),
+                                          inputFormatters: [
+                                            FilteringTextInputFormatter.allow(
+                                                RegExp(r'^\d+\.?\d{0,2}')),
+                                          ],
                                           validator: (value) {
                                             if (value == null ||
                                                 value.isEmpty) {
@@ -1426,11 +1481,16 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
           _addQrCodeIfNotExists();
 
           final produit = _createProduit(imageUrl);
-          _assignApprovisionnementsToProduit(produit);
 
-          // Sauvegarde du nouveau produit
-          produitProvider.ajouterProduit(
-              produit, _selectedFournisseurs, _approvisionnementTemporaire);
+
+          if (_prixAchatController.text.isNotEmpty && _stockController.text.isNotEmpty ){
+            saveApprovisionnement();
+            print('saveApprovisionnement');
+          }
+          _assignApprovisionnementsToProduit(produit);
+            // Sauvegarde du nouveau produit
+            produitProvider.ajouterProduit(
+                produit, _selectedFournisseurs, _approvisionnementTemporaire);
           _formKey.currentState?.save();
           setState(() => _isLoadingSauv = false);
           _showSnackBar(context, 'Produit ajouté avec succès', Colors.green);

@@ -1356,27 +1356,61 @@ class ProduitDetailPage extends StatelessWidget {
                     // SizedBox(height: 10),
                     // Text('Stock Update : ' + produit.stockUpdate.toString()),
                     SizedBox(height: 10),
-                    ...produit.approvisionnements.map((appro) {
-                      return Padding(
-                        padding: EdgeInsets.symmetric(vertical: 4.0),
-                        child: Text(
-                            '  - Date: ${appro.crud.target!.dateCreation}\n      Quantité: ${appro.quantite}\n      Prix d\'achat: ${appro.prixAchat}\n      Date de péremption: ${appro.datePeremption}'),
-                      );
-                    }).toList(),
-                    SizedBox(height: 10),
-                    ...produit.approvisionnements.map((appro) {
-                      return Padding(
-                        padding: EdgeInsets.symmetric(vertical: 4.0),
-                        child: Text(
-                            '  Date Peremption :  ${appro.datePeremption}'),
-                      );
-                    }).toList(),
-                    SizedBox(height: 10),
-                    SizedBox(height: 10),
-                    SizedBox(height: 10),
+                    produit.approvisionnements.isEmpty
+                        ? Container()
+                        : SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: DataTable(
+                              columns: [
+                                DataColumn(label: Text('Fournisseurs')),
+                                DataColumn(label: Text('Date de Création')),
+                                DataColumn(label: Text('Quantité')),
+                                DataColumn(label: Text('Prix d\'Achat')),
+                                DataColumn(label: Text('Date de Péremption')),
+                              ],
+                              rows: produit.approvisionnements.map((appro) {
+                                return DataRow(
+                                  cells: [
+                                    DataCell(Text(
+                                        '${appro.fournisseur.target!.nom}')),
+                                    DataCell(
+                                      Text(DateFormat('EEE dd MMM yyyy', 'fr')
+                                          .format(DateTime.parse(appro
+                                              .crud.target!.dateCreation
+                                              .toString()))),
+                                    ),
+                                    DataCell(Text(
+                                        '${appro.quantite.toStringAsFixed(2)}')),
+                                    DataCell(Text(
+                                        '${appro.prixAchat!.toStringAsFixed(2)}')),
+                                    // DataCell(
+                                    //     Text('${appro.datePeremption ?? '-'}')),
+                                    DataCell(
+                                      Text(DateFormat('EEE dd MMM yyyy', 'fr')
+                                              .format(DateTime.parse(appro
+                                                  .datePeremption
+                                                  .toString())) ??
+                                          '-'),
+                                    ),
+                                  ],
+                                );
+                              }).toList(),
+                            ),
+                          ),
+
+                    // SizedBox(height: 10),
+                    // ...produit.approvisionnements.map((appro) {
+                    //   return Padding(
+                    //     padding: EdgeInsets.symmetric(vertical: 4.0),
+                    //     child: Text(
+                    //         '  Date Peremption :  ${appro.datePeremption}'),
+                    //   );
+                    // }).toList(),
+
+                    // SizedBox(height: 10),
                     // Text('Derniere Modification : ' +
                     //     produit.crud.target!.derniereModification.toString()),
-                    SizedBox(height: 10),
+                    // SizedBox(height: 10),
                     SizedBox(
                       height: 16,
                     ),
@@ -1387,44 +1421,53 @@ class ProduitDetailPage extends StatelessWidget {
                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: 8),
-                    // Consumer<CommerceProvider>(
-                    //   builder: (context, produitProvider, child) {
-                    //     return Wrap(
-                    //       spacing: 6.0, // Espace horizontal entre les éléments
-                    //       runSpacing: 4.0, // Espace vertical entre les lignes
-                    //       children: produit.fournisseurs.map((fournisseur) {
-                    //         return InkWell(
-                    //           onTap: () {
-                    //             Navigator.of(context).push(MaterialPageRoute(
-                    //                 builder: (ctx) => ProduitsFournisseurPage(
-                    //                       fournisseur: fournisseur,
-                    //                     )));
-                    //           },
-                    //           child: Chip(
-                    //             shadowColor: Colors.black,
-                    //             backgroundColor:
-                    //                 Theme.of(context).chipTheme.backgroundColor,
-                    //             labelStyle: TextStyle(
-                    //               color: Theme.of(context)
-                    //                   .chipTheme
-                    //                   .labelStyle
-                    //                   ?.color,
-                    //             ),
-                    //             side: BorderSide.none,
-                    //             shape: RoundedRectangleBorder(
-                    //                 borderRadius:
-                    //                     BorderRadius.all(Radius.circular(10))),
-                    //             padding: EdgeInsets.zero,
-                    //             label: Text(
-                    //               fournisseur.nom,
-                    //               style: TextStyle(fontSize: 10),
-                    //             ),
-                    //           ),
-                    //         );
-                    //       }).toList(),
-                    //     );
-                    //   },
-                    // ),
+                    // SizedBox(height: 10),
+                    // ...produit.approvisionnements.map((appro) {
+                    //   return Padding(
+                    //     padding: EdgeInsets.symmetric(vertical: 4.0),
+                    //     child: Text(
+                    //         '  Date Peremption :  ${appro.datePeremption}'),
+                    //   );
+                    // }).toList(),
+                    Consumer<CommerceProvider>(
+                      builder: (context, produitProvider, child) {
+                        return Wrap(
+                          spacing: 6.0, // Espace horizontal entre les éléments
+                          runSpacing: 4.0, // Espace vertical entre les lignes
+                          children: produit.approvisionnements.map((appro) {
+                            return InkWell(
+                              onTap: () {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (ctx) => ProduitsFournisseurPage(
+                                          fournisseur:
+                                              appro.fournisseur.target!,
+                                        )));
+                              },
+                              child: Chip(
+                                shadowColor: Colors.black,
+                                backgroundColor:
+                                    Theme.of(context).chipTheme.backgroundColor,
+                                labelStyle: TextStyle(
+                                  color: Theme.of(context)
+                                      .chipTheme
+                                      .labelStyle
+                                      ?.color,
+                                ),
+                                side: BorderSide.none,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(10))),
+                                padding: EdgeInsets.zero,
+                                label: Text(
+                                  appro.fournisseur.target!.nom,
+                                  style: TextStyle(fontSize: 10),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        );
+                      },
+                    ),
                     SizedBox(
                       height: 50,
                     ),
