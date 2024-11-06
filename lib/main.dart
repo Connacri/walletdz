@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_in_app_messaging/firebase_in_app_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -22,6 +23,16 @@ import 'dart:convert';
 import 'objectBox/MyApp.dart';
 import 'objectBox/hash.dart';
 
+///gere les gestu
+class CustomScrollBehavior extends MaterialScrollBehavior {
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.touch,
+        PointerDeviceKind.stylus,
+      };
+}
+
 //late ObjectBox objectbox;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +47,8 @@ Future<void> main() async {
       center: true,
       backgroundColor: Colors.transparent,
       titleBarStyle: TitleBarStyle.normal,
+      // fullScreen: true,
+      // skipTaskbar: false,
     );
 
     windowManager.waitUntilReadyToShow(windowOptions, () async {
@@ -167,6 +180,8 @@ class _MyAppState extends State<MyApp> {
       ],
       //lazy: true,
       child: MaterialApp(
+          scrollBehavior:
+              CustomScrollBehavior(), // Applique le nouveau ScrollBehavior
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
             useMaterial3: true,

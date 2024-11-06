@@ -39,6 +39,7 @@ class ResponsiveLayout2 extends StatefulWidget {
 
 class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
   final _formKey = GlobalKey<FormState>();
+  final _formKeyApp = GlobalKey<FormState>();
   final _nomController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _prixAchatController = TextEditingController();
@@ -237,6 +238,7 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
     final produitProvider =
         Provider.of<CommerceProvider>(context, listen: false);
     return SafeArea(
+      maintainBottomViewPadding: true,
       child: LayoutBuilder(
         builder: (context, constraints) {
           if (constraints.maxWidth < 600) {
@@ -278,7 +280,7 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                       child: Container(
                           constraints: BoxConstraints(
                             maxWidth: 400, // largeur maximale de 200 pixels
-                            // maxHeight: 100,  // hauteur maximale de 100 pixels
+                            // maxHeight: 100, // hauteur maximale de 100 pixels
                           ),
                           child: TabletLayout()),
                     ),
@@ -301,7 +303,7 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                     child: Container(
                       constraints: BoxConstraints(
                         maxWidth: 400, // largeur maximale de 200 pixels
-                        // maxHeight: 100,  // hauteur maximale de 100 pixels
+                        //maxHeight: 100, // hauteur maximale de 100 pixels
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -479,6 +481,7 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
               padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
               child: TextFormField(
                 controller: _serialController,
+                enabled: !_isLoadingSauv,
                 focusNode:
                     _serialFocusNode, // Attache FocusNode au TextFormField
                 textAlign: TextAlign.center,
@@ -590,7 +593,7 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                 ? Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: TextFormField(
-                      //enabled: _isFirstFieldRempli || _qrCodesTemp.isNotEmpty,
+                      enabled: !_isLoadingSauv,
                       controller: _nomController,
                       textAlign: TextAlign.center,
                       keyboardType: TextInputType.text,
@@ -662,6 +665,8 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                         children: [
                           TextFormField(
                             controller: _descriptionController,
+                            enabled: !_isLoadingSauv,
+
                             maxLines: 5,
                             keyboardType: TextInputType.text,
                             textInputAction:
@@ -715,8 +720,8 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: TextFormField(
-                              enabled: _isFirstFieldRempli ||
-                                  _qrCodesTemp.isNotEmpty,
+                              enabled: !_isLoadingSauv,
+
                               controller: _prixVenteController,
                               textAlign: TextAlign.center,
                               textInputAction:
@@ -796,55 +801,132 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                 : Container(),
 
             ///********************************************************************** 1
-            _qrCodesTemp.isEmpty
-                ? Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: !_showAppro
-                        ? _isFirstFieldRempli || _qrCodesTemp.isNotEmpty
-                            ? IconButton(
-                                icon: Icon(Icons.keyboard_arrow_down),
-                                onPressed: () {
-                                  setState(() {
-                                    _showAppro = true;
-                                  });
-                                },
-                              )
-                            : Container()
-                        : Container(
-                            padding: EdgeInsets.all(
-                                8.0), // Espacement à l'intérieur du cadre
-                            decoration: BoxDecoration(
-                              //      color: Colors.grey, // Couleur de fond
-                              borderRadius:
-                                  BorderRadius.circular(8.0), // Bords arrondis
-                              border: Border.all(
-                                color: Colors.grey, // Couleur de la bordure
-                                width: 1.0, // Épaisseur de la bordure
-                              ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: !_showAppro
+                  ? _isFirstFieldRempli || _qrCodesTemp.isNotEmpty
+                      ? IconButton(
+                          icon: Icon(Icons.keyboard_arrow_down),
+                          onPressed: () {
+                            setState(() {
+                              _showAppro = true;
+                            });
+                          },
+                        )
+                      : Container()
+                  : Container(
+                      padding: EdgeInsets.all(
+                          8.0), // Espacement à l'intérieur du cadre
+                      decoration: BoxDecoration(
+                        //      color: Colors.grey, // Couleur de fond
+                        borderRadius:
+                            BorderRadius.circular(8.0), // Bords arrondis
+                        border: Border.all(
+                          color: Colors.grey, // Couleur de la bordure
+                          width: 1.0, // Épaisseur de la bordure
+                        ),
+                      ),
+                      child: Form(
+                        key: _formKeyApp,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.keyboard_arrow_up),
+                              onPressed: () {
+                                setState(() {
+                                  _showAppro = false;
+                                });
+                              },
                             ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
+                            Row(
                               children: [
-                                IconButton(
-                                  icon: Icon(Icons.keyboard_arrow_up),
-                                  onPressed: () {
-                                    setState(() {
-                                      _showAppro = false;
-                                    });
-                                  },
-                                ),
-                                Row(
-                                  children: [
-                                    Flexible(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
+                                Flexible(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: TextFormField(
+                                      enabled: !_isLoadingSauv,
+                                      controller: _prixAchatController,
+                                      textAlign: TextAlign.center,
+                                      decoration: InputDecoration(
+                                        labelText: 'Prix d\'achat',
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                          borderSide: BorderSide
+                                              .none, // Supprime le contour
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                          borderSide: BorderSide
+                                              .none, // Supprime le contour en état normal
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                          borderSide: BorderSide
+                                              .none, // Supprime le contour en état focus
+                                        ),
+                                        //border: InputBorder.none,
+                                        filled: true,
+                                        contentPadding: EdgeInsets.all(15),
+                                      ),
+                                      // keyboardType: TextInputType.number,
+                                      //  validator: (value) {
+                                      //    if (value == null || value.isEmpty) {
+                                      //      return 'Veuillez entrer le prix d\'achat';
+                                      //    }
+                                      //    return null;
+                                      //  },
+                                      keyboardType:
+                                          TextInputType.numberWithOptions(
+                                              decimal: true),
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.allow(
+                                            RegExp(r'^\d+\.?\d{0,2}')),
+                                      ],
+                                      // onChanged: (value) {
+                                      //   if (value.isNotEmpty) {
+                                      //     double? parsed = double.tryParse(value);
+                                      //     if (parsed != null) {
+                                      //       _prixAchatController.text = parsed.toStringAsFixed(2);
+                                      //       _prixAchatController.selection =
+                                      //           TextSelection.fromPosition(
+                                      //         TextPosition(
+                                      //             offset: _prixAchatController.text.length),
+                                      //       );
+                                      //     }
+                                      //   }
+                                      // },
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Veuillez entrer le prix d\'achat';
+                                        }
+                                        // if (double.tryParse(value) == null) {
+                                        //   return 'Veuillez entrer un prix valide';
+                                        // }
+                                        // return null;
+                                      },
+                                    ),
+                                  ),
+                                ), //prix d'achat
+                                !_showAppro
+                                    ? Container()
+                                    : Expanded(
                                         child: TextFormField(
-                                          enabled: _isFirstFieldRempli ||
-                                              _qrCodesTemp.isNotEmpty,
-                                          controller: _prixAchatController,
+                                          enabled: !_isLoadingSauv,
+                                          controller: _stockController,
                                           textAlign: TextAlign.center,
                                           decoration: InputDecoration(
-                                            labelText: 'Prix d\'achat',
+                                            labelText: 'Stock',
+                                            // suffixIcon: Padding(
+                                            //   padding: const EdgeInsets.all(4.0),
+                                            //   child: IconButton(
+                                            //       onPressed: _showAddQuantityDialog,
+                                            //       icon: Icon(Icons.add)),
+                                            // ),
+
                                             border: OutlineInputBorder(
                                               borderRadius:
                                                   BorderRadius.circular(8.0),
@@ -867,180 +949,143 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                                             filled: true,
                                             contentPadding: EdgeInsets.all(15),
                                           ),
-                                          // keyboardType: TextInputType.number,
-                                          //  validator: (value) {
-                                          //    if (value == null || value.isEmpty) {
-                                          //      return 'Veuillez entrer le prix d\'achat';
-                                          //    }
-                                          //    return null;
-                                          //  },
-                                          keyboardType:
-                                              TextInputType.numberWithOptions(
-                                                  decimal: true),
-                                          inputFormatters: [
-                                            FilteringTextInputFormatter.allow(
-                                                RegExp(r'^\d+\.?\d{0,2}')),
-                                          ],
-                                          // onChanged: (value) {
-                                          //   if (value.isNotEmpty) {
-                                          //     double? parsed = double.tryParse(value);
-                                          //     if (parsed != null) {
-                                          //       _prixAchatController.text = parsed.toStringAsFixed(2);
-                                          //       _prixAchatController.selection =
-                                          //           TextSelection.fromPosition(
-                                          //         TextPosition(
-                                          //             offset: _prixAchatController.text.length),
-                                          //       );
-                                          //     }
-                                          //   }
-                                          // },
-                                          // validator: (value) {
-                                          //   if (value == null || value.isEmpty) {
-                                          //     return 'Veuillez entrer le prix d\'achat';
-                                          //   }
-                                          //   // if (double.tryParse(value) == null) {
-                                          //   //   return 'Veuillez entrer un prix valide';
-                                          //   // }
-                                          //   // return null;
-                                          // },
+                                          keyboardType: TextInputType.number,
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value.isEmpty) {
+                                              return 'Veuillez entrer le stock';
+                                            }
+                                            return null;
+                                          },
                                         ),
                                       ),
-                                    ), //prix d'achat
-                                    !_showAppro
-                                        ? Container()
-                                        : Expanded(
-                                            child: TextFormField(
-                                              enabled: _isFirstFieldRempli ||
-                                                  _qrCodesTemp.isNotEmpty,
-                                              controller: _stockController,
-                                              textAlign: TextAlign.center,
-                                              decoration: InputDecoration(
-                                                labelText: 'Stock',
-                                                // suffixIcon: Padding(
-                                                //   padding: const EdgeInsets.all(4.0),
-                                                //   child: IconButton(
-                                                //       onPressed: _showAddQuantityDialog,
-                                                //       icon: Icon(Icons.add)),
-                                                // ),
-
-                                                border: OutlineInputBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          8.0),
-                                                  borderSide: BorderSide
-                                                      .none, // Supprime le contour
+                              ],
+                            ), // stock
+                            Flexible(
+                              flex: 2,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: TextFormField(
+                                  enabled: !_isLoadingSauv,
+                                  controller: _datePeremptionController,
+                                  textAlign: TextAlign.center,
+                                  keyboardType: TextInputType.text,
+                                  decoration: InputDecoration(
+                                    // fillColor: _isFirstFieldFilled
+                                    //     ? Colors.yellow.shade200
+                                    //     : null,
+                                    labelText: 'Date de Péremption',
+                                    suffixIcon: IconButton(
+                                      icon: const Icon(Icons.date_range),
+                                      onPressed: () async {
+                                        final DateTime? dateTimePerem =
+                                            await showDatePicker(
+                                          context: context,
+                                          initialDate: selectedDate,
+                                          firstDate: DateTime(2000),
+                                          lastDate: DateTime(2200),
+                                        );
+                                        if (dateTimePerem != null) {
+                                          setState(() {
+                                            selectedDate = dateTimePerem;
+                                            _datePeremptionController.text =
+                                                dateTimePerem.format(
+                                                    'yMMMMd', 'fr_FR');
+                                          });
+                                        }
+                                      },
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      borderSide: BorderSide
+                                          .none, // Supprime le contour
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      borderSide: BorderSide
+                                          .none, // Supprime le contour en état normal
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      borderSide: BorderSide
+                                          .none, // Supprime le contour en état focus
+                                    ),
+                                    filled: true,
+                                    contentPadding: EdgeInsets.all(15),
+                                  ),
+                                  // validator: (value) {
+                                  //   if (value == null || value.isEmpty) {
+                                  //     return 'Veuillez entrer un nom du Produit';
+                                  //   }
+                                  //   return null;
+                                  // },
+                                ),
+                              ),
+                            ),
+                            Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Container(
+                                  width: largeur,
+                                  child: Wrap(
+                                    spacing: 8.0,
+                                    runSpacing: 4.0,
+                                    children: [
+                                      // Affiche le fournisseur sélectionné
+                                      if (_selectedFournisseur !=
+                                          null) // Afficher seulement si un fournisseur est sélectionné
+                                        GestureDetector(
+                                          onTap: () async {
+                                            final result =
+                                                await Navigator.of(context)
+                                                    .push(
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    FournisseurSelectionScreen(
+                                                  selectedFournisseur:
+                                                      _selectedFournisseur,
+                                                  onSelectedFournisseurChanged:
+                                                      _onSelectedFournisseurChanged,
                                                 ),
-                                                enabledBorder:
-                                                    OutlineInputBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          8.0),
-                                                  borderSide: BorderSide
-                                                      .none, // Supprime le contour en état normal
-                                                ),
-                                                focusedBorder:
-                                                    OutlineInputBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          8.0),
-                                                  borderSide: BorderSide
-                                                      .none, // Supprime le contour en état focus
-                                                ),
-                                                //border: InputBorder.none,
-                                                filled: true,
-                                                contentPadding:
-                                                    EdgeInsets.all(15),
                                               ),
-                                              keyboardType:
-                                                  TextInputType.number,
-                                              // validator: (value) {
-                                              //   if (value == null || value.isEmpty) {
-                                              //     return 'Veuillez entrer le stock';
-                                              //   }
-                                              //   return null;
-                                              // },
-                                            ),
-                                          ),
-                                  ],
-                                ), // stock
-                                Flexible(
-                                  flex: 2,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: TextFormField(
-                                      enabled: _isFirstFieldRempli ||
-                                          _qrCodesTemp.isNotEmpty,
-                                      controller: _datePeremptionController,
-                                      textAlign: TextAlign.center,
-                                      keyboardType: TextInputType.text,
-                                      decoration: InputDecoration(
-                                        // fillColor: _isFirstFieldFilled
-                                        //     ? Colors.yellow.shade200
-                                        //     : null,
-                                        labelText: 'Date de Péremption',
-                                        suffixIcon: IconButton(
-                                          icon: const Icon(Icons.date_range),
-                                          onPressed: () async {
-                                            final DateTime? dateTimePerem =
-                                                await showDatePicker(
-                                              context: context,
-                                              initialDate: selectedDate,
-                                              firstDate: DateTime(2000),
-                                              lastDate: DateTime(2200),
                                             );
-                                            if (dateTimePerem != null) {
+                                            if (result != null) {
                                               setState(() {
-                                                selectedDate = dateTimePerem;
-                                                _datePeremptionController.text =
-                                                    dateTimePerem.format(
-                                                        'yMMMMd', 'fr_FR');
+                                                _selectedFournisseur =
+                                                    result; // Mettre à jour le fournisseur sélectionné
                                               });
                                             }
                                           },
+                                          child: Chip(
+                                            label: Text(_selectedFournisseur!
+                                                .nom), // Afficher le nom du fournisseur sélectionné
+                                            onDeleted: () {
+                                              setState(() {
+                                                _selectedFournisseur =
+                                                    null; // Réinitialiser la sélection
+                                              });
+                                            },
+                                          ),
                                         ),
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8.0),
-                                          borderSide: BorderSide
-                                              .none, // Supprime le contour
-                                        ),
-                                        enabledBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8.0),
-                                          borderSide: BorderSide
-                                              .none, // Supprime le contour en état normal
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8.0),
-                                          borderSide: BorderSide
-                                              .none, // Supprime le contour en état focus
-                                        ),
-                                        filled: true,
-                                        contentPadding: EdgeInsets.all(15),
-                                      ),
-                                      // validator: (value) {
-                                      //   if (value == null || value.isEmpty) {
-                                      //     return 'Veuillez entrer un nom du Produit';
-                                      //   }
-                                      //   return null;
-                                      // },
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Container(
-                                      width: largeur,
-                                      child: Wrap(
-                                        spacing: 8.0,
-                                        runSpacing: 4.0,
-                                        children: [
-                                          // Affiche le fournisseur sélectionné
-                                          if (_selectedFournisseur !=
-                                              null) // Afficher seulement si un fournisseur est sélectionné
-                                            GestureDetector(
-                                              onTap: () async {
+
+                                      // Icône pour ajouter un fournisseur (toujours la dernière)
+                                      _selectedFournisseur == null
+                                          ? TextButton(
+                                              style: ElevatedButton.styleFrom(
+                                                foregroundColor:
+                                                    Theme.of(context)
+                                                        .colorScheme
+                                                        .primary,
+                                                backgroundColor:
+                                                    Theme.of(context)
+                                                        .colorScheme
+                                                        .onPrimary,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          15.0),
+                                                ),
+                                              ),
+                                              onPressed: () async {
                                                 final result =
                                                     await Navigator.of(context)
                                                         .push(
@@ -1061,221 +1106,163 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                                                   });
                                                 }
                                               },
-                                              child: Chip(
-                                                label: Text(_selectedFournisseur!
-                                                    .nom), // Afficher le nom du fournisseur sélectionné
-                                                onDeleted: () {
+                                              child: const Text(
+                                                  'Selectionné un Fournisseur'),
+                                            )
+                                          : Container(),
+                                      // IconButton(
+                                      //   icon: Icon(Icons.add),
+                                      //   onPressed: () async {
+                                      //     final result =
+                                      //         await Navigator.of(context).push(
+                                      //       MaterialPageRoute(
+                                      //         builder: (context) =>
+                                      //             FournisseurSelectionScreen(
+                                      //           selectedFournisseur:
+                                      //               _selectedFournisseur,
+                                      //           onSelectedFournisseurChanged:
+                                      //               _onSelectedFournisseurChanged,
+                                      //         ),
+                                      //       ),
+                                      //     );
+                                      //     if (result != null) {
+                                      //       setState(() {
+                                      //         _selectedFournisseur =
+                                      //             result; // Mettre à jour le fournisseur sélectionné
+                                      //       });
+                                      //     }
+                                      //   },
+                                      // ),
+                                    ],
+                                  ),
+                                )),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: ElevatedButton.icon(
+                                icon: Icon(_isEditing ? Icons.edit : Icons.send,
+                                    color: _isEditing
+                                        ? Colors.blue
+                                        : Colors.green),
+                                onPressed: saveApprovisionnement,
+                                label: Text(_isEditing
+                                    ? 'Modifier le Stock'
+                                    : 'Ajouter ce Stock'),
+                              ),
+                            ), //Ajouter ce Stock
+                            Flexible(
+                              child: Container(
+                                width: largeur,
+                                child: ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemCount: _approvisionnementTemporaire
+                                      .length, // Utilisation de la liste temporaire
+                                  itemBuilder: (context, index) {
+                                    // Utilisation de la liste inversée pour afficher les derniers en haut
+                                    final approvisionnement =
+                                        _approvisionnementTemporaire
+                                            .reversed // Inversion de la liste
+                                            .toList()[index];
+
+                                    // Récupérer le fournisseur associé à cet approvisionnement
+                                    final fournisseur =
+                                        approvisionnement.fournisseur.target;
+
+                                    return Card(
+                                        child: InkWell(
+                                      onTap: () {
+                                        // Démarrer l'édition de cet approvisionnement
+                                        startEditing(approvisionnement);
+                                      },
+                                      borderRadius: BorderRadius.circular(15),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            flex: 3,
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Text(
+                                                '${approvisionnement.quantite.toStringAsFixed(approvisionnement.quantite.truncateToDouble() == approvisionnement.quantite ? 0 : 2)}',
+                                                style: TextStyle(fontSize: 20),
+                                              ),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            flex: 6,
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  fournisseur != null
+                                                      ? fournisseur.nom.trim()
+                                                      : 'Fournisseur Inconnu',
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                                approvisionnement
+                                                            .datePeremption !=
+                                                        null
+                                                    ? Text(
+                                                        'Expire le : ${DateFormat('dd/MM/yyyy').format(approvisionnement.datePeremption!)}',
+                                                        style: TextStyle(
+                                                          fontSize: 12,
+                                                        ),
+                                                      )
+                                                    : Container(),
+                                              ],
+                                            ),
+                                          ),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    left: 8),
+                                                child: Text(
+                                                  '${approvisionnement.prixAchat!.toStringAsFixed(2)}',
+                                                  style:
+                                                      TextStyle(fontSize: 20),
+                                                ),
+                                              ),
+                                              IconButton(
+                                                padding: EdgeInsets.zero,
+                                                icon: Icon(
+                                                  Icons.delete,
+                                                  color: Colors.red,
+                                                  size: 15,
+                                                ),
+                                                onPressed: () {
+                                                  // Appeler la méthode pour supprimer l'approvisionnement
                                                   setState(() {
-                                                    _selectedFournisseur =
-                                                        null; // Réinitialiser la sélection
+                                                    supprimerApprovisionnementTemporaire(
+                                                        approvisionnement);
+                                                    stockGlobale -=
+                                                        approvisionnement
+                                                            .quantite;
                                                   });
                                                 },
                                               ),
-                                            ),
-
-                                          // Icône pour ajouter un fournisseur (toujours la dernière)
-                                          _selectedFournisseur == null
-                                              ? TextButton(
-                                                  style:
-                                                      ElevatedButton.styleFrom(
-                                                    foregroundColor:
-                                                        Theme.of(context)
-                                                            .colorScheme
-                                                            .primary,
-                                                    backgroundColor:
-                                                        Theme.of(context)
-                                                            .colorScheme
-                                                            .onPrimary,
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              15.0),
-                                                    ),
-                                                  ),
-                                                  onPressed: () async {
-                                                    final result =
-                                                        await Navigator.of(
-                                                                context)
-                                                            .push(
-                                                      MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            FournisseurSelectionScreen(
-                                                          selectedFournisseur:
-                                                              _selectedFournisseur,
-                                                          onSelectedFournisseurChanged:
-                                                              _onSelectedFournisseurChanged,
-                                                        ),
-                                                      ),
-                                                    );
-                                                    if (result != null) {
-                                                      setState(() {
-                                                        _selectedFournisseur =
-                                                            result; // Mettre à jour le fournisseur sélectionné
-                                                      });
-                                                    }
-                                                  },
-                                                  child: const Text(
-                                                      'Selectionné un Fournisseur'),
-                                                )
-                                              : Container(),
-                                          // IconButton(
-                                          //   icon: Icon(Icons.add),
-                                          //   onPressed: () async {
-                                          //     final result =
-                                          //         await Navigator.of(context).push(
-                                          //       MaterialPageRoute(
-                                          //         builder: (context) =>
-                                          //             FournisseurSelectionScreen(
-                                          //           selectedFournisseur:
-                                          //               _selectedFournisseur,
-                                          //           onSelectedFournisseurChanged:
-                                          //               _onSelectedFournisseurChanged,
-                                          //         ),
-                                          //       ),
-                                          //     );
-                                          //     if (result != null) {
-                                          //       setState(() {
-                                          //         _selectedFournisseur =
-                                          //             result; // Mettre à jour le fournisseur sélectionné
-                                          //       });
-                                          //     }
-                                          //   },
-                                          // ),
-                                        ],
-                                      ),
-                                    )),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: ElevatedButton.icon(
-                                    icon: Icon(
-                                        _isEditing ? Icons.edit : Icons.send,
-                                        color: _isEditing
-                                            ? Colors.blue
-                                            : Colors.green),
-                                    onPressed: saveApprovisionnement,
-                                    label: Text(_isEditing
-                                        ? 'Modifier le Stock'
-                                        : 'Ajouter ce Stock'),
-                                  ),
-                                ), //Ajouter ce Stock
-                                Flexible(
-                                  child: Container(
-                                    width: largeur,
-                                    child: ListView.builder(
-                                      shrinkWrap: true,
-                                      physics: NeverScrollableScrollPhysics(),
-                                      itemCount: _approvisionnementTemporaire
-                                          .length, // Utilisation de la liste temporaire
-                                      itemBuilder: (context, index) {
-                                        // Utilisation de la liste inversée pour afficher les derniers en haut
-                                        final approvisionnement =
-                                            _approvisionnementTemporaire
-                                                .reversed // Inversion de la liste
-                                                .toList()[index];
-
-                                        // Récupérer le fournisseur associé à cet approvisionnement
-                                        final fournisseur = approvisionnement
-                                            .fournisseur.target;
-
-                                        return Card(
-                                            child: InkWell(
-                                          onTap: () {
-                                            // Démarrer l'édition de cet approvisionnement
-                                            startEditing(approvisionnement);
-                                          },
-                                          borderRadius:
-                                              BorderRadius.circular(15),
-                                          child: Row(
-                                            children: [
-                                              Expanded(
-                                                flex: 3,
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(8.0),
-                                                  child: Text(
-                                                    '${approvisionnement.quantite.toStringAsFixed(approvisionnement.quantite.truncateToDouble() == approvisionnement.quantite ? 0 : 2)}',
-                                                    style:
-                                                        TextStyle(fontSize: 20),
-                                                  ),
-                                                ),
-                                              ),
-                                              Expanded(
-                                                flex: 6,
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      fournisseur != null
-                                                          ? fournisseur.nom
-                                                          : 'Fournisseur non spécifié',
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      style: TextStyle(
-                                                          fontSize: 15,
-                                                          fontWeight:
-                                                              FontWeight.bold),
-                                                    ),
-                                                    Text(
-                                                      approvisionnement
-                                                                  .datePeremption !=
-                                                              null
-                                                          ? 'Expire le : ${DateFormat('dd/MM/yyyy').format(approvisionnement.datePeremption!)}'
-                                                          : 'Date de Expiration non spécifiée',
-                                                      style: TextStyle(
-                                                        fontSize: 12,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.end,
-                                                children: [
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            left: 8),
-                                                    child: Text(
-                                                      '${approvisionnement.prixAchat!.toStringAsFixed(2)}',
-                                                      style: TextStyle(
-                                                          fontSize: 20),
-                                                    ),
-                                                  ),
-                                                  IconButton(
-                                                    padding: EdgeInsets.zero,
-                                                    icon: Icon(
-                                                      Icons.delete,
-                                                      color: Colors.red,
-                                                      size: 15,
-                                                    ),
-                                                    onPressed: () {
-                                                      // Appeler la méthode pour supprimer l'approvisionnement
-                                                      setState(() {
-                                                        supprimerApprovisionnementTemporaire(
-                                                            approvisionnement);
-                                                        stockGlobale -=
-                                                            approvisionnement
-                                                                .quantite;
-                                                      });
-                                                    },
-                                                  ),
-                                                ],
-                                              ),
                                             ],
                                           ),
-                                        ));
-                                      },
-                                    ),
-                                  ),
-                                ), //Liste des approvisionnements
-                              ],
-                            ),
-                          ),
-                  )
-                : Container(),
+                                        ],
+                                      ),
+                                    ));
+                                  },
+                                ),
+                              ),
+                            ), //Liste des approvisionnements
+                          ],
+                        ),
+                      ),
+                    ),
+            ),
             SizedBox(
               height: 50,
             )
@@ -1428,11 +1415,11 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
 
         // Affichage du ProgressDialog uniquement pour un produit non existant
         setState(() => _isLoadingSauv = true);
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => const ProgressDialog(),
-        );
+        // showDialog(
+        //   context: context,
+        //   barrierDismissible: false,
+        //   builder: (context) => const ProgressDialog(),
+        // );
 
         try {
           final imageUrl = await _prepareImageUrl();
@@ -1448,7 +1435,7 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
           setState(() => _isLoadingSauv = false);
           _showSnackBar(context, 'Produit ajouté avec succès', Colors.green);
 
-          //  Navigator.pop(context); // Ferme la page du formulaire
+          Navigator.pop(context); // Ferme la page du formulaire
         } catch (e) {
           _showSnackBar(
               context, 'Erreur lors de la sauvegarde : $e', Colors.red);
@@ -1752,67 +1739,91 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
     // Rediriger le focus vers le TextFormField après l'ajout
     FocusScope.of(context).requestFocus(_serialFocusNode);
 
-    if (code.isNotEmpty && !_qrCodesTemp.contains(code)) {
-      setState(() {
-        _serialController.text = code;
-        _qrCodesTemp.add(code); // Ajout du QR code à la liste temporaire
-        _searchQr = false;
-      });
-      // Rediriger le focus vers le TextFormField après l'ajout
-      FocusScope.of(context).requestFocus(_serialFocusNode);
-      final provider = Provider.of<CommerceProvider>(context, listen: false);
-      //final produit = await provider.getProduitById(int.parse(code));
-      final produit = await provider.getProduitByQr(code);
-      if (produit != null) {
+    // if (code.isNotEmpty && !_qrCodesTemp.contains(code)) {
+    //   setState(() {
+    //     _serialController.text = code;
+    //     _qrCodesTemp.add(code); // Ajout du QR code à la liste temporaire
+    //     _searchQr = false;
+    //   });
+    //   // Rediriger le focus vers le TextFormField après l'ajout
+    //   FocusScope.of(context).requestFocus(_serialFocusNode);
+    //   final provider = Provider.of<CommerceProvider>(context, listen: false);
+    //   //final produit = await provider.getProduitById(int.parse(code));
+    //   final produit = await provider.getProduitByQr(code);
+    //   if (produit == null) {
+    //     if (code.isNotEmpty && !_qrCodesTemp.contains(code)) {
+    //       setState(() {
+    //         _qrCodesTemp.add(code);
+    //         _serialController.clear();
+    //         _searchQr = false;
+    //       });
+    //     } else {
+    //       _serialController.clear();
+    //     }
+    //     FocusScope.of(context).requestFocus(_serialFocusNode);
+    //   }
+    //   // if (produit != null) {
+    //   //   setState(() {
+    //   //     _tempProduitId = produit.id.toString() ?? '';
+    //   //     _nomController.text = produit.nom;
+    //   //     _descriptionController.text = produit.description ?? '';
+    //   //     // _prixAchatController.text = produit.prixAchat.toStringAsFixed(2);
+    //   //     _prixVenteController.text = produit.prixVente.toStringAsFixed(2);
+    //   //     _stockController.text = produit.stock.toStringAsFixed(2);
+    //   //     stockTemp = double.parse(produit.stock.toStringAsFixed(2));
+    //   //     _minimStockController.text = produit.minimStock!.toStringAsFixed(2);
+    //   //     _alertPeremptionController.text = produit.alertPeremption.toString();
+    //   //     // _datePeremptionController.text = produit
+    //   //     //     .approvisionnements.first.datePeremption!
+    //   //     //     .format('yMMMMd', 'fr_FR');
+    //   //     //_selectedFournisseurs = List.from(produit.fournisseurs);
+    //   //     _existingImageUrl = produit.image;
+    //   //     _isFinded = true;
+    //   //     _image = null;
+    //   //     // Ajouter le QR code scanné à la liste
+    //   //     produit.addQrCode(code); // Ajoute le QR code scanné à la liste
+    //   //   });
+    //   // } else {
+    //   //   setState(() {
+    //   //     _tempProduitId = '';
+    //   //     _nomController.clear();
+    //   //     _descriptionController.clear();
+    //   //     _prixAchatController.clear();
+    //   //     stockTemp = 0.0;
+    //   //     _alertPeremptionController.clear();
+    //   //     _prixVenteController.clear();
+    //   //     _stockController.clear();
+    //   //     _selectedFournisseurs.clear();
+    //   //     _datePeremptionController.clear();
+    //   //     _minimStockController.clear();
+    //   //     _existingImageUrl = '';
+    //   //     _isFinded = false;
+    //   //     _image = null;
+    //   //   });
+    //   //   // Si un nouveau produit doit être créé, tu peux créer un objet Produit temporaire
+    //   //   Produit newProduit = Produit(
+    //   //     nom: _nomController.text,
+    //   //     prixVente: double.parse(_prixVenteController.text),
+    //   //     minimStock: double.parse(_minimStockController.text),
+    //   //     alertPeremption: int.parse(_alertPeremptionController.text),
+    //   //     derniereModification: DateTime.now(),
+    //   //   );
+    //   //
+    //   //   // Ajoute le QR code scanné à ce nouveau produit
+    //   //   newProduit.addQrCode(code);
+    //   // }
+    // }
+    if (produit == null) {
+      if (code.isNotEmpty && !_qrCodesTemp.contains(code)) {
         setState(() {
-          _tempProduitId = produit.id.toString() ?? '';
-          _nomController.text = produit.nom;
-          _descriptionController.text = produit.description ?? '';
-          // _prixAchatController.text = produit.prixAchat.toStringAsFixed(2);
-          _prixVenteController.text = produit.prixVente.toStringAsFixed(2);
-          _stockController.text = produit.stock.toStringAsFixed(2);
-          stockTemp = double.parse(produit.stock.toStringAsFixed(2));
-          _minimStockController.text = produit.minimStock!.toStringAsFixed(2);
-          _alertPeremptionController.text = produit.alertPeremption.toString();
-          // _datePeremptionController.text = produit
-          //     .approvisionnements.first.datePeremption!
-          //     .format('yMMMMd', 'fr_FR');
-          //_selectedFournisseurs = List.from(produit.fournisseurs);
-          _existingImageUrl = produit.image;
-          _isFinded = true;
-          _image = null;
-          // Ajouter le QR code scanné à la liste
-          produit.addQrCode(code); // Ajoute le QR code scanné à la liste
+          _qrCodesTemp.add(code);
+          _serialController.clear();
+          _searchQr = false;
         });
       } else {
-        setState(() {
-          _tempProduitId = '';
-          _nomController.clear();
-          _descriptionController.clear();
-          _prixAchatController.clear();
-          stockTemp = 0.0;
-          _alertPeremptionController.clear();
-          _prixVenteController.clear();
-          _stockController.clear();
-          _selectedFournisseurs.clear();
-          _datePeremptionController.clear();
-          _minimStockController.clear();
-          _existingImageUrl = '';
-          _isFinded = false;
-          _image = null;
-        });
-        // Si un nouveau produit doit être créé, tu peux créer un objet Produit temporaire
-        Produit newProduit = Produit(
-          nom: _nomController.text,
-          prixVente: double.parse(_prixVenteController.text),
-          minimStock: double.parse(_minimStockController.text),
-          alertPeremption: int.parse(_alertPeremptionController.text),
-          derniereModification: DateTime.now(),
-        );
-
-        // Ajoute le QR code scanné à ce nouveau produit
-        newProduit.addQrCode(code);
+        _serialController.clear();
       }
+      FocusScope.of(context).requestFocus(_serialFocusNode);
     }
   }
 
@@ -1856,10 +1867,10 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                               ),
                               errorWidget: (context, url, error) => Center(
                                 child: Lottie.asset(
-                                  'assets/error_animation.json', // Chemin vers ton fichier Lottie
+                                  'assets/lotties/1 (8).json', // Chemin vers ton fichier Lottie
                                   width: screenWidth *
-                                      0.3, // Ajuste la taille de l'erreur à 30%
-                                  height: screenWidth * 0.3,
+                                      0.2, // Ajuste la taille de l'erreur à 30%
+                                  height: screenWidth * 0.2,
                                 ),
                               ),
                             ),
@@ -1978,7 +1989,7 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
     );
   }
 
-// Votre méthode _addQRCodeFromText modifiée
+  // Votre méthode _addQRCodeFromText modifiée
   void _addQRCodeFromText() async {
     final code = _serialController.text.trim();
     final provider = Provider.of<CommerceProvider>(context, listen: false);
@@ -2051,13 +2062,15 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                           //   ),
                           // ),
                           ),
-                  IconButton(
-                    onPressed: _pickImage,
-                    icon: Icon(
-                      Icons.add_a_photo,
-                      color: Colors.blue,
-                    ),
-                  ),
+                  !_isLoadingSauv
+                      ? IconButton(
+                          onPressed: _pickImage,
+                          icon: Icon(
+                            Icons.add_a_photo,
+                            color: Colors.blue,
+                          ),
+                        )
+                      : Container(),
                 ],
               )
             : Container(
@@ -2219,12 +2232,23 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
   }
 
   void saveApprovisionnement() {
-    if (_formKey.currentState!.validate()) {
+    if (_formKeyApp.currentState!.validate()) {
       final quantite = double.parse(_stockController.text);
       final prixAchat = double.parse(_prixAchatController.text);
-      final datePeremption = DateFormat('dd MMMM yyyy', 'fr_FR')
-          .parse(_datePeremptionController.text);
-
+      // final datePeremption = DateFormat('dd MMMM yyyy', 'fr_FR')
+      //     .parse(_datePeremptionController.text);
+      // Initialisation de datePeremption en vérifiant si le champ est vide
+      DateTime? datePeremption;
+      if (_datePeremptionController.text.isNotEmpty) {
+        try {
+          datePeremption = DateFormat('dd MMMM yyyy', 'fr_FR')
+              .parse(_datePeremptionController.text);
+        } catch (e) {
+          print("Erreur lors du parsing de la date : $e");
+          // Gérer le cas d'erreur, par exemple en affichant un message
+          return;
+        }
+      }
       // Vérifiez si nous sommes en mode édition et que l'approvisionnement est sélectionné
       if (_isEditing && _currentApprovisionnement != null) {
         // Trouver l'index de l'approvisionnement dans la liste temporaire
