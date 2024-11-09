@@ -1285,6 +1285,11 @@ class ProduitDetailPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Text(
+                      'Derniere Modification : ' +
+                          produit.crud.target!.derniereModification.toString(),
+                      style: TextStyle(fontSize: 10),
+                    ),
                     Center(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -1356,7 +1361,8 @@ class ProduitDetailPage extends StatelessWidget {
                     // SizedBox(height: 10),
                     // Text('Stock Update : ' + produit.stockUpdate.toString()),
                     SizedBox(height: 10),
-                    produit.approvisionnements.isEmpty
+                    produit.approvisionnements.isEmpty ||
+                            produit.approvisionnements == ''
                         ? Container()
                         : SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
@@ -1371,26 +1377,40 @@ class ProduitDetailPage extends StatelessWidget {
                               rows: produit.approvisionnements.map((appro) {
                                 return DataRow(
                                   cells: [
-                                    DataCell(Text(
-                                        '${appro.fournisseur.target!.nom}')),
                                     DataCell(
-                                      Text(DateFormat('EEE dd MMM yyyy', 'fr')
-                                          .format(DateTime.parse(appro
-                                              .crud.target!.dateCreation
-                                              .toString()))),
+                                      Text(
+                                        appro.fournisseur != null &&
+                                                appro.fournisseur.target != null
+                                            ? '${appro.fournisseur.target!.nom}'
+                                            : '-', // Valeur par défaut si fournisseur ou target est null
+                                      ),
+                                    ),
+                                    DataCell(
+                                      Text(
+                                        appro.crud != null &&
+                                                appro.crud.target != null
+                                            ? DateFormat(
+                                                    'EEE dd MMM yyyy', 'fr')
+                                                .format(DateTime.parse(appro
+                                                    .crud.target!.dateCreation
+                                                    .toString()))
+                                            : '-', // Valeur par défaut si crud ou target est null
+                                      ),
                                     ),
                                     DataCell(Text(
                                         '${appro.quantite.toStringAsFixed(2)}')),
                                     DataCell(Text(
-                                        '${appro.prixAchat!.toStringAsFixed(2)}')),
-                                    // DataCell(
-                                    //     Text('${appro.datePeremption ?? '-'}')),
+                                        '${appro.prixAchat?.toStringAsFixed(2) ?? '-'}')),
                                     DataCell(
-                                      Text(DateFormat('EEE dd MMM yyyy', 'fr')
-                                              .format(DateTime.parse(appro
-                                                  .datePeremption
-                                                  .toString())) ??
-                                          '-'),
+                                      Text(
+                                        appro.datePeremption != null
+                                            ? DateFormat(
+                                                    'EEE dd MMM yyyy', 'fr')
+                                                .format(DateTime.parse(appro
+                                                    .datePeremption
+                                                    .toString()))
+                                            : '-', // Valeur par défaut si datePeremption est null
+                                      ),
                                     ),
                                   ],
                                 );
@@ -1406,11 +1426,10 @@ class ProduitDetailPage extends StatelessWidget {
                     //         '  Date Peremption :  ${appro.datePeremption}'),
                     //   );
                     // }).toList(),
+                    //
+                    // SizedBox(height: 10),
 
-                    // SizedBox(height: 10),
-                    // Text('Derniere Modification : ' +
-                    //     produit.crud.target!.derniereModification.toString()),
-                    // SizedBox(height: 10),
+                    SizedBox(height: 10),
                     SizedBox(
                       height: 16,
                     ),
@@ -1434,7 +1453,10 @@ class ProduitDetailPage extends StatelessWidget {
                         return Wrap(
                           spacing: 6.0, // Espace horizontal entre les éléments
                           runSpacing: 4.0, // Espace vertical entre les lignes
-                          children: produit.approvisionnements.map((appro) {
+                          children: produit.approvisionnements
+                              .where(
+                                  (appro) => appro.fournisseur.target != null)
+                              .map((appro) {
                             return InkWell(
                               onTap: () {
                                 Navigator.of(context).push(MaterialPageRoute(
@@ -1459,7 +1481,8 @@ class ProduitDetailPage extends StatelessWidget {
                                         BorderRadius.all(Radius.circular(10))),
                                 padding: EdgeInsets.zero,
                                 label: Text(
-                                  appro.fournisseur.target!.nom,
+                                  appro.fournisseur.target?.nom ??
+                                      'Fournisseur inconnu',
                                   style: TextStyle(fontSize: 10),
                                 ),
                               ),

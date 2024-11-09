@@ -47,10 +47,12 @@ class _WinMobileState extends State<WinMobile> {
     } else {
       // Passer en mode Mobile
       await windowManager.setSize(const Size(375, 812));
-      setState(() {
-        isPhoneSize = true;
-        iconSign = FontAwesomeIcons.desktop;
-      });
+      if (mounted) {
+        setState(() {
+          isPhoneSize = true;
+          iconSign = FontAwesomeIcons.desktop;
+        });
+      }
     }
   }
 

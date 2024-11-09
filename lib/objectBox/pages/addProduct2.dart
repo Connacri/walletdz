@@ -15,6 +15,7 @@ import '../MyProviders.dart';
 import '../Utils/country_flags.dart';
 import '../Utils/mobile_scanner/barcode_scanner_window.dart';
 import '../Utils/winMobile.dart';
+import 'ProduitListScreen.dart';
 
 class addProduct2 extends StatefulWidget {
   const addProduct2({super.key});
@@ -63,6 +64,7 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
   String _produitNom = '';
   String _produitDesignation = '';
   String _produitImage = '';
+  String _produitImageTile = '';
   String _produitQr = '';
   double _produitStock = 0.0;
   double stockGlobale = 0.0; // Déclaration de la variable
@@ -197,6 +199,7 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
         _produitStock = produit.stock;
         _produitQr = produit.qr!;
         _produitImage = produit.image!;
+        _produitImageTile = produit.image!;
         _isFinded = true;
         //_image = null;
       });
@@ -243,75 +246,69 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
         builder: (context, constraints) {
           if (constraints.maxWidth < 600) {
             // Mobile layout
-            return SafeArea(
-              child: Scaffold(
-                  resizeToAvoidBottomInset: true,
-                  appBar: AppBar(
-                    actions: [
-                      WinMobile(),
-                      buildButton_Edit_Add(context, produitProvider, _isFinded),
-                      SizedBox(width: 50)
-                    ],
+            return Scaffold(
+                resizeToAvoidBottomInset: false,
+                appBar: AppBar(
+                  actions: [
+                    WinMobile(),
+                    buildButton_Edit_Add(context, produitProvider, _isFinded),
+                    SizedBox(width: 50)
+                  ],
+                ),
+                body: Form(
+                  key: _formKey,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: MobileLayout(),
                   ),
-                  body: Form(
-                    key: _formKey,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: MobileLayout(),
-                    ),
-                  )),
-            );
+                ));
           } else if (constraints.maxWidth < 1200) {
             // Tablet layout
-            return SafeArea(
-              child: Scaffold(
-                  resizeToAvoidBottomInset: true,
-                  appBar: AppBar(
-                    actions: [
-                      WinMobile(),
-                      buildButton_Edit_Add(context, produitProvider, _isFinded),
-                      SizedBox(width: 50)
-                    ],
+            return Scaffold(
+                resizeToAvoidBottomInset: false,
+                appBar: AppBar(
+                  actions: [
+                    WinMobile(),
+                    buildButton_Edit_Add(context, produitProvider, _isFinded),
+                    SizedBox(width: 50)
+                  ],
+                ),
+                body: Form(
+                  key: _formKey,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                        constraints: BoxConstraints(
+                          maxWidth: 400, // largeur maximale de 200 pixels
+                          // maxHeight: 100, // hauteur maximale de 100 pixels
+                        ),
+                        child: TabletLayout()),
                   ),
-                  body: Form(
-                    key: _formKey,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                          constraints: BoxConstraints(
-                            maxWidth: 400, // largeur maximale de 200 pixels
-                            // maxHeight: 100, // hauteur maximale de 100 pixels
-                          ),
-                          child: TabletLayout()),
-                    ),
-                  )),
-            );
+                ));
           } else {
             // Desktop layout
-            return SafeArea(
-              child: Scaffold(
-                  resizeToAvoidBottomInset: true,
-                  appBar: AppBar(
-                    actions: [
-                      WinMobile(),
-                      buildButton_Edit_Add(context, produitProvider, _isFinded),
-                      SizedBox(width: 50)
-                    ],
-                  ),
-                  body: Form(
-                    key: _formKey,
-                    child: Container(
-                      constraints: BoxConstraints(
-                        maxWidth: 400, // largeur maximale de 200 pixels
-                        //maxHeight: 100, // hauteur maximale de 100 pixels
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DesktopLayout(),
-                      ),
+            return Scaffold(
+                resizeToAvoidBottomInset: false,
+                appBar: AppBar(
+                  actions: [
+                    WinMobile(),
+                    buildButton_Edit_Add(context, produitProvider, _isFinded),
+                    SizedBox(width: 50)
+                  ],
+                ),
+                body: Form(
+                  key: _formKey,
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxWidth: 400, // largeur maximale de 200 pixels
+                      //maxHeight: 100, // hauteur maximale de 100 pixels
                     ),
-                  )),
-            );
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: DesktopLayout(),
+                    ),
+                  ),
+                ));
           }
         },
       ),
@@ -347,134 +344,144 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
 
   SingleChildScrollView _buildColumn() {
     var largeur = MediaQuery.of(context).size.width;
-    final produitProvider =
-        Provider.of<CommerceProvider>(context, listen: false);
+
     final String fallbackImage =
         'https://source.unsplash.com/random/1920x1080/?wallpaper,landscape';
+
+    final code = _serialController.text.trim();
+    final provider = Provider.of<CommerceProvider>(context, listen: false);
+
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            _searchQr == true
-                ? _tempProduitId.isNotEmpty
-                    ? Padding(
+            _searchQr == true && _tempProduitId.isNotEmpty
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Card(
+                      child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Card(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: ListTile(
-                                hoverColor: Colors.transparent,
-                                splashColor: Colors.transparent,
-                                focusColor: Colors.transparent,
-                                selectedColor: Colors.transparent,
-                                dense: true,
-                                contentPadding: EdgeInsets.zero,
-                                onTap: () {
-                                  _updateProductInfo(_serialController.text);
-                                },
-                                leading: CircleAvatar(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ListTile(
+                            hoverColor: Colors.transparent,
+                            splashColor: Colors.transparent,
+                            focusColor: Colors.transparent,
+                            selectedColor: Colors.transparent,
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            onTap: () async {
+                              // _updateProductInfo(_serialController.text);
+                              //_addQRCodeFromText();
+                              final produit =
+                                  await provider.getProduitByQr(code);
+                              await Navigator.of(context)
+                                  .push(MaterialPageRoute(
+                                      builder: (ctx) => ProduitDetailPage(
+                                            produit: produit!,
+                                          )));
+                            },
+                            leading: _produitImageTile.isNotEmpty
+                                ? CircleAvatar(
                                     backgroundImage: CachedNetworkImageProvider(
-                                  _produitImage,
-                                  errorListener: (Object error) {
-                                    setState(() {
-                                      _produitImage =
-                                          fallbackImage; // Remplacer par l'image de secours
-                                    });
-                                  },
-                                  // Pour Web
-                                )),
-                                title: Text('${_produitNom.capitalize}',
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                        fontSize: 15, color: Colors.black54)),
-                                trailing: Text(
-                                  '${_produitPV.toStringAsFixed(2)}',
-                                  style: TextStyle(fontSize: 20),
-                                ),
-                              ),
+                                    _produitImageTile,
+                                    errorListener: (Object error) {
+                                      setState(() {
+                                        _produitImageTile =
+                                            fallbackImage; // Remplacer par l'image de secours
+                                      });
+                                    },
+                                    // Pour Web
+                                  ))
+                                : CircleAvatar(
+                                    child: Icon(Icons.image_not_supported),
+                                  ),
+                            title: Text('${_produitNom.capitalize}',
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontSize: 15)),
+                            trailing: Text(
+                              '${_produitPV.toStringAsFixed(2)}',
+                              style: TextStyle(fontSize: 20),
                             ),
                           ),
                         ),
-                      )
-                    : Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: ListTile(
-                          title: Text(
-                            'L\'ID du Produit n\'a pas encore été créer'
-                                .capitalize,
-                            style:
-                                TextStyle(fontSize: 15, color: Colors.black54),
-                          ),
-                        ),
-                      )
+                      ),
+                    ),
+                  )
+                // : Padding(
+                //     padding: const EdgeInsets.all(8.0),
+                //     child: ListTile(
+                //       title: Text(
+                //         'L\'ID du Produit n\'a pas encore été créer'
+                //             .capitalize,
+                //         style:
+                //             TextStyle(fontSize: 14, color: Colors.black54),
+                //       ),
+                //     ),
+                //   )
                 : Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: ListTile(
                       title: Text(
                         'Nouveau ID du produit sera créer'.capitalize,
-                        style: TextStyle(fontSize: 15, color: Colors.black54),
+                        style: TextStyle(fontSize: 14, color: Colors.black54),
                       ),
                     ),
                   ),
             //id
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Container(
-                height: 30,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Transform.scale(
-                      scale:
-                          0.8, // Ajustez cette valeur pour modifier la taille (1.0 est la taille par défaut)
-                      child: Switch(
-                        value: _searchQr,
-                        onChanged: (bool newValue) {
-                          setState(() {
-                            _searchQr = newValue;
-                          });
-                        },
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: FittedBox(
-                        child: Text(
-                          _searchQr
-                              ? 'Recherche par Codes-barres Activé'.capitalize
-                              : 'Recherche par Codes-barres Désactivé'
-                                  .capitalize,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ), //switch recherche auto
+            // Padding(
+            //   padding: const EdgeInsets.all(20.0),
+            //   child: Container(
+            //     height: 30,
+            //     child: Row(
+            //       mainAxisAlignment: MainAxisAlignment.start,
+            //       children: [
+            //         Transform.scale(
+            //           scale:
+            //               0.7, // Ajustez cette valeur pour modifier la taille (1.0 est la taille par défaut)
+            //           child: Switch(
+            //             value: _searchQr,
+            //             onChanged: (bool newValue) {
+            //               setState(() {
+            //                 _searchQr = newValue;
+            //               });
+            //             },
+            //           ),
+            //         ),
+            //         // SizedBox(width: 10),
+            //         FittedBox(
+            //           child: Text(
+            //             _searchQr
+            //                 ? 'Recherche Activé'.capitalize
+            //                 : 'Recherche Désactivé'.capitalize,
+            //             overflow: TextOverflow.ellipsis,
+            //           ),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ), //switch recherche auto
             _isFirstFieldRempli || _qrCodesTemp.isNotEmpty
                 ? Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: _serialController.text.isNotEmpty
                         ? FlagDetector(
                             barcode: _serialController.text,
-                            height: 30,
-                            width: 50,
+                            height: 25,
+                            width: 40,
                           ) // Afficher FlagDetector avec le code-barres
                         : FlagDetector(
                             barcode: _serialController.text,
-                            height: 30,
-                            width: 50,
+                            height: 25,
+                            width: 40,
                           ),
                   )
                 : Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Container(
-                      height: 30,
-                      width: 50,
+                      height: 25,
+                      width: 40,
                     ),
                   ), // Flag
             Padding(
@@ -487,6 +494,18 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                 textAlign: TextAlign.center,
                 decoration: InputDecoration(
                   labelText: 'Code Barre / QrCode',
+                  prefixIcon: Transform.scale(
+                    scale:
+                        0.7, // Ajustez cette valeur pour modifier la taille (1.0 est la taille par défaut)
+                    child: Switch(
+                      value: _searchQr,
+                      onChanged: (bool newValue) {
+                        setState(() {
+                          _searchQr = newValue;
+                        });
+                      },
+                    ),
+                  ),
                   suffixIcon: (Platform.isIOS || Platform.isAndroid)
                       ? IconButton(
                           icon: Icon(Icons.qr_code_scanner),
@@ -1348,6 +1367,14 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
     });
   }
 
+  void _clearAllFields2() {
+    setState(() {
+      _existingImageUrl = '';
+
+      _image = null;
+    });
+  }
+
   Future<String> uploadImageToSupabase(File image, String? oldImageUrl) async {
     final String bucket = 'products';
     final supabase = Supabase.instance.client;
@@ -1477,20 +1504,23 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
         // );
 
         try {
+          // Préparation de l'URL de l'image
           final imageUrl = await _prepareImageUrl();
           _addQrCodeIfNotExists();
 
+          // Création d'un nouveau produit avec les détails saisis
           final produit = _createProduit(imageUrl);
 
-
-          if (_prixAchatController.text.isNotEmpty && _stockController.text.isNotEmpty ){
+          if ( //_prixAchatController.text.isNotEmpty &&
+              _stockController.text.isNotEmpty) {
+            print('debut saveApprovisionnement');
             saveApprovisionnement();
             print('saveApprovisionnement');
           }
           _assignApprovisionnementsToProduit(produit);
-            // Sauvegarde du nouveau produit
-            produitProvider.ajouterProduit(
-                produit, _selectedFournisseurs, _approvisionnementTemporaire);
+          // Sauvegarde du nouveau produit
+          produitProvider.ajouterProduit(
+              produit, _selectedFournisseurs, _approvisionnementTemporaire);
           _formKey.currentState?.save();
           setState(() => _isLoadingSauv = false);
           _showSnackBar(context, 'Produit ajouté avec succès', Colors.green);
@@ -1517,271 +1547,288 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
     );
   }
 
+  // void _assignApprovisionnementsToProduit(Produit produit) {
+  //   for (int i = 0; i < _approvisionnementTemporaire.length; i++) {
+  //     final approvisionnement = _approvisionnementTemporaire[i];
+  //     approvisionnement.produit.target = produit;
+  //     if (i < _selectedFournisseurs.length) {
+  //       approvisionnement.fournisseur.target = _selectedFournisseurs[i];
+  //     }
+  //     approvisionnement.crud.target = Crud(
+  //       createdBy: 1,
+  //       updatedBy: 1,
+  //       deletedBy: 1,
+  //       dateCreation: DateTime.now(),
+  //       derniereModification: DateTime.now(),
+  //     );
+  //   }
+  // }
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-  IconButton buildButton_Edit_Add1(
-      BuildContext context, CommerceProvider produitProvider, bool isFinded) {
-    return IconButton(
-      onPressed: () async {
-        if (!mounted) return;
-
-        // Validation préalable
-        final isValid = await _formKey.currentState!.validate();
-        if (!isValid) return;
-
-        bool isContextValid = true;
-        // Affichage du dialog de progression
-        BuildContext dialogContext = context;
-
-        _isFinded
-            ? null
-            : showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (context) => const ProgressDialog(),
-              );
-
-        setState(() => _isLoadingSauv = true);
-
-        try {
-          final existingProduct =
-              await produitProvider.getProduitByQr(_serialController.text);
-
-          // Validation préalable
-          final isValid = await _formKey.currentState!.validate();
-          if (!isValid) return;
-
-          // Initialisation de l'URL de l'image
-          String imageUrl = '';
-
-          // Gestion de l'image du produit
-          if (_image != null) {
-            imageUrl = await uploadImageToSupabase(_image!, _existingImageUrl);
-          } else if (_existingImageUrl != null &&
-              _existingImageUrl!.isNotEmpty) {
-            imageUrl = _existingImageUrl!;
-          }
-
-          // Gestion du code QR
-          final code = _serialController.text.trim();
-          if (code.isNotEmpty && !_isFinded && !_qrCodesTemp.contains(code)) {
-            _qrCodesTemp.add(code);
-          }
-
-          // Initialisation du produit
-          final produit = Produit(
-            qr: _qrCodesTemp.toSet().toList().join(','),
-            image: imageUrl,
-            nom: _nomController.text,
-            description: _descriptionController.text,
-            prixVente: double.parse(_prixVenteController.text),
-            qtyPartiel: double.parse(_qtyPartielController.text),
-            pricePartielVente: double.parse(_pricePartielVenteController.text),
-            derniereModification: DateTime.now(),
-          )..crud.target = Crud(
-              createdBy: 1,
-              updatedBy: 1,
-              deletedBy: 1,
-              dateCreation: DateTime.now(),
-              derniereModification: DateTime.now(),
-            );
-
-          // Gestion des approvisionnements
-          for (int i = 0; i < _approvisionnementTemporaire.length; i++) {
-            if (!isContextValid) break;
-            final approvisionnement = _approvisionnementTemporaire[i];
-            approvisionnement.produit.target = produit;
-            if (i < _selectedFournisseurs.length) {
-              approvisionnement.fournisseur.target = _selectedFournisseurs[i];
-            }
-            approvisionnement.crud.target = Crud(
-              createdBy: 1,
-              updatedBy: 1,
-              deletedBy: 1,
-              dateCreation: DateTime.now(),
-              derniereModification: DateTime.now(),
-            );
-          }
-
-          // Sauvegarde ou mise à jour du produit
-          if (existingProduct == null) {
-            produitProvider.ajouterProduit(
-                produit, _selectedFournisseurs, _approvisionnementTemporaire);
-            if (isContextValid) {
-              _formKey.currentState?.save();
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Produit ajouté avec succès'),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            }
-            Navigator.pop(context);
-            setState(() => _isLoadingSauv = false);
-            // Fermeture du dialog de progression
-            if (isContextValid && Navigator.canPop(dialogContext)) {
-              Navigator.pop(dialogContext);
-            }
-          } else {
-            if (isContextValid && !isFinded) {
-              _addQRCodeFromText();
-              setState(() => _isLoadingSauv = false);
-              // Fermeture du dialog de progression
-              if (isContextValid && Navigator.canPop(dialogContext)) {
-                Navigator.pop(dialogContext);
-              }
-              return;
-            }
-          }
-        } catch (e) {
-          if (isContextValid) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Erreur lors de la sauvegarde : $e'),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        } finally {
-          // if (mounted) {
-          setState(() => _isLoadingSauv = false);
-          // }
-        }
-      },
-      icon: _isLoadingSauv
-          ? const CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-            )
-          : Icon(
-              isFinded && _serialController.text == _produitQr
-                  ? Icons.edit
-                  : Icons.check,
-            ),
-    );
-  }
-
-  IconButton buildButton_Edit_Add0(
-      BuildContext context, CommerceProvider produitProvider, bool isFinded) {
-    return IconButton(
-      onPressed: () async {
-        if (!mounted) return;
-
-        // Afficher le dialog de progression
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return Dialog(
-              backgroundColor: Colors.black.withOpacity(0.5),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
-                    Text(
-                      "Sauvegarde en cours...",
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-
-        setState(() => _isLoadingSauv = true);
-
-        try {
-          final existingProduct =
-              await produitProvider.getProduitByQr(_serialController.text);
-
-          if (_formKey.currentState!.validate()) {
-            String imageUrl = '';
-
-            // Gestion de l'image du produit
-            if (_image != null) {
-              imageUrl =
-                  await uploadImageToSupabase(_image!, _existingImageUrl);
-            } else if (_existingImageUrl != null &&
-                _existingImageUrl!.isNotEmpty) {
-              imageUrl = _existingImageUrl!;
-            }
-
-            final code = _serialController.text.trim();
-            if (code.isNotEmpty) _qrCodesTemp.add(code);
-
-            // Initialisation du produit
-            final produit = Produit(
-              qr: _qrCodesTemp.toSet().toList().join(',').toString(),
-              image: imageUrl,
-              nom: _nomController.text,
-              description: _descriptionController.text,
-              prixVente: double.parse(_prixVenteController.text),
-              qtyPartiel: double.parse(_qtyPartielController.text),
-              pricePartielVente:
-                  double.parse(_pricePartielVenteController.text),
-              derniereModification: DateTime.now(),
-            )..crud.target = Crud(
-                createdBy: 1,
-                updatedBy: 1,
-                deletedBy: 1,
-                dateCreation: DateTime.now(),
-                derniereModification: DateTime.now(),
-              );
-
-            // Gestion des approvisionnements
-            for (int i = 0; i < _approvisionnementTemporaire.length; i++) {
-              final approvisionnement = _approvisionnementTemporaire[i];
-              approvisionnement.produit.target = produit;
-              if (i < _selectedFournisseurs.length) {
-                approvisionnement.fournisseur.target = _selectedFournisseurs[i];
-              }
-              approvisionnement.crud.target = Crud(
-                createdBy: 1,
-                updatedBy: 1,
-                deletedBy: 1,
-                dateCreation: DateTime.now(),
-                derniereModification: DateTime.now(),
-              );
-            }
-
-            if (existingProduct == null) {
-              produitProvider.ajouterProduit(
-                  produit, _selectedFournisseurs, _approvisionnementTemporaire);
-              print('Nouveau produit ajouté');
-              _formKey.currentState!.save();
-            } else {
-              _addQRCodeFromText();
-              print('Produit déjà existant');
-            }
-          }
-        } catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Erreur lors de la sauvegarde du produit : $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        } finally {
-          if (Navigator.of(context).canPop()) {
-            Navigator.of(context).pop(); // Ferme le dialog de progression
-          }
-          setState(() => _isLoadingSauv = false);
-        }
-      },
-      icon: _isLoadingSauv
-          ? CircularProgressIndicator()
-          : Icon(
-              isFinded && _serialController.text == _produitQr
-                  ? Icons.edit
-                  : Icons.check,
-            ),
-    );
-  }
+//   IconButton buildButton_Edit_Add1(
+//       BuildContext context, CommerceProvider produitProvider, bool isFinded) {
+//     return IconButton(
+//       onPressed: () async {
+//         if (!mounted) return;
+//
+//         // Validation préalable
+//         final isValid = await _formKey.currentState!.validate();
+//         if (!isValid) return;
+//
+//         bool isContextValid = true;
+//         // Affichage du dialog de progression
+//         BuildContext dialogContext = context;
+//
+//         _isFinded
+//             ? null
+//             : showDialog(
+//                 context: context,
+//                 barrierDismissible: false,
+//                 builder: (context) => const ProgressDialog(),
+//               );
+//
+//         setState(() => _isLoadingSauv = true);
+//
+//         try {
+//           final existingProduct =
+//               await produitProvider.getProduitByQr(_serialController.text);
+//
+//           // Validation préalable
+//           final isValid = await _formKey.currentState!.validate();
+//           if (!isValid) return;
+//
+//           // Initialisation de l'URL de l'image
+//           String imageUrl = '';
+//
+//           // Gestion de l'image du produit
+//           if (_image != null) {
+//             imageUrl = await uploadImageToSupabase(_image!, _existingImageUrl);
+//           } else if (_existingImageUrl != null &&
+//               _existingImageUrl!.isNotEmpty) {
+//             imageUrl = _existingImageUrl!;
+//           }
+//
+//           // Gestion du code QR
+//           final code = _serialController.text.trim();
+//           if (code.isNotEmpty && !_isFinded && !_qrCodesTemp.contains(code)) {
+//             _qrCodesTemp.add(code);
+//           }
+//
+//           // Initialisation du produit
+//           final produit = Produit(
+//             qr: _qrCodesTemp.toSet().toList().join(','),
+//             image: imageUrl,
+//             nom: _nomController.text,
+//             description: _descriptionController.text,
+//             prixVente: double.parse(_prixVenteController.text),
+//             qtyPartiel: double.parse(_qtyPartielController.text),
+//             pricePartielVente: double.parse(_pricePartielVenteController.text),
+//             derniereModification: DateTime.now(),
+//           )..crud.target = Crud(
+//               createdBy: 1,
+//               updatedBy: 1,
+//               deletedBy: 1,
+//               dateCreation: DateTime.now(),
+//               derniereModification: DateTime.now(),
+//             );
+//
+//           // Gestion des approvisionnements
+//           for (int i = 0; i < _approvisionnementTemporaire.length; i++) {
+//             if (!isContextValid) break;
+//             final approvisionnement = _approvisionnementTemporaire[i];
+//             approvisionnement.produit.target = produit;
+//             if (i < _selectedFournisseurs.length) {
+//               approvisionnement.fournisseur.target = _selectedFournisseurs[i];
+//             }
+//             approvisionnement.crud.target = Crud(
+//               createdBy: 1,
+//               updatedBy: 1,
+//               deletedBy: 1,
+//               dateCreation: DateTime.now(),
+//               derniereModification: DateTime.now(),
+//             );
+//           }
+//
+//           // Sauvegarde ou mise à jour du produit
+//           if (existingProduct == null) {
+//             produitProvider.ajouterProduit(
+//                 produit, _selectedFournisseurs, _approvisionnementTemporaire);
+//             if (isContextValid) {
+//               _formKey.currentState?.save();
+//
+//               ScaffoldMessenger.of(context).showSnackBar(
+//                 const SnackBar(
+//                   content: Text('Produit ajouté avec succès'),
+//                   backgroundColor: Colors.green,
+//                 ),
+//               );
+//             }
+//             Navigator.pop(context);
+//             setState(() => _isLoadingSauv = false);
+//             // Fermeture du dialog de progression
+//             if (isContextValid && Navigator.canPop(dialogContext)) {
+//               Navigator.pop(dialogContext);
+//             }
+//           } else {
+//             if (isContextValid && !isFinded) {
+//               _addQRCodeFromText();
+//               setState(() => _isLoadingSauv = false);
+//               // Fermeture du dialog de progression
+//               if (isContextValid && Navigator.canPop(dialogContext)) {
+//                 Navigator.pop(dialogContext);
+//               }
+//               return;
+//             }
+//           }
+//         } catch (e) {
+//           if (isContextValid) {
+//             ScaffoldMessenger.of(context).showSnackBar(
+//               SnackBar(
+//                 content: Text('Erreur lors de la sauvegarde : $e'),
+//                 backgroundColor: Colors.red,
+//               ),
+//             );
+//           }
+//         } finally {
+//           // if (mounted) {
+//           setState(() => _isLoadingSauv = false);
+//           // }
+//         }
+//       },
+//       icon: _isLoadingSauv
+//           ? const CircularProgressIndicator(
+//               strokeWidth: 2,
+//               valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+//             )
+//           : Icon(
+//               isFinded && _serialController.text == _produitQr
+//                   ? Icons.edit
+//                   : Icons.check,
+//             ),
+//     );
+//   }
+//
+//   IconButton buildButton_Edit_Add0(
+//       BuildContext context, CommerceProvider produitProvider, bool isFinded) {
+//     return IconButton(
+//       onPressed: () async {
+//         if (!mounted) return;
+//
+//         // Afficher le dialog de progression
+//         showDialog(
+//           context: context,
+//           barrierDismissible: false,
+//           builder: (BuildContext context) {
+//             return Dialog(
+//               backgroundColor: Colors.black.withOpacity(0.5),
+//               child: Padding(
+//                 padding: const EdgeInsets.all(16.0),
+//                 child: Column(
+//                   mainAxisSize: MainAxisSize.min,
+//                   mainAxisAlignment: MainAxisAlignment.center,
+//                   children: [
+//                     CircularProgressIndicator(),
+//                     SizedBox(height: 16),
+//                     Text(
+//                       "Sauvegarde en cours...",
+//                       style: TextStyle(color: Colors.white, fontSize: 16),
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//             );
+//           },
+//         );
+//
+//         setState(() => _isLoadingSauv = true);
+//
+//         try {
+//           final existingProduct =
+//               await produitProvider.getProduitByQr(_serialController.text);
+//
+//           if (_formKey.currentState!.validate()) {
+//             String imageUrl = '';
+//
+//             // Gestion de l'image du produit
+//             if (_image != null) {
+//               imageUrl =
+//                   await uploadImageToSupabase(_image!, _existingImageUrl);
+//             } else if (_existingImageUrl != null &&
+//                 _existingImageUrl!.isNotEmpty) {
+//               imageUrl = _existingImageUrl!;
+//             }
+//
+//             final code = _serialController.text.trim();
+//             if (code.isNotEmpty) _qrCodesTemp.add(code);
+//
+//             // Initialisation du produit
+//             final produit = Produit(
+//               qr: _qrCodesTemp.toSet().toList().join(',').toString(),
+//               image: imageUrl,
+//               nom: _nomController.text,
+//               description: _descriptionController.text,
+//               prixVente: double.parse(_prixVenteController.text),
+//               qtyPartiel: double.parse(_qtyPartielController.text),
+//               pricePartielVente:
+//                   double.parse(_pricePartielVenteController.text),
+//               derniereModification: DateTime.now(),
+//             )..crud.target = Crud(
+//                 createdBy: 1,
+//                 updatedBy: 1,
+//                 deletedBy: 1,
+//                 dateCreation: DateTime.now(),
+//                 derniereModification: DateTime.now(),
+//               );
+//
+//             // Gestion des approvisionnements
+//             for (int i = 0; i < _approvisionnementTemporaire.length; i++) {
+//               final approvisionnement = _approvisionnementTemporaire[i];
+//               approvisionnement.produit.target = produit;
+//               if (i < _selectedFournisseurs.length) {
+//                 approvisionnement.fournisseur.target = _selectedFournisseurs[i];
+//               }
+//               approvisionnement.crud.target = Crud(
+//                 createdBy: 1,
+//                 updatedBy: 1,
+//                 deletedBy: 1,
+//                 dateCreation: DateTime.now(),
+//                 derniereModification: DateTime.now(),
+//               );
+//             }
+//
+//             if (existingProduct == null) {
+//               produitProvider.ajouterProduit(
+//                   produit, _selectedFournisseurs, _approvisionnementTemporaire);
+//               print('Nouveau produit ajouté');
+//               _formKey.currentState!.save();
+//             } else {
+//               _addQRCodeFromText();
+//               print('Produit déjà existant');
+//             }
+//           }
+//         } catch (e) {
+//           ScaffoldMessenger.of(context).showSnackBar(
+//             SnackBar(
+//               content: Text('Erreur lors de la sauvegarde du produit : $e'),
+//               backgroundColor: Colors.red,
+//             ),
+//           );
+//         } finally {
+//           if (Navigator.of(context).canPop()) {
+//             Navigator.of(context).pop(); // Ferme le dialog de progression
+//           }
+//           setState(() => _isLoadingSauv = false);
+//         }
+//       },
+//       icon: _isLoadingSauv
+//           ? CircularProgressIndicator()
+//           : Icon(
+//               isFinded && _serialController.text == _produitQr
+//                   ? Icons.edit
+//                   : Icons.check,
+//             ),
+//     );
+//   }
 
   Future<void> _scanQRCode() async {
     // Simuler un scan de QR code pour tester
@@ -2123,13 +2170,23 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                           // ),
                           ),
                   !_isLoadingSauv
-                      ? IconButton(
-                          onPressed: _pickImage,
-                          icon: Icon(
-                            Icons.add_a_photo,
-                            color: Colors.blue,
-                          ),
-                        )
+                      ? _existingImageUrl != null &&
+                              _existingImageUrl!.isNotEmpty
+                          ? IconButton(
+                              onPressed: () {
+                                _clearAllFields2();
+                              },
+                              icon: Icon(
+                                Icons.delete,
+                                color: Colors.red,
+                              ))
+                          : IconButton(
+                              onPressed: _pickImage,
+                              icon: Icon(
+                                Icons.add_a_photo,
+                                color: Colors.blue,
+                              ),
+                            )
                       : Container(),
                 ],
               )
@@ -2254,15 +2311,23 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
   void startEditing(Approvisionnement approvisionnement) {
     setState(() {
       _currentApprovisionnement = approvisionnement;
+
+      // Gérer les cas où `quantite` est non null, sinon mettre une valeur par défaut.
       _stockController.text = approvisionnement.quantite.toStringAsFixed(2);
-      _prixAchatController.text =
-          approvisionnement.prixAchat!.toStringAsFixed(2);
-      _datePeremptionController.text = DateFormat('dd MMMM yyyy', 'fr_FR')
-          .format(approvisionnement.datePeremption!);
+
+      // Vérifier si `prixAchat` est non null, sinon laisser vide ou définir une valeur par défaut.
+      _prixAchatController.text = approvisionnement.prixAchat != null
+          ? approvisionnement.prixAchat!.toStringAsFixed(2)
+          : ''; // Valeur par défaut vide
+
+      // Vérifier si `datePeremption` est non null, sinon laisser vide.
+      _datePeremptionController.text = approvisionnement.datePeremption != null
+          ? DateFormat('dd MMMM yyyy', 'fr_FR')
+              .format(approvisionnement.datePeremption!)
+          : ''; // Valeur par défaut vide
 
       // Récupérer le fournisseur associé à l'approvisionnement
-      _currentFournisseur = approvisionnement.fournisseur
-          .target; // Assurez-vous que c'est correct selon votre architecture
+      _currentFournisseur = approvisionnement.fournisseur.target;
       _selectedFournisseur = _currentFournisseur;
       _isEditing = true;
     });
@@ -2292,97 +2357,236 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
   }
 
   void saveApprovisionnement() {
-    if (_formKeyApp.currentState!.validate()) {
-      final quantite = double.parse(_stockController.text);
-      final prixAchat = double.parse(_prixAchatController.text);
-      // final datePeremption = DateFormat('dd MMMM yyyy', 'fr_FR')
-      //     .parse(_datePeremptionController.text);
-      // Initialisation de datePeremption en vérifiant si le champ est vide
-      DateTime? datePeremption;
-      if (_datePeremptionController.text.isNotEmpty) {
-        try {
-          datePeremption = DateFormat('dd MMMM yyyy', 'fr_FR')
-              .parse(_datePeremptionController.text);
-        } catch (e) {
-          print("Erreur lors du parsing de la date : $e");
-          // Gérer le cas d'erreur, par exemple en affichant un message
-          return;
-        }
+    print(
+        "Début de saveApprovisionnement"); // Log pour vérifier que la méthode est appelée
+
+    // if (_formKeyApp.currentState!.validate())
+    // {
+    print("Formulaire validé avec succès");
+
+    final quantite = double.parse(_stockController.text);
+    print("Quantité récupérée : $quantite");
+
+    // Vérification pour `prixAchat` : le laisser à null si le champ est vide
+    double? prixAchat;
+    if (_prixAchatController.text.isNotEmpty) {
+      try {
+        prixAchat = double.parse(_prixAchatController.text);
+        print("Prix d'achat récupéré : $prixAchat");
+      } catch (e) {
+        print("Erreur lors de la conversion du prix d'achat : $e");
+        return;
       }
-      // Vérifiez si nous sommes en mode édition et que l'approvisionnement est sélectionné
-      if (_isEditing && _currentApprovisionnement != null) {
-        // Trouver l'index de l'approvisionnement dans la liste temporaire
-        final int index = _approvisionnementTemporaire.indexWhere(
-            (approvisionnement) =>
-                approvisionnement == _currentApprovisionnement);
+    } else {
+      print("Champ prixAchat vide, initialisé à 0.0");
+      prixAchat = 0.0;
+    }
 
-        if (index != -1) {
-          // Mettre à jour les valeurs de l'approvisionnement existant
-          setState(() {
-            _currentApprovisionnement!.quantite = quantite;
-            _currentApprovisionnement!.prixAchat = prixAchat;
-            _currentApprovisionnement!.datePeremption = datePeremption;
+    // Initialisation de `datePeremption` en vérifiant si le champ est vide
+    DateTime? datePeremption;
+    if (_datePeremptionController.text.isNotEmpty) {
+      try {
+        datePeremption = DateFormat('dd MMMM yyyy', 'fr_FR')
+            .parse(_datePeremptionController.text);
+        print("Date de péremption récupérée : $datePeremption");
+      } catch (e) {
+        print("Erreur lors du parsing de la date : $e");
+        return;
+      }
+    } else {
+      print("Aucune date de péremption spécifiée.");
+    }
 
-            // Vérifier si un fournisseur est sélectionné avant de l'assigner
-            if (_selectedFournisseur != null) {
-              _currentApprovisionnement!.fournisseur.target =
-                  _selectedFournisseur;
-            } else {
-              _currentApprovisionnement!.fournisseur.target = null;
-            }
+    // Vérifier si nous sommes en mode édition et que l'approvisionnement est sélectionné
+    if (_isEditing && _currentApprovisionnement != null) {
+      print("Mode édition activé pour l'approvisionnement existant");
 
-            _currentApprovisionnement!.derniereModification = DateTime.now();
+      // Trouver l'index de l'approvisionnement dans la liste temporaire
+      final int index = _approvisionnementTemporaire.indexWhere(
+          (approvisionnement) =>
+              approvisionnement == _currentApprovisionnement);
 
-            // Remplacer l'approvisionnement dans la liste
-            _approvisionnementTemporaire[index] = _currentApprovisionnement!;
+      if (index != -1) {
+        print("Approvisionnement trouvé à l'index : $index");
 
-            // Réinitialiser les champs après la modification
-            _stockController.clear();
-            _prixAchatController.clear();
-            _datePeremptionController.clear();
-            _currentFournisseur = null;
-            _selectedFournisseur = null;
-            _isEditing = false; // Désactiver le mode édition
-          });
-        } else {
-          print("Erreur : Approvisionnement non trouvé dans la liste.");
-        }
-      } else {
-        // Si ce n'est pas une modification, créer un nouvel approvisionnement
-        Approvisionnement nouveauApprovisionnement = Approvisionnement(
-          quantite: quantite,
-          prixAchat: prixAchat,
-          datePeremption: datePeremption,
-          derniereModification: DateTime.now(),
-        );
-
-        // Assigner le fournisseur sélectionné, ou laisser null si non sélectionné
-        if (_currentFournisseur != null) {
-          nouveauApprovisionnement.fournisseur.target = _currentFournisseur;
-        } else if (_selectedFournisseur != null) {
-          nouveauApprovisionnement.fournisseur.target = _selectedFournisseur;
-        } else {
-          nouveauApprovisionnement.fournisseur.target = null;
-        }
-
-        // Ajouter le nouvel approvisionnement à la liste temporaire
+        // Mettre à jour les valeurs de l'approvisionnement existant
         setState(() {
-          _approvisionnementTemporaire.add(nouveauApprovisionnement);
+          _currentApprovisionnement!.quantite = quantite;
+          _currentApprovisionnement!.prixAchat = prixAchat;
+          _currentApprovisionnement!.datePeremption = datePeremption;
 
-          // Réinitialiser les champs après l'ajout
+          // Vérifier si un fournisseur est sélectionné avant de l'assigner
+          if (_selectedFournisseur != null) {
+            _currentApprovisionnement!.fournisseur.target =
+                _selectedFournisseur;
+            print("Fournisseur sélectionné assigné à l'approvisionnement");
+          } else {
+            _currentApprovisionnement!.fournisseur.target = null;
+            print("Aucun fournisseur sélectionné, valeur null assignée");
+          }
+
+          _currentApprovisionnement!.derniereModification = DateTime.now();
+          print(
+              "Dernière modification mise à jour : ${_currentApprovisionnement!.derniereModification}");
+
+          // Remplacer l'approvisionnement dans la liste
+          _approvisionnementTemporaire[index] = _currentApprovisionnement!;
+          print("Approvisionnement mis à jour dans la liste temporaire");
+
+          // Réinitialiser les champs après la modification
           _stockController.clear();
           _prixAchatController.clear();
           _datePeremptionController.clear();
           _currentFournisseur = null;
           _selectedFournisseur = null;
-          _isEditing = false;
+          _isEditing = false; // Désactiver le mode édition
+          print("Champs réinitialisés et mode édition désactivé");
         });
+      } else {
+        print("Erreur : Approvisionnement non trouvé dans la liste.");
+      }
+    } else {
+      print("Ajout d'un nouvel approvisionnement");
+
+      // Si ce n'est pas une modification, créer un nouvel approvisionnement
+      Approvisionnement nouveauApprovisionnement = Approvisionnement(
+        quantite: quantite,
+        prixAchat: prixAchat,
+        datePeremption: datePeremption,
+        derniereModification: DateTime.now(),
+      );
+
+      // Assigner le fournisseur sélectionné, ou laisser null si non sélectionné
+      if (_currentFournisseur != null) {
+        nouveauApprovisionnement.fournisseur.target = _currentFournisseur;
+        print("Fournisseur courant assigné au nouvel approvisionnement");
+      } else if (_selectedFournisseur != null) {
+        nouveauApprovisionnement.fournisseur.target = _selectedFournisseur;
+        print("Fournisseur sélectionné assigné au nouvel approvisionnement");
+      } else {
+        nouveauApprovisionnement.fournisseur.target = null;
+        print("Aucun fournisseur assigné au nouvel approvisionnement");
       }
 
-      // Mettre à jour le stock global après modification ou ajout
-      mettreAJourStockGlobal();
+      // Ajouter le nouvel approvisionnement à la liste temporaire
+      setState(() {
+        _approvisionnementTemporaire.add(nouveauApprovisionnement);
+        print("Nouveau approvisionnement ajouté à la liste temporaire");
+
+        // Réinitialiser les champs après l'ajout
+        _stockController.clear();
+        _prixAchatController.clear();
+        _datePeremptionController.clear();
+        _currentFournisseur = null;
+        _selectedFournisseur = null;
+        _isEditing = false;
+        print("Champs réinitialisés et mode édition désactivé après l'ajout");
+      });
     }
+
+    // Mettre à jour le stock global après modification ou ajout
+    mettreAJourStockGlobal();
+    print("Stock global mis à jour");
+    // }
+    // else {
+    //   print("Formulaire invalide");
+    // }
+
+    print("Fin de saveApprovisionnement");
   }
+
+// void saveApprovisionnement() {
+  //   if (_formKeyApp.currentState!.validate()) {
+  //     final quantite = double.parse(_stockController.text);
+  //     final prixAchat = double.parse(_prixAchatController.text);
+  //     // final datePeremption = DateFormat('dd MMMM yyyy', 'fr_FR')
+  //     //     .parse(_datePeremptionController.text);
+  //     // Initialisation de datePeremption en vérifiant si le champ est vide
+  //     DateTime? datePeremption;
+  //     if (_datePeremptionController.text.isNotEmpty) {
+  //       try {
+  //         datePeremption = DateFormat('dd MMMM yyyy', 'fr_FR')
+  //             .parse(_datePeremptionController.text);
+  //       } catch (e) {
+  //         print("Erreur lors du parsing de la date : $e");
+  //         // Gérer le cas d'erreur, par exemple en affichant un message
+  //         return;
+  //       }
+  //     }
+  //     // Vérifiez si nous sommes en mode édition et que l'approvisionnement est sélectionné
+  //     if (_isEditing && _currentApprovisionnement != null) {
+  //       // Trouver l'index de l'approvisionnement dans la liste temporaire
+  //       final int index = _approvisionnementTemporaire.indexWhere(
+  //           (approvisionnement) =>
+  //               approvisionnement == _currentApprovisionnement);
+  //
+  //       if (index != -1) {
+  //         // Mettre à jour les valeurs de l'approvisionnement existant
+  //         setState(() {
+  //           _currentApprovisionnement!.quantite = quantite;
+  //           _currentApprovisionnement!.prixAchat = prixAchat;
+  //           _currentApprovisionnement!.datePeremption = datePeremption;
+  //
+  //           // Vérifier si un fournisseur est sélectionné avant de l'assigner
+  //           if (_selectedFournisseur != null) {
+  //             _currentApprovisionnement!.fournisseur.target =
+  //                 _selectedFournisseur;
+  //           } else {
+  //             _currentApprovisionnement!.fournisseur.target = null;
+  //           }
+  //
+  //           _currentApprovisionnement!.derniereModification = DateTime.now();
+  //
+  //           // Remplacer l'approvisionnement dans la liste
+  //           _approvisionnementTemporaire[index] = _currentApprovisionnement!;
+  //
+  //           // Réinitialiser les champs après la modification
+  //           _stockController.clear();
+  //           _prixAchatController.clear();
+  //           _datePeremptionController.clear();
+  //           _currentFournisseur = null;
+  //           _selectedFournisseur = null;
+  //           _isEditing = false; // Désactiver le mode édition
+  //         });
+  //       } else {
+  //         print("Erreur : Approvisionnement non trouvé dans la liste.");
+  //       }
+  //     } else {
+  //       // Si ce n'est pas une modification, créer un nouvel approvisionnement
+  //       Approvisionnement nouveauApprovisionnement = Approvisionnement(
+  //         quantite: quantite,
+  //         prixAchat: prixAchat,
+  //         datePeremption: datePeremption,
+  //         derniereModification: DateTime.now(),
+  //       );
+  //
+  //       // Assigner le fournisseur sélectionné, ou laisser null si non sélectionné
+  //       if (_currentFournisseur != null) {
+  //         nouveauApprovisionnement.fournisseur.target = _currentFournisseur;
+  //       } else if (_selectedFournisseur != null) {
+  //         nouveauApprovisionnement.fournisseur.target = _selectedFournisseur;
+  //       } else {
+  //         nouveauApprovisionnement.fournisseur.target = null;
+  //       }
+  //
+  //       // Ajouter le nouvel approvisionnement à la liste temporaire
+  //       setState(() {
+  //         _approvisionnementTemporaire.add(nouveauApprovisionnement);
+  //
+  //         // Réinitialiser les champs après l'ajout
+  //         _stockController.clear();
+  //         _prixAchatController.clear();
+  //         _datePeremptionController.clear();
+  //         _currentFournisseur = null;
+  //         _selectedFournisseur = null;
+  //         _isEditing = false;
+  //       });
+  //     }
+  //
+  //     // Mettre à jour le stock global après modification ou ajout
+  //     mettreAJourStockGlobal();
+  //   }
+  // }
 }
 
 class FournisseurSelectionScreen extends StatefulWidget {
