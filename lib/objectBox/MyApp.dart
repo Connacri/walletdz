@@ -2460,8 +2460,7 @@ class HeroLayoutCard extends StatelessWidget {
             child: OverflowBox(
               alignment:
                   Alignment.center, // centre l'image dans la zone de recadrage
-              maxWidth: double
-                  .infinity, // autorise l'image à couvrir toute la largeur
+              maxWidth:width,// double.infinity, // autorise l'image à couvrir toute la largeur
               minWidth: 0.0, // autorise une largeur minimale flexible
               child: ShaderMask(
                 shaderCallback: (rect) {

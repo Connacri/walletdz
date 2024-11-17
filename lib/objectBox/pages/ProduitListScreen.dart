@@ -1,5 +1,5 @@
 import 'dart:isolate';
-
+import 'package:timeago/timeago.dart' as timeago;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dart_date/dart_date.dart';
 import 'package:faker/faker.dart';
@@ -10,6 +10,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:provider/provider.dart';
+import 'package:string_extensions/string_extensions.dart';
 import '../../objectbox.g.dart';
 import '../Entity.dart';
 import '../MyProviders.dart';
@@ -1281,28 +1282,42 @@ class ProduitDetailPage extends StatelessWidget {
           delegate: SliverChildListDelegate(
             [
               Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Derniere Modification : ' +
-                          produit.crud.target!.derniereModification.toString(),
-                      style: TextStyle(fontSize: 10),
+                      'Dernière Modification : ' +
+                          timeago.format(
+                              produit.crud.target!.derniereModification,
+                              locale: 'fr'),
+                      style: TextStyle(fontSize: 12),
                     ),
+
                     Center(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: TextButton.icon(
+                            child: ElevatedButton.icon(
                               onPressed: () {
-                                _deleteProduit(context, produit);
+                                context
+                                    .read<CommerceProvider>()
+                                    .supprimerProduit(produit);
                                 Navigator.of(context).pop();
                               },
-                              icon: Icon(Icons.delete),
+                              style: ElevatedButton.styleFrom(
+                                // Utilise les couleurs du thème pour le bouton de suppression
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.error,
+                                foregroundColor:
+                                    Theme.of(context).colorScheme.onError,
+                                elevation: 2,
+                              ),
                               label: Text('Supprimer'),
+                              icon: Icon(Icons.delete),
                             ),
                           ),
                           Padding(
@@ -1349,12 +1364,26 @@ class ProduitDetailPage extends StatelessWidget {
                       style: TextStyle(fontSize: 16),
                     ),
                     SizedBox(height: 16),
-                    Text('Description :\n${produit.description}'),
+                    produit.description != '' ||
+                            produit.description != null ||
+                            produit.description!.isNotEmpty ||
+                            produit.description!.length != 0
+                        ? Text('Description :\n${produit.description}')
+                        : Container(),
                     SizedBox(height: 16),
-                    // Text(
-                    //     'Earn : ${(produit.prixVente - produit.prixAchat).toStringAsFixed(2)}'),
+                    Text(
+                      'Nombre de pièces dans ce pack: ${produit.qtyPartiel?.truncate() ?? 'Non défini'}',
+                      style: TextStyle(fontSize: 16),
+                    ),
                     SizedBox(height: 16),
-                    Text('Stock : ' + produit.stock.toString()),
+                    Text(
+                      'Prix de la pièce du détail: ${produit.pricePartielVente?.toStringAsFixed(2) ?? 'Non défini'} DZD',
+                      style: TextStyle(fontSize: 16),
+                    ),
+
+                    SizedBox(height: 16),
+
+                    Text('Stock : ' + produit.stock.truncate().toString()),
                     SizedBox(height: 10),
                     // Text('Stock Minimal pour l\'Alert : ' +
                     //     produit.stockinit.toString()),
@@ -1398,7 +1427,7 @@ class ProduitDetailPage extends StatelessWidget {
                                       ),
                                     ),
                                     DataCell(Text(
-                                        '${appro.quantite.toStringAsFixed(2)}')),
+                                        '${appro.quantite.truncate().toStringAsFixed(2)}')),
                                     DataCell(Text(
                                         '${appro.prixAchat?.toStringAsFixed(2) ?? '-'}')),
                                     DataCell(
@@ -1448,49 +1477,47 @@ class ProduitDetailPage extends StatelessWidget {
                     //         '  Date Peremption :  ${appro.datePeremption}'),
                     //   );
                     // }).toList(),
-                    Consumer<CommerceProvider>(
-                      builder: (context, produitProvider, child) {
-                        return Wrap(
-                          spacing: 6.0, // Espace horizontal entre les éléments
-                          runSpacing: 4.0, // Espace vertical entre les lignes
-                          children: produit.approvisionnements
-                              .where(
-                                  (appro) => appro.fournisseur.target != null)
-                              .map((appro) {
-                            return InkWell(
-                              onTap: () {
-                                Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (ctx) => ProduitsFournisseurPage(
-                                          fournisseur:
-                                              appro.fournisseur.target!,
-                                        )));
-                              },
-                              child: Chip(
-                                shadowColor: Colors.black,
-                                backgroundColor:
-                                    Theme.of(context).chipTheme.backgroundColor,
-                                labelStyle: TextStyle(
-                                  color: Theme.of(context)
-                                      .chipTheme
-                                      .labelStyle
-                                      ?.color,
-                                ),
-                                side: BorderSide.none,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
-                                padding: EdgeInsets.zero,
-                                label: Text(
-                                  appro.fournisseur.target?.nom ??
-                                      'Fournisseur inconnu',
-                                  style: TextStyle(fontSize: 10),
-                                ),
-                              ),
-                            );
-                          }).toList(),
+                    // Consumer<CommerceProvider>(
+                    //   builder: (context, produitProvider, child) {
+                    //return
+                    Wrap(
+                      spacing: 6.0, // Espace horizontal entre les éléments
+                      runSpacing: 4.0, // Espace vertical entre les lignes
+                      children: produit.approvisionnements
+                          .where((appro) => appro.fournisseur.target != null)
+                          .map((appro) {
+                        return InkWell(
+                          onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (ctx) => ProduitsFournisseurPage(
+                                      fournisseur: appro.fournisseur.target!,
+                                    )));
+                          },
+                          child: Chip(
+                            shadowColor: Colors.black,
+                            backgroundColor:
+                                Theme.of(context).chipTheme.backgroundColor,
+                            labelStyle: TextStyle(
+                              color:
+                                  Theme.of(context).chipTheme.labelStyle?.color,
+                            ),
+                            side: BorderSide.none,
+                            shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(10))),
+                            padding: EdgeInsets.zero,
+                            label: Text(
+                              appro.fournisseur.target?.nom ??
+                                  'Fournisseur inconnu',
+                              style: TextStyle(fontSize: 10),
+                            ),
+                          ),
                         );
-                      },
+                      }).toList(),
                     ),
+                    //     ;
+                    //   },
+                    // ),
                     SizedBox(
                       height: 50,
                     ),
