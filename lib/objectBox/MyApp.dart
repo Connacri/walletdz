@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:walletdz/objectBox/pages/addProduct.dart';
-import 'package:walletdz/objectBox/pages/addProduct2.dart';
+import 'package:walletdz/objectBox/pages/addProduct.dart';
 import 'package:window_manager/window_manager.dart';
 import '../objectBox/pages/ClientListScreen.dart';
 import '../objectBox/pages/FactureListScreen.dart';
@@ -39,7 +39,6 @@ import 'package:faker/faker.dart' as Faker;
 
 import 'pages/ProduitListScreen.dart';
 import 'pages/ProduitListSupabase.dart' as supa;
-import 'pages/add_Produit.dart'; // Importez le package path_provider
 
 class MyMain extends StatelessWidget {
   @override
@@ -665,7 +664,7 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                                       onPressed: () {
                                         Navigator.of(context).push(
                                             MaterialPageRoute(
-                                                builder: (_) => addProduct2()));
+                                                builder: (_) => addProduct()));
                                       },
                                       label: Text(
                                         'Produit',
@@ -713,7 +712,7 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                           ElevatedButton(
                               onPressed: () {
                                 Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (_) => addProduct2()));
+                                    builder: (_) => addProduct()));
                               },
                               child: Text('Add Product 2')),
                           // Padding(
@@ -1625,7 +1624,7 @@ class _adaptiveHomeState extends State<adaptiveHome> {
                         ),
                         onPressed: () {
                           Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => addProduct2()));
+                              MaterialPageRoute(builder: (_) => addProduct()));
                         },
                         label: Text(
                           'Produit',
@@ -2186,7 +2185,7 @@ class _homeRailState extends State<homeRail> {
           IconButton(
             onPressed: () {
               Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (ctx) => addProduct2()));
+                  .push(MaterialPageRoute(builder: (ctx) => addProduct()));
             },
             icon: Icon(Icons.add),
           ),
@@ -2460,7 +2459,8 @@ class HeroLayoutCard extends StatelessWidget {
             child: OverflowBox(
               alignment:
                   Alignment.center, // centre l'image dans la zone de recadrage
-              maxWidth:width,// double.infinity, // autorise l'image à couvrir toute la largeur
+              maxWidth:
+                  width, // double.infinity, // autorise l'image à couvrir toute la largeur
               minWidth: 0.0, // autorise une largeur minimale flexible
               child: ShaderMask(
                 shaderCallback: (rect) {

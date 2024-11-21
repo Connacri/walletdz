@@ -14,7 +14,7 @@ import 'ProduitListScreen.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
-import 'add_Produit.dart';
+import 'addProduct.dart';
 import 'package:syncfusion_flutter_barcodes/barcodes.dart';
 
 class FacturePage extends StatefulWidget {
@@ -550,7 +550,7 @@ class _FacturePageState extends State<FacturePage> {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => add_Produit(qrCode: _barcodeBuffer),
+        builder: (context) => addProduct(),
       ),
     );
 

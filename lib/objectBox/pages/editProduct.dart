@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:intl/intl.dart';
+import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:string_extensions/string_extensions.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -17,29 +18,44 @@ import '../Utils/country_flags.dart';
 import '../Utils/mobile_scanner/barcode_scanner_window.dart';
 import '../Utils/winMobile.dart';
 import 'ProduitListScreen.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
-class addProduct2 extends StatefulWidget {
-  const addProduct2({super.key});
+class editProduct extends StatefulWidget {
+  final Produit? produit;
+  final Fournisseur? specifiquefournisseur;
+
+  editProduct({Key? key, this.produit, this.qrCode, this.specifiquefournisseur})
+      : super(key: key);
+  final String? qrCode;
 
   @override
-  State<addProduct2> createState() => _addProduct2State();
+  State<editProduct> createState() => _editProductState();
 }
 
-class _addProduct2State extends State<addProduct2> {
+class _editProductState extends State<editProduct> {
   @override
   Widget build(BuildContext context) {
-    return ResponsiveLayout2();
+    return ResponsiveLayout(produit: widget.produit!);
   }
 }
 
-class ResponsiveLayout2 extends StatefulWidget {
-  const ResponsiveLayout2({super.key});
+class ResponsiveLayout extends StatefulWidget {
+  final Produit produit;
+  final Fournisseur? specifiquefournisseur;
+
+  ResponsiveLayout(
+      {Key? key,
+      required this.produit,
+      this.qrCode,
+      this.specifiquefournisseur})
+      : super(key: key);
+  final String? qrCode;
 
   @override
-  State<ResponsiveLayout2> createState() => _ResponsiveLayout2State();
+  State<ResponsiveLayout> createState() => _ResponsiveLayoutState();
 }
 
-class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
+class _ResponsiveLayoutState extends State<ResponsiveLayout> {
   final _formKey = GlobalKey<FormState>();
   final _formKeyApp = GlobalKey<FormState>();
   final _nomController = TextEditingController();
@@ -81,13 +97,13 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
   Fournisseur? _currentFournisseur;
   Approvisionnement? _currentApprovisionnement;
   List<Approvisionnement> _approvisionnementTemporaire = [];
-  bool _isFinded = false;
+  bool _isFinded = true;
   bool _searchQr = true;
-  bool _isFirstFieldRempli = false;
+  bool _isFirstFieldRempli = true;
   bool _showDescription = false;
-  bool _showAppro = false;
-  bool _showDetail = false;
-  bool _isEditing = false;
+  bool _showAppro = true;
+  bool _showDetail = true;
+  bool _isEditing = true;
   bool _isLoadingSauv = false;
   bool _isFirstTap = true;
 
@@ -96,14 +112,15 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
     super.initState();
     _serialController.addListener(_onSerialChanged);
     _serialController.addListener(_checkFirstField);
-    _clearAllFields();
+    _serialController.text = widget.produit.qr!;
+    //_clearAllFields();
 
-    _qrCodesTemp.clear();
-    _selectedFournisseurs.clear();
-    _approvisionnementTemporaire.clear();
-    _showDescription = false;
-    _isFirstFieldRempli = false;
-    _isFinded = false;
+    // _qrCodesTemp.clear();
+    // _selectedFournisseurs.clear();
+    // _approvisionnementTemporaire.clear();
+    _showDescription = true;
+    _isFirstFieldRempli = true;
+    _isFinded = true;
     // Ajoutez les listeners
     _prixVenteController.addListener(updatePricePartiel);
     _qtyPartielController.addListener(updatePricePartiel);
@@ -136,6 +153,7 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
   }
 
   void _onSerialChanged() {
+    //   final _serialController.text = widget.produit.id;
     final code = _serialController.text.replaceAll(' ', '');
 
     // Vérifie si le champ est vide en premier lieu pour éviter des opérations inutiles.
@@ -148,8 +166,8 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
     }
 
     if (_searchQr) {
-      //_updateProductInfo(code);
-      _productInfo(code);
+      _updateProductInfo(code);
+      //_productInfo(code);
     }
   }
 
@@ -187,10 +205,18 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
         _alertPeremptionController.text = produit.alertPeremption.toString();
         //_selectedFournisseurs = List.from(produit.fournisseurs);
         _existingImageUrl = produit.image;
-
+        _produitImageTile = produit.image!;
         _isFinded = true;
         _image = null;
         _approvisionnementTemporaire = produit.approvisionnements.toList();
+        _tempProduitId = produit.id.toString();
+        _produitNom = produit.nom;
+        _produitDesignation = produit.description ?? '';
+        _produitPV = produit.prixVente;
+        _produitStock = produit.stock;
+        _produitQr = produit.qr!;
+        _produitImage = produit.image!;
+        _produitImageTile = produit.image!;
       });
     } else {
       if (_tempProduitId.isNotEmpty) {
@@ -1119,7 +1145,6 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                             QtyfilledButton(10),
                             QtyfilledButton(15),
                             QtyfilledButton(20),
-                            QtyfilledButton(50),
                           ],
                         ),
                       ],
@@ -1307,26 +1332,80 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                                     ),
                             ],
                           ), // stock
+                          // Flexible(
+                          //   flex: 2,
+                          //   child: Padding(
+                          //     padding: const EdgeInsets.all(8.0),
+                          //     child: TextFormField(
+                          //       enabled: !_isLoadingSauv,
+                          //       controller: _datePeremptionController,
+                          //       textAlign: TextAlign.center,
+                          //       onFieldSubmitted: (_) {
+                          //         _focusNodePV
+                          //             .requestFocus(); // Passe au champ 2
+                          //       },
+                          //       keyboardType: TextInputType.text,
+                          //       decoration: InputDecoration(
+                          //         // fillColor: _isFirstFieldFilled
+                          //         //     ? Colors.yellow.shade200
+                          //         //     : null,
+                          //         labelText: 'Date de Péremption',
+                          //         suffixIcon: IconButton(
+                          //           icon: const Icon(Icons.date_range),
+                          //           onPressed: () async {
+                          //             final DateTime? dateTimePerem =
+                          //                 await showDatePicker(
+                          //               context: context,
+                          //               initialDate: selectedDate,
+                          //               firstDate: DateTime(2000),
+                          //               lastDate: DateTime(2200),
+                          //             );
+                          //             if (dateTimePerem != null) {
+                          //               setState(() {
+                          //                 selectedDate = dateTimePerem;
+                          //                 _datePeremptionController.text =
+                          //                     dateTimePerem.format(
+                          //                         'yMMMMd', 'fr_FR');
+                          //               });
+                          //             }
+                          //           },
+                          //         ),
+                          //         border: OutlineInputBorder(
+                          //           borderRadius: BorderRadius.circular(8.0),
+                          //           borderSide:
+                          //               BorderSide.none, // Supprime le contour
+                          //         ),
+                          //         enabledBorder: OutlineInputBorder(
+                          //           borderRadius: BorderRadius.circular(8.0),
+                          //           borderSide: BorderSide
+                          //               .none, // Supprime le contour en état normal
+                          //         ),
+                          //         focusedBorder: OutlineInputBorder(
+                          //           borderRadius: BorderRadius.circular(8.0),
+                          //           borderSide: BorderSide
+                          //               .none, // Supprime le contour en état focus
+                          //         ),
+                          //         filled: true,
+                          //         contentPadding: EdgeInsets.all(15),
+                          //       ),
+                          //       // validator: (value) {
+                          //       //   if (value == null || value.isEmpty) {
+                          //       //     return 'Veuillez entrer un nom du Produit';
+                          //       //   }
+                          //       //   return null;
+                          //       // },
+                          //     ),
+                          //   ),
+                          // ),
                           Flexible(
                             flex: 2,
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: TextFormField(
-                                enabled: !_isLoadingSauv,
-                                controller: _datePeremptionController,
-                                textAlign: TextAlign.center,
-                                onFieldSubmitted: (_) {
-                                  _focusNodePV
-                                      .requestFocus(); // Passe au champ 2
-                                },
-                                keyboardType: TextInputType.text,
-                                decoration: InputDecoration(
-                                  // fillColor: _isFirstFieldFilled
-                                  //     ? Colors.yellow.shade200
-                                  //     : null,
-                                  labelText: 'Date de Péremption',
-                                  suffixIcon: IconButton(
-                                    icon: const Icon(Icons.date_range),
+                            child: FittedBox(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.date_range),
+                                    color: Colors.blue,
                                     onPressed: () async {
                                       final DateTime? dateTimePerem =
                                           await showDatePicker(
@@ -1334,44 +1413,52 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                                         initialDate: selectedDate,
                                         firstDate: DateTime(2000),
                                         lastDate: DateTime(2200),
+                                        currentDate: DateTime.now(),
                                       );
                                       if (dateTimePerem != null) {
                                         setState(() {
                                           selectedDate = dateTimePerem;
                                           _datePeremptionController.text =
-                                              dateTimePerem.format(
-                                                  'yMMMMd', 'fr_FR');
+                                              DateFormat(
+                                                      'dd MMMM yyyy', 'fr_FR')
+                                                  .format(dateTimePerem);
                                         });
                                       }
                                     },
                                   ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    borderSide:
-                                        BorderSide.none, // Supprime le contour
+                                  Text(
+                                    _datePeremptionController.text.isEmpty
+                                        ? 'Sélectionner une date'
+                                        : _datePeremptionController.text,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color:
+                                          _datePeremptionController.text.isEmpty
+                                              ? Colors.grey
+                                              : Colors.black,
+                                    ),
                                   ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    borderSide: BorderSide
-                                        .none, // Supprime le contour en état normal
+                                  SizedBox(
+                                    width: 8,
                                   ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    borderSide: BorderSide
-                                        .none, // Supprime le contour en état focus
-                                  ),
-                                  filled: true,
-                                  contentPadding: EdgeInsets.all(15),
-                                ),
-                                // validator: (value) {
-                                //   if (value == null || value.isEmpty) {
-                                //     return 'Veuillez entrer un nom du Produit';
-                                //   }
-                                //   return null;
-                                // },
+                                  buildDatePeremptionInfo(),
+                                  _datePeremptionController.text.isEmpty
+                                      ? SizedBox.shrink()
+                                      : IconButton(
+                                          icon: Icon(Icons.delete),
+                                          color: Colors.red,
+                                          onPressed: () async {
+                                            //  selectedDate = dateTimePerem;
+                                            setState(() {
+                                              _datePeremptionController.clear();
+                                            });
+                                          },
+                                        ),
+                                ],
                               ),
                             ),
                           ),
+
                           Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Container(
@@ -1407,22 +1494,54 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                                                 }
                                               },
                                               child: Chip(
-                                                label: Text(_selectedFournisseur!
-                                                    .nom), // Afficher le nom du fournisseur sélectionné
+                                                label: Text(
+                                                  _selectedFournisseur!.nom,
+                                                  style: TextStyle(
+                                                    color: Theme.of(context)
+                                                            .chipTheme
+                                                            .labelStyle
+                                                            ?.color ??
+                                                        Theme.of(context)
+                                                            .textTheme
+                                                            .bodyMedium
+                                                            ?.color,
+                                                  ),
+                                                ),
                                                 onDeleted: () {
                                                   setState(() {
                                                     _selectedFournisseur =
                                                         null; // Réinitialiser la sélection
                                                   });
                                                 },
+                                                backgroundColor:
+                                                    Theme.of(context)
+                                                            .chipTheme
+                                                            .backgroundColor ??
+                                                        Theme.of(context)
+                                                            .colorScheme
+                                                            .surface,
+                                                deleteIconColor:
+                                                    Theme.of(context)
+                                                        .colorScheme
+                                                        .error,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          12), // Bordures rondes
+                                                  side: BorderSide(
+                                                    color: Theme.of(context)
+                                                        .dividerColor, // Bordure subtile
+                                                  ),
+                                                ),
                                               ),
                                             )
                                           : Chip(
                                               label: Text(_selectedFournisseur!
                                                   .nom), // Afficher le nom du fournisseur sélectionné
+
                                               onDeleted: null,
-                                              backgroundColor: Colors.grey
-                                                  .shade300, // Optionnel: couleur grisée
+                                              // backgroundColor: Colors.grey
+                                              //     .shade300, // Optionnel: couleur grisée
                                             ),
 
                                     // Icône pour ajouter un fournisseur (toujours la dernière)
@@ -1531,10 +1650,12 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
 
                                   return Card(
                                       child: InkWell(
-                                    onTap: () {
-                                      // Démarrer l'édition de cet approvisionnement
-                                      startEditing(approvisionnement);
-                                    },
+                                    onTap: _isLoadingSauv
+                                        ? null
+                                        : () {
+                                            // Démarrer l'édition de cet approvisionnement
+                                            startEditing(approvisionnement);
+                                          },
                                     borderRadius: BorderRadius.circular(15),
                                     child: Row(
                                       children: [
@@ -1544,7 +1665,13 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                                             padding: const EdgeInsets.all(8.0),
                                             child: Text(
                                               '${approvisionnement.quantite.toStringAsFixed(approvisionnement.quantite.truncateToDouble() == approvisionnement.quantite ? 0 : 2)}',
-                                              style: TextStyle(fontSize: 20),
+                                              style: TextStyle(
+                                                fontSize: 20,
+                                                color: _isLoadingSauv
+                                                    ? Colors.black87
+                                                        .withOpacity(0.6)
+                                                    : null,
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -1560,9 +1687,13 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                                                     : 'Fournisseur Inconnu',
                                                 overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
-                                                    fontSize: 15,
-                                                    fontWeight:
-                                                        FontWeight.bold),
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: _isLoadingSauv
+                                                      ? Colors.black87
+                                                          .withOpacity(0.6)
+                                                      : null,
+                                                ),
                                               ),
                                               approvisionnement
                                                           .datePeremption !=
@@ -1571,6 +1702,11 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                                                       'Expire le : ${DateFormat('dd/MM/yyyy').format(approvisionnement.datePeremption!)}',
                                                       style: TextStyle(
                                                         fontSize: 12,
+                                                        color: _isLoadingSauv
+                                                            ? Colors.black87
+                                                                .withOpacity(
+                                                                    0.6)
+                                                            : null,
                                                       ),
                                                     )
                                                   : Container(),
@@ -1586,26 +1722,37 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
                                                   left: 8),
                                               child: Text(
                                                 '${approvisionnement.prixAchat!.toStringAsFixed(2)}',
-                                                style: TextStyle(fontSize: 20),
+                                                style: TextStyle(
+                                                  fontSize: 20,
+                                                  color: _isLoadingSauv
+                                                      ? Colors.black87
+                                                          .withOpacity(0.6)
+                                                      : null,
+                                                ),
                                               ),
                                             ),
                                             IconButton(
                                               padding: EdgeInsets.zero,
                                               icon: Icon(
                                                 Icons.delete,
-                                                color: Colors.red,
+                                                color: _isLoadingSauv
+                                                    ? Colors.white
+                                                        .withOpacity(0.6)
+                                                    : Colors.red,
                                                 size: 15,
                                               ),
-                                              onPressed: () {
-                                                // Appeler la méthode pour supprimer l'approvisionnement
-                                                setState(() {
-                                                  supprimerApprovisionnementTemporaire(
-                                                      approvisionnement);
-                                                  stockGlobale -=
-                                                      approvisionnement
-                                                          .quantite;
-                                                });
-                                              },
+                                              onPressed: _isLoadingSauv
+                                                  ? null
+                                                  : () {
+                                                      // Appeler la méthode pour supprimer l'approvisionnement
+                                                      setState(() {
+                                                        supprimerApprovisionnementTemporaire(
+                                                            approvisionnement);
+                                                        stockGlobale -=
+                                                            approvisionnement
+                                                                .quantite;
+                                                      });
+                                                    },
                                             ),
                                           ],
                                         ),
@@ -1636,10 +1783,11 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
               ? null
               : () {
                   setState(() {
-                    double prix = double.parse(_prixVenteController.text);
-                    double qty = double.parse(_qtyPartielController.text);
                     _qtyPartielController.text = StringNum.toString();
-                    _resultatPrixPartiel = (prix / qty).toStringAsFixed(2);
+                    _resultatPrixPartiel =
+                        (double.parse(_prixVenteController.text) /
+                                double.parse(_qtyPartielController.text))
+                            .toStringAsFixed(2);
                   });
                 },
       style: ButtonStyle(
@@ -1802,72 +1950,80 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
     bool isFinded,
   ) {
     return IconButton(
-      onPressed: () async {
-        if (!mounted) return;
+      onPressed: _serialController.text.trim().isEmpty
+          ? null
+          : () async {
+              if (!mounted) return;
 
-        // Validation du formulaire
-        if (!await _validateForm()) return;
+              // Validation du formulaire
+              if (!await _validateForm()) return;
 
-        // Vérifier si le produit existe déjà avant d'afficher le ProgressDialog
-        final existingProduct =
-            await produitProvider.getProduitByQr(_serialController.text);
-        if (existingProduct != null) {
-          print('Produit existant détecté');
-          showExistingProductDialog(context, _serialController.text,
-              existingProduct, produitProvider);
-          _showSnackBar(context, 'Produit déjà existant', Colors.orange);
-          return; // Arrêter ici si le produit existe déjà
-        }
+              // Vérifier si le produit existe déjà avant d'afficher le ProgressDialog
+              final existingProduct =
+                  await produitProvider.getProduitByQr(_serialController.text);
+              if (existingProduct != null) {
+                print('Produit existant détecté');
+                showExistingProductDialog(context, _serialController.text,
+                    existingProduct, produitProvider);
+                _showSnackBar(context, 'Produit déjà existant', Colors.orange);
+                return; // Arrêter ici si le produit existe déjà
+              }
 
-        // Affichage du ProgressDialog uniquement pour un produit non existant
-        setState(() => _isLoadingSauv = true);
-        // showDialog(
-        //   context: context,
-        //   barrierDismissible: false,
-        //   builder: (context) => const ProgressDialog(),
-        // );
+              // Affichage du ProgressDialog uniquement pour un produit non existant
+              setState(() => _isLoadingSauv = true);
+              // showDialog(
+              //   context: context,
+              //   barrierDismissible: false,
+              //   builder: (context) => const ProgressDialog(),
+              // );
 
-        try {
-          // Préparation de l'URL de l'image
-          final imageUrl = await _prepareImageUrl();
-          _addQrCodeIfNotExists();
+              try {
+                // Préparation de l'URL de l'image
+                final imageUrl = await _prepareImageUrl();
+                _addQrCodeIfNotExists();
 
-          // Création d'un nouveau produit avec les détails saisis
-          final produit = _createProduit(imageUrl);
+                // Création d'un nouveau produit avec les détails saisis
+                final produit = _createProduit(imageUrl);
 
-          if ( //_prixAchatController.text.isNotEmpty &&
-              _stockController.text.isNotEmpty) {
-            print('debut saveApprovisionnement');
-            saveApprovisionnement();
-            print('saveApprovisionnement');
-          }
-          _assignApprovisionnementsToProduit(produit);
-          // Sauvegarde du nouveau produit
-          produitProvider.ajouterProduit(
-              produit, _selectedFournisseurs, _approvisionnementTemporaire);
-          _formKey.currentState?.save();
-          setState(() => _isLoadingSauv = false);
-          _showSnackBar(context, 'Produit ajouté avec succès', Colors.green);
+                if ( //_prixAchatController.text.isNotEmpty &&
+                    _stockController.text.isNotEmpty) {
+                  print('debut saveApprovisionnement');
+                  saveApprovisionnement();
+                  print('saveApprovisionnement');
+                }
+                _assignApprovisionnementsToProduit(produit);
+                // Sauvegarde du nouveau produit
+                produitProvider.ajouterProduit(produit, _selectedFournisseurs,
+                    _approvisionnementTemporaire);
+                _formKey.currentState?.save();
+                setState(() => _isLoadingSauv = false);
+                _showSnackBar(
+                    context, 'Produit ajouté avec succès', Colors.green);
 
-          Navigator.pop(context); // Ferme la page du formulaire
-        } catch (e) {
-          _showSnackBar(
-              context, 'Erreur lors de la sauvegarde : $e', Colors.red);
-        } finally {
-          if (mounted) {
-            setState(() => _isLoadingSauv = false);
-            //Navigator.pop(context); // Ferme le ProgressDialog
-          }
-        }
-      },
+                Navigator.pop(context); // Ferme la page du formulaire
+              } catch (e) {
+                _showSnackBar(
+                    context, 'Erreur lors de la sauvegarde : $e', Colors.red);
+              } finally {
+                if (mounted) {
+                  setState(() => _isLoadingSauv = false);
+                  //Navigator.pop(context); // Ferme le ProgressDialog
+                }
+              }
+            },
       icon: _isLoadingSauv
           ? const CircularProgressIndicator(
               strokeWidth: 2,
               valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
             )
-          : Icon(isFinded && _serialController.text == _produitQr
-              ? Icons.edit
-              : Icons.check),
+          : Icon(
+              isFinded && _serialController.text == _produitQr
+                  ? Icons.edit
+                  : _serialController.text.trim().isEmpty
+                      ? null
+                      : Icons.send,
+              color: Colors.blueAccent,
+            ),
     );
   }
 
@@ -2846,98 +3002,147 @@ class _ResponsiveLayout2State extends State<ResponsiveLayout2> {
     print("Fin de saveApprovisionnement");
   }
 
+  Widget buildDatePeremptionInfo() {
+    if (_datePeremptionController.text.isEmpty) {
+      // Si le champ est vide, retourner un widget vide
+      return const SizedBox.shrink();
+    }
+
+    try {
+      // Convertir la date de péremption
+      final datePeremption = DateFormat('dd MMMM yyyy', 'fr_FR')
+          .parse(_datePeremptionController.text);
+
+      // Calculer la différence en jours
+      final difference = datePeremption.difference(DateTime.now()).inDays;
+
+      // Déterminer le message et la couleur
+      String message;
+      Color textColor;
+
+      if (difference < 0) {
+        // Date dépassée
+        message = "Expiré depuis ${-difference} jour(s)";
+        textColor = Colors.red;
+      } else if (difference == 0) {
+        // Aujourd'hui
+        message = "Expire aujourd'hui";
+        textColor = Colors.red;
+      } else if (difference <= 2) {
+        // Moins de 2 jours
+        message = "Expire dans $difference jour(s)";
+        textColor = Colors.orange;
+      } else {
+        // Date lointaine
+        message = "Expire dans $difference jour(s)";
+        textColor = Colors.black;
+      }
+
+      return Text(
+        message,
+        style: TextStyle(fontSize: 16, color: textColor),
+      );
+    } catch (e) {
+      // En cas d'erreur de parsing, afficher un message d'erreur
+      return const Text(
+        "Date invalide",
+        style: TextStyle(fontSize: 16, color: Colors.red),
+      );
+    }
+  }
+
 // void saveApprovisionnement() {
-  //   if (_formKeyApp.currentState!.validate()) {
-  //     final quantite = double.parse(_stockController.text);
-  //     final prixAchat = double.parse(_prixAchatController.text);
-  //     // final datePeremption = DateFormat('dd MMMM yyyy', 'fr_FR')
-  //     //     .parse(_datePeremptionController.text);
-  //     // Initialisation de datePeremption en vérifiant si le champ est vide
-  //     DateTime? datePeremption;
-  //     if (_datePeremptionController.text.isNotEmpty) {
-  //       try {
-  //         datePeremption = DateFormat('dd MMMM yyyy', 'fr_FR')
-  //             .parse(_datePeremptionController.text);
-  //       } catch (e) {
-  //         print("Erreur lors du parsing de la date : $e");
-  //         // Gérer le cas d'erreur, par exemple en affichant un message
-  //         return;
-  //       }
-  //     }
-  //     // Vérifiez si nous sommes en mode édition et que l'approvisionnement est sélectionné
-  //     if (_isEditing && _currentApprovisionnement != null) {
-  //       // Trouver l'index de l'approvisionnement dans la liste temporaire
-  //       final int index = _approvisionnementTemporaire.indexWhere(
-  //           (approvisionnement) =>
-  //               approvisionnement == _currentApprovisionnement);
-  //
-  //       if (index != -1) {
-  //         // Mettre à jour les valeurs de l'approvisionnement existant
-  //         setState(() {
-  //           _currentApprovisionnement!.quantite = quantite;
-  //           _currentApprovisionnement!.prixAchat = prixAchat;
-  //           _currentApprovisionnement!.datePeremption = datePeremption;
-  //
-  //           // Vérifier si un fournisseur est sélectionné avant de l'assigner
-  //           if (_selectedFournisseur != null) {
-  //             _currentApprovisionnement!.fournisseur.target =
-  //                 _selectedFournisseur;
-  //           } else {
-  //             _currentApprovisionnement!.fournisseur.target = null;
-  //           }
-  //
-  //           _currentApprovisionnement!.derniereModification = DateTime.now();
-  //
-  //           // Remplacer l'approvisionnement dans la liste
-  //           _approvisionnementTemporaire[index] = _currentApprovisionnement!;
-  //
-  //           // Réinitialiser les champs après la modification
-  //           _stockController.clear();
-  //           _prixAchatController.clear();
-  //           _datePeremptionController.clear();
-  //           _currentFournisseur = null;
-  //           _selectedFournisseur = null;
-  //           _isEditing = false; // Désactiver le mode édition
-  //         });
-  //       } else {
-  //         print("Erreur : Approvisionnement non trouvé dans la liste.");
-  //       }
-  //     } else {
-  //       // Si ce n'est pas une modification, créer un nouvel approvisionnement
-  //       Approvisionnement nouveauApprovisionnement = Approvisionnement(
-  //         quantite: quantite,
-  //         prixAchat: prixAchat,
-  //         datePeremption: datePeremption,
-  //         derniereModification: DateTime.now(),
-  //       );
-  //
-  //       // Assigner le fournisseur sélectionné, ou laisser null si non sélectionné
-  //       if (_currentFournisseur != null) {
-  //         nouveauApprovisionnement.fournisseur.target = _currentFournisseur;
-  //       } else if (_selectedFournisseur != null) {
-  //         nouveauApprovisionnement.fournisseur.target = _selectedFournisseur;
-  //       } else {
-  //         nouveauApprovisionnement.fournisseur.target = null;
-  //       }
-  //
-  //       // Ajouter le nouvel approvisionnement à la liste temporaire
-  //       setState(() {
-  //         _approvisionnementTemporaire.add(nouveauApprovisionnement);
-  //
-  //         // Réinitialiser les champs après l'ajout
-  //         _stockController.clear();
-  //         _prixAchatController.clear();
-  //         _datePeremptionController.clear();
-  //         _currentFournisseur = null;
-  //         _selectedFournisseur = null;
-  //         _isEditing = false;
-  //       });
-  //     }
-  //
-  //     // Mettre à jour le stock global après modification ou ajout
-  //     mettreAJourStockGlobal();
-  //   }
-  // }
+//   if (_formKeyApp.currentState!.validate()) {
+//     final quantite = double.parse(_stockController.text);
+//     final prixAchat = double.parse(_prixAchatController.text);
+//     // final datePeremption = DateFormat('dd MMMM yyyy', 'fr_FR')
+//     //     .parse(_datePeremptionController.text);
+//     // Initialisation de datePeremption en vérifiant si le champ est vide
+//     DateTime? datePeremption;
+//     if (_datePeremptionController.text.isNotEmpty) {
+//       try {
+//         datePeremption = DateFormat('dd MMMM yyyy', 'fr_FR')
+//             .parse(_datePeremptionController.text);
+//       } catch (e) {
+//         print("Erreur lors du parsing de la date : $e");
+//         // Gérer le cas d'erreur, par exemple en affichant un message
+//         return;
+//       }
+//     }
+//     // Vérifiez si nous sommes en mode édition et que l'approvisionnement est sélectionné
+//     if (_isEditing && _currentApprovisionnement != null) {
+//       // Trouver l'index de l'approvisionnement dans la liste temporaire
+//       final int index = _approvisionnementTemporaire.indexWhere(
+//           (approvisionnement) =>
+//               approvisionnement == _currentApprovisionnement);
+//
+//       if (index != -1) {
+//         // Mettre à jour les valeurs de l'approvisionnement existant
+//         setState(() {
+//           _currentApprovisionnement!.quantite = quantite;
+//           _currentApprovisionnement!.prixAchat = prixAchat;
+//           _currentApprovisionnement!.datePeremption = datePeremption;
+//
+//           // Vérifier si un fournisseur est sélectionné avant de l'assigner
+//           if (_selectedFournisseur != null) {
+//             _currentApprovisionnement!.fournisseur.target =
+//                 _selectedFournisseur;
+//           } else {
+//             _currentApprovisionnement!.fournisseur.target = null;
+//           }
+//
+//           _currentApprovisionnement!.derniereModification = DateTime.now();
+//
+//           // Remplacer l'approvisionnement dans la liste
+//           _approvisionnementTemporaire[index] = _currentApprovisionnement!;
+//
+//           // Réinitialiser les champs après la modification
+//           _stockController.clear();
+//           _prixAchatController.clear();
+//           _datePeremptionController.clear();
+//           _currentFournisseur = null;
+//           _selectedFournisseur = null;
+//           _isEditing = false; // Désactiver le mode édition
+//         });
+//       } else {
+//         print("Erreur : Approvisionnement non trouvé dans la liste.");
+//       }
+//     } else {
+//       // Si ce n'est pas une modification, créer un nouvel approvisionnement
+//       Approvisionnement nouveauApprovisionnement = Approvisionnement(
+//         quantite: quantite,
+//         prixAchat: prixAchat,
+//         datePeremption: datePeremption,
+//         derniereModification: DateTime.now(),
+//       );
+//
+//       // Assigner le fournisseur sélectionné, ou laisser null si non sélectionné
+//       if (_currentFournisseur != null) {
+//         nouveauApprovisionnement.fournisseur.target = _currentFournisseur;
+//       } else if (_selectedFournisseur != null) {
+//         nouveauApprovisionnement.fournisseur.target = _selectedFournisseur;
+//       } else {
+//         nouveauApprovisionnement.fournisseur.target = null;
+//       }
+//
+//       // Ajouter le nouvel approvisionnement à la liste temporaire
+//       setState(() {
+//         _approvisionnementTemporaire.add(nouveauApprovisionnement);
+//
+//         // Réinitialiser les champs après l'ajout
+//         _stockController.clear();
+//         _prixAchatController.clear();
+//         _datePeremptionController.clear();
+//         _currentFournisseur = null;
+//         _selectedFournisseur = null;
+//         _isEditing = false;
+//       });
+//     }
+//
+//     // Mettre à jour le stock global après modification ou ajout
+//     mettreAJourStockGlobal();
+//   }
+// }
 }
 
 class FournisseurSelectionScreen extends StatefulWidget {

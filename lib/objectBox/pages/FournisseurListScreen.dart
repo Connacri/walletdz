@@ -8,7 +8,8 @@ import 'ProduitListScreen.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:timeago/timeago.dart' as timeago;
-import 'add_Produit.dart';
+import 'addProduct.dart';
+
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'dart:isolate';
 
@@ -64,7 +65,10 @@ class _FournisseurListScreenState extends State<FournisseurListScreen> {
           return ListView.builder(
             itemCount: fournisseurProvider.fournisseurs.length,
             itemBuilder: (context, index) {
-              if (index != 0 && index % 5 == 0 && _nativeAd != null && _nativeAdIsLoaded) {
+              if (index != 0 &&
+                  index % 5 == 0 &&
+                  _nativeAd != null &&
+                  _nativeAdIsLoaded) {
                 return Align(
                   alignment: Alignment.center,
                   child: ConstrainedBox(
@@ -423,7 +427,7 @@ class ProduitsFournisseurPage extends StatelessWidget {
           FloatingActionButton(
             onPressed: () {
               Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (_) => add_Produit()));
+                  .push(MaterialPageRoute(builder: (_) => addProduct()));
             },
             child: Icon(Icons.add),
             heroTag: 'addNew',

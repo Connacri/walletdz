@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:provider/provider.dart';
 import 'package:string_extensions/string_extensions.dart';
+import 'package:walletdz/objectBox/pages/editProduct.dart';
 import '../../objectbox.g.dart';
 import '../Entity.dart';
 import '../MyProviders.dart';
@@ -23,8 +24,8 @@ import 'FournisseurListScreen.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:percent_indicator/percent_indicator.dart';
-import 'addProduct2.dart';
-import 'add_Produit.dart';
+import 'addProduct.dart';
+
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class ProduitListScreen extends StatefulWidget {
@@ -666,9 +667,26 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                       ),
                           ),
                         ),
-                        title: Text(
-                          produit.nom ?? '',
-                          overflow: TextOverflow.ellipsis,
+                        title: Container(
+                          width: 50,
+                          child: Row(
+                            children: [
+                              Text(
+                                produit.nom ?? '',
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.delete, color: Colors.red),
+                                onPressed: () async {
+                                  await Navigator.of(context)
+                                      .push(MaterialPageRoute(
+                                          builder: (ctx) => editProduct(
+                                                produit: produit,
+                                              )));
+                                },
+                              )
+                            ],
+                          ),
                         ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1029,7 +1047,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context)
-              .push(MaterialPageRoute(builder: (_) => addProduct2()));
+              .push(MaterialPageRoute(builder: (_) => addProduct()));
         },
         child: Icon(Icons.add),
       ),
@@ -1294,58 +1312,19 @@ class ProduitDetailPage extends StatelessWidget {
                               locale: 'fr'),
                       style: TextStyle(fontSize: 12),
                     ),
-
+                    SizedBox(height: 28),
                     Center(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: ElevatedButton.icon(
-                              onPressed: () {
-                                context
-                                    .read<CommerceProvider>()
-                                    .supprimerProduit(produit);
-                                Navigator.of(context).pop();
-                              },
-                              style: ElevatedButton.styleFrom(
-                                // Utilise les couleurs du thème pour le bouton de suppression
-                                backgroundColor:
-                                    Theme.of(context).colorScheme.error,
-                                foregroundColor:
-                                    Theme.of(context).colorScheme.onError,
-                                elevation: 2,
-                              ),
-                              label: Text('Supprimer'),
-                              icon: Icon(Icons.delete),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: ElevatedButton.icon(
-                              onPressed: () async {
-                                // final updatedProduit =
-                                //     await Navigator.of(context).push(
-                                //   MaterialPageRoute(
-                                //     builder: (ctx) => Edit_Produit(
-                                //       produit: produit,
-                                //     ),
-                                //   ),
-                                // );
-                              },
-                              label: Text('Modifier'),
-                              icon: Icon(Icons.edit),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                        child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('QR : ${produit.qr}'),
+                    )),
                     Center(
                       child: PrettyQr(
                         data: produit.qr.toString(),
                         elementColor: Theme.of(context).hintColor,
                       ),
                     ),
+                    SizedBox(height: 8),
                     Center(child: Text('Id : ${produit.id}')),
                     Center(
                       child: Text(
@@ -1354,7 +1333,7 @@ class ProduitDetailPage extends StatelessWidget {
                             fontSize: 24, fontWeight: FontWeight.bold),
                       ),
                     ),
-                    SizedBox(height: 8),
+                    SizedBox(height: 28),
                     // Text(
                     //   'Prix d\'achat: ${produit.prixAchat.toStringAsFixed(2)} DZD',
                     //   style: TextStyle(fontSize: 16),
@@ -1363,27 +1342,36 @@ class ProduitDetailPage extends StatelessWidget {
                       'Prix de vente: ${produit.prixVente.toStringAsFixed(2)} DZD',
                       style: TextStyle(fontSize: 16),
                     ),
-                    SizedBox(height: 16),
-                    produit.description != '' ||
-                            produit.description != null ||
-                            produit.description!.isNotEmpty ||
-                            produit.description!.length != 0
-                        ? Text('Description :\n${produit.description}')
-                        : Container(),
-                    SizedBox(height: 16),
+                    SizedBox(height: 8),
                     Text(
-                      'Nombre de pièces dans ce pack: ${produit.qtyPartiel?.truncate() ?? 'Non défini'}',
+                      'Stock : ' + produit.stock.truncate().toString(),
                       style: TextStyle(fontSize: 16),
                     ),
-                    SizedBox(height: 16),
-                    Text(
-                      'Prix de la pièce du détail: ${produit.pricePartielVente?.toStringAsFixed(2) ?? 'Non défini'} DZD',
-                      style: TextStyle(fontSize: 16),
-                    ),
-
-                    SizedBox(height: 16),
-
-                    Text('Stock : ' + produit.stock.truncate().toString()),
+                    produit.description != null &&
+                            produit.description!.isNotEmpty
+                        ? Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child:
+                                Text('Description :\n${produit.description}'),
+                          )
+                        : SizedBox.shrink(),
+                    // Vérifiez si les données doivent être affichées
+                    if ((produit.qtyPartiel != null &&
+                            produit.qtyPartiel! > 1) &&
+                        (produit.pricePartielVente != null &&
+                            produit.pricePartielVente! > 0)) ...[
+                      SizedBox(height: 16),
+                      Text(
+                        'Nombre de pièces dans ce pack: ${produit.qtyPartiel!.truncate()}',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Prix de la pièce du détail: ${produit.pricePartielVente!.toStringAsFixed(2)}',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      SizedBox(height: 16),
+                    ],
                     SizedBox(height: 10),
                     // Text('Stock Minimal pour l\'Alert : ' +
                     //     produit.stockinit.toString()),
@@ -1446,7 +1434,6 @@ class ProduitDetailPage extends StatelessWidget {
                               }).toList(),
                             ),
                           ),
-
                     // SizedBox(height: 10),
                     // ...produit.approvisionnements.map((appro) {
                     //   return Padding(
@@ -1457,17 +1444,25 @@ class ProduitDetailPage extends StatelessWidget {
                     // }).toList(),
                     //
                     // SizedBox(height: 10),
-
                     SizedBox(height: 10),
                     SizedBox(
                       height: 16,
                     ),
-                    Divider(),
-                    Text(
-                      'Fournisseurs',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
+                    produit.approvisionnements.length == 0
+                        ? SizedBox.shrink()
+                        : Divider(),
+                    produit.approvisionnements.isEmpty ||
+                            !produit.approvisionnements.any((appro) =>
+                                appro.fournisseur != null &&
+                                appro.fournisseur.target != null)
+                        ? SizedBox.shrink()
+                        : Text(
+                            'Fournisseurs',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                     SizedBox(height: 8),
                     // SizedBox(height: 10),
                     // ...produit.approvisionnements.map((appro) {
@@ -1494,22 +1489,39 @@ class ProduitDetailPage extends StatelessWidget {
                                     )));
                           },
                           child: Chip(
-                            shadowColor: Colors.black,
                             backgroundColor:
-                                Theme.of(context).chipTheme.backgroundColor,
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Theme.of(context).colorScheme.surface
+                                    : Theme.of(context)
+                                        .colorScheme
+                                        .primary
+                                        .withOpacity(0.1),
                             labelStyle: TextStyle(
-                              color:
-                                  Theme.of(context).chipTheme.labelStyle?.color,
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Theme.of(context).colorScheme.onSurface
+                                  : Theme.of(context).colorScheme.primary,
+                              fontSize:
+                                  12, // Ajout pour une taille de texte cohérente
                             ),
-                            side: BorderSide.none,
+                            side: BorderSide(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(0.5),
+                              width: 1, // Définir une bordure subtile
+                            ),
                             shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(10))),
-                            padding: EdgeInsets.zero,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
                             label: Text(
                               appro.fournisseur.target?.nom ??
                                   'Fournisseur inconnu',
-                              style: TextStyle(fontSize: 10),
+                              overflow: TextOverflow
+                                  .ellipsis, // Gérer les textes trop longs
                             ),
                           ),
                         );
@@ -1518,6 +1530,52 @@ class ProduitDetailPage extends StatelessWidget {
                     //     ;
                     //   },
                     // ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              context
+                                  .read<CommerceProvider>()
+                                  .supprimerProduit(produit);
+                              Navigator.of(context).pop();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              // Utilise les couleurs du thème pour le bouton de suppression
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.error,
+                              foregroundColor:
+                                  Theme.of(context).colorScheme.onError,
+                              elevation: 2,
+                            ),
+                            label: Text('Supprimer'),
+                            icon: Icon(Icons.delete),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ElevatedButton.icon(
+                            onPressed: () async {
+                              final updatedProduit =
+                                  await Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (ctx) => editProduct(
+                                    produit: produit,
+                                  ),
+                                ),
+                              );
+                            },
+                            label: Text('Modifier'),
+                            icon: Icon(Icons.edit),
+                          ),
+                        ),
+                      ],
+                    ),
                     SizedBox(
                       height: 50,
                     ),
