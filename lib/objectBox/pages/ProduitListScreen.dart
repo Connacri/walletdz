@@ -675,8 +675,9 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
                                 produit.nom ?? '',
                                 overflow: TextOverflow.ellipsis,
                               ),
+                              Spacer(),
                               IconButton(
-                                icon: Icon(Icons.delete, color: Colors.red),
+                                icon: Icon(Icons.edit, size: 15),
                                 onPressed: () async {
                                   await Navigator.of(context)
                                       .push(MaterialPageRoute(

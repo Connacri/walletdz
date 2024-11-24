@@ -290,7 +290,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
               appBar: AppBar(
                 actions: [
                   WinMobile(),
-                  buildButton_Edit_Add(context, produitProvider, _isFinded),
+                  buildButton_Add(context, produitProvider, _isFinded),
                   SizedBox(width: 50)
                 ],
               ),
@@ -309,7 +309,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                 appBar: AppBar(
                   actions: [
                     WinMobile(),
-                    buildButton_Edit_Add(context, produitProvider, _isFinded),
+                    buildButton_Add(context, produitProvider, _isFinded),
                     SizedBox(width: 50)
                   ],
                 ),
@@ -334,7 +334,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                 appBar: AppBar(
                   actions: [
                     WinMobile(),
-                    buildButton_Edit_Add(context, produitProvider, _isFinded),
+                    buildButton_Add(context, produitProvider, _isFinded),
                     SizedBox(width: 50)
                   ],
                 ),
@@ -1845,8 +1845,6 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
       return '';
     }
   }
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Étape 1 : Validation et Préparation des Données
 
   Future<bool> _validateForm() async {
     final isValid = await _formKey.currentState?.validate() ?? false;
@@ -1920,13 +1918,13 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
 
 // Étape 4 :Combinaison des Étapes
 
-  IconButton buildButton_Edit_Add(
+  IconButton buildButton_Add(
     BuildContext context,
     CommerceProvider produitProvider,
     bool isFinded,
   ) {
     return IconButton(
-      onPressed: _serialController.text.trim().isEmpty
+      onPressed: _serialController.text.trim().isEmpty && _qrCodesTemp.isEmpty
           ? null
           : () async {
               if (!mounted) return;
@@ -1995,296 +1993,14 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
           : Icon(
               isFinded && _serialController.text == _produitQr
                   ? Icons.edit
-                  : _serialController.text.trim().isEmpty
+                  : _serialController.text.trim().isEmpty &&
+                          _qrCodesTemp.isEmpty
                       ? null
                       : Icons.send,
               color: Colors.blueAccent,
             ),
     );
   }
-
-  // void _assignApprovisionnementsToProduit(Produit produit) {
-  //   for (int i = 0; i < _approvisionnementTemporaire.length; i++) {
-  //     final approvisionnement = _approvisionnementTemporaire[i];
-  //     approvisionnement.produit.target = produit;
-  //     if (i < _selectedFournisseurs.length) {
-  //       approvisionnement.fournisseur.target = _selectedFournisseurs[i];
-  //     }
-  //     approvisionnement.crud.target = Crud(
-  //       createdBy: 1,
-  //       updatedBy: 1,
-  //       deletedBy: 1,
-  //       dateCreation: DateTime.now(),
-  //       derniereModification: DateTime.now(),
-  //     );
-  //   }
-  // }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-//   IconButton buildButton_Edit_Add1(
-//       BuildContext context, CommerceProvider produitProvider, bool isFinded) {
-//     return IconButton(
-//       onPressed: () async {
-//         if (!mounted) return;
-//
-//         // Validation préalable
-//         final isValid = await _formKey.currentState!.validate();
-//         if (!isValid) return;
-//
-//         bool isContextValid = true;
-//         // Affichage du dialog de progression
-//         BuildContext dialogContext = context;
-//
-//         _isFinded
-//             ? null
-//             : showDialog(
-//                 context: context,
-//                 barrierDismissible: false,
-//                 builder: (context) => const ProgressDialog(),
-//               );
-//
-//         setState(() => _isLoadingSauv = true);
-//
-//         try {
-//           final existingProduct =
-//               await produitProvider.getProduitByQr(_serialController.text);
-//
-//           // Validation préalable
-//           final isValid = await _formKey.currentState!.validate();
-//           if (!isValid) return;
-//
-//           // Initialisation de l'URL de l'image
-//           String imageUrl = '';
-//
-//           // Gestion de l'image du produit
-//           if (_image != null) {
-//             imageUrl = await uploadImageToSupabase(_image!, _existingImageUrl);
-//           } else if (_existingImageUrl != null &&
-//               _existingImageUrl!.isNotEmpty) {
-//             imageUrl = _existingImageUrl!;
-//           }
-//
-//           // Gestion du code QR
-//           final code = _serialController.text.trim();
-//           if (code.isNotEmpty && !_isFinded && !_qrCodesTemp.contains(code)) {
-//             _qrCodesTemp.add(code);
-//           }
-//
-//           // Initialisation du produit
-//           final produit = Produit(
-//             qr: _qrCodesTemp.toSet().toList().join(','),
-//             image: imageUrl,
-//             nom: _nomController.text,
-//             description: _descriptionController.text,
-//             prixVente: double.parse(_prixVenteController.text),
-//             qtyPartiel: double.parse(_qtyPartielController.text),
-//             pricePartielVente: double.parse(_pricePartielVenteController.text),
-//             derniereModification: DateTime.now(),
-//           )..crud.target = Crud(
-//               createdBy: 1,
-//               updatedBy: 1,
-//               deletedBy: 1,
-//               dateCreation: DateTime.now(),
-//               derniereModification: DateTime.now(),
-//             );
-//
-//           // Gestion des approvisionnements
-//           for (int i = 0; i < _approvisionnementTemporaire.length; i++) {
-//             if (!isContextValid) break;
-//             final approvisionnement = _approvisionnementTemporaire[i];
-//             approvisionnement.produit.target = produit;
-//             if (i < _selectedFournisseurs.length) {
-//               approvisionnement.fournisseur.target = _selectedFournisseurs[i];
-//             }
-//             approvisionnement.crud.target = Crud(
-//               createdBy: 1,
-//               updatedBy: 1,
-//               deletedBy: 1,
-//               dateCreation: DateTime.now(),
-//               derniereModification: DateTime.now(),
-//             );
-//           }
-//
-//           // Sauvegarde ou mise à jour du produit
-//           if (existingProduct == null) {
-//             produitProvider.ajouterProduit(
-//                 produit, _selectedFournisseurs, _approvisionnementTemporaire);
-//             if (isContextValid) {
-//               _formKey.currentState?.save();
-//
-//               ScaffoldMessenger.of(context).showSnackBar(
-//                 const SnackBar(
-//                   content: Text('Produit ajouté avec succès'),
-//                   backgroundColor: Colors.green,
-//                 ),
-//               );
-//             }
-//             Navigator.pop(context);
-//             setState(() => _isLoadingSauv = false);
-//             // Fermeture du dialog de progression
-//             if (isContextValid && Navigator.canPop(dialogContext)) {
-//               Navigator.pop(dialogContext);
-//             }
-//           } else {
-//             if (isContextValid && !isFinded) {
-//               _addQRCodeFromText();
-//               setState(() => _isLoadingSauv = false);
-//               // Fermeture du dialog de progression
-//               if (isContextValid && Navigator.canPop(dialogContext)) {
-//                 Navigator.pop(dialogContext);
-//               }
-//               return;
-//             }
-//           }
-//         } catch (e) {
-//           if (isContextValid) {
-//             ScaffoldMessenger.of(context).showSnackBar(
-//               SnackBar(
-//                 content: Text('Erreur lors de la sauvegarde : $e'),
-//                 backgroundColor: Colors.red,
-//               ),
-//             );
-//           }
-//         } finally {
-//           // if (mounted) {
-//           setState(() => _isLoadingSauv = false);
-//           // }
-//         }
-//       },
-//       icon: _isLoadingSauv
-//           ? const CircularProgressIndicator(
-//               strokeWidth: 2,
-//               valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-//             )
-//           : Icon(
-//               isFinded && _serialController.text == _produitQr
-//                   ? Icons.edit
-//                   : Icons.check,
-//             ),
-//     );
-//   }
-//
-//   IconButton buildButton_Edit_Add0(
-//       BuildContext context, CommerceProvider produitProvider, bool isFinded) {
-//     return IconButton(
-//       onPressed: () async {
-//         if (!mounted) return;
-//
-//         // Afficher le dialog de progression
-//         showDialog(
-//           context: context,
-//           barrierDismissible: false,
-//           builder: (BuildContext context) {
-//             return Dialog(
-//               backgroundColor: Colors.black.withOpacity(0.5),
-//               child: Padding(
-//                 padding: const EdgeInsets.all(16.0),
-//                 child: Column(
-//                   mainAxisSize: MainAxisSize.min,
-//                   mainAxisAlignment: MainAxisAlignment.center,
-//                   children: [
-//                     CircularProgressIndicator(),
-//                     SizedBox(height: 16),
-//                     Text(
-//                       "Sauvegarde en cours...",
-//                       style: TextStyle(color: Colors.white, fontSize: 16),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//             );
-//           },
-//         );
-//
-//         setState(() => _isLoadingSauv = true);
-//
-//         try {
-//           final existingProduct =
-//               await produitProvider.getProduitByQr(_serialController.text);
-//
-//           if (_formKey.currentState!.validate()) {
-//             String imageUrl = '';
-//
-//             // Gestion de l'image du produit
-//             if (_image != null) {
-//               imageUrl =
-//                   await uploadImageToSupabase(_image!, _existingImageUrl);
-//             } else if (_existingImageUrl != null &&
-//                 _existingImageUrl!.isNotEmpty) {
-//               imageUrl = _existingImageUrl!;
-//             }
-//
-//             final code = _serialController.text.trim();
-//             if (code.isNotEmpty) _qrCodesTemp.add(code);
-//
-//             // Initialisation du produit
-//             final produit = Produit(
-//               qr: _qrCodesTemp.toSet().toList().join(',').toString(),
-//               image: imageUrl,
-//               nom: _nomController.text,
-//               description: _descriptionController.text,
-//               prixVente: double.parse(_prixVenteController.text),
-//               qtyPartiel: double.parse(_qtyPartielController.text),
-//               pricePartielVente:
-//                   double.parse(_pricePartielVenteController.text),
-//               derniereModification: DateTime.now(),
-//             )..crud.target = Crud(
-//                 createdBy: 1,
-//                 updatedBy: 1,
-//                 deletedBy: 1,
-//                 dateCreation: DateTime.now(),
-//                 derniereModification: DateTime.now(),
-//               );
-//
-//             // Gestion des approvisionnements
-//             for (int i = 0; i < _approvisionnementTemporaire.length; i++) {
-//               final approvisionnement = _approvisionnementTemporaire[i];
-//               approvisionnement.produit.target = produit;
-//               if (i < _selectedFournisseurs.length) {
-//                 approvisionnement.fournisseur.target = _selectedFournisseurs[i];
-//               }
-//               approvisionnement.crud.target = Crud(
-//                 createdBy: 1,
-//                 updatedBy: 1,
-//                 deletedBy: 1,
-//                 dateCreation: DateTime.now(),
-//                 derniereModification: DateTime.now(),
-//               );
-//             }
-//
-//             if (existingProduct == null) {
-//               produitProvider.ajouterProduit(
-//                   produit, _selectedFournisseurs, _approvisionnementTemporaire);
-//               print('Nouveau produit ajouté');
-//               _formKey.currentState!.save();
-//             } else {
-//               _addQRCodeFromText();
-//               print('Produit déjà existant');
-//             }
-//           }
-//         } catch (e) {
-//           ScaffoldMessenger.of(context).showSnackBar(
-//             SnackBar(
-//               content: Text('Erreur lors de la sauvegarde du produit : $e'),
-//               backgroundColor: Colors.red,
-//             ),
-//           );
-//         } finally {
-//           if (Navigator.of(context).canPop()) {
-//             Navigator.of(context).pop(); // Ferme le dialog de progression
-//           }
-//           setState(() => _isLoadingSauv = false);
-//         }
-//       },
-//       icon: _isLoadingSauv
-//           ? CircularProgressIndicator()
-//           : Icon(
-//               isFinded && _serialController.text == _produitQr
-//                   ? Icons.edit
-//                   : Icons.check,
-//             ),
-//     );
-//   }
 
   Future<void> _scanQRCode() async {
     // Simuler un scan de QR code pour tester
@@ -3026,99 +2742,6 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
       );
     }
   }
-
-// void saveApprovisionnement() {
-  //   if (_formKeyApp.currentState!.validate()) {
-  //     final quantite = double.parse(_stockController.text);
-  //     final prixAchat = double.parse(_prixAchatController.text);
-  //     // final datePeremption = DateFormat('dd MMMM yyyy', 'fr_FR')
-  //     //     .parse(_datePeremptionController.text);
-  //     // Initialisation de datePeremption en vérifiant si le champ est vide
-  //     DateTime? datePeremption;
-  //     if (_datePeremptionController.text.isNotEmpty) {
-  //       try {
-  //         datePeremption = DateFormat('dd MMMM yyyy', 'fr_FR')
-  //             .parse(_datePeremptionController.text);
-  //       } catch (e) {
-  //         print("Erreur lors du parsing de la date : $e");
-  //         // Gérer le cas d'erreur, par exemple en affichant un message
-  //         return;
-  //       }
-  //     }
-  //     // Vérifiez si nous sommes en mode édition et que l'approvisionnement est sélectionné
-  //     if (_isEditing && _currentApprovisionnement != null) {
-  //       // Trouver l'index de l'approvisionnement dans la liste temporaire
-  //       final int index = _approvisionnementTemporaire.indexWhere(
-  //           (approvisionnement) =>
-  //               approvisionnement == _currentApprovisionnement);
-  //
-  //       if (index != -1) {
-  //         // Mettre à jour les valeurs de l'approvisionnement existant
-  //         setState(() {
-  //           _currentApprovisionnement!.quantite = quantite;
-  //           _currentApprovisionnement!.prixAchat = prixAchat;
-  //           _currentApprovisionnement!.datePeremption = datePeremption;
-  //
-  //           // Vérifier si un fournisseur est sélectionné avant de l'assigner
-  //           if (_selectedFournisseur != null) {
-  //             _currentApprovisionnement!.fournisseur.target =
-  //                 _selectedFournisseur;
-  //           } else {
-  //             _currentApprovisionnement!.fournisseur.target = null;
-  //           }
-  //
-  //           _currentApprovisionnement!.derniereModification = DateTime.now();
-  //
-  //           // Remplacer l'approvisionnement dans la liste
-  //           _approvisionnementTemporaire[index] = _currentApprovisionnement!;
-  //
-  //           // Réinitialiser les champs après la modification
-  //           _stockController.clear();
-  //           _prixAchatController.clear();
-  //           _datePeremptionController.clear();
-  //           _currentFournisseur = null;
-  //           _selectedFournisseur = null;
-  //           _isEditing = false; // Désactiver le mode édition
-  //         });
-  //       } else {
-  //         print("Erreur : Approvisionnement non trouvé dans la liste.");
-  //       }
-  //     } else {
-  //       // Si ce n'est pas une modification, créer un nouvel approvisionnement
-  //       Approvisionnement nouveauApprovisionnement = Approvisionnement(
-  //         quantite: quantite,
-  //         prixAchat: prixAchat,
-  //         datePeremption: datePeremption,
-  //         derniereModification: DateTime.now(),
-  //       );
-  //
-  //       // Assigner le fournisseur sélectionné, ou laisser null si non sélectionné
-  //       if (_currentFournisseur != null) {
-  //         nouveauApprovisionnement.fournisseur.target = _currentFournisseur;
-  //       } else if (_selectedFournisseur != null) {
-  //         nouveauApprovisionnement.fournisseur.target = _selectedFournisseur;
-  //       } else {
-  //         nouveauApprovisionnement.fournisseur.target = null;
-  //       }
-  //
-  //       // Ajouter le nouvel approvisionnement à la liste temporaire
-  //       setState(() {
-  //         _approvisionnementTemporaire.add(nouveauApprovisionnement);
-  //
-  //         // Réinitialiser les champs après l'ajout
-  //         _stockController.clear();
-  //         _prixAchatController.clear();
-  //         _datePeremptionController.clear();
-  //         _currentFournisseur = null;
-  //         _selectedFournisseur = null;
-  //         _isEditing = false;
-  //       });
-  //     }
-  //
-  //     // Mettre à jour le stock global après modification ou ajout
-  //     mettreAJourStockGlobal();
-  //   }
-  // }
 }
 
 class FournisseurSelectionScreen extends StatefulWidget {

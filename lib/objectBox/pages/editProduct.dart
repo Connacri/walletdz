@@ -88,10 +88,13 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
   double stockTemp = 0;
   double _produitPV = 0.0;
   String _resultatPrixPartiel = '0';
-
+  double _totalStock = 0.0;
   DateTime selectedDate = DateTime.now();
-  final List<String> _qrCodesTemp = [];
+  //final List<String> _qrCodesTemp = [];
   List<Fournisseur> _selectedFournisseurs = [];
+
+  String qrCodesString = ""; // Exemple : "123456,789012,345678"
+  List<String> _qrCodesTemp = [];
 
   Fournisseur? _selectedFournisseur;
   Fournisseur? _currentFournisseur;
@@ -103,24 +106,33 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
   bool _showDescription = false;
   bool _showAppro = true;
   bool _showDetail = true;
-  bool _isEditing = true;
+  bool _isEditing = false;
   bool _isLoadingSauv = false;
   bool _isFirstTap = true;
+  bool _isButtonSaveApproStockEnabled = false;
+  bool _isButtonSaveApproPrixAchatEnabled = false;
 
   @override
   void initState() {
     super.initState();
-    _serialController.addListener(_onSerialChanged);
-    _serialController.addListener(_checkFirstField);
-    _serialController.text = widget.produit.qr!;
+    // _serialController.addListener(_onSerialChanged);
+    //_serialController.addListener(_checkFirstField);
+    // _updateProductInfo(widget.produit.qr!);
+    _updateProductInfo(widget.produit);
+    // _serialController.text = widget.produit.qr!;
+    qrCodesString = widget.produit.qr!; // Exemple : "QR1,QR2,QR3"
+    // Initialiser la liste des QR codes
+    _qrCodesTemp = qrCodesString.isNotEmpty
+        ? qrCodesString.split(',').map((e) => e.trim()).toList()
+        : [];
     //_clearAllFields();
-
+    _totalStock = calculerStockGlobal();
     // _qrCodesTemp.clear();
     // _selectedFournisseurs.clear();
     // _approvisionnementTemporaire.clear();
-    _showDescription = true;
-    _isFirstFieldRempli = true;
-    _isFinded = true;
+    _showDescription = widget.produit.description!.isEmpty ? false : true;
+    //_isFirstFieldRempli = true;
+    //_isFinded = true;
     // Ajoutez les listeners
     _prixVenteController.addListener(updatePricePartiel);
     _qtyPartielController.addListener(updatePricePartiel);
@@ -152,35 +164,72 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
     }
   }
 
-  void _onSerialChanged() {
-    //   final _serialController.text = widget.produit.id;
-    final code = _serialController.text.replaceAll(' ', '');
+  // void _onSerialChanged() {
+  //   //   final _serialController.text = widget.produit.id;
+  //   final code = _serialController.text.replaceAll(' ', '');
+  //
+  //   // // Vérifie si le champ est vide en premier lieu pour éviter des opérations inutiles.
+  //   // if (code.isEmpty && _qrCodesTemp.isEmpty
+  //   //     // || _serialController.text == ''
+  //   //     /*|| code == _lastScannedCode*/) {
+  //   //   _clearAllFields();
+  //   //
+  //   //   // return;
+  //   // }
+  //
+  //   // if (_searchQr) {
+  //   _updateProductInfo(code);
+  //   //_productInfo(code);
+  //   //   }
+  // }
+  //
+  // void _checkFirstField() {
+  //   // _serialController.text.isEmpty
+  //   //     ? _approvisionnementTemporaire.clear()
+  //   //     : null; /////// A VOIRE
+  //   setState(() {
+  //     _isFirstFieldRempli = _serialController.text.trim().isNotEmpty;
+  //   });
+  // }
 
-    // Vérifie si le champ est vide en premier lieu pour éviter des opérations inutiles.
-    if (code.isEmpty && _qrCodesTemp.isEmpty
-        // || _serialController.text == ''
-        /*|| code == _lastScannedCode*/) {
-      _clearAllFields();
+  Future<void> _updateProductInfo(Produit produit) async {
+    final provider = Provider.of<CommerceProvider>(context, listen: false);
 
-      // return;
-    }
+    // Calculer le stock total des approvisionnements pour ce produit
+    double stockTemp = produit.calculerStockTotal();
+    print('Stock total pour le produit ${produit.nom} : $stockTemp');
 
-    if (_searchQr) {
-      _updateProductInfo(code);
-      //_productInfo(code);
-    }
-  }
-
-  void _checkFirstField() {
-    // _serialController.text.isEmpty
-    //     ? _approvisionnementTemporaire.clear()
-    //     : null; /////// A VOIRE
     setState(() {
-      _isFirstFieldRempli = _serialController.text.trim().isNotEmpty;
+      _tempProduitId = produit.id.toString();
+      _nomController.text = produit.nom;
+      _descriptionController.text = produit.description ?? '';
+      //   _prixAchatController.text = produit.prixAchat.toStringAsFixed(2);
+      _prixVenteController.text = produit.prixVente.toStringAsFixed(2);
+      _stockController.clear();
+      //_totalStock = produit.stock;
+      // _minimStockController.text = produit.minimStock!.toStringAsFixed(2);
+      stockTemp = double.parse(produit.stock.toStringAsFixed(2));
+      // _datePeremptionController.text =
+      //     produit.datePeremption!.format('yMMMMd', 'fr_FR');
+      _alertPeremptionController.text = produit.alertPeremption.toString();
+      //_selectedFournisseurs = List.from(produit.fournisseurs);
+      _existingImageUrl = produit.image;
+      _produitImageTile = produit.image!;
+      _isFinded = true;
+      _image = null;
+      _approvisionnementTemporaire = produit.approvisionnements.toList();
+      _tempProduitId = produit.id.toString();
+      _produitNom = produit.nom;
+      _produitDesignation = produit.description ?? '';
+      _produitPV = produit.prixVente;
+      _produitStock = produit.stock;
+      _produitQr = produit.qr!;
+      _produitImage = produit.image!;
+      _produitImageTile = produit.image!;
     });
   }
 
-  Future<void> _updateProductInfo(String code) async {
+  Future<void> _updateProductInfo1(String code) async {
     final provider = Provider.of<CommerceProvider>(context, listen: false);
     final produit = await provider.getProduitByQr(code);
 
@@ -197,7 +246,8 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
         _descriptionController.text = produit.description ?? '';
         //   _prixAchatController.text = produit.prixAchat.toStringAsFixed(2);
         _prixVenteController.text = produit.prixVente.toStringAsFixed(2);
-        _stockController.text = produit.stock.toStringAsFixed(2);
+        _stockController.clear();
+        //_totalStock = produit.stock;
         // _minimStockController.text = produit.minimStock!.toStringAsFixed(2);
         stockTemp = double.parse(produit.stock.toStringAsFixed(2));
         // _datePeremptionController.text =
@@ -218,66 +268,13 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
         _produitImage = produit.image!;
         _produitImageTile = produit.image!;
       });
-    } else {
-      if (_tempProduitId.isNotEmpty) {
-        _tempProduitId = '';
-        _nomController.clear();
-        _descriptionController.clear();
-        stockTemp = 0.0;
-        _prixAchatController.clear();
-        _prixVenteController.clear();
-        _stockController.clear();
-        _selectedFournisseurs.clear();
-        _datePeremptionController.clear();
-        _minimStockController.clear();
-        _alertPeremptionController.clear();
-        _approvisionnementTemporaire.clear();
-        _existingImageUrl = '';
-        _isFinded = false;
-        // _image = null;
-      }
-    }
-  }
-
-  Future<void> _productInfo(String code) async {
-    final provider = Provider.of<CommerceProvider>(context, listen: false);
-    final produit = await provider.getProduitByQr(code);
-
-    if (produit != null) {
-      // Calculer le stock total des approvisionnements pour ce produit
-      double stockTemp = produit.calculerStockTotal();
-      print('Stock total pour le produit ${produit.nom} : $stockTemp');
-    }
-
-    if (produit != null) {
-      setState(() {
-        _tempProduitId = produit.id.toString();
-        _produitNom = produit.nom;
-        _produitDesignation = produit.description ?? '';
-        _produitPV = produit.prixVente;
-        _produitStock = produit.stock;
-        _produitQr = produit.qr!;
-        _produitImage = produit.image!;
-        _produitImageTile = produit.image!;
-        _isFinded = true;
-        //_image = null;
-      });
-    } else {
-      _tempProduitId = '';
-      _produitNom = '';
-      _produitDesignation = '';
-      _produitPV = 0.0;
-      _produitStock = 0.0;
-      _produitImage = '';
-      _isFinded = false;
-      // _image = null;
     }
   }
 
   @override
   void dispose() {
-    _serialController.removeListener(_onSerialChanged);
-    _serialController.removeListener(_checkFirstField);
+    // _serialController.removeListener(_onSerialChanged);
+    // _serialController.removeListener(_checkFirstField);
     _serialController.dispose();
     _nomController.dispose();
     _descriptionController.dispose();
@@ -303,6 +300,12 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
     final produitProvider =
         Provider.of<CommerceProvider>(context, listen: false);
     final iskeyboard = MediaQuery.of(context).viewInsets.bottom != 0;
+    // Vérifiez que produit.qr n'est pas vide ou null
+    // List<String> _qrCodesTemp = qrCodesString.isNotEmpty
+    //     ? qrCodesString.split(',') // Sépare les QR codes par la virgule
+    //     : []; // Si null ou vide, on crée une liste vide
+    // print('${qrCodesString} qrCodesString');
+    // print('${_qrCodesTemp} _qrCodesTemp');
     return SafeArea(
       maintainBottomViewPadding: true,
       child: LayoutBuilder(
@@ -314,7 +317,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
               appBar: AppBar(
                 actions: [
                   WinMobile(),
-                  buildButton_Edit_Add(context, produitProvider, _isFinded),
+                  buildButton_Edit(context, produitProvider, _isFinded),
                   SizedBox(width: 50)
                 ],
               ),
@@ -333,7 +336,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                 appBar: AppBar(
                   actions: [
                     WinMobile(),
-                    buildButton_Edit_Add(context, produitProvider, _isFinded),
+                    buildButton_Edit(context, produitProvider, _isFinded),
                     SizedBox(width: 50)
                   ],
                 ),
@@ -358,7 +361,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                 appBar: AppBar(
                   actions: [
                     WinMobile(),
-                    buildButton_Edit_Add(context, produitProvider, _isFinded),
+                    buildButton_Edit(context, produitProvider, _isFinded),
                     SizedBox(width: 50)
                   ],
                 ),
@@ -421,114 +424,6 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
       child: ListView(
         shrinkWrap: true,
         children: [
-          _searchQr == true && _tempProduitId.isNotEmpty
-              ? Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: ListTile(
-                          hoverColor: Colors.transparent,
-                          splashColor: Colors.transparent,
-                          focusColor: Colors.transparent,
-                          selectedColor: Colors.transparent,
-                          dense: true,
-                          contentPadding: EdgeInsets.zero,
-                          onTap: () async {
-                            // _updateProductInfo(_serialController.text);
-                            _addQRCodeFromText();
-                            // final produit =
-                            //     await provider.getProduitByQr(code);
-                            // await Navigator.of(context)
-                            //     .push(MaterialPageRoute(
-                            //         builder: (ctx) => ProduitDetailPage(
-                            //               produit: produit!,
-                            //             )));
-                          },
-                          leading: _produitImageTile.isNotEmpty
-                              ? CircleAvatar(
-                                  backgroundImage: CachedNetworkImageProvider(
-                                  _produitImageTile,
-                                  errorListener: (Object error) {
-                                    setState(() {
-                                      _produitImageTile =
-                                          fallbackImage; // Remplacer par l'image de secours
-                                    });
-                                  },
-                                  // Pour Web
-                                ))
-                              : CircleAvatar(
-                                  child: Icon(Icons.image_not_supported),
-                                ),
-                          title: Text('${_produitNom.capitalize}',
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(fontSize: 15)),
-                          trailing: Text(
-                            '${_produitPV.toStringAsFixed(2)}',
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                )
-              // : Padding(
-              //     padding: const EdgeInsets.all(8.0),
-              //     child: ListTile(
-              //       title: Text(
-              //         'L\'ID du Produit n\'a pas encore été créer'
-              //             .capitalize,
-              //         style:
-              //             TextStyle(fontSize: 14, color: Colors.black54),
-              //       ),
-              //     ),
-              //   )
-              : Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ListTile(
-                    title: Text(
-                      'Nouveau ID du produit sera créer'.capitalize,
-                      style: TextStyle(
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ),
-          //id
-          // Padding(
-          //   padding: const EdgeInsets.all(20.0),
-          //   child: Container(
-          //     height: 30,
-          //     child: Row(
-          //       mainAxisAlignment: MainAxisAlignment.start,
-          //       children: [
-          //         Transform.scale(
-          //           scale:
-          //               0.7, // Ajustez cette valeur pour modifier la taille (1.0 est la taille par défaut)
-          //           child: Switch(
-          //             value: _searchQr,
-          //             onChanged: (bool newValue) {
-          //               setState(() {
-          //                 _searchQr = newValue;
-          //               });
-          //             },
-          //           ),
-          //         ),
-          //         // SizedBox(width: 10),
-          //         FittedBox(
-          //           child: Text(
-          //             _searchQr
-          //                 ? 'Recherche Activé'.capitalize
-          //                 : 'Recherche Désactivé'.capitalize,
-          //             overflow: TextOverflow.ellipsis,
-          //           ),
-          //         ),
-          //       ],
-          //     ),
-          //   ),
-          // ), //switch recherche auto
           _isFirstFieldRempli || _qrCodesTemp.isNotEmpty
               ? Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -560,18 +455,18 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
               textAlign: TextAlign.center,
               decoration: InputDecoration(
                 labelText: 'Code Barre / QrCode',
-                prefixIcon: Transform.scale(
-                  scale:
-                      0.7, // Ajustez cette valeur pour modifier la taille (1.0 est la taille par défaut)
-                  child: Switch(
-                    value: _searchQr,
-                    onChanged: (bool newValue) {
-                      setState(() {
-                        _searchQr = newValue;
-                      });
-                    },
-                  ),
-                ),
+                // prefixIcon: Transform.scale(
+                //   scale:
+                //       0.7, // Ajustez cette valeur pour modifier la taille (1.0 est la taille par défaut)
+                //   child: Switch(
+                //     value: _searchQr,
+                //     onChanged: (bool newValue) {
+                //       setState(() {
+                //         _searchQr = newValue;
+                //       });
+                //     },
+                //   ),
+                // ),
                 suffixIcon: (Platform.isIOS || Platform.isAndroid)
                     ? IconButton(
                         icon: Icon(Icons.qr_code_scanner),
@@ -655,12 +550,14 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                                       .black, // Couleur du texte pour le thème clair
                             ),
                           ), // Affiche le QR code dans le Chip
-                          deleteIcon: Icon(Icons.delete, color: Colors.red),
+                          deleteIcon:
+                              Icon(Icons.delete, size: 15, color: Colors.red),
 
                           onDeleted: () {
                             setState(() {
                               _qrCodesTemp.remove(
                                   code); // Supprime le QR code sélectionné
+                              print(_qrCodesTemp);
                             });
                           },
                         ),
@@ -798,146 +695,80 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                   ),
           ), // description
           _isFirstFieldRempli || _qrCodesTemp.isNotEmpty
-              ? Container(
-                  width: largeur,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TextFormField(
-                            enabled: !_isLoadingSauv,
+              ? Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextFormField(
+                    enabled: !_isLoadingSauv,
 
-                            controller: _prixVenteController,
-                            textAlign: TextAlign.center,
-                            textInputAction:
-                                TextInputAction.next, // Action "Suivant"
-                            onFieldSubmitted: (_) {
-                              _focusNodeStock
-                                  .requestFocus(); // Passe au champ 2
-                            },
-                            // onChanged: (value) {
-                            //   // Force la validation à chaque changement
-                            //   _formKey.currentState?.validate();
-                            // },
-                            decoration: InputDecoration(
-                              labelText: 'Prix de vente',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                                borderSide:
-                                    BorderSide.none, // Supprime le contour
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                                borderSide: BorderSide
-                                    .none, // Supprime le contour en état normal
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                                borderSide: BorderSide
-                                    .none, // Supprime le contour en état focus
-                              ),
-                              //border: InputBorder.none,
-                              filled: true,
-                              contentPadding: EdgeInsets.all(15),
-                            ),
-                            // keyboardType: TextInputType.number,
-                            // validator: (value) {
-                            //   if (value == null || value.isEmpty) {
-                            //     return 'Veuillez entrer le prix de vente';
-                            //   }
-                            //   return null;
-                            // },
-                            keyboardType: TextInputType.numberWithOptions(
-                                decimal: true, signed: true),
+                    controller: _prixVenteController,
+                    textAlign: TextAlign.center,
+                    textInputAction: TextInputAction.next, // Action "Suivant"
+                    onFieldSubmitted: (_) {
+                      _focusNodeStock.requestFocus(); // Passe au champ 2
+                    },
+                    // onChanged: (value) {
+                    //   // Force la validation à chaque changement
+                    //   _formKey.currentState?.validate();
+                    // },
+                    decoration: InputDecoration(
+                      labelText: 'Prix de vente',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: BorderSide.none, // Supprime le contour
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: BorderSide
+                            .none, // Supprime le contour en état normal
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: BorderSide
+                            .none, // Supprime le contour en état focus
+                      ),
+                      //border: InputBorder.none,
+                      filled: true,
+                      contentPadding: EdgeInsets.all(15),
+                    ),
+                    // keyboardType: TextInputType.number,
+                    // validator: (value) {
+                    //   if (value == null || value.isEmpty) {
+                    //     return 'Veuillez entrer le prix de vente';
+                    //   }
+                    //   return null;
+                    // },
+                    keyboardType: TextInputType.numberWithOptions(
+                        decimal: true, signed: true),
 
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(
-                                  RegExp(r'^\d+\.?\d{0,2}')),
-                            ],
-                            // onChanged: (value) {
-                            //   if (value.isNotEmpty) {
-                            //     double? parsed = double.tryParse(value);
-                            //     if (parsed != null) {
-                            //       _prixVenteController.text = parsed.toStringAsFixed(2);
-                            //       _prixVenteController.selection =
-                            //           TextSelection.fromPosition(
-                            //         TextPosition(
-                            //             offset: _prixVenteController.text.length),
-                            //       );
-                            //     }
-                            //   }
-                            // },
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Veuillez entrer le prix d\'achat';
-                              }
-                              // if (double.tryParse(value) == null) {
-                              //   return 'Veuillez entrer un prix valide';
-                              // }
-                              return null;
-                            },
-                          ),
-                        ),
-                      ), // prix de vente
-                      _showAppro
-                          ? Container()
-                          : Expanded(
-                              child: TextFormField(
-                                enabled: !_isLoadingSauv,
-                                controller: _stockController,
-                                onFieldSubmitted: (_) {
-                                  _focusNodePV
-                                      .requestFocus(); // Passe au champ 2
-                                },
-                                textAlign: TextAlign.center,
-                                decoration: InputDecoration(
-                                  labelText: 'Stock',
-                                  // suffixIcon: Padding(
-                                  //   padding: const EdgeInsets.all(4.0),
-                                  //   child: IconButton(
-                                  //       onPressed: _showAddQuantityDialog,
-                                  //       icon: Icon(Icons.add)),
-                                  // ),
-
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    borderSide:
-                                        BorderSide.none, // Supprime le contour
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    borderSide: BorderSide
-                                        .none, // Supprime le contour en état normal
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    borderSide: BorderSide
-                                        .none, // Supprime le contour en état focus
-                                  ),
-                                  //border: InputBorder.none,
-                                  filled: true,
-                                  contentPadding: EdgeInsets.all(15),
-                                ),
-                                keyboardType: TextInputType.numberWithOptions(
-                                    decimal: true, signed: true),
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.allow(
-                                      RegExp(r'^\d+\.?\d{0,2}')),
-                                ],
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Veuillez entrer le stock';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                      // stock alert
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d+\.?\d{0,2}')),
                     ],
+                    // onChanged: (value) {
+                    //   if (value.isNotEmpty) {
+                    //     double? parsed = double.tryParse(value);
+                    //     if (parsed != null) {
+                    //       _prixVenteController.text = parsed.toStringAsFixed(2);
+                    //       _prixVenteController.selection =
+                    //           TextSelection.fromPosition(
+                    //         TextPosition(
+                    //             offset: _prixVenteController.text.length),
+                    //       );
+                    //     }
+                    //   }
+                    // },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Veuillez entrer le prix d\'achat';
+                      }
+                      // if (double.tryParse(value) == null) {
+                      //   return 'Veuillez entrer un prix valide';
+                      // }
+                      return null;
+                    },
                   ),
-                ) // prix de vente
+                )
+              // prix de vente
               : Container(),
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -1195,6 +1026,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                           Row(
                             children: [
                               Expanded(
+                                flex: 7,
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: TextFormField(
@@ -1236,6 +1068,12 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                                     //    }
                                     //    return null;
                                     //  },
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _isButtonSaveApproPrixAchatEnabled =
+                                            value.isNotEmpty;
+                                      });
+                                    },
                                     keyboardType:
                                         TextInputType.numberWithOptions(
                                             decimal: true),
@@ -1271,6 +1109,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                               !_showAppro
                                   ? Container()
                                   : Expanded(
+                                      flex: 5,
                                       child: Padding(
                                         padding:
                                             const EdgeInsets.only(right: 8),
@@ -1313,6 +1152,12 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                                             filled: true,
                                             contentPadding: EdgeInsets.all(15),
                                           ),
+                                          onChanged: (value) {
+                                            setState(() {
+                                              _isButtonSaveApproStockEnabled =
+                                                  value.isNotEmpty;
+                                            });
+                                          },
                                           keyboardType:
                                               TextInputType.numberWithOptions(
                                                   decimal: true, signed: true),
@@ -1330,6 +1175,36 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                                         ),
                                       ),
                                     ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors
+                                      .blueAccent.shade100, // Couleur de fond
+                                  borderRadius: BorderRadius.circular(
+                                      6.0), // Bords arrondis
+                                  border: Border.all(
+                                    color: Colors.grey, // Couleur de la bordure
+                                    width: 1.0, // Épaisseur de la bordure
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(3.0),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        'Total Qty',
+                                        style: TextStyle(color: Colors.black54),
+                                      ),
+                                      FittedBox(
+                                        child: Text(
+                                          _totalStock.toStringAsFixed(2),
+                                          style:
+                                              TextStyle(color: Colors.black54),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ],
                           ), // stock
                           // Flexible(
@@ -1397,168 +1272,158 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                           //     ),
                           //   ),
                           // ),
-                          Flexible(
-                            flex: 2,
-                            child: FittedBox(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  IconButton(
-                                    icon: Icon(Icons.date_range),
-                                    color: Colors.blue,
-                                    onPressed: () async {
-                                      final DateTime? dateTimePerem =
-                                          await showDatePicker(
-                                        context: context,
-                                        initialDate: selectedDate,
-                                        firstDate: DateTime(2000),
-                                        lastDate: DateTime(2200),
-                                        currentDate: DateTime.now(),
-                                      );
-                                      if (dateTimePerem != null) {
-                                        setState(() {
-                                          selectedDate = dateTimePerem;
-                                          _datePeremptionController.text =
-                                              DateFormat(
-                                                      'dd MMMM yyyy', 'fr_FR')
-                                                  .format(dateTimePerem);
-                                        });
-                                      }
-                                    },
-                                  ),
-                                  Text(
-                                    _datePeremptionController.text.isEmpty
-                                        ? 'Sélectionner une date'
-                                        : _datePeremptionController.text,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color:
-                                          _datePeremptionController.text.isEmpty
-                                              ? Colors.grey
-                                              : Colors.black,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 8,
-                                  ),
-                                  buildDatePeremptionInfo(),
-                                  _datePeremptionController.text.isEmpty
-                                      ? SizedBox.shrink()
-                                      : IconButton(
-                                          icon: Icon(Icons.delete),
-                                          color: Colors.red,
-                                          onPressed: () async {
-                                            //  selectedDate = dateTimePerem;
-                                            setState(() {
-                                              _datePeremptionController.clear();
-                                            });
-                                          },
-                                        ),
-                                ],
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.date_range),
+                                color: Colors.blue,
+                                onPressed: () async {
+                                  final DateTime? dateTimePerem =
+                                      await showDatePicker(
+                                    context: context,
+                                    initialDate: selectedDate,
+                                    firstDate: DateTime(2000),
+                                    lastDate: DateTime(2200),
+                                    currentDate: DateTime.now(),
+                                  );
+                                  if (dateTimePerem != null) {
+                                    setState(() {
+                                      selectedDate = dateTimePerem;
+                                      _datePeremptionController.text =
+                                          DateFormat('dd MMMM yyyy', 'fr_FR')
+                                              .format(dateTimePerem);
+                                    });
+                                  }
+                                },
                               ),
-                            ),
+                              Text(
+                                _datePeremptionController.text.isEmpty
+                                    ? 'Sélectionner une date d\'expiration'
+                                    : _datePeremptionController.text,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: _datePeremptionController.text.isEmpty
+                                      ? Colors.grey
+                                      : Colors.black,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 8,
+                              ),
+                              buildDatePeremptionInfo(),
+                              _datePeremptionController.text.isEmpty
+                                  ? SizedBox.shrink()
+                                  : IconButton(
+                                      icon: Icon(
+                                        Icons.delete,
+                                        size: 15,
+                                      ),
+                                      color: Colors.red,
+                                      onPressed: () async {
+                                        //  selectedDate = dateTimePerem;
+                                        setState(() {
+                                          _datePeremptionController.clear();
+                                        });
+                                      },
+                                    ),
+                            ],
                           ),
-
-                          Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Container(
-                                width: largeur,
-                                child: Wrap(
-                                  spacing: 8.0,
-                                  runSpacing: 4.0,
-                                  children: [
-                                    // Affiche le fournisseur sélectionné
-                                    if (_selectedFournisseur !=
-                                        null) // Afficher seulement si un fournisseur est sélectionné
-                                      !_isLoadingSauv
-                                          ? GestureDetector(
-                                              onTap: () async {
-                                                final result =
-                                                    await Navigator.of(context)
-                                                        .push(
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        FournisseurSelectionScreen(
-                                                      selectedFournisseur:
-                                                          _selectedFournisseur,
-                                                      onSelectedFournisseurChanged:
-                                                          _onSelectedFournisseurChanged,
-                                                    ),
-                                                  ),
-                                                );
-                                                if (result != null) {
-                                                  setState(() {
-                                                    _selectedFournisseur =
-                                                        result; // Mettre à jour le fournisseur sélectionné
-                                                  });
-                                                }
-                                              },
-                                              child: Chip(
-                                                label: Text(
-                                                  _selectedFournisseur!.nom,
-                                                  style: TextStyle(
-                                                    color: Theme.of(context)
-                                                            .chipTheme
-                                                            .labelStyle
-                                                            ?.color ??
-                                                        Theme.of(context)
-                                                            .textTheme
-                                                            .bodyMedium
-                                                            ?.color,
-                                                  ),
-                                                ),
-                                                onDeleted: () {
-                                                  setState(() {
-                                                    _selectedFournisseur =
-                                                        null; // Réinitialiser la sélection
-                                                  });
-                                                },
-                                                backgroundColor:
-                                                    Theme.of(context)
-                                                            .chipTheme
-                                                            .backgroundColor ??
-                                                        Theme.of(context)
-                                                            .colorScheme
-                                                            .surface,
-                                                deleteIconColor:
-                                                    Theme.of(context)
-                                                        .colorScheme
-                                                        .error,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          12), // Bordures rondes
-                                                  side: BorderSide(
-                                                    color: Theme.of(context)
-                                                        .dividerColor, // Bordure subtile
-                                                  ),
+                          SizedBox(
+                            height: 8,
+                          ),
+                          Container(
+                            width: largeur,
+                            child: Wrap(
+                              spacing: 8.0,
+                              runSpacing: 4.0,
+                              children: [
+                                // Affiche le fournisseur sélectionné
+                                if (_selectedFournisseur !=
+                                    null) // Afficher seulement si un fournisseur est sélectionné
+                                  !_isLoadingSauv
+                                      ? GestureDetector(
+                                          onTap: () async {
+                                            final result =
+                                                await Navigator.of(context)
+                                                    .push(
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    FournisseurSelectionScreen(
+                                                  selectedFournisseur:
+                                                      _selectedFournisseur,
+                                                  onSelectedFournisseurChanged:
+                                                      _onSelectedFournisseurChanged,
                                                 ),
                                               ),
-                                            )
-                                          : Chip(
-                                              label: Text(_selectedFournisseur!
-                                                  .nom), // Afficher le nom du fournisseur sélectionné
-
-                                              onDeleted: null,
-                                              // backgroundColor: Colors.grey
-                                              //     .shade300, // Optionnel: couleur grisée
+                                            );
+                                            if (result != null) {
+                                              setState(() {
+                                                _selectedFournisseur =
+                                                    result; // Mettre à jour le fournisseur sélectionné
+                                              });
+                                            }
+                                          },
+                                          child: Chip(
+                                            deleteIcon: Icon(
+                                              Icons.delete,
+                                              size: 15,
                                             ),
-
-                                    // Icône pour ajouter un fournisseur (toujours la dernière)
-                                    _selectedFournisseur == null
-                                        ? TextButton(
-                                            style: ElevatedButton.styleFrom(
-                                              foregroundColor: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary,
-                                              backgroundColor: Theme.of(context)
-                                                  .colorScheme
-                                                  .onPrimary,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(15.0),
+                                            label: Text(
+                                              _selectedFournisseur!.nom,
+                                              style: TextStyle(
+                                                color: Theme.of(context)
+                                                        .chipTheme
+                                                        .labelStyle
+                                                        ?.color ??
+                                                    Theme.of(context)
+                                                        .textTheme
+                                                        .bodyMedium
+                                                        ?.color,
                                               ),
                                             ),
+                                            onDeleted: () {
+                                              setState(() {
+                                                _selectedFournisseur =
+                                                    null; // Réinitialiser la sélection
+                                              });
+                                            },
+                                            backgroundColor: Theme.of(context)
+                                                    .chipTheme
+                                                    .backgroundColor ??
+                                                Theme.of(context)
+                                                    .colorScheme
+                                                    .surface,
+                                            deleteIconColor: Theme.of(context)
+                                                .colorScheme
+                                                .error,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                      16), // Bordures rondes
+                                              side: BorderSide(
+                                                color: Theme.of(context)
+                                                    .dividerColor, // Bordure subtile
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                      : Chip(
+                                          label: Text(_selectedFournisseur!
+                                              .nom), // Afficher le nom du fournisseur sélectionné
+
+                                          onDeleted: null,
+                                          // backgroundColor: Colors.grey
+                                          //     .shade300, // Optionnel: couleur grisée
+                                        ),
+
+                                // Icône pour ajouter un fournisseur (toujours la dernière)
+                                _selectedFournisseur == null
+                                    ? Row(
+                                        children: [
+                                          IconButton(
+                                            icon: Icon(Icons.factory),
+                                            color: Colors.blue,
 
                                             onPressed: !_isLoadingSauv
                                                 ? () async {
@@ -1584,51 +1449,94 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                                                     }
                                                   }
                                                 : null, // Désactive si la condition est fausse
-
-                                            child: const Text(
-                                                'Selectionné un Fournisseur'),
-                                          )
-                                        : Container(),
-                                    // IconButton(
-                                    //   icon: Icon(Icons.add),
-                                    //   onPressed: () async {
-                                    //     final result =
-                                    //         await Navigator.of(context).push(
-                                    //       MaterialPageRoute(
-                                    //         builder: (context) =>
-                                    //             FournisseurSelectionScreen(
-                                    //           selectedFournisseur:
-                                    //               _selectedFournisseur,
-                                    //           onSelectedFournisseurChanged:
-                                    //               _onSelectedFournisseurChanged,
-                                    //         ),
-                                    //       ),
-                                    //     );
-                                    //     if (result != null) {
-                                    //       setState(() {
-                                    //         _selectedFournisseur =
-                                    //             result; // Mettre à jour le fournisseur sélectionné
-                                    //       });
-                                    //     }
-                                    //   },
-                                    // ),
-                                  ],
-                                ),
-                              )),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: ElevatedButton.icon(
-                              icon: Icon(_isEditing ? Icons.edit : Icons.send,
-                                  color:
-                                      _isEditing ? Colors.blue : Colors.green),
-                              onPressed: !_isLoadingSauv
-                                  ? saveApprovisionnement
-                                  : null,
-                              label: Text(_isEditing
-                                  ? 'Modifier le Stock'
-                                  : 'Ajouter ce Stock'),
+                                          ),
+                                          const Text(
+                                            'Selectionné un Fournisseur',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    : Container(),
+                                // IconButton(
+                                //   icon: Icon(Icons.add),
+                                //   onPressed: () async {
+                                //     final result =
+                                //         await Navigator.of(context).push(
+                                //       MaterialPageRoute(
+                                //         builder: (context) =>
+                                //             FournisseurSelectionScreen(
+                                //           selectedFournisseur:
+                                //               _selectedFournisseur,
+                                //           onSelectedFournisseurChanged:
+                                //               _onSelectedFournisseurChanged,
+                                //         ),
+                                //       ),
+                                //     );
+                                //     if (result != null) {
+                                //       setState(() {
+                                //         _selectedFournisseur =
+                                //             result; // Mettre à jour le fournisseur sélectionné
+                                //       });
+                                //     }
+                                //   },
+                                // ),
+                              ],
                             ),
-                          ), //Ajouter ce Stock
+                          ),
+                          // Padding(
+                          //   padding: const EdgeInsets.all(8.0),
+                          //   child: ElevatedButton.icon(
+                          //     icon: Icon(_isEditing ? Icons.edit : Icons.send,
+                          //         color:
+                          //             _isEditing ? Colors.blue : Colors.green),
+                          //     onPressed: _isButtonSaveApproEnabled ||
+                          //             _prixAchatController.text.isNotEmpty
+                          //         ? () {
+                          //             if (!_isLoadingSauv) {
+                          //               setState(() {
+                          //                 saveApprovisionnement(); // Exécute la fonction
+                          //                 calculerTotalStock(); // Mettre à jour le total
+                          //               });
+                          //             }
+                          //           }
+                          //         : null,
+                          //     label: Text(_isEditing
+                          //         ? 'Modifier le Stock'
+                          //         : 'Ajouter ce Stock'),
+                          //   ),
+                          // ), //Ajouter ce Stock
+
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: ElevatedButton.icon(
+                              icon: Icon(
+                                _isEditing ? Icons.edit : Icons.send,
+                                color: _isEditing ? Colors.blue : Colors.green,
+                              ),
+                              onPressed: (_isButtonSaveApproStockEnabled &&
+                                          _isButtonSaveApproPrixAchatEnabled) ||
+                                      (_prixAchatController.text.isNotEmpty &&
+                                          _stockController.text
+                                              .isNotEmpty) //|| // Vérifie si le stock est rempli
+                                  // !_isLoadingSauv // Vérifie que le chargement n'est pas en cours
+                                  ? () {
+                                      setState(() {
+                                        saveApprovisionnement(); // Exécute la fonction
+                                        calculerTotalStock(); // Mettre à jour le total
+                                      });
+                                    }
+                                  : null, // Désactiver le bouton si les conditions ne sont pas remplies
+                              label: Text(
+                                _isEditing
+                                    ? 'Modifier le Stock'
+                                    : 'Ajouter ce Stock',
+                              ),
+                            ),
+                          ),
+
                           Flexible(
                             child: Container(
                               width: largeur,
@@ -1751,6 +1659,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                                                         stockGlobale -=
                                                             approvisionnement
                                                                 .quantite;
+                                                        calculerTotalStock();
                                                       });
                                                     },
                                             ),
@@ -1869,8 +1778,6 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
       return '';
     }
   }
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Étape 1 : Validation et Préparation des Données
 
   Future<bool> _validateForm() async {
     final isValid = await _formKey.currentState?.validate() ?? false;
@@ -1936,7 +1843,9 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
   void _showSnackBar(BuildContext context, String message, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
+        padding: EdgeInsets.symmetric(vertical: 35, horizontal: 18),
+        showCloseIcon: true,
+        content: Center(child: Text(message)),
         backgroundColor: color,
       ),
     );
@@ -1944,13 +1853,13 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
 
 // Étape 4 :Combinaison des Étapes
 
-  IconButton buildButton_Edit_Add(
+  IconButton buildButton_Edit(
     BuildContext context,
     CommerceProvider produitProvider,
     bool isFinded,
   ) {
     return IconButton(
-      onPressed: _serialController.text.trim().isEmpty
+      onPressed: _serialController.text.trim().isEmpty && _qrCodesTemp.isEmpty
           ? null
           : () async {
               if (!mounted) return;
@@ -1993,8 +1902,10 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                 }
                 _assignApprovisionnementsToProduit(produit);
                 // Sauvegarde du nouveau produit
-                produitProvider.ajouterProduit(produit, _selectedFournisseurs,
-                    _approvisionnementTemporaire);
+                produitProvider.updateProduit(
+                  produit,
+                  // _approvisionnementTemporaire
+                );
                 _formKey.currentState?.save();
                 setState(() => _isLoadingSauv = false);
                 _showSnackBar(
@@ -2004,6 +1915,9 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
               } catch (e) {
                 _showSnackBar(
                     context, 'Erreur lors de la sauvegarde : $e', Colors.red);
+                print(
+                  'Erreur lors de la sauvegarde : $e',
+                );
               } finally {
                 if (mounted) {
                   setState(() => _isLoadingSauv = false);
@@ -2019,296 +1933,14 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
           : Icon(
               isFinded && _serialController.text == _produitQr
                   ? Icons.edit
-                  : _serialController.text.trim().isEmpty
+                  : _serialController.text.trim().isEmpty &&
+                          _qrCodesTemp.isEmpty
                       ? null
                       : Icons.send,
               color: Colors.blueAccent,
             ),
     );
   }
-
-  // void _assignApprovisionnementsToProduit(Produit produit) {
-  //   for (int i = 0; i < _approvisionnementTemporaire.length; i++) {
-  //     final approvisionnement = _approvisionnementTemporaire[i];
-  //     approvisionnement.produit.target = produit;
-  //     if (i < _selectedFournisseurs.length) {
-  //       approvisionnement.fournisseur.target = _selectedFournisseurs[i];
-  //     }
-  //     approvisionnement.crud.target = Crud(
-  //       createdBy: 1,
-  //       updatedBy: 1,
-  //       deletedBy: 1,
-  //       dateCreation: DateTime.now(),
-  //       derniereModification: DateTime.now(),
-  //     );
-  //   }
-  // }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-//   IconButton buildButton_Edit_Add1(
-//       BuildContext context, CommerceProvider produitProvider, bool isFinded) {
-//     return IconButton(
-//       onPressed: () async {
-//         if (!mounted) return;
-//
-//         // Validation préalable
-//         final isValid = await _formKey.currentState!.validate();
-//         if (!isValid) return;
-//
-//         bool isContextValid = true;
-//         // Affichage du dialog de progression
-//         BuildContext dialogContext = context;
-//
-//         _isFinded
-//             ? null
-//             : showDialog(
-//                 context: context,
-//                 barrierDismissible: false,
-//                 builder: (context) => const ProgressDialog(),
-//               );
-//
-//         setState(() => _isLoadingSauv = true);
-//
-//         try {
-//           final existingProduct =
-//               await produitProvider.getProduitByQr(_serialController.text);
-//
-//           // Validation préalable
-//           final isValid = await _formKey.currentState!.validate();
-//           if (!isValid) return;
-//
-//           // Initialisation de l'URL de l'image
-//           String imageUrl = '';
-//
-//           // Gestion de l'image du produit
-//           if (_image != null) {
-//             imageUrl = await uploadImageToSupabase(_image!, _existingImageUrl);
-//           } else if (_existingImageUrl != null &&
-//               _existingImageUrl!.isNotEmpty) {
-//             imageUrl = _existingImageUrl!;
-//           }
-//
-//           // Gestion du code QR
-//           final code = _serialController.text.trim();
-//           if (code.isNotEmpty && !_isFinded && !_qrCodesTemp.contains(code)) {
-//             _qrCodesTemp.add(code);
-//           }
-//
-//           // Initialisation du produit
-//           final produit = Produit(
-//             qr: _qrCodesTemp.toSet().toList().join(','),
-//             image: imageUrl,
-//             nom: _nomController.text,
-//             description: _descriptionController.text,
-//             prixVente: double.parse(_prixVenteController.text),
-//             qtyPartiel: double.parse(_qtyPartielController.text),
-//             pricePartielVente: double.parse(_pricePartielVenteController.text),
-//             derniereModification: DateTime.now(),
-//           )..crud.target = Crud(
-//               createdBy: 1,
-//               updatedBy: 1,
-//               deletedBy: 1,
-//               dateCreation: DateTime.now(),
-//               derniereModification: DateTime.now(),
-//             );
-//
-//           // Gestion des approvisionnements
-//           for (int i = 0; i < _approvisionnementTemporaire.length; i++) {
-//             if (!isContextValid) break;
-//             final approvisionnement = _approvisionnementTemporaire[i];
-//             approvisionnement.produit.target = produit;
-//             if (i < _selectedFournisseurs.length) {
-//               approvisionnement.fournisseur.target = _selectedFournisseurs[i];
-//             }
-//             approvisionnement.crud.target = Crud(
-//               createdBy: 1,
-//               updatedBy: 1,
-//               deletedBy: 1,
-//               dateCreation: DateTime.now(),
-//               derniereModification: DateTime.now(),
-//             );
-//           }
-//
-//           // Sauvegarde ou mise à jour du produit
-//           if (existingProduct == null) {
-//             produitProvider.ajouterProduit(
-//                 produit, _selectedFournisseurs, _approvisionnementTemporaire);
-//             if (isContextValid) {
-//               _formKey.currentState?.save();
-//
-//               ScaffoldMessenger.of(context).showSnackBar(
-//                 const SnackBar(
-//                   content: Text('Produit ajouté avec succès'),
-//                   backgroundColor: Colors.green,
-//                 ),
-//               );
-//             }
-//             Navigator.pop(context);
-//             setState(() => _isLoadingSauv = false);
-//             // Fermeture du dialog de progression
-//             if (isContextValid && Navigator.canPop(dialogContext)) {
-//               Navigator.pop(dialogContext);
-//             }
-//           } else {
-//             if (isContextValid && !isFinded) {
-//               _addQRCodeFromText();
-//               setState(() => _isLoadingSauv = false);
-//               // Fermeture du dialog de progression
-//               if (isContextValid && Navigator.canPop(dialogContext)) {
-//                 Navigator.pop(dialogContext);
-//               }
-//               return;
-//             }
-//           }
-//         } catch (e) {
-//           if (isContextValid) {
-//             ScaffoldMessenger.of(context).showSnackBar(
-//               SnackBar(
-//                 content: Text('Erreur lors de la sauvegarde : $e'),
-//                 backgroundColor: Colors.red,
-//               ),
-//             );
-//           }
-//         } finally {
-//           // if (mounted) {
-//           setState(() => _isLoadingSauv = false);
-//           // }
-//         }
-//       },
-//       icon: _isLoadingSauv
-//           ? const CircularProgressIndicator(
-//               strokeWidth: 2,
-//               valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-//             )
-//           : Icon(
-//               isFinded && _serialController.text == _produitQr
-//                   ? Icons.edit
-//                   : Icons.check,
-//             ),
-//     );
-//   }
-//
-//   IconButton buildButton_Edit_Add0(
-//       BuildContext context, CommerceProvider produitProvider, bool isFinded) {
-//     return IconButton(
-//       onPressed: () async {
-//         if (!mounted) return;
-//
-//         // Afficher le dialog de progression
-//         showDialog(
-//           context: context,
-//           barrierDismissible: false,
-//           builder: (BuildContext context) {
-//             return Dialog(
-//               backgroundColor: Colors.black.withOpacity(0.5),
-//               child: Padding(
-//                 padding: const EdgeInsets.all(16.0),
-//                 child: Column(
-//                   mainAxisSize: MainAxisSize.min,
-//                   mainAxisAlignment: MainAxisAlignment.center,
-//                   children: [
-//                     CircularProgressIndicator(),
-//                     SizedBox(height: 16),
-//                     Text(
-//                       "Sauvegarde en cours...",
-//                       style: TextStyle(color: Colors.white, fontSize: 16),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//             );
-//           },
-//         );
-//
-//         setState(() => _isLoadingSauv = true);
-//
-//         try {
-//           final existingProduct =
-//               await produitProvider.getProduitByQr(_serialController.text);
-//
-//           if (_formKey.currentState!.validate()) {
-//             String imageUrl = '';
-//
-//             // Gestion de l'image du produit
-//             if (_image != null) {
-//               imageUrl =
-//                   await uploadImageToSupabase(_image!, _existingImageUrl);
-//             } else if (_existingImageUrl != null &&
-//                 _existingImageUrl!.isNotEmpty) {
-//               imageUrl = _existingImageUrl!;
-//             }
-//
-//             final code = _serialController.text.trim();
-//             if (code.isNotEmpty) _qrCodesTemp.add(code);
-//
-//             // Initialisation du produit
-//             final produit = Produit(
-//               qr: _qrCodesTemp.toSet().toList().join(',').toString(),
-//               image: imageUrl,
-//               nom: _nomController.text,
-//               description: _descriptionController.text,
-//               prixVente: double.parse(_prixVenteController.text),
-//               qtyPartiel: double.parse(_qtyPartielController.text),
-//               pricePartielVente:
-//                   double.parse(_pricePartielVenteController.text),
-//               derniereModification: DateTime.now(),
-//             )..crud.target = Crud(
-//                 createdBy: 1,
-//                 updatedBy: 1,
-//                 deletedBy: 1,
-//                 dateCreation: DateTime.now(),
-//                 derniereModification: DateTime.now(),
-//               );
-//
-//             // Gestion des approvisionnements
-//             for (int i = 0; i < _approvisionnementTemporaire.length; i++) {
-//               final approvisionnement = _approvisionnementTemporaire[i];
-//               approvisionnement.produit.target = produit;
-//               if (i < _selectedFournisseurs.length) {
-//                 approvisionnement.fournisseur.target = _selectedFournisseurs[i];
-//               }
-//               approvisionnement.crud.target = Crud(
-//                 createdBy: 1,
-//                 updatedBy: 1,
-//                 deletedBy: 1,
-//                 dateCreation: DateTime.now(),
-//                 derniereModification: DateTime.now(),
-//               );
-//             }
-//
-//             if (existingProduct == null) {
-//               produitProvider.ajouterProduit(
-//                   produit, _selectedFournisseurs, _approvisionnementTemporaire);
-//               print('Nouveau produit ajouté');
-//               _formKey.currentState!.save();
-//             } else {
-//               _addQRCodeFromText();
-//               print('Produit déjà existant');
-//             }
-//           }
-//         } catch (e) {
-//           ScaffoldMessenger.of(context).showSnackBar(
-//             SnackBar(
-//               content: Text('Erreur lors de la sauvegarde du produit : $e'),
-//               backgroundColor: Colors.red,
-//             ),
-//           );
-//         } finally {
-//           if (Navigator.of(context).canPop()) {
-//             Navigator.of(context).pop(); // Ferme le dialog de progression
-//           }
-//           setState(() => _isLoadingSauv = false);
-//         }
-//       },
-//       icon: _isLoadingSauv
-//           ? CircularProgressIndicator()
-//           : Icon(
-//               isFinded && _serialController.text == _produitQr
-//                   ? Icons.edit
-//                   : Icons.check,
-//             ),
-//     );
-//   }
 
   Future<void> _scanQRCode() async {
     // Simuler un scan de QR code pour tester
@@ -2606,6 +2238,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
           _serialController.clear();
           _searchQr = false;
         });
+        print(_qrCodesTemp);
       } else {
         _serialController.clear();
       }
@@ -2625,30 +2258,72 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                           width: largeur,
                           height:
                               Platform.isAndroid || Platform.isIOS ? 150 : 300,
-                          decoration: BoxDecoration(
-                            borderRadius:
-                                BorderRadius.circular(8.0), // Bords arrondis
-                            border: Border.all(
-                              color: Colors.grey, // Couleur de la bordure
-                              width: 1.0, // Épaisseur de la bordure
-                            ),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8.0),
-                            child: CachedNetworkImage(
-                              imageUrl: _existingImageUrl!,
-                              fit: BoxFit.cover, // Remplir le container
-                              width: double.infinity, // Remplir en largeur
-                              height: double.infinity, // Remplir en hauteur
-                              placeholder: (context, url) => Center(
-                                child:
-                                    CircularProgressIndicator(), // Indicateur de chargement
-                              ),
-                              errorWidget: (context, url, error) =>
-                                  Container(), // Widget en cas d'erreur
+                          child: InkWell(
+                            onTap: () {
+                              setState(() {
+                                _existingImageUrl = '';
+                              });
+                            },
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    child: CachedNetworkImage(
+                                      imageUrl: _existingImageUrl!,
+                                      fit: BoxFit.cover, // Remplir le container
+                                      width:
+                                          double.infinity, // Remplir en largeur
+                                      height:
+                                          double.infinity, // Remplir en hauteur
+                                      placeholder: (context, url) => Center(
+                                        child:
+                                            CircularProgressIndicator(), // Indicateur de chargement
+                                      ),
+                                      errorWidget: (context, url, error) =>
+                                          Container(), // Widget en cas d'erreur
+                                    ),
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.delete,
+                                  size: 15,
+                                  color: Colors.red,
+                                ),
+                              ],
                             ),
                           ),
                         )
+                      // Container(
+                      //    width: largeur,
+                      //    height:
+                      //        Platform.isAndroid || Platform.isIOS ? 150 : 300,
+                      //    decoration: BoxDecoration(
+                      //      borderRadius:
+                      //          BorderRadius.circular(8.0), // Bords arrondis
+                      //      border: Border.all(
+                      //        color: Colors.grey, // Couleur de la bordure
+                      //        width: 1.0, // Épaisseur de la bordure
+                      //      ),
+                      //    ),
+                      //    child: ClipRRect(
+                      //      borderRadius: BorderRadius.circular(8.0),
+                      //      child: CachedNetworkImage(
+                      //        imageUrl: _existingImageUrl!,
+                      //        fit: BoxFit.cover, // Remplir le container
+                      //        width: double.infinity, // Remplir en largeur
+                      //        height: double.infinity, // Remplir en hauteur
+                      //        placeholder: (context, url) => Center(
+                      //          child:
+                      //              CircularProgressIndicator(), // Indicateur de chargement
+                      //        ),
+                      //        errorWidget: (context, url, error) =>
+                      //            Container(), // Widget en cas d'erreur
+                      //      ),
+                      //    ),
+                      //  )
                       : IconButton(
                           onPressed: _pickImage,
                           icon: Icon(
@@ -2685,6 +2360,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                               },
                               icon: Icon(
                                 Icons.delete,
+                                size: 15,
                                 color: Colors.red,
                               ))
                           : IconButton(
@@ -2720,6 +2396,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                       ),
                       Icon(
                         Icons.delete,
+                        size: 15,
                         color: Colors.red,
                       ),
                     ],
@@ -3040,109 +2717,24 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
 
       return Text(
         message,
-        style: TextStyle(fontSize: 16, color: textColor),
+        style: TextStyle(fontSize: 14, color: textColor),
       );
     } catch (e) {
       // En cas d'erreur de parsing, afficher un message d'erreur
       return const Text(
         "Date invalide",
-        style: TextStyle(fontSize: 16, color: Colors.red),
+        style: TextStyle(fontSize: 14, color: Colors.red),
       );
     }
   }
 
-// void saveApprovisionnement() {
-//   if (_formKeyApp.currentState!.validate()) {
-//     final quantite = double.parse(_stockController.text);
-//     final prixAchat = double.parse(_prixAchatController.text);
-//     // final datePeremption = DateFormat('dd MMMM yyyy', 'fr_FR')
-//     //     .parse(_datePeremptionController.text);
-//     // Initialisation de datePeremption en vérifiant si le champ est vide
-//     DateTime? datePeremption;
-//     if (_datePeremptionController.text.isNotEmpty) {
-//       try {
-//         datePeremption = DateFormat('dd MMMM yyyy', 'fr_FR')
-//             .parse(_datePeremptionController.text);
-//       } catch (e) {
-//         print("Erreur lors du parsing de la date : $e");
-//         // Gérer le cas d'erreur, par exemple en affichant un message
-//         return;
-//       }
-//     }
-//     // Vérifiez si nous sommes en mode édition et que l'approvisionnement est sélectionné
-//     if (_isEditing && _currentApprovisionnement != null) {
-//       // Trouver l'index de l'approvisionnement dans la liste temporaire
-//       final int index = _approvisionnementTemporaire.indexWhere(
-//           (approvisionnement) =>
-//               approvisionnement == _currentApprovisionnement);
-//
-//       if (index != -1) {
-//         // Mettre à jour les valeurs de l'approvisionnement existant
-//         setState(() {
-//           _currentApprovisionnement!.quantite = quantite;
-//           _currentApprovisionnement!.prixAchat = prixAchat;
-//           _currentApprovisionnement!.datePeremption = datePeremption;
-//
-//           // Vérifier si un fournisseur est sélectionné avant de l'assigner
-//           if (_selectedFournisseur != null) {
-//             _currentApprovisionnement!.fournisseur.target =
-//                 _selectedFournisseur;
-//           } else {
-//             _currentApprovisionnement!.fournisseur.target = null;
-//           }
-//
-//           _currentApprovisionnement!.derniereModification = DateTime.now();
-//
-//           // Remplacer l'approvisionnement dans la liste
-//           _approvisionnementTemporaire[index] = _currentApprovisionnement!;
-//
-//           // Réinitialiser les champs après la modification
-//           _stockController.clear();
-//           _prixAchatController.clear();
-//           _datePeremptionController.clear();
-//           _currentFournisseur = null;
-//           _selectedFournisseur = null;
-//           _isEditing = false; // Désactiver le mode édition
-//         });
-//       } else {
-//         print("Erreur : Approvisionnement non trouvé dans la liste.");
-//       }
-//     } else {
-//       // Si ce n'est pas une modification, créer un nouvel approvisionnement
-//       Approvisionnement nouveauApprovisionnement = Approvisionnement(
-//         quantite: quantite,
-//         prixAchat: prixAchat,
-//         datePeremption: datePeremption,
-//         derniereModification: DateTime.now(),
-//       );
-//
-//       // Assigner le fournisseur sélectionné, ou laisser null si non sélectionné
-//       if (_currentFournisseur != null) {
-//         nouveauApprovisionnement.fournisseur.target = _currentFournisseur;
-//       } else if (_selectedFournisseur != null) {
-//         nouveauApprovisionnement.fournisseur.target = _selectedFournisseur;
-//       } else {
-//         nouveauApprovisionnement.fournisseur.target = null;
-//       }
-//
-//       // Ajouter le nouvel approvisionnement à la liste temporaire
-//       setState(() {
-//         _approvisionnementTemporaire.add(nouveauApprovisionnement);
-//
-//         // Réinitialiser les champs après l'ajout
-//         _stockController.clear();
-//         _prixAchatController.clear();
-//         _datePeremptionController.clear();
-//         _currentFournisseur = null;
-//         _selectedFournisseur = null;
-//         _isEditing = false;
-//       });
-//     }
-//
-//     // Mettre à jour le stock global après modification ou ajout
-//     mettreAJourStockGlobal();
-//   }
-// }
+  void calculerTotalStock() {
+    _totalStock = _approvisionnementTemporaire.fold(
+        0.0, (total, item) => total + item.quantite);
+    setState(() {
+      _totalStock;
+    }); // Rafraîchir l'interface utilisateur
+  }
 }
 
 class FournisseurSelectionScreen extends StatefulWidget {
