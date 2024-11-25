@@ -338,8 +338,51 @@ class CommerceProvider extends ChangeNotifier {
     _chargerFournisseurs();
   }
 
-  void updateProduit(Produit produit) {
-    _objectBox.produitBox.put(produit);
+  //
+  // void updateProduit(Produit produit) {
+  //   _objectBox.produitBox.put(produit);
+  //   chargerProduits(reset: true);
+  // }
+
+  void updateProduit(Produit updatedProduit) {
+    // Vérifiez si le produit existe déjà
+    final existingProduct = _objectBox.produitBox.get(updatedProduit.id);
+
+    if (existingProduct == null) {
+      throw Exception("Produit avec l'ID ${updatedProduit.id} n'existe pas.");
+    }
+
+    // Remplacer complètement les données du produit
+    existingProduct
+      ..nom = updatedProduit.nom
+      ..description = updatedProduit.description
+      ..qr = updatedProduit.qr?.trim() ?? ""
+      ..prixVente = updatedProduit.prixVente
+      ..image = updatedProduit.image
+      ..prixVente = updatedProduit.prixVente
+      ..pricePartielVente = updatedProduit.pricePartielVente
+      ..qtyPartiel = updatedProduit.qtyPartiel
+      ..derniereModification = DateTime.now();
+
+    // Supprimer les anciens approvisionnements liés
+    for (var appro in existingProduct.approvisionnements) {
+      _objectBox.approvisionnementBox.remove(appro.id);
+    }
+    existingProduct.approvisionnements.clear();
+
+    // Ajouter les nouveaux approvisionnements
+    for (var approvisionnement in updatedProduit.approvisionnements) {
+      // Sauvegarder chaque approvisionnement
+      approvisionnement.produit.target = existingProduct;
+      final approId = _objectBox.approvisionnementBox.put(approvisionnement);
+      approvisionnement.id = approId;
+      existingProduct.approvisionnements.add(approvisionnement);
+    }
+
+    // Sauvegarder le produit mis à jour
+    _objectBox.produitBox.put(existingProduct);
+
+    // Recharger les produits si nécessaire
     chargerProduits(reset: true);
   }
 

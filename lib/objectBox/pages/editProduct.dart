@@ -84,7 +84,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
   String _produitImageTile = '';
   String _produitQr = '';
   double _produitStock = 0.0;
-  double stockGlobale = 0.0; // Déclaration de la variable
+  double stockGlobale = 0.0; // Déclaration de la variablen,lb
   double stockTemp = 0;
   double _produitPV = 0.0;
   String _resultatPrixPartiel = '0';
@@ -213,6 +213,9 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
       //     produit.datePeremption!.format('yMMMMd', 'fr_FR');
       _alertPeremptionController.text = produit.alertPeremption.toString();
       //_selectedFournisseurs = List.from(produit.fournisseurs);
+      _qtyPartielController.text = produit.qtyPartiel!.toStringAsFixed(2);
+      _pricePartielVenteController.text =
+          produit.pricePartielVente!.toStringAsFixed(2);
       _existingImageUrl = produit.image;
       _produitImageTile = produit.image!;
       _isFinded = true;
@@ -424,6 +427,29 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
       child: ListView(
         shrinkWrap: true,
         children: [
+          Center(
+            child: _searchQr == true && _tempProduitId.isNotEmpty
+                ? Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      'ID du produit ${widget.produit.id}'.capitalize,
+                      style: TextStyle(
+                        fontSize: 14,
+                      ),
+                    ),
+                  )
+                : Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ListTile(
+                      title: Text(
+                        'Nouveau ID du produit sera créer'.capitalize,
+                        style: TextStyle(
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+          ),
           _isFirstFieldRempli || _qrCodesTemp.isNotEmpty
               ? Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -1786,6 +1812,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
 
   Future<String> _prepareImageUrl() async {
     if (_image != null) {
+      print(_image);
       return await uploadImageToSupabase(_image!, _existingImageUrl);
     } else if (_existingImageUrl?.isNotEmpty ?? false) {
       return _existingImageUrl!;
@@ -1824,10 +1851,16 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
   void _assignApprovisionnementsToProduit(Produit produit) {
     for (int i = 0; i < _approvisionnementTemporaire.length; i++) {
       final approvisionnement = _approvisionnementTemporaire[i];
+
+      // Lier le produit à l'approvisionnement
       approvisionnement.produit.target = produit;
+
+      // Vérifier et attribuer un fournisseur si disponible
       if (i < _selectedFournisseurs.length) {
         approvisionnement.fournisseur.target = _selectedFournisseurs[i];
       }
+
+      // Créer et associer un objet Crud
       approvisionnement.crud.target = Crud(
         createdBy: 1,
         updatedBy: 1,
@@ -1835,6 +1868,9 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
         dateCreation: DateTime.now(),
         derniereModification: DateTime.now(),
       );
+
+      // Sauvegarder temporairement l'approvisionnement
+      produit.approvisionnements.add(approvisionnement);
     }
   }
 
@@ -1853,7 +1889,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
 
 // Étape 4 :Combinaison des Étapes
 
-  IconButton buildButton_Edit(
+  IconButton buildButton_Edit1(
     BuildContext context,
     CommerceProvider produitProvider,
     bool isFinded,
@@ -1897,10 +1933,11 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                 if ( //_prixAchatController.text.isNotEmpty &&
                     _stockController.text.isNotEmpty) {
                   print('debut saveApprovisionnement');
-                  saveApprovisionnement();
+                  // saveApprovisionnement();
                   print('saveApprovisionnement');
                 }
                 _assignApprovisionnementsToProduit(produit);
+
                 // Sauvegarde du nouveau produit
                 produitProvider.updateProduit(
                   produit,
@@ -1937,6 +1974,81 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                           _qrCodesTemp.isEmpty
                       ? null
                       : Icons.send,
+              color: Colors.blueAccent,
+            ),
+    );
+  }
+
+  IconButton buildButton_Edit(
+    BuildContext context,
+    CommerceProvider produitProvider,
+    bool isFinded,
+  ) {
+    return IconButton(
+      onPressed: () async {
+        if (!mounted) return;
+
+        // Validation du formulaire
+        if (!await _validateForm()) return;
+
+        // Vérifier si le produit existe déjà avant d'afficher le ProgressDialog
+        final existingProduct =
+            await produitProvider.getProduitByQr(_serialController.text);
+        if (existingProduct != null) {
+          print('Produit existant détecté');
+          showExistingProductDialog(context, _serialController.text,
+              existingProduct, produitProvider);
+          _showSnackBar(context, 'Produit déjà existant', Colors.orange);
+          return; // Arrêter ici si le produit existe déjà
+        }
+
+        try {
+          setState(() => _isLoadingSauv = true);
+
+          // Récupérer le produit existant par son ID
+          final produit = widget.produit;
+
+          // Préparation de l'URL de l'image
+          final imageUrl = await _prepareImageUrl();
+
+          _addQrCodeIfNotExists();
+
+          // Mise à jour des détails du produit
+          produit
+            ..nom = _nomController.text.trim()
+            ..description = _descriptionController.text.trim()
+            ..prixVente = double.parse(_prixVenteController.text.trim())
+            ..qr = _qrCodesTemp.toSet().toList().join(',')
+            ..image = imageUrl
+            ..prixVente = double.parse(_prixVenteController.text)
+            ..pricePartielVente =
+                double.parse(_pricePartielVenteController.text)
+            ..qtyPartiel = double.parse(_qtyPartielController.text)
+            ..derniereModification = DateTime.now();
+
+          if (_stockController.text.isNotEmpty) {
+            _assignApprovisionnementsToProduit(produit);
+          }
+
+          // Sauvegarder les modifications
+          produitProvider.updateProduit(produit);
+
+          _showSnackBar(
+              context, "Produit mis à jour avec succès", Colors.green);
+          Navigator.pop(context); // Ferme la page
+        } catch (e) {
+          _showSnackBar(context, "Erreur : $e", Colors.red);
+        } finally {
+          setState(() => _isLoadingSauv = false);
+        }
+      },
+      icon: _isLoadingSauv
+          ? const CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+            )
+          : Icon(
+              isFinded ? Icons.edit : Icons.send,
               color: Colors.blueAccent,
             ),
     );
@@ -2221,13 +2333,12 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
     );
   }
 
-  // Votre méthode _addQRCodeFromText modifiée
   void _addQRCodeFromText() async {
     final code = _serialController.text.trim();
     final provider = Provider.of<CommerceProvider>(context, listen: false);
     final produit = await provider.getProduitByQr(code);
 
-    if (produit != null) {
+    if (produit != null && produit.id != widget.produit.id) {
       showExistingProductDialog(context, code, produit, provider);
     }
 
@@ -2238,7 +2349,6 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
           _serialController.clear();
           _searchQr = false;
         });
-        print(_qrCodesTemp);
       } else {
         _serialController.clear();
       }
