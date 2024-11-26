@@ -2155,69 +2155,19 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                             ),
                           ),
                         )
-                      : Container(), // Affiche un container vide si pas d'image
+                      : Center(
+                          child: Lottie.asset(
+                            'assets/lotties/1 (8).json', // Chemin vers ton fichier Lottie
+                            width: screenWidth *
+                                0.2, // Ajuste la taille de l'erreur à 30%
+                            height: screenWidth * 0.2,
+                          ),
+                        ), // Affiche un container vide si pas d'image
                 ),
                 Text(
                   'Dernière Modification : ${produit.derniereModification.format('yMMMMd', 'fr_FR')}',
                   style: TextStyle(
                     fontSize: 12,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextButton(
-                    style: TextButton.styleFrom(foregroundColor: Colors.blue),
-                    child: Text('Voir Details...'),
-                    onPressed: () async {
-                      await Navigator.of(context).push(MaterialPageRoute(
-                          builder: (ctx) => ProduitDetailPage(
-                                produit: produit,
-                              )));
-                    },
-                  ),
-                ),
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(0.0),
-                    child: RichText(
-                      text: TextSpan(
-                        text: 'BarCode'.toUpperCase(),
-                        style: TextStyle(
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? Colors
-                                  .white // Couleur du texte pour le thème sombre
-                              : Colors
-                                  .black, // Couleur du texte pour le thème clair
-                          fontSize: 20,
-                          fontFamily: 'Oswald',
-                        ),
-                        children: <TextSpan>[
-                          TextSpan(
-                            text: ' ${code} '.toUpperCase(),
-                            style: TextStyle(
-                              fontFamily: 'Oswald',
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          TextSpan(
-                            text: ' est déjà associé au '.toUpperCase(),
-                            style: TextStyle(
-                              fontFamily: 'Oswald',
-                              fontSize: 20,
-                            ),
-                          ),
-                          TextSpan(
-                            text: '${produit.nom}'.toUpperCase(),
-                            style: TextStyle(
-                              fontFamily: 'Oswald',
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
                 ),
               ],
@@ -2231,6 +2181,51 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(0.0),
+                      child: RichText(
+                        text: TextSpan(
+                          text: 'BarCode'.toUpperCase(),
+                          style: TextStyle(
+                            color: Theme.of(context).brightness ==
+                                    Brightness.dark
+                                ? Colors
+                                    .white // Couleur du texte pour le thème sombre
+                                : Colors
+                                    .black, // Couleur du texte pour le thème clair
+                            fontSize: 20,
+                            fontFamily: 'Oswald',
+                          ),
+                          children: <TextSpan>[
+                            TextSpan(
+                              text: ' ${code} '.toUpperCase(),
+                              style: TextStyle(
+                                fontFamily: 'Oswald',
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextSpan(
+                              text: ' est déjà associé au '.toUpperCase(),
+                              style: TextStyle(
+                                fontFamily: 'Oswald',
+                                fontSize: 20,
+                              ),
+                            ),
+                            TextSpan(
+                              text: '${produit.nom}'.toUpperCase(),
+                              style: TextStyle(
+                                fontFamily: 'Oswald',
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                   if (produit.description != null &&
                       produit.description!.isNotEmpty)
                     Padding(
@@ -2261,18 +2256,28 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
             ),
           ),
           actions: [
-            TextButton(
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: Text('Supprimer le code'),
-              onPressed: () async {
-                await provider.removeQRCodeFromProduit(produit.id, code);
-                Navigator.of(context).pop();
-              },
-            ),
+            // TextButton(
+            //   style: TextButton.styleFrom(foregroundColor: Colors.red),
+            //   child: Text('Supprimer le code'),
+            //   onPressed: () async {
+            //     await provider.removeQRCodeFromProduit(produit.id, code);
+            //     Navigator.of(context).pop();
+            //   },
+            // ),
             TextButton(
               child: Text('OK', style: TextStyle(color: Colors.blue)),
               onPressed: () {
                 Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(foregroundColor: Colors.blue),
+              child: Text('Voir Details...'),
+              onPressed: () async {
+                await Navigator.of(context).push(MaterialPageRoute(
+                    builder: (ctx) => ProduitDetailPage(
+                          produit: produit,
+                        )));
               },
             ),
           ],

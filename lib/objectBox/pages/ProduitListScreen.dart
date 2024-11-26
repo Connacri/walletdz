@@ -260,6 +260,7 @@ class _ProduitListScreenState extends State<ProduitListScreen> {
             onPressed: () async {
               final produitProvider =
                   Provider.of<CommerceProvider>(context, listen: false);
+
               showSearch(
                 context: context,
                 delegate: ProduitSearchDelegateMain(produitProvider),
@@ -1562,6 +1563,10 @@ class ProduitDetailPage extends StatelessWidget {
                           padding: const EdgeInsets.all(8.0),
                           child: ElevatedButton.icon(
                             onPressed: () async {
+                              final produitProvider =
+                                  Provider.of<CommerceProvider>(context,
+                                      listen: false);
+
                               final updatedProduit =
                                   await Navigator.of(context).push(
                                 MaterialPageRoute(

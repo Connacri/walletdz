@@ -17,6 +17,7 @@ import '../MyProviders.dart';
 import '../Utils/country_flags.dart';
 import '../Utils/mobile_scanner/barcode_scanner_window.dart';
 import '../Utils/winMobile.dart';
+import '../classeObjectBox.dart';
 import 'ProduitListScreen.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -126,6 +127,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
         ? qrCodesString.split(',').map((e) => e.trim()).toList()
         : [];
     //_clearAllFields();
+    showDetailBool();
     _totalStock = calculerStockGlobal();
     // _qrCodesTemp.clear();
     // _selectedFournisseurs.clear();
@@ -136,6 +138,14 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
     // Ajoutez les listeners
     _prixVenteController.addListener(updatePricePartiel);
     _qtyPartielController.addListener(updatePricePartiel);
+  }
+
+  void showDetailBool() {
+    if (double.parse(_qtyPartielController.text) <= 1) {
+      _showDetail == false;
+    } else {
+      _showDetail == true;
+    }
   }
 
   void updatePricePartiel() {
@@ -206,7 +216,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
       //   _prixAchatController.text = produit.prixAchat.toStringAsFixed(2);
       _prixVenteController.text = produit.prixVente.toStringAsFixed(2);
       _stockController.clear();
-      //_totalStock = produit.stock;
+      //  _totalStock = produit.calculerStockTotal();
       // _minimStockController.text = produit.minimStock!.toStringAsFixed(2);
       stockTemp = double.parse(produit.stock.toStringAsFixed(2));
       // _datePeremptionController.text =
@@ -214,8 +224,10 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
       _alertPeremptionController.text = produit.alertPeremption.toString();
       //_selectedFournisseurs = List.from(produit.fournisseurs);
       _qtyPartielController.text = produit.qtyPartiel!.toStringAsFixed(2);
+
       _pricePartielVenteController.text =
-          produit.pricePartielVente!.toStringAsFixed(2);
+          widget.produit.pricePartielVente!.toStringAsFixed(2);
+
       _existingImageUrl = produit.image;
       _produitImageTile = produit.image!;
       _isFinded = true;
@@ -302,6 +314,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
   Widget build(BuildContext context) {
     final produitProvider =
         Provider.of<CommerceProvider>(context, listen: false);
+
     final iskeyboard = MediaQuery.of(context).viewInsets.bottom != 0;
     // Vérifiez que produit.qr n'est pas vide ou null
     // List<String> _qrCodesTemp = qrCodesString.isNotEmpty
@@ -309,83 +322,87 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
     //     : []; // Si null ou vide, on crée une liste vide
     // print('${qrCodesString} qrCodesString');
     // print('${_qrCodesTemp} _qrCodesTemp');
-    return SafeArea(
-      maintainBottomViewPadding: true,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth < 600) {
-            // Mobile layout
-            return Scaffold(
-              resizeToAvoidBottomInset: false,
-              appBar: AppBar(
-                actions: [
-                  WinMobile(),
-                  buildButton_Edit(context, produitProvider, _isFinded),
-                  SizedBox(width: 50)
-                ],
-              ),
-              body: Form(
-                key: _formKey,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: MobileLayout(),
-                ),
-              ),
-            );
-          } else if (constraints.maxWidth < 1200) {
-            // Tablet layout
-            return Scaffold(
-                resizeToAvoidBottomInset: false,
-                appBar: AppBar(
-                  actions: [
-                    WinMobile(),
-                    buildButton_Edit(context, produitProvider, _isFinded),
-                    SizedBox(width: 50)
-                  ],
-                ),
-                body: SingleChildScrollView(
-                  child: Form(
+    return Consumer<CommerceProvider>(
+      builder: (context, produitProvider, child) {
+        return SafeArea(
+          maintainBottomViewPadding: true,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth < 600) {
+                // Mobile layout
+                return Scaffold(
+                  resizeToAvoidBottomInset: true,
+                  appBar: AppBar(
+                    actions: [
+                      WinMobile(),
+                      buildButton_Edit(context, produitProvider, _isFinded),
+                      SizedBox(width: 50)
+                    ],
+                  ),
+                  body: Form(
                     key: _formKey,
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Container(
+                      child: MobileLayout(),
+                    ),
+                  ),
+                );
+              } else if (constraints.maxWidth < 1200) {
+                // Tablet layout
+                return Scaffold(
+                    resizeToAvoidBottomInset: false,
+                    appBar: AppBar(
+                      actions: [
+                        WinMobile(),
+                        buildButton_Edit(context, produitProvider, _isFinded),
+                        SizedBox(width: 50)
+                      ],
+                    ),
+                    body: SingleChildScrollView(
+                      child: Form(
+                        key: _formKey,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                              constraints: BoxConstraints(
+                                maxWidth: 400, // largeur maximale de 200 pixels
+                                // maxHeight: 100, // hauteur maximale de 100 pixels
+                              ),
+                              child: TabletLayout()),
+                        ),
+                      ),
+                    ));
+              } else {
+                // Desktop layout
+                return Scaffold(
+                    resizeToAvoidBottomInset: false,
+                    appBar: AppBar(
+                      actions: [
+                        WinMobile(),
+                        buildButton_Edit(context, produitProvider, _isFinded),
+                        SizedBox(width: 50)
+                      ],
+                    ),
+                    body: SingleChildScrollView(
+                      child: Form(
+                        key: _formKey,
+                        child: Container(
                           constraints: BoxConstraints(
                             maxWidth: 400, // largeur maximale de 200 pixels
-                            // maxHeight: 100, // hauteur maximale de 100 pixels
+                            //maxHeight: 100, // hauteur maximale de 100 pixels
                           ),
-                          child: TabletLayout()),
-                    ),
-                  ),
-                ));
-          } else {
-            // Desktop layout
-            return Scaffold(
-                resizeToAvoidBottomInset: false,
-                appBar: AppBar(
-                  actions: [
-                    WinMobile(),
-                    buildButton_Edit(context, produitProvider, _isFinded),
-                    SizedBox(width: 50)
-                  ],
-                ),
-                body: SingleChildScrollView(
-                  child: Form(
-                    key: _formKey,
-                    child: Container(
-                      constraints: BoxConstraints(
-                        maxWidth: 400, // largeur maximale de 200 pixels
-                        //maxHeight: 100, // hauteur maximale de 100 pixels
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: DesktopLayout(),
+                          ),
+                        ),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DesktopLayout(),
-                      ),
-                    ),
-                  ),
-                ));
-          }
-        },
-      ),
+                    ));
+              }
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -427,51 +444,51 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
       child: ListView(
         shrinkWrap: true,
         children: [
-          Center(
-            child: _searchQr == true && _tempProduitId.isNotEmpty
-                ? Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      'ID du produit ${widget.produit.id}'.capitalize,
-                      style: TextStyle(
-                        fontSize: 14,
-                      ),
-                    ),
-                  )
-                : Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ListTile(
-                      title: Text(
-                        'Nouveau ID du produit sera créer'.capitalize,
-                        style: TextStyle(
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  ),
-          ),
-          _isFirstFieldRempli || _qrCodesTemp.isNotEmpty
-              ? Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: _serialController.text.isNotEmpty
-                      ? FlagDetector(
-                          barcode: _serialController.text,
-                          height: 25,
-                          width: 40,
-                        ) // Afficher FlagDetector avec le code-barres
-                      : FlagDetector(
-                          barcode: _serialController.text,
-                          height: 25,
-                          width: 40,
-                        ),
-                )
-              : Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    height: 25,
-                    width: 40,
-                  ),
-                ), // Flag
+          // Center(
+          //   child: _searchQr == true && _tempProduitId.isNotEmpty
+          //       ? Padding(
+          //           padding: const EdgeInsets.all(8.0),
+          //           child: Text(
+          //             'ID du produit ${widget.produit.id}'.capitalize,
+          //             style: TextStyle(
+          //               fontSize: 14,
+          //             ),
+          //           ),
+          //         )
+          //       : Padding(
+          //           padding: const EdgeInsets.all(8.0),
+          //           child: ListTile(
+          //             title: Text(
+          //               'Nouveau ID du produit sera créer'.capitalize,
+          //               style: TextStyle(
+          //                 fontSize: 14,
+          //               ),
+          //             ),
+          //           ),
+          //         ),
+          // ),
+          // _isFirstFieldRempli || _qrCodesTemp.isNotEmpty
+          //     ? Padding(
+          //         padding: const EdgeInsets.all(8.0),
+          //         child: _serialController.text.isNotEmpty
+          //             ? FlagDetector(
+          //                 barcode: _serialController.text,
+          //                 height: 25,
+          //                 width: 40,
+          //               ) // Afficher FlagDetector avec le code-barres
+          //             : FlagDetector(
+          //                 barcode: _serialController.text,
+          //                 height: 25,
+          //                 width: 40,
+          //               ),
+          //       )
+          //     : Padding(
+          //         padding: const EdgeInsets.all(8.0),
+          //         child: Container(
+          //           height: 25,
+          //           width: 40,
+          //         ),
+          //       ), // Flag
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
             child: TextFormField(
@@ -796,6 +813,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                 )
               // prix de vente
               : Container(),
+
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: !_showDetail
@@ -860,6 +878,25 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                                     // },
                                     decoration: InputDecoration(
                                       labelText: 'Piéce dans ce Pack',
+                                      suffixIcon: TextButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            _qtyPartielController.text = '1';
+                                            _resultatPrixPartiel = (double
+                                                        .parse(
+                                                            _prixVenteController
+                                                                .text) /
+                                                    double.parse(
+                                                        _qtyPartielController
+                                                            .text))
+                                                .toStringAsFixed(2);
+                                          });
+                                        },
+                                        child: Text(
+                                          'Reset',
+                                          style: TextStyle(fontSize: 12),
+                                        ),
+                                      ),
                                       border: OutlineInputBorder(
                                         borderRadius:
                                             BorderRadius.circular(8.0),
@@ -1063,6 +1100,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                                       _focusNodePV
                                           .requestFocus(); // Passe au champ 2
                                     },
+
                                     decoration: InputDecoration(
                                       labelText: 'Prix d\'achat',
                                       border: OutlineInputBorder(
@@ -1083,7 +1121,6 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                                         borderSide: BorderSide
                                             .none, // Supprime le contour en état focus
                                       ),
-                                      //border: InputBorder.none,
                                       filled: true,
                                       contentPadding: EdgeInsets.all(15),
                                     ),
@@ -1848,38 +1885,12 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
       );
   }
 
-  void _assignApprovisionnementsToProduit(Produit produit) {
-    for (int i = 0; i < _approvisionnementTemporaire.length; i++) {
-      final approvisionnement = _approvisionnementTemporaire[i];
-
-      // Lier le produit à l'approvisionnement
-      approvisionnement.produit.target = produit;
-
-      // Vérifier et attribuer un fournisseur si disponible
-      if (i < _selectedFournisseurs.length) {
-        approvisionnement.fournisseur.target = _selectedFournisseurs[i];
-      }
-
-      // Créer et associer un objet Crud
-      approvisionnement.crud.target = Crud(
-        createdBy: 1,
-        updatedBy: 1,
-        deletedBy: 1,
-        dateCreation: DateTime.now(),
-        derniereModification: DateTime.now(),
-      );
-
-      // Sauvegarder temporairement l'approvisionnement
-      produit.approvisionnements.add(approvisionnement);
-    }
-  }
-
 //Étape 3 : Gestion des Erreurs et du Retour UI
 
   void _showSnackBar(BuildContext context, String message, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        padding: EdgeInsets.symmetric(vertical: 35, horizontal: 18),
+        padding: EdgeInsets.symmetric(vertical: 20, horizontal: 8),
         showCloseIcon: true,
         content: Center(child: Text(message)),
         backgroundColor: color,
@@ -1888,96 +1899,6 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
   }
 
 // Étape 4 :Combinaison des Étapes
-
-  IconButton buildButton_Edit1(
-    BuildContext context,
-    CommerceProvider produitProvider,
-    bool isFinded,
-  ) {
-    return IconButton(
-      onPressed: _serialController.text.trim().isEmpty && _qrCodesTemp.isEmpty
-          ? null
-          : () async {
-              if (!mounted) return;
-
-              // Validation du formulaire
-              if (!await _validateForm()) return;
-
-              // Vérifier si le produit existe déjà avant d'afficher le ProgressDialog
-              final existingProduct =
-                  await produitProvider.getProduitByQr(_serialController.text);
-              if (existingProduct != null) {
-                print('Produit existant détecté');
-                showExistingProductDialog(context, _serialController.text,
-                    existingProduct, produitProvider);
-                _showSnackBar(context, 'Produit déjà existant', Colors.orange);
-                return; // Arrêter ici si le produit existe déjà
-              }
-
-              // Affichage du ProgressDialog uniquement pour un produit non existant
-              setState(() => _isLoadingSauv = true);
-              // showDialog(
-              //   context: context,
-              //   barrierDismissible: false,
-              //   builder: (context) => const ProgressDialog(),
-              // );
-
-              try {
-                // Préparation de l'URL de l'image
-                final imageUrl = await _prepareImageUrl();
-                _addQrCodeIfNotExists();
-
-                // Création d'un nouveau produit avec les détails saisis
-                final produit = _createProduit(imageUrl);
-
-                if ( //_prixAchatController.text.isNotEmpty &&
-                    _stockController.text.isNotEmpty) {
-                  print('debut saveApprovisionnement');
-                  // saveApprovisionnement();
-                  print('saveApprovisionnement');
-                }
-                _assignApprovisionnementsToProduit(produit);
-
-                // Sauvegarde du nouveau produit
-                produitProvider.updateProduit(
-                  produit,
-                  // _approvisionnementTemporaire
-                );
-                _formKey.currentState?.save();
-                setState(() => _isLoadingSauv = false);
-                _showSnackBar(
-                    context, 'Produit ajouté avec succès', Colors.green);
-
-                Navigator.pop(context); // Ferme la page du formulaire
-              } catch (e) {
-                _showSnackBar(
-                    context, 'Erreur lors de la sauvegarde : $e', Colors.red);
-                print(
-                  'Erreur lors de la sauvegarde : $e',
-                );
-              } finally {
-                if (mounted) {
-                  setState(() => _isLoadingSauv = false);
-                  //Navigator.pop(context); // Ferme le ProgressDialog
-                }
-              }
-            },
-      icon: _isLoadingSauv
-          ? const CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-            )
-          : Icon(
-              isFinded && _serialController.text == _produitQr
-                  ? Icons.edit
-                  : _serialController.text.trim().isEmpty &&
-                          _qrCodesTemp.isEmpty
-                      ? null
-                      : Icons.send,
-              color: Colors.blueAccent,
-            ),
-    );
-  }
 
   IconButton buildButton_Edit(
     BuildContext context,
@@ -2026,9 +1947,13 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
             ..qtyPartiel = double.parse(_qtyPartielController.text)
             ..derniereModification = DateTime.now();
 
-          if (_stockController.text.isNotEmpty) {
-            _assignApprovisionnementsToProduit(produit);
+          if ( //_prixAchatController.text.isNotEmpty &&
+              _stockController.text.isNotEmpty) {
+            print('debut saveApprovisionnement');
+            saveApprovisionnement();
+            print('saveApprovisionnement');
           }
+          _assignApprovisionnementsToProduit(produit);
 
           // Sauvegarder les modifications
           produitProvider.updateProduit(produit);
@@ -2189,9 +2114,9 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                               fit: BoxFit
                                   .cover, // Remplit l'espace sans déformation
                               width: screenWidth *
-                                  0.6, // 60% de la largeur de l'écran
+                                  0.4, // 60% de la largeur de l'écran
                               height: screenHeight *
-                                  0.6, // 60% de la largeur pour garder le ratio
+                                  0.4, // 60% de la largeur pour garder le ratio
                               placeholder: (context, url) => Center(
                                 child:
                                     CircularProgressIndicator(), // Indicateur de chargement
@@ -2207,69 +2132,19 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                             ),
                           ),
                         )
-                      : Container(), // Affiche un container vide si pas d'image
+                      : Center(
+                          child: Lottie.asset(
+                            'assets/lotties/1 (8).json', // Chemin vers ton fichier Lottie
+                            width: screenWidth *
+                                0.2, // Ajuste la taille de l'erreur à 30%
+                            height: screenWidth * 0.2,
+                          ),
+                        ), // Affiche un container vide si pas d'image
                 ),
                 Text(
                   'Dernière Modification : ${produit.derniereModification.format('yMMMMd', 'fr_FR')}',
                   style: TextStyle(
                     fontSize: 12,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextButton(
-                    style: TextButton.styleFrom(foregroundColor: Colors.blue),
-                    child: Text('Voir Details...'),
-                    onPressed: () async {
-                      await Navigator.of(context).push(MaterialPageRoute(
-                          builder: (ctx) => ProduitDetailPage(
-                                produit: produit,
-                              )));
-                    },
-                  ),
-                ),
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(0.0),
-                    child: RichText(
-                      text: TextSpan(
-                        text: 'BarCode'.toUpperCase(),
-                        style: TextStyle(
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? Colors
-                                  .white // Couleur du texte pour le thème sombre
-                              : Colors
-                                  .black, // Couleur du texte pour le thème clair
-                          fontSize: 20,
-                          fontFamily: 'Oswald',
-                        ),
-                        children: <TextSpan>[
-                          TextSpan(
-                            text: ' ${code} '.toUpperCase(),
-                            style: TextStyle(
-                              fontFamily: 'Oswald',
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          TextSpan(
-                            text: ' est déjà associé au '.toUpperCase(),
-                            style: TextStyle(
-                              fontFamily: 'Oswald',
-                              fontSize: 20,
-                            ),
-                          ),
-                          TextSpan(
-                            text: '${produit.nom}'.toUpperCase(),
-                            style: TextStyle(
-                              fontFamily: 'Oswald',
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
                 ),
               ],
@@ -2283,6 +2158,135 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Wrap(
+                      spacing: 8.0, // Espacement horizontal entre les Chips
+                      runSpacing: 7.0, // Espacement vertical entre les Chips
+                      children: [
+                        // Affiche uniquement les trois premiers Chips
+                        ...produit.qr!
+                            .split(',')
+                            .map((e) => e.trim()) // Supprime les espaces
+                            .take(3) // Prend les trois premiers éléments
+                            .map(
+                              (code) => Chip(
+                                padding: EdgeInsets.zero,
+                                backgroundColor: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Colors.blueAccent.withOpacity(
+                                        0.2) // Couleur pour le thème sombre
+                                    : Colors.blueAccent.withOpacity(
+                                        0.6), // Couleur pour le thème clair
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      20.0), // Coins arrondis
+                                ),
+                                avatar: Align(
+                                  alignment: Alignment
+                                      .center, // Centre l'avatar verticalement
+                                  child: CircularFlagDetector(
+                                    barcode: code,
+                                    size: 25, // Taille ajustée
+                                  ),
+                                ),
+                                visualDensity: const VisualDensity(
+                                  vertical: -1, // Ajustement vertical
+                                ),
+                                label: Text(
+                                  code,
+                                  style: TextStyle(
+                                    color: Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors
+                                            .white // Texte pour le thème sombre
+                                        : Colors
+                                            .black, // Texte pour le thème clair
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                        // Affiche une icône indiquant le nombre de Chips restants, si nécessaire
+                        if (produit.qr!.split(',').length > 3)
+                          Chip(
+                            padding: EdgeInsets.zero,
+                            backgroundColor:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.grey.withOpacity(
+                                        0.2) // Couleur pour le thème sombre
+                                    : Colors.grey.withOpacity(
+                                        0.6), // Couleur pour le thème clair
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(20.0), // Coins arrondis
+                            ),
+                            avatar: Icon(
+                              Icons
+                                  .more_horiz, // Icône indiquant plus d'éléments
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black,
+                            ),
+                            label: Text(
+                              "+${produit.qr!.split(',').length - 3}", // Nombre d'éléments restants
+                              style: TextStyle(
+                                color: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Colors.white
+                                    : Colors.black,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(0.0),
+                      child: RichText(
+                        text: TextSpan(
+                          text: 'BarCode'.toUpperCase(),
+                          style: TextStyle(
+                            color: Theme.of(context).brightness ==
+                                    Brightness.dark
+                                ? Colors
+                                    .white // Couleur du texte pour le thème sombre
+                                : Colors
+                                    .black, // Couleur du texte pour le thème clair
+                            fontSize: 20,
+                            fontFamily: 'Oswald',
+                          ),
+                          children: <TextSpan>[
+                            TextSpan(
+                              text: ' ${code} '.toUpperCase(),
+                              style: TextStyle(
+                                fontFamily: 'Oswald',
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextSpan(
+                              text: ' est déjà associé au '.toUpperCase(),
+                              style: TextStyle(
+                                fontFamily: 'Oswald',
+                                fontSize: 20,
+                              ),
+                            ),
+                            TextSpan(
+                              text: '${produit.nom}'.toUpperCase(),
+                              style: TextStyle(
+                                fontFamily: 'Oswald',
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                   if (produit.description != null &&
                       produit.description!.isNotEmpty)
                     Padding(
@@ -2315,16 +2319,30 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
           actions: [
             TextButton(
               style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: Text('Supprimer le code'),
+              child: Text('Supprimer code'),
               onPressed: () async {
                 await provider.removeQRCodeFromProduit(produit.id, code);
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('OK', style: TextStyle(color: Colors.blue)),
+              child: Text('Bye', style: TextStyle(color: Colors.blue)),
               onPressed: () {
                 Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(foregroundColor: Colors.blue),
+              child: Text('Voir Details...'),
+              onPressed: () async {
+                await Navigator.of(context)
+                    .push(MaterialPageRoute(
+                        builder: (ctx) => ProduitDetailPage(
+                              produit: produit,
+                            )))
+                    .whenComplete(
+                      () => Navigator.of(context).pop(),
+                    );
               },
             ),
           ],
@@ -2625,6 +2643,36 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
       _selectedFournisseur = _currentFournisseur;
       _isEditing = true;
     });
+  }
+
+  void _assignApprovisionnementsToProduit(Produit produit) {
+    // Effacer les approvisionnements existants liés au produit
+    produit.approvisionnements.clear();
+
+    // Parcourir la liste temporaire et réassigner les approvisionnements
+    for (int i = 0; i < _approvisionnementTemporaire.length; i++) {
+      final approvisionnement = _approvisionnementTemporaire[i];
+
+      // Lier le produit à l'approvisionnement
+      approvisionnement.produit.target = produit;
+
+      // Vérifier et attribuer un fournisseur si disponible
+      if (i < _selectedFournisseurs.length) {
+        approvisionnement.fournisseur.target = _selectedFournisseurs[i];
+      }
+
+      // Créer et associer un objet Crud
+      approvisionnement.crud.target = Crud(
+        createdBy: 1,
+        updatedBy: 1,
+        deletedBy: 1,
+        dateCreation: DateTime.now(),
+        derniereModification: DateTime.now(),
+      );
+
+      // Ajouter le nouvel approvisionnement à la liste du produit
+      produit.approvisionnements.add(approvisionnement);
+    }
   }
 
   void supprimerApprovisionnementTemporaire(
