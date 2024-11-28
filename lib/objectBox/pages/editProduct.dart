@@ -1989,7 +1989,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
     final provider = Provider.of<CommerceProvider>(context, listen: false);
     final produit = await provider.getProduitByQr(code!);
 // Afficher une alerte avec les détails du produit existant
-    if (produit != null) {
+    if (produit != null && produit.id != widget.produit.id) {
       showExistingProductDialog(context, code, produit, provider);
     }
     // Rediriger le focus vers le TextFormField après l'ajout
@@ -2083,274 +2083,6 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
     }
   }
 
-  // Méthode séparée pour afficher le dialogue
-  void showExistingProductDialog(BuildContext context, String code,
-      Produit produit, CommerceProvider provider) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        // Récupérer la largeur et la hauteur de l'écran
-        final screenWidth = MediaQuery.of(context).size.width;
-        final screenHeight = MediaQuery.of(context).size.height;
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(20)),
-          ),
-          titlePadding: EdgeInsets.all(0),
-          contentPadding: EdgeInsets.all(20),
-          insetPadding: EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
-          title: Padding(
-            padding: const EdgeInsets.all(0),
-            child: Column(
-              children: [
-                Center(
-                  child: produit.image != null
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: AspectRatio(
-                            aspectRatio: 1, // Conserve un ratio 1:1
-                            child: CachedNetworkImage(
-                              imageUrl: produit.image!,
-                              fit: BoxFit
-                                  .cover, // Remplit l'espace sans déformation
-                              width: screenWidth *
-                                  0.4, // 60% de la largeur de l'écran
-                              height: screenHeight *
-                                  0.4, // 60% de la largeur pour garder le ratio
-                              placeholder: (context, url) => Center(
-                                child:
-                                    CircularProgressIndicator(), // Indicateur de chargement
-                              ),
-                              errorWidget: (context, url, error) => Center(
-                                child: Lottie.asset(
-                                  'assets/lotties/1 (8).json', // Chemin vers ton fichier Lottie
-                                  width: screenWidth *
-                                      0.2, // Ajuste la taille de l'erreur à 30%
-                                  height: screenWidth * 0.2,
-                                ),
-                              ),
-                            ),
-                          ),
-                        )
-                      : Center(
-                          child: Lottie.asset(
-                            'assets/lotties/1 (8).json', // Chemin vers ton fichier Lottie
-                            width: screenWidth *
-                                0.2, // Ajuste la taille de l'erreur à 30%
-                            height: screenWidth * 0.2,
-                          ),
-                        ), // Affiche un container vide si pas d'image
-                ),
-                Text(
-                  'Dernière Modification : ${produit.derniereModification.format('yMMMMd', 'fr_FR')}',
-                  style: TextStyle(
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          content: SingleChildScrollView(
-            child: SizedBox(
-              width: 200, // Largeur fixe du dialogue
-              // height: 300,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Wrap(
-                      spacing: 8.0, // Espacement horizontal entre les Chips
-                      runSpacing: 7.0, // Espacement vertical entre les Chips
-                      children: [
-                        // Affiche uniquement les trois premiers Chips
-                        ...produit.qr!
-                            .split(',')
-                            .map((e) => e.trim()) // Supprime les espaces
-                            .take(3) // Prend les trois premiers éléments
-                            .map(
-                              (code) => Chip(
-                                padding: EdgeInsets.zero,
-                                backgroundColor: Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? Colors.blueAccent.withOpacity(
-                                        0.2) // Couleur pour le thème sombre
-                                    : Colors.blueAccent.withOpacity(
-                                        0.6), // Couleur pour le thème clair
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      20.0), // Coins arrondis
-                                ),
-                                avatar: Align(
-                                  alignment: Alignment
-                                      .center, // Centre l'avatar verticalement
-                                  child: CircularFlagDetector(
-                                    barcode: code,
-                                    size: 25, // Taille ajustée
-                                  ),
-                                ),
-                                visualDensity: const VisualDensity(
-                                  vertical: -1, // Ajustement vertical
-                                ),
-                                label: Text(
-                                  code,
-                                  style: TextStyle(
-                                    color: Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Colors
-                                            .white // Texte pour le thème sombre
-                                        : Colors
-                                            .black, // Texte pour le thème clair
-                                  ),
-                                ),
-                              ),
-                            ),
-
-                        // Affiche une icône indiquant le nombre de Chips restants, si nécessaire
-                        if (produit.qr!.split(',').length > 3)
-                          Chip(
-                            padding: EdgeInsets.zero,
-                            backgroundColor:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? Colors.grey.withOpacity(
-                                        0.2) // Couleur pour le thème sombre
-                                    : Colors.grey.withOpacity(
-                                        0.6), // Couleur pour le thème clair
-                            shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.circular(20.0), // Coins arrondis
-                            ),
-                            avatar: Icon(
-                              Icons
-                                  .more_horiz, // Icône indiquant plus d'éléments
-                              color: Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? Colors.white
-                                  : Colors.black,
-                            ),
-                            label: Text(
-                              "+${produit.qr!.split(',').length - 3}", // Nombre d'éléments restants
-                              style: TextStyle(
-                                color: Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? Colors.white
-                                    : Colors.black,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(0.0),
-                      child: RichText(
-                        text: TextSpan(
-                          text: 'BarCode'.toUpperCase(),
-                          style: TextStyle(
-                            color: Theme.of(context).brightness ==
-                                    Brightness.dark
-                                ? Colors
-                                    .white // Couleur du texte pour le thème sombre
-                                : Colors
-                                    .black, // Couleur du texte pour le thème clair
-                            fontSize: 20,
-                            fontFamily: 'Oswald',
-                          ),
-                          children: <TextSpan>[
-                            TextSpan(
-                              text: ' ${code} '.toUpperCase(),
-                              style: TextStyle(
-                                fontFamily: 'Oswald',
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            TextSpan(
-                              text: ' est déjà associé au '.toUpperCase(),
-                              style: TextStyle(
-                                fontFamily: 'Oswald',
-                                fontSize: 20,
-                              ),
-                            ),
-                            TextSpan(
-                              text: '${produit.nom}'.toUpperCase(),
-                              style: TextStyle(
-                                fontFamily: 'Oswald',
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (produit.description != null &&
-                      produit.description!.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4.0),
-                      child: Text(
-                        'Description : ${produit.description}',
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.justify,
-                        style: TextStyle(
-                          fontSize: 18,
-                        ),
-                      ),
-                    ),
-                  Text(
-                    'Prix de vente : ${produit.prixVente.toStringAsFixed(2)} DA',
-                    style: TextStyle(
-                      fontSize: 18,
-                    ),
-                  ),
-                  Text(
-                    'Stock : ${produit.stock.toStringAsFixed(2)}',
-                    style: TextStyle(
-                      fontSize: 18,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: Text('Supprimer code'),
-              onPressed: () async {
-                await provider.removeQRCodeFromProduit(produit.id, code);
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Bye', style: TextStyle(color: Colors.blue)),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              style: TextButton.styleFrom(foregroundColor: Colors.blue),
-              child: Text('Voir Details...'),
-              onPressed: () async {
-                await Navigator.of(context)
-                    .push(MaterialPageRoute(
-                        builder: (ctx) => ProduitDetailPage(
-                              produit: produit,
-                            )))
-                    .whenComplete(
-                      () => Navigator.of(context).pop(),
-                    );
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   void _addQRCodeFromText() async {
     final code = _serialController.text.trim();
     final provider = Provider.of<CommerceProvider>(context, listen: false);
@@ -2372,6 +2104,305 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
       }
       FocusScope.of(context).requestFocus(_serialFocusNode);
     }
+  }
+
+  // Méthode séparée pour afficher le dialogue
+  void showExistingProductDialog(BuildContext context, String code,
+      Produit produit, CommerceProvider provider) {
+    final commerceProvider =
+        Provider.of<CommerceProvider>(context, listen: false);
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        // Récupérer la largeur et la hauteur de l'écran
+        final screenWidth = MediaQuery.of(context).size.width;
+        final screenHeight = MediaQuery.of(context).size.height;
+        return Builder(builder: (BuildContext builderContext) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20)),
+            ),
+            titlePadding: EdgeInsets.all(0),
+            contentPadding: EdgeInsets.all(20),
+            insetPadding:
+                EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+            title: Padding(
+              padding: const EdgeInsets.all(0),
+              child: Column(
+                children: [
+                  Center(
+                    child: produit.image != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: AspectRatio(
+                              aspectRatio: 1, // Conserve un ratio 1:1
+                              child: CachedNetworkImage(
+                                imageUrl: produit.image!,
+                                fit: BoxFit
+                                    .cover, // Remplit l'espace sans déformation
+                                width: screenWidth *
+                                    0.4, // 60% de la largeur de l'écran
+                                height: screenHeight *
+                                    0.4, // 60% de la largeur pour garder le ratio
+                                placeholder: (context, url) => Center(
+                                  child:
+                                      CircularProgressIndicator(), // Indicateur de chargement
+                                ),
+                                errorWidget: (context, url, error) => Center(
+                                  child: Lottie.asset(
+                                    'assets/lotties/1 (8).json', // Chemin vers ton fichier Lottie
+                                    width: screenWidth *
+                                        0.2, // Ajuste la taille de l'erreur à 30%
+                                    height: screenWidth * 0.2,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        : Center(
+                            child: Lottie.asset(
+                              'assets/lotties/1 (8).json', // Chemin vers ton fichier Lottie
+                              width: screenWidth *
+                                  0.2, // Ajuste la taille de l'erreur à 30%
+                              height: screenWidth * 0.2,
+                            ),
+                          ), // Affiche un container vide si pas d'image
+                  ),
+                  Text(
+                    'Dernière Modification : ${produit.derniereModification.format('yMMMMd', 'fr_FR')}',
+                    style: TextStyle(
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            content: SingleChildScrollView(
+              child: SizedBox(
+                width: 200, // Largeur fixe du dialogue
+                // height: 300,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Wrap(
+                        spacing: 8.0, // Espacement horizontal entre les Chips
+                        runSpacing: 7.0, // Espacement vertical entre les Chips
+                        children: [
+                          // Affiche uniquement les trois premiers Chips
+                          ...produit.qr!
+                              .split(',')
+                              .map((e) => e.trim()) // Supprime les espaces
+                              .take(3) // Prend les trois premiers éléments
+                              .map(
+                                (code) => Chip(
+                                  padding: EdgeInsets.zero,
+                                  backgroundColor: Theme.of(context)
+                                              .brightness ==
+                                          Brightness.dark
+                                      ? Colors.blueAccent.withOpacity(
+                                          0.2) // Couleur pour le thème sombre
+                                      : Colors.blueAccent.withOpacity(
+                                          0.6), // Couleur pour le thème clair
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                        20.0), // Coins arrondis
+                                  ),
+                                  avatar: Align(
+                                    alignment: Alignment
+                                        .center, // Centre l'avatar verticalement
+                                    child: CircularFlagDetector(
+                                      barcode: code,
+                                      size: 25, // Taille ajustée
+                                    ),
+                                  ),
+                                  visualDensity: const VisualDensity(
+                                    vertical: -1, // Ajustement vertical
+                                  ),
+                                  label: Text(
+                                    code,
+                                    style: TextStyle(
+                                      color: Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? Colors
+                                              .white // Texte pour le thème sombre
+                                          : Colors
+                                              .black, // Texte pour le thème clair
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                          // Affiche une icône indiquant le nombre de Chips restants, si nécessaire
+                          if (produit.qr!.split(',').length > 3)
+                            Chip(
+                              padding: EdgeInsets.zero,
+                              backgroundColor: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.grey.withOpacity(
+                                      0.2) // Couleur pour le thème sombre
+                                  : Colors.grey.withOpacity(
+                                      0.6), // Couleur pour le thème clair
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                    20.0), // Coins arrondis
+                              ),
+                              avatar: Icon(
+                                Icons
+                                    .more_horiz, // Icône indiquant plus d'éléments
+                                color: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Colors.white
+                                    : Colors.black,
+                              ),
+                              label: Text(
+                                "+${produit.qr!.split(',').length - 3}", // Nombre d'éléments restants
+                                style: TextStyle(
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.white
+                                      : Colors.black,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(0.0),
+                        child: RichText(
+                          text: TextSpan(
+                            text: 'BarCode'.toUpperCase(),
+                            style: TextStyle(
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors
+                                      .white // Couleur du texte pour le thème sombre
+                                  : Colors
+                                      .black, // Couleur du texte pour le thème clair
+                              fontSize: 20,
+                              fontFamily: 'Oswald',
+                            ),
+                            children: <TextSpan>[
+                              TextSpan(
+                                text: ' ${code} '.toUpperCase(),
+                                style: TextStyle(
+                                  fontFamily: 'Oswald',
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              TextSpan(
+                                text: ' est déjà associé au '.toUpperCase(),
+                                style: TextStyle(
+                                  fontFamily: 'Oswald',
+                                  fontSize: 20,
+                                ),
+                              ),
+                              TextSpan(
+                                text: '${produit.nom}'.toUpperCase(),
+                                style: TextStyle(
+                                  fontFamily: 'Oswald',
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (produit.description != null &&
+                        produit.description!.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Text(
+                          'Description : ${produit.description}',
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.justify,
+                          style: TextStyle(
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                    Text(
+                      'Prix de vente : ${produit.prixVente.toStringAsFixed(2)} DA',
+                      style: TextStyle(
+                        fontSize: 18,
+                      ),
+                    ),
+                    Text(
+                      'Stock : ${produit.stock.toStringAsFixed(2)}',
+                      style: TextStyle(
+                        fontSize: 18,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: Text('Supprimer code'),
+                onPressed: () async {
+                  // Ferme d'abord la boîte de dialogue
+                  Navigator.of(builderContext).pop();
+                  await provider
+                      .removeQRCodeFromProduit(produit.id, code)
+                      .whenComplete(() => print('suppression reusite'));
+
+                  // Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: Text('Bye', style: TextStyle(color: Colors.blue)),
+                onPressed: () {
+                  // Ferme d'abord la boîte de dialogue
+                  Navigator.of(builderContext).pop();
+                },
+              ),
+              TextButton(
+                style: TextButton.styleFrom(foregroundColor: Colors.blue),
+                child: Text('Voir Details...'),
+                onPressed: () async {
+                  // Ferme d'abord la boîte de dialogue
+                  Navigator.of(builderContext).pop();
+
+                  // Ensuite, navigue vers la nouvelle page
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (ctx) => ProduitDetailPage(produit: produit),
+                    ),
+                  );
+                },
+              ),
+
+              // TextButton(
+              //   style: TextButton.styleFrom(foregroundColor: Colors.blue),
+              //   child: Text('Voir Details...'),
+              //   onPressed: () async {
+              //     await Navigator.of(context).push(MaterialPageRoute(
+              //             builder: (ctx) => ProduitDetailPage(
+              //                   produit: produit,
+              //                 )))
+              //         // .whenComplete(
+              //         //   () => Navigator.of(builderContext).pop(),
+              //         // )
+              //         ;
+              //     // Navigator.of(context).pop();
+              //     // Navigator.of(dialogContext).pop();
+              //     Navigator.of(builderContext).pop();
+              //   },
+              // ),
+            ],
+          );
+        });
+      },
+    );
   }
 
   Container buildColumnPicSuppliers(double largeur, BuildContext context) {

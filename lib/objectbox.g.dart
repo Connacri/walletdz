@@ -167,12 +167,7 @@ final _entities = <obx_int.ModelEntity>[
             type: 10,
             flags: 0)
       ],
-      relations: <obx_int.ModelRelation>[
-        obx_int.ModelRelation(
-            id: const obx_int.IdUid(2, 4545419348761092860),
-            name: 'qrcodes',
-            targetId: const obx_int.IdUid(11, 3443064098621496820))
-      ],
+      relations: <obx_int.ModelRelation>[],
       backlinks: <obx_int.ModelBacklink>[
         obx_int.ModelBacklink(
             name: 'approvisionnements',
@@ -241,122 +236,8 @@ final _entities = <obx_int.ModelEntity>[
       relations: <obx_int.ModelRelation>[],
       backlinks: <obx_int.ModelBacklink>[
         obx_int.ModelBacklink(
-            name: 'factures', srcEntity: 'Facture', srcField: '')
+            name: 'factures', srcEntity: 'Document', srcField: '')
       ]),
-  obx_int.ModelEntity(
-      id: const obx_int.IdUid(4, 1285774936409385946),
-      name: 'Facture',
-      lastPropertyId: const obx_int.IdUid(13, 1884377143891085364),
-      flags: 0,
-      properties: <obx_int.ModelProperty>[
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(1, 703887304841839968),
-            name: 'id',
-            type: 6,
-            flags: 1),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(2, 142214021994294718),
-            name: 'qr',
-            type: 9,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(3, 807322010398501475),
-            name: 'date',
-            type: 10,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(4, 7593775792342322389),
-            name: 'clientId',
-            type: 11,
-            flags: 520,
-            indexId: const obx_int.IdUid(1, 7209079759549609437),
-            relationTarget: 'Client'),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(8, 4377413958790530702),
-            name: 'impayer',
-            type: 8,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(9, 3233551067305536959),
-            name: 'crudId',
-            type: 11,
-            flags: 520,
-            indexId: const obx_int.IdUid(13, 4799214949334452013),
-            relationTarget: 'Crud'),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(11, 1535173712481404531),
-            name: 'derniereModification',
-            type: 10,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(12, 6592955708497446217),
-            name: 'isSynced',
-            type: 1,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(13, 1884377143891085364),
-            name: 'syncedAt',
-            type: 10,
-            flags: 0)
-      ],
-      relations: <obx_int.ModelRelation>[],
-      backlinks: <obx_int.ModelBacklink>[
-        obx_int.ModelBacklink(
-            name: 'lignesFacture', srcEntity: 'LigneFacture', srcField: '')
-      ]),
-  obx_int.ModelEntity(
-      id: const obx_int.IdUid(5, 615909935097060499),
-      name: 'LigneFacture',
-      lastPropertyId: const obx_int.IdUid(9, 1592701008287979150),
-      flags: 0,
-      properties: <obx_int.ModelProperty>[
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(1, 7495577581902831294),
-            name: 'id',
-            type: 6,
-            flags: 1),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(2, 8662175227878512386),
-            name: 'produitId',
-            type: 11,
-            flags: 520,
-            indexId: const obx_int.IdUid(2, 4469509526914219384),
-            relationTarget: 'Produit'),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(3, 2271720061750415984),
-            name: 'factureId',
-            type: 11,
-            flags: 520,
-            indexId: const obx_int.IdUid(3, 3115440698062349467),
-            relationTarget: 'Facture'),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(4, 3968408471191777871),
-            name: 'quantite',
-            type: 8,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(5, 2176273511660132623),
-            name: 'prixUnitaire',
-            type: 8,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(7, 5597323246222841857),
-            name: 'derniereModification',
-            type: 10,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(8, 1437889204080274190),
-            name: 'isSynced',
-            type: 1,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(9, 1592701008287979150),
-            name: 'syncedAt',
-            type: 10,
-            flags: 0)
-      ],
-      relations: <obx_int.ModelRelation>[],
-      backlinks: <obx_int.ModelBacklink>[]),
   obx_int.ModelEntity(
       id: const obx_int.IdUid(7, 4476248726244800597),
       name: 'DeletedProduct',
@@ -604,40 +485,6 @@ final _entities = <obx_int.ModelEntity>[
       relations: <obx_int.ModelRelation>[],
       backlinks: <obx_int.ModelBacklink>[]),
   obx_int.ModelEntity(
-      id: const obx_int.IdUid(11, 3443064098621496820),
-      name: 'QrCode',
-      lastPropertyId: const obx_int.IdUid(5, 799174612431273081),
-      flags: 0,
-      properties: <obx_int.ModelProperty>[
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(1, 221992503793589292),
-            name: 'id',
-            type: 6,
-            flags: 1),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(2, 8114817508930789153),
-            name: 'serial',
-            type: 9,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(3, 7892746565150206372),
-            name: 'type',
-            type: 9,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(4, 7048804820784696697),
-            name: 'isSynced',
-            type: 1,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(5, 799174612431273081),
-            name: 'syncedAt',
-            type: 10,
-            flags: 0)
-      ],
-      relations: <obx_int.ModelRelation>[],
-      backlinks: <obx_int.ModelBacklink>[]),
-  obx_int.ModelEntity(
       id: const obx_int.IdUid(12, 7671421685835368695),
       name: 'Locater',
       lastPropertyId: const obx_int.IdUid(2, 171507787880345142),
@@ -718,6 +565,137 @@ final _entities = <obx_int.ModelEntity>[
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
+      backlinks: <obx_int.ModelBacklink>[]),
+  obx_int.ModelEntity(
+      id: const obx_int.IdUid(15, 2855331488523553781),
+      name: 'Document',
+      lastPropertyId: const obx_int.IdUid(12, 3933310820785329583),
+      flags: 0,
+      properties: <obx_int.ModelProperty>[
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(1, 4237791499931033119),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(2, 3985891523293286709),
+            name: 'type',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(3, 7726161578765442765),
+            name: 'qrReference',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(4, 835359165134542184),
+            name: 'impayer',
+            type: 8,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(5, 5505107835250131667),
+            name: 'derniereModification',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(6, 334968220961204506),
+            name: 'isSynced',
+            type: 1,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(7, 6918906124049023416),
+            name: 'syncedAt',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(8, 6675712082848843966),
+            name: 'date',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(9, 4664916555777117313),
+            name: 'clientId',
+            type: 11,
+            flags: 520,
+            indexId: const obx_int.IdUid(20, 3151200795533087506),
+            relationTarget: 'Client'),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(10, 4701486699852357867),
+            name: 'fournisseurId',
+            type: 11,
+            flags: 520,
+            indexId: const obx_int.IdUid(21, 7593563520958121057),
+            relationTarget: 'Fournisseur'),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(11, 8943818526450160785),
+            name: 'crudId',
+            type: 11,
+            flags: 520,
+            indexId: const obx_int.IdUid(22, 8855833750708756558),
+            relationTarget: 'Crud'),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(12, 3933310820785329583),
+            name: 'montantVerse',
+            type: 8,
+            flags: 0)
+      ],
+      relations: <obx_int.ModelRelation>[],
+      backlinks: <obx_int.ModelBacklink>[
+        obx_int.ModelBacklink(
+            name: 'lignesDocument', srcEntity: 'LigneDocument', srcField: '')
+      ]),
+  obx_int.ModelEntity(
+      id: const obx_int.IdUid(16, 6384163625204797289),
+      name: 'LigneDocument',
+      lastPropertyId: const obx_int.IdUid(8, 2922646589130360037),
+      flags: 0,
+      properties: <obx_int.ModelProperty>[
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(1, 864096671946263408),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(2, 1374050035982448901),
+            name: 'quantite',
+            type: 8,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(3, 6868220462476377885),
+            name: 'prixUnitaire',
+            type: 8,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(4, 700606146638982059),
+            name: 'derniereModification',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(5, 665638284434107564),
+            name: 'isSynced',
+            type: 1,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(6, 3180509861732758781),
+            name: 'syncedAt',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(7, 3988161801854014953),
+            name: 'produitId',
+            type: 11,
+            flags: 520,
+            indexId: const obx_int.IdUid(23, 2599477206857474289),
+            relationTarget: 'Produit'),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(8, 2922646589130360037),
+            name: 'factureId',
+            type: 11,
+            flags: 520,
+            indexId: const obx_int.IdUid(24, 6359461765771555142),
+            relationTarget: 'Document')
+      ],
+      relations: <obx_int.ModelRelation>[],
       backlinks: <obx_int.ModelBacklink>[])
 ];
 
@@ -756,11 +734,16 @@ Future<obx.Store> openStore(
 obx_int.ModelDefinition getObjectBoxModel() {
   final model = obx_int.ModelInfo(
       entities: _entities,
-      lastEntityId: const obx_int.IdUid(14, 1300875806629673682),
-      lastIndexId: const obx_int.IdUid(19, 752249656180889003),
+      lastEntityId: const obx_int.IdUid(16, 6384163625204797289),
+      lastIndexId: const obx_int.IdUid(24, 6359461765771555142),
       lastRelationId: const obx_int.IdUid(2, 4545419348761092860),
       lastSequenceId: const obx_int.IdUid(0, 0),
-      retiredEntityUids: const [6647246884597588827],
+      retiredEntityUids: const [
+        6647246884597588827,
+        1285774936409385946,
+        615909935097060499,
+        3443064098621496820
+      ],
       retiredIndexUids: const [
         7680843215305245682,
         720122404314208774,
@@ -817,9 +800,31 @@ obx_int.ModelDefinition getObjectBoxModel() {
         510917551575483361,
         6450200723927042371,
         5959659676638121576,
-        8159454970821468214
+        8159454970821468214,
+        703887304841839968,
+        142214021994294718,
+        807322010398501475,
+        7593775792342322389,
+        4377413958790530702,
+        3233551067305536959,
+        1535173712481404531,
+        6592955708497446217,
+        1884377143891085364,
+        7495577581902831294,
+        8662175227878512386,
+        2271720061750415984,
+        3968408471191777871,
+        2176273511660132623,
+        5597323246222841857,
+        1437889204080274190,
+        1592701008287979150,
+        221992503793589292,
+        8114817508930789153,
+        7892746565150206372,
+        7048804820784696697,
+        799174612431273081
       ],
-      retiredRelationUids: const [2832941486252609678],
+      retiredRelationUids: const [2832941486252609678, 4545419348761092860],
       modelVersion: 5,
       modelVersionParserMinimum: 5,
       version: 1);
@@ -900,7 +905,6 @@ obx_int.ModelDefinition getObjectBoxModel() {
         model: _entities[1],
         toOneRelations: (Produit object) => [object.crud],
         toManyRelations: (Produit object) => {
-              obx_int.RelInfo<Produit>.toMany(2, object.id): object.qrcodes,
               obx_int.RelInfo<Approvisionnement>.toOneBacklink(5, object.id,
                       (Approvisionnement srcObject) => srcObject.produit):
                   object.approvisionnements
@@ -990,8 +994,6 @@ obx_int.ModelDefinition getObjectBoxModel() {
           object.crud.targetId =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 44, 0);
           object.crud.attach(store);
-          obx_int.InternalToManyAccess.setRelInfo<Produit>(object.qrcodes,
-              store, obx_int.RelInfo<Produit>.toMany(2, object.id));
           obx_int.InternalToManyAccess.setRelInfo<Produit>(
               object.approvisionnements,
               store,
@@ -1003,8 +1005,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
         model: _entities[2],
         toOneRelations: (Client object) => [object.crud],
         toManyRelations: (Client object) => {
-              obx_int.RelInfo<Facture>.toOneBacklink(
-                      4, object.id, (Facture srcObject) => srcObject.client):
+              obx_int.RelInfo<Document>.toOneBacklink(
+                      9, object.id, (Document srcObject) => srcObject.client):
                   object.factures
             },
         getId: (Client object) => object.id,
@@ -1071,129 +1073,12 @@ obx_int.ModelDefinition getObjectBoxModel() {
           obx_int.InternalToManyAccess.setRelInfo<Client>(
               object.factures,
               store,
-              obx_int.RelInfo<Facture>.toOneBacklink(
-                  4, object.id, (Facture srcObject) => srcObject.client));
-          return object;
-        }),
-    Facture: obx_int.EntityDefinition<Facture>(
-        model: _entities[3],
-        toOneRelations: (Facture object) => [object.client, object.crud],
-        toManyRelations: (Facture object) => {
-              obx_int.RelInfo<LigneFacture>.toOneBacklink(3, object.id,
-                      (LigneFacture srcObject) => srcObject.facture):
-                  object.lignesFacture
-            },
-        getId: (Facture object) => object.id,
-        setId: (Facture object, int id) {
-          object.id = id;
-        },
-        objectToFB: (Facture object, fb.Builder fbb) {
-          final qrOffset = fbb.writeString(object.qr);
-          fbb.startTable(14);
-          fbb.addInt64(0, object.id);
-          fbb.addOffset(1, qrOffset);
-          fbb.addInt64(2, object.date.millisecondsSinceEpoch);
-          fbb.addInt64(3, object.client.targetId);
-          fbb.addFloat64(7, object.impayer);
-          fbb.addInt64(8, object.crud.targetId);
-          fbb.addInt64(10, object.derniereModification.millisecondsSinceEpoch);
-          fbb.addBool(11, object.isSynced);
-          fbb.addInt64(12, object.syncedAt.millisecondsSinceEpoch);
-          fbb.finish(fbb.endTable());
-          return object.id;
-        },
-        objectFromFB: (obx.Store store, ByteData fbData) {
-          final buffer = fb.BufferContext(fbData);
-          final rootOffset = buffer.derefObject(0);
-          final idParam =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
-          final dateParam = DateTime.fromMillisecondsSinceEpoch(
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0));
-          final qrParam = const fb.StringReader(asciiOptimization: true)
-              .vTableGet(buffer, rootOffset, 6, '');
-          final impayerParam = const fb.Float64Reader()
-              .vTableGetNullable(buffer, rootOffset, 18);
-          final derniereModificationParam = DateTime.fromMillisecondsSinceEpoch(
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 24, 0));
-          final isSyncedParam =
-              const fb.BoolReader().vTableGet(buffer, rootOffset, 26, false);
-          final syncedAtParam = DateTime.fromMillisecondsSinceEpoch(
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 28, 0));
-          final object = Facture(
-              id: idParam,
-              date: dateParam,
-              qr: qrParam,
-              impayer: impayerParam,
-              derniereModification: derniereModificationParam,
-              isSynced: isSyncedParam,
-              syncedAt: syncedAtParam);
-          object.client.targetId =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0);
-          object.client.attach(store);
-          object.crud.targetId =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 20, 0);
-          object.crud.attach(store);
-          obx_int.InternalToManyAccess.setRelInfo<Facture>(
-              object.lignesFacture,
-              store,
-              obx_int.RelInfo<LigneFacture>.toOneBacklink(
-                  3, object.id, (LigneFacture srcObject) => srcObject.facture));
-          return object;
-        }),
-    LigneFacture: obx_int.EntityDefinition<LigneFacture>(
-        model: _entities[4],
-        toOneRelations: (LigneFacture object) =>
-            [object.produit, object.facture],
-        toManyRelations: (LigneFacture object) => {},
-        getId: (LigneFacture object) => object.id,
-        setId: (LigneFacture object, int id) {
-          object.id = id;
-        },
-        objectToFB: (LigneFacture object, fb.Builder fbb) {
-          fbb.startTable(10);
-          fbb.addInt64(0, object.id);
-          fbb.addInt64(1, object.produit.targetId);
-          fbb.addInt64(2, object.facture.targetId);
-          fbb.addFloat64(3, object.quantite);
-          fbb.addFloat64(4, object.prixUnitaire);
-          fbb.addInt64(6, object.derniereModification.millisecondsSinceEpoch);
-          fbb.addBool(7, object.isSynced);
-          fbb.addInt64(8, object.syncedAt.millisecondsSinceEpoch);
-          fbb.finish(fbb.endTable());
-          return object.id;
-        },
-        objectFromFB: (obx.Store store, ByteData fbData) {
-          final buffer = fb.BufferContext(fbData);
-          final rootOffset = buffer.derefObject(0);
-          final idParam =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
-          final quantiteParam =
-              const fb.Float64Reader().vTableGet(buffer, rootOffset, 10, 0);
-          final prixUnitaireParam =
-              const fb.Float64Reader().vTableGet(buffer, rootOffset, 12, 0);
-          final derniereModificationParam = DateTime.fromMillisecondsSinceEpoch(
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 16, 0));
-          final isSyncedParam =
-              const fb.BoolReader().vTableGet(buffer, rootOffset, 18, false);
-          final syncedAtParam = DateTime.fromMillisecondsSinceEpoch(
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 20, 0));
-          final object = LigneFacture(
-              id: idParam,
-              quantite: quantiteParam,
-              prixUnitaire: prixUnitaireParam,
-              derniereModification: derniereModificationParam,
-              isSynced: isSyncedParam,
-              syncedAt: syncedAtParam);
-          object.produit.targetId =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 6, 0);
-          object.produit.attach(store);
-          object.facture.targetId =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0);
-          object.facture.attach(store);
+              obx_int.RelInfo<Document>.toOneBacklink(
+                  9, object.id, (Document srcObject) => srcObject.client));
           return object;
         }),
     DeletedProduct: obx_int.EntityDefinition<DeletedProduct>(
-        model: _entities[5],
+        model: _entities[3],
         toOneRelations: (DeletedProduct object) => [object.crud],
         toManyRelations: (DeletedProduct object) => {},
         getId: (DeletedProduct object) => object.id,
@@ -1253,7 +1138,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           return object;
         }),
     User: obx_int.EntityDefinition<User>(
-        model: _entities[6],
+        model: _entities[4],
         toOneRelations: (User object) => [object.crud],
         toManyRelations: (User object) => {},
         getId: (User object) => object.id,
@@ -1324,7 +1209,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           return object;
         }),
     Approvisionnement: obx_int.EntityDefinition<Approvisionnement>(
-        model: _entities[7],
+        model: _entities[5],
         toOneRelations: (Approvisionnement object) =>
             [object.produit, object.fournisseur, object.crud],
         toManyRelations: (Approvisionnement object) => {},
@@ -1390,7 +1275,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           return object;
         }),
     Crud: obx_int.EntityDefinition<Crud>(
-        model: _entities[8],
+        model: _entities[6],
         toOneRelations: (Crud object) => [],
         toManyRelations: (Crud object) => {},
         getId: (Crud object) => object.id,
@@ -1451,51 +1336,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
 
           return object;
         }),
-    QrCode: obx_int.EntityDefinition<QrCode>(
-        model: _entities[9],
-        toOneRelations: (QrCode object) => [],
-        toManyRelations: (QrCode object) => {},
-        getId: (QrCode object) => object.id,
-        setId: (QrCode object, int id) {
-          object.id = id;
-        },
-        objectToFB: (QrCode object, fb.Builder fbb) {
-          final serialOffset = fbb.writeString(object.serial);
-          final typeOffset =
-              object.type == null ? null : fbb.writeString(object.type!);
-          fbb.startTable(6);
-          fbb.addInt64(0, object.id);
-          fbb.addOffset(1, serialOffset);
-          fbb.addOffset(2, typeOffset);
-          fbb.addBool(3, object.isSynced);
-          fbb.addInt64(4, object.syncedAt.millisecondsSinceEpoch);
-          fbb.finish(fbb.endTable());
-          return object.id;
-        },
-        objectFromFB: (obx.Store store, ByteData fbData) {
-          final buffer = fb.BufferContext(fbData);
-          final rootOffset = buffer.derefObject(0);
-          final idParam =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
-          final serialParam = const fb.StringReader(asciiOptimization: true)
-              .vTableGet(buffer, rootOffset, 6, '');
-          final typeParam = const fb.StringReader(asciiOptimization: true)
-              .vTableGetNullable(buffer, rootOffset, 8);
-          final isSyncedParam =
-              const fb.BoolReader().vTableGet(buffer, rootOffset, 10, false);
-          final syncedAtParam = DateTime.fromMillisecondsSinceEpoch(
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0));
-          final object = QrCode(
-              id: idParam,
-              serial: serialParam,
-              type: typeParam,
-              isSynced: isSyncedParam,
-              syncedAt: syncedAtParam);
-
-          return object;
-        }),
     Locater: obx_int.EntityDefinition<Locater>(
-        model: _entities[10],
+        model: _entities[7],
         toOneRelations: (Locater object) => [],
         toManyRelations: (Locater object) => {},
         getId: (Locater object) => object.id,
@@ -1522,7 +1364,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           return object;
         }),
     Reservation: obx_int.EntityDefinition<Reservation>(
-        model: _entities[11],
+        model: _entities[8],
         toOneRelations: (Reservation object) => [],
         toManyRelations: (Reservation object) => {},
         getId: (Reservation object) => object.id,
@@ -1571,7 +1413,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           return object;
         }),
     Room: obx_int.EntityDefinition<Room>(
-        model: _entities[12],
+        model: _entities[9],
         toOneRelations: (Room object) => [],
         toManyRelations: (Room object) => {},
         getId: (Room object) => object.id,
@@ -1595,6 +1437,138 @@ obx_int.ModelDefinition getObjectBoxModel() {
               .vTableGet(buffer, rootOffset, 6, '');
           final object = Room(id: idParam, name: nameParam);
 
+          return object;
+        }),
+    Document: obx_int.EntityDefinition<Document>(
+        model: _entities[10],
+        toOneRelations: (Document object) =>
+            [object.client, object.fournisseur, object.crud],
+        toManyRelations: (Document object) => {
+              obx_int.RelInfo<LigneDocument>.toOneBacklink(8, object.id,
+                      (LigneDocument srcObject) => srcObject.facture):
+                  object.lignesDocument
+            },
+        getId: (Document object) => object.id,
+        setId: (Document object, int id) {
+          object.id = id;
+        },
+        objectToFB: (Document object, fb.Builder fbb) {
+          final typeOffset = fbb.writeString(object.type);
+          final qrReferenceOffset = fbb.writeString(object.qrReference);
+          fbb.startTable(13);
+          fbb.addInt64(0, object.id);
+          fbb.addOffset(1, typeOffset);
+          fbb.addOffset(2, qrReferenceOffset);
+          fbb.addFloat64(3, object.impayer);
+          fbb.addInt64(4, object.derniereModification.millisecondsSinceEpoch);
+          fbb.addBool(5, object.isSynced);
+          fbb.addInt64(6, object.syncedAt.millisecondsSinceEpoch);
+          fbb.addInt64(7, object.date.millisecondsSinceEpoch);
+          fbb.addInt64(8, object.client.targetId);
+          fbb.addInt64(9, object.fournisseur.targetId);
+          fbb.addInt64(10, object.crud.targetId);
+          fbb.addFloat64(11, object.montantVerse);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (obx.Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+          final idParam =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
+          final dateParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 18, 0));
+          final qrReferenceParam =
+              const fb.StringReader(asciiOptimization: true)
+                  .vTableGet(buffer, rootOffset, 8, '');
+          final typeParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 6, '');
+          final montantVerseParam =
+              const fb.Float64Reader().vTableGet(buffer, rootOffset, 26, 0);
+          final impayerParam = const fb.Float64Reader()
+              .vTableGetNullable(buffer, rootOffset, 10);
+          final derniereModificationParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0));
+          final isSyncedParam =
+              const fb.BoolReader().vTableGet(buffer, rootOffset, 14, false);
+          final syncedAtParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 16, 0));
+          final object = Document(
+              id: idParam,
+              date: dateParam,
+              qrReference: qrReferenceParam,
+              type: typeParam,
+              montantVerse: montantVerseParam,
+              impayer: impayerParam,
+              derniereModification: derniereModificationParam,
+              isSynced: isSyncedParam,
+              syncedAt: syncedAtParam);
+          object.client.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 20, 0);
+          object.client.attach(store);
+          object.fournisseur.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 22, 0);
+          object.fournisseur.attach(store);
+          object.crud.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 24, 0);
+          object.crud.attach(store);
+          obx_int.InternalToManyAccess.setRelInfo<Document>(
+              object.lignesDocument,
+              store,
+              obx_int.RelInfo<LigneDocument>.toOneBacklink(8, object.id,
+                  (LigneDocument srcObject) => srcObject.facture));
+          return object;
+        }),
+    LigneDocument: obx_int.EntityDefinition<LigneDocument>(
+        model: _entities[11],
+        toOneRelations: (LigneDocument object) =>
+            [object.produit, object.facture],
+        toManyRelations: (LigneDocument object) => {},
+        getId: (LigneDocument object) => object.id,
+        setId: (LigneDocument object, int id) {
+          object.id = id;
+        },
+        objectToFB: (LigneDocument object, fb.Builder fbb) {
+          fbb.startTable(9);
+          fbb.addInt64(0, object.id);
+          fbb.addFloat64(1, object.quantite);
+          fbb.addFloat64(2, object.prixUnitaire);
+          fbb.addInt64(3, object.derniereModification.millisecondsSinceEpoch);
+          fbb.addBool(4, object.isSynced);
+          fbb.addInt64(5, object.syncedAt.millisecondsSinceEpoch);
+          fbb.addInt64(6, object.produit.targetId);
+          fbb.addInt64(7, object.facture.targetId);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (obx.Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+          final idParam =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
+          final quantiteParam =
+              const fb.Float64Reader().vTableGet(buffer, rootOffset, 6, 0);
+          final prixUnitaireParam =
+              const fb.Float64Reader().vTableGet(buffer, rootOffset, 8, 0);
+          final derniereModificationParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0));
+          final isSyncedParam =
+              const fb.BoolReader().vTableGet(buffer, rootOffset, 12, false);
+          final syncedAtParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 14, 0));
+          final object = LigneDocument(
+              id: idParam,
+              quantite: quantiteParam,
+              prixUnitaire: prixUnitaireParam,
+              derniereModification: derniereModificationParam,
+              isSynced: isSyncedParam,
+              syncedAt: syncedAtParam);
+          object.produit.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 16, 0);
+          object.produit.attach(store);
+          object.facture.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 18, 0);
+          object.facture.attach(store);
           return object;
         })
   };
@@ -1708,10 +1682,6 @@ class Produit_ {
   static final syncedAt =
       obx.QueryDateProperty<Produit>(_entities[1].properties[14]);
 
-  /// see [Produit.qrcodes]
-  static final qrcodes =
-      obx.QueryRelationToMany<Produit, QrCode>(_entities[1].relations[0]);
-
   /// see [Produit.approvisionnements]
   static final approvisionnements =
       obx.QueryBacklinkToMany<Approvisionnement, Produit>(
@@ -1761,328 +1731,316 @@ class Client_ {
 
   /// see [Client.factures]
   static final factures =
-      obx.QueryBacklinkToMany<Facture, Client>(Facture_.client);
-}
-
-/// [Facture] entity fields to define ObjectBox queries.
-class Facture_ {
-  /// See [Facture.id].
-  static final id =
-      obx.QueryIntegerProperty<Facture>(_entities[3].properties[0]);
-
-  /// See [Facture.qr].
-  static final qr =
-      obx.QueryStringProperty<Facture>(_entities[3].properties[1]);
-
-  /// See [Facture.date].
-  static final date =
-      obx.QueryDateProperty<Facture>(_entities[3].properties[2]);
-
-  /// See [Facture.client].
-  static final client =
-      obx.QueryRelationToOne<Facture, Client>(_entities[3].properties[3]);
-
-  /// See [Facture.impayer].
-  static final impayer =
-      obx.QueryDoubleProperty<Facture>(_entities[3].properties[4]);
-
-  /// See [Facture.crud].
-  static final crud =
-      obx.QueryRelationToOne<Facture, Crud>(_entities[3].properties[5]);
-
-  /// See [Facture.derniereModification].
-  static final derniereModification =
-      obx.QueryDateProperty<Facture>(_entities[3].properties[6]);
-
-  /// See [Facture.isSynced].
-  static final isSynced =
-      obx.QueryBooleanProperty<Facture>(_entities[3].properties[7]);
-
-  /// See [Facture.syncedAt].
-  static final syncedAt =
-      obx.QueryDateProperty<Facture>(_entities[3].properties[8]);
-
-  /// see [Facture.lignesFacture]
-  static final lignesFacture =
-      obx.QueryBacklinkToMany<LigneFacture, Facture>(LigneFacture_.facture);
-}
-
-/// [LigneFacture] entity fields to define ObjectBox queries.
-class LigneFacture_ {
-  /// See [LigneFacture.id].
-  static final id =
-      obx.QueryIntegerProperty<LigneFacture>(_entities[4].properties[0]);
-
-  /// See [LigneFacture.produit].
-  static final produit =
-      obx.QueryRelationToOne<LigneFacture, Produit>(_entities[4].properties[1]);
-
-  /// See [LigneFacture.facture].
-  static final facture =
-      obx.QueryRelationToOne<LigneFacture, Facture>(_entities[4].properties[2]);
-
-  /// See [LigneFacture.quantite].
-  static final quantite =
-      obx.QueryDoubleProperty<LigneFacture>(_entities[4].properties[3]);
-
-  /// See [LigneFacture.prixUnitaire].
-  static final prixUnitaire =
-      obx.QueryDoubleProperty<LigneFacture>(_entities[4].properties[4]);
-
-  /// See [LigneFacture.derniereModification].
-  static final derniereModification =
-      obx.QueryDateProperty<LigneFacture>(_entities[4].properties[5]);
-
-  /// See [LigneFacture.isSynced].
-  static final isSynced =
-      obx.QueryBooleanProperty<LigneFacture>(_entities[4].properties[6]);
-
-  /// See [LigneFacture.syncedAt].
-  static final syncedAt =
-      obx.QueryDateProperty<LigneFacture>(_entities[4].properties[7]);
+      obx.QueryBacklinkToMany<Document, Client>(Document_.client);
 }
 
 /// [DeletedProduct] entity fields to define ObjectBox queries.
 class DeletedProduct_ {
   /// See [DeletedProduct.id].
   static final id =
-      obx.QueryIntegerProperty<DeletedProduct>(_entities[5].properties[0]);
+      obx.QueryIntegerProperty<DeletedProduct>(_entities[3].properties[0]);
 
   /// See [DeletedProduct.name].
   static final name =
-      obx.QueryStringProperty<DeletedProduct>(_entities[5].properties[1]);
+      obx.QueryStringProperty<DeletedProduct>(_entities[3].properties[1]);
 
   /// See [DeletedProduct.description].
   static final description =
-      obx.QueryStringProperty<DeletedProduct>(_entities[5].properties[2]);
+      obx.QueryStringProperty<DeletedProduct>(_entities[3].properties[2]);
 
   /// See [DeletedProduct.price].
   static final price =
-      obx.QueryDoubleProperty<DeletedProduct>(_entities[5].properties[3]);
+      obx.QueryDoubleProperty<DeletedProduct>(_entities[3].properties[3]);
 
   /// See [DeletedProduct.quantity].
   static final quantity =
-      obx.QueryIntegerProperty<DeletedProduct>(_entities[5].properties[4]);
+      obx.QueryIntegerProperty<DeletedProduct>(_entities[3].properties[4]);
 
   /// See [DeletedProduct.delaisPeremption].
   static final delaisPeremption =
-      obx.QueryIntegerProperty<DeletedProduct>(_entities[5].properties[5]);
+      obx.QueryIntegerProperty<DeletedProduct>(_entities[3].properties[5]);
 
   /// See [DeletedProduct.crud].
   static final crud =
-      obx.QueryRelationToOne<DeletedProduct, Crud>(_entities[5].properties[6]);
+      obx.QueryRelationToOne<DeletedProduct, Crud>(_entities[3].properties[6]);
 
   /// See [DeletedProduct.derniereModification].
   static final derniereModification =
-      obx.QueryDateProperty<DeletedProduct>(_entities[5].properties[7]);
+      obx.QueryDateProperty<DeletedProduct>(_entities[3].properties[7]);
 
   /// See [DeletedProduct.isSynced].
   static final isSynced =
-      obx.QueryBooleanProperty<DeletedProduct>(_entities[5].properties[8]);
+      obx.QueryBooleanProperty<DeletedProduct>(_entities[3].properties[8]);
 
   /// See [DeletedProduct.syncedAt].
   static final syncedAt =
-      obx.QueryDateProperty<DeletedProduct>(_entities[5].properties[9]);
+      obx.QueryDateProperty<DeletedProduct>(_entities[3].properties[9]);
 }
 
 /// [User] entity fields to define ObjectBox queries.
 class User_ {
   /// See [User.id].
-  static final id = obx.QueryIntegerProperty<User>(_entities[6].properties[0]);
+  static final id = obx.QueryIntegerProperty<User>(_entities[4].properties[0]);
 
   /// See [User.photo].
   static final photo =
-      obx.QueryStringProperty<User>(_entities[6].properties[1]);
+      obx.QueryStringProperty<User>(_entities[4].properties[1]);
 
   /// See [User.username].
   static final username =
-      obx.QueryStringProperty<User>(_entities[6].properties[2]);
+      obx.QueryStringProperty<User>(_entities[4].properties[2]);
 
   /// See [User.password].
   static final password =
-      obx.QueryStringProperty<User>(_entities[6].properties[3]);
+      obx.QueryStringProperty<User>(_entities[4].properties[3]);
 
   /// See [User.email].
   static final email =
-      obx.QueryStringProperty<User>(_entities[6].properties[4]);
+      obx.QueryStringProperty<User>(_entities[4].properties[4]);
 
   /// See [User.phone].
   static final phone =
-      obx.QueryStringProperty<User>(_entities[6].properties[5]);
+      obx.QueryStringProperty<User>(_entities[4].properties[5]);
 
   /// See [User.role].
-  static final role = obx.QueryStringProperty<User>(_entities[6].properties[6]);
+  static final role = obx.QueryStringProperty<User>(_entities[4].properties[6]);
 
   /// See [User.crud].
   static final crud =
-      obx.QueryRelationToOne<User, Crud>(_entities[6].properties[7]);
+      obx.QueryRelationToOne<User, Crud>(_entities[4].properties[7]);
 
   /// See [User.derniereModification].
   static final derniereModification =
-      obx.QueryDateProperty<User>(_entities[6].properties[8]);
+      obx.QueryDateProperty<User>(_entities[4].properties[8]);
 
   /// See [User.isSynced].
   static final isSynced =
-      obx.QueryBooleanProperty<User>(_entities[6].properties[9]);
+      obx.QueryBooleanProperty<User>(_entities[4].properties[9]);
 
   /// See [User.syncedAt].
   static final syncedAt =
-      obx.QueryDateProperty<User>(_entities[6].properties[10]);
+      obx.QueryDateProperty<User>(_entities[4].properties[10]);
 }
 
 /// [Approvisionnement] entity fields to define ObjectBox queries.
 class Approvisionnement_ {
   /// See [Approvisionnement.id].
   static final id =
-      obx.QueryIntegerProperty<Approvisionnement>(_entities[7].properties[0]);
+      obx.QueryIntegerProperty<Approvisionnement>(_entities[5].properties[0]);
 
   /// See [Approvisionnement.quantite].
   static final quantite =
-      obx.QueryDoubleProperty<Approvisionnement>(_entities[7].properties[1]);
+      obx.QueryDoubleProperty<Approvisionnement>(_entities[5].properties[1]);
 
   /// See [Approvisionnement.datePeremption].
   static final datePeremption =
-      obx.QueryDateProperty<Approvisionnement>(_entities[7].properties[2]);
+      obx.QueryDateProperty<Approvisionnement>(_entities[5].properties[2]);
 
   /// See [Approvisionnement.produit].
   static final produit = obx.QueryRelationToOne<Approvisionnement, Produit>(
-      _entities[7].properties[3]);
+      _entities[5].properties[3]);
 
   /// See [Approvisionnement.fournisseur].
   static final fournisseur =
       obx.QueryRelationToOne<Approvisionnement, Fournisseur>(
-          _entities[7].properties[4]);
+          _entities[5].properties[4]);
 
   /// See [Approvisionnement.prixAchat].
   static final prixAchat =
-      obx.QueryDoubleProperty<Approvisionnement>(_entities[7].properties[5]);
+      obx.QueryDoubleProperty<Approvisionnement>(_entities[5].properties[5]);
 
   /// See [Approvisionnement.crud].
   static final crud = obx.QueryRelationToOne<Approvisionnement, Crud>(
-      _entities[7].properties[6]);
+      _entities[5].properties[6]);
 
   /// See [Approvisionnement.derniereModification].
   static final derniereModification =
-      obx.QueryDateProperty<Approvisionnement>(_entities[7].properties[7]);
+      obx.QueryDateProperty<Approvisionnement>(_entities[5].properties[7]);
 
   /// See [Approvisionnement.isSynced].
   static final isSynced =
-      obx.QueryBooleanProperty<Approvisionnement>(_entities[7].properties[8]);
+      obx.QueryBooleanProperty<Approvisionnement>(_entities[5].properties[8]);
 
   /// See [Approvisionnement.syncedAt].
   static final syncedAt =
-      obx.QueryDateProperty<Approvisionnement>(_entities[7].properties[9]);
+      obx.QueryDateProperty<Approvisionnement>(_entities[5].properties[9]);
 }
 
 /// [Crud] entity fields to define ObjectBox queries.
 class Crud_ {
   /// See [Crud.id].
-  static final id = obx.QueryIntegerProperty<Crud>(_entities[8].properties[0]);
+  static final id = obx.QueryIntegerProperty<Crud>(_entities[6].properties[0]);
 
   /// See [Crud.createdBy].
   static final createdBy =
-      obx.QueryIntegerProperty<Crud>(_entities[8].properties[1]);
+      obx.QueryIntegerProperty<Crud>(_entities[6].properties[1]);
 
   /// See [Crud.updatedBy].
   static final updatedBy =
-      obx.QueryIntegerProperty<Crud>(_entities[8].properties[2]);
+      obx.QueryIntegerProperty<Crud>(_entities[6].properties[2]);
 
   /// See [Crud.deletedBy].
   static final deletedBy =
-      obx.QueryIntegerProperty<Crud>(_entities[8].properties[3]);
+      obx.QueryIntegerProperty<Crud>(_entities[6].properties[3]);
 
   /// See [Crud.dateCreation].
   static final dateCreation =
-      obx.QueryDateProperty<Crud>(_entities[8].properties[4]);
+      obx.QueryDateProperty<Crud>(_entities[6].properties[4]);
 
   /// See [Crud.derniereModification].
   static final derniereModification =
-      obx.QueryDateProperty<Crud>(_entities[8].properties[5]);
+      obx.QueryDateProperty<Crud>(_entities[6].properties[5]);
 
   /// See [Crud.dateDeleting].
   static final dateDeleting =
-      obx.QueryDateProperty<Crud>(_entities[8].properties[6]);
+      obx.QueryDateProperty<Crud>(_entities[6].properties[6]);
 
   /// See [Crud.isSynced].
   static final isSynced =
-      obx.QueryBooleanProperty<Crud>(_entities[8].properties[7]);
+      obx.QueryBooleanProperty<Crud>(_entities[6].properties[7]);
 
   /// See [Crud.syncedAt].
   static final syncedAt =
-      obx.QueryDateProperty<Crud>(_entities[8].properties[8]);
-}
-
-/// [QrCode] entity fields to define ObjectBox queries.
-class QrCode_ {
-  /// See [QrCode.id].
-  static final id =
-      obx.QueryIntegerProperty<QrCode>(_entities[9].properties[0]);
-
-  /// See [QrCode.serial].
-  static final serial =
-      obx.QueryStringProperty<QrCode>(_entities[9].properties[1]);
-
-  /// See [QrCode.type].
-  static final type =
-      obx.QueryStringProperty<QrCode>(_entities[9].properties[2]);
-
-  /// See [QrCode.isSynced].
-  static final isSynced =
-      obx.QueryBooleanProperty<QrCode>(_entities[9].properties[3]);
-
-  /// See [QrCode.syncedAt].
-  static final syncedAt =
-      obx.QueryDateProperty<QrCode>(_entities[9].properties[4]);
+      obx.QueryDateProperty<Crud>(_entities[6].properties[8]);
 }
 
 /// [Locater] entity fields to define ObjectBox queries.
 class Locater_ {
   /// See [Locater.id].
   static final id =
-      obx.QueryIntegerProperty<Locater>(_entities[10].properties[0]);
+      obx.QueryIntegerProperty<Locater>(_entities[7].properties[0]);
 
   /// See [Locater.name].
   static final name =
-      obx.QueryStringProperty<Locater>(_entities[10].properties[1]);
+      obx.QueryStringProperty<Locater>(_entities[7].properties[1]);
 }
 
 /// [Reservation] entity fields to define ObjectBox queries.
 class Reservation_ {
   /// See [Reservation.id].
   static final id =
-      obx.QueryIntegerProperty<Reservation>(_entities[11].properties[0]);
+      obx.QueryIntegerProperty<Reservation>(_entities[8].properties[0]);
 
   /// See [Reservation.roomId].
   static final roomId =
-      obx.QueryIntegerProperty<Reservation>(_entities[11].properties[1]);
+      obx.QueryIntegerProperty<Reservation>(_entities[8].properties[1]);
 
   /// See [Reservation.locaterId].
   static final locaterId =
-      obx.QueryIntegerProperty<Reservation>(_entities[11].properties[2]);
+      obx.QueryIntegerProperty<Reservation>(_entities[8].properties[2]);
 
   /// See [Reservation.startDate].
   static final startDate =
-      obx.QueryDateProperty<Reservation>(_entities[11].properties[3]);
+      obx.QueryDateProperty<Reservation>(_entities[8].properties[3]);
 
   /// See [Reservation.endDate].
   static final endDate =
-      obx.QueryDateProperty<Reservation>(_entities[11].properties[4]);
+      obx.QueryDateProperty<Reservation>(_entities[8].properties[4]);
 
   /// See [Reservation.pricePerNight].
   static final pricePerNight =
-      obx.QueryDoubleProperty<Reservation>(_entities[11].properties[5]);
+      obx.QueryDoubleProperty<Reservation>(_entities[8].properties[5]);
 
   /// See [Reservation.status].
   static final status =
-      obx.QueryStringProperty<Reservation>(_entities[11].properties[6]);
+      obx.QueryStringProperty<Reservation>(_entities[8].properties[6]);
 }
 
 /// [Room] entity fields to define ObjectBox queries.
 class Room_ {
   /// See [Room.id].
-  static final id = obx.QueryIntegerProperty<Room>(_entities[12].properties[0]);
+  static final id = obx.QueryIntegerProperty<Room>(_entities[9].properties[0]);
 
   /// See [Room.name].
-  static final name =
-      obx.QueryStringProperty<Room>(_entities[12].properties[1]);
+  static final name = obx.QueryStringProperty<Room>(_entities[9].properties[1]);
+}
+
+/// [Document] entity fields to define ObjectBox queries.
+class Document_ {
+  /// See [Document.id].
+  static final id =
+      obx.QueryIntegerProperty<Document>(_entities[10].properties[0]);
+
+  /// See [Document.type].
+  static final type =
+      obx.QueryStringProperty<Document>(_entities[10].properties[1]);
+
+  /// See [Document.qrReference].
+  static final qrReference =
+      obx.QueryStringProperty<Document>(_entities[10].properties[2]);
+
+  /// See [Document.impayer].
+  static final impayer =
+      obx.QueryDoubleProperty<Document>(_entities[10].properties[3]);
+
+  /// See [Document.derniereModification].
+  static final derniereModification =
+      obx.QueryDateProperty<Document>(_entities[10].properties[4]);
+
+  /// See [Document.isSynced].
+  static final isSynced =
+      obx.QueryBooleanProperty<Document>(_entities[10].properties[5]);
+
+  /// See [Document.syncedAt].
+  static final syncedAt =
+      obx.QueryDateProperty<Document>(_entities[10].properties[6]);
+
+  /// See [Document.date].
+  static final date =
+      obx.QueryDateProperty<Document>(_entities[10].properties[7]);
+
+  /// See [Document.client].
+  static final client =
+      obx.QueryRelationToOne<Document, Client>(_entities[10].properties[8]);
+
+  /// See [Document.fournisseur].
+  static final fournisseur = obx.QueryRelationToOne<Document, Fournisseur>(
+      _entities[10].properties[9]);
+
+  /// See [Document.crud].
+  static final crud =
+      obx.QueryRelationToOne<Document, Crud>(_entities[10].properties[10]);
+
+  /// See [Document.montantVerse].
+  static final montantVerse =
+      obx.QueryDoubleProperty<Document>(_entities[10].properties[11]);
+
+  /// see [Document.lignesDocument]
+  static final lignesDocument =
+      obx.QueryBacklinkToMany<LigneDocument, Document>(LigneDocument_.facture);
+}
+
+/// [LigneDocument] entity fields to define ObjectBox queries.
+class LigneDocument_ {
+  /// See [LigneDocument.id].
+  static final id =
+      obx.QueryIntegerProperty<LigneDocument>(_entities[11].properties[0]);
+
+  /// See [LigneDocument.quantite].
+  static final quantite =
+      obx.QueryDoubleProperty<LigneDocument>(_entities[11].properties[1]);
+
+  /// See [LigneDocument.prixUnitaire].
+  static final prixUnitaire =
+      obx.QueryDoubleProperty<LigneDocument>(_entities[11].properties[2]);
+
+  /// See [LigneDocument.derniereModification].
+  static final derniereModification =
+      obx.QueryDateProperty<LigneDocument>(_entities[11].properties[3]);
+
+  /// See [LigneDocument.isSynced].
+  static final isSynced =
+      obx.QueryBooleanProperty<LigneDocument>(_entities[11].properties[4]);
+
+  /// See [LigneDocument.syncedAt].
+  static final syncedAt =
+      obx.QueryDateProperty<LigneDocument>(_entities[11].properties[5]);
+
+  /// See [LigneDocument.produit].
+  static final produit = obx.QueryRelationToOne<LigneDocument, Produit>(
+      _entities[11].properties[6]);
+
+  /// See [LigneDocument.facture].
+  static final facture = obx.QueryRelationToOne<LigneDocument, Document>(
+      _entities[11].properties[7]);
 }

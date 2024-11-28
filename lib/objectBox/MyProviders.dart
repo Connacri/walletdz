@@ -689,19 +689,20 @@ class CommerceProvider extends ChangeNotifier {
 
 class CartProvider with ChangeNotifier {
   final ObjectBox _objectBox;
-  Facture _facture = Facture(
+  Document _facture = Document(
     date: DateTime.now(),
-    qr: '',
+    qrReference: '',
     impayer: 0.0,
     derniereModification: DateTime.now(),
+    type: '',
   );
   Client? _selectedClient;
-  List<Facture> _factures = [];
+  List<Document> _factures = [];
   Produit? produit;
 
-  Facture get facture => _facture;
+  Document get facture => _facture;
   Client? get selectedClient => _selectedClient;
-  List<Facture> get factures => _factures;
+  List<Document> get factures => _factures;
   int get factureCount => _factures.length;
 
   CartProvider(this._objectBox) {
@@ -802,38 +803,38 @@ class CartProvider with ChangeNotifier {
   }
 
   void addToCart(Produit produit) {
-    final index = _facture.lignesFacture
+    final index = _facture.lignesDocument
         .indexWhere((item) => item.produit.target!.id == produit.id);
     if (index != -1) {
-      _facture.lignesFacture[index].quantite += 1;
+      _facture.lignesDocument[index].quantite += 1;
     } else {
-      final ligneFacture = LigneFacture(
+      final ligneFacture = LigneDocument(
         quantite: 1,
         prixUnitaire: produit.prixVente,
         derniereModification: DateTime.now(),
       );
       ligneFacture.produit.target = produit;
       ligneFacture.facture.target = _facture;
-      _facture.lignesFacture.add(ligneFacture);
+      _facture.lignesDocument.add(ligneFacture);
     }
     notifyListeners();
   }
 
   void removeFromCart(Produit produit) {
-    final index = _facture.lignesFacture
+    final index = _facture.lignesDocument
         .indexWhere((item) => item.produit.target!.id == produit.id);
     if (index != -1) {
-      if (_facture.lignesFacture[index].quantite > 1) {
-        _facture.lignesFacture[index].quantite -= 1;
+      if (_facture.lignesDocument[index].quantite > 1) {
+        _facture.lignesDocument[index].quantite -= 1;
       } else {
-        _facture.lignesFacture.removeAt(index);
+        _facture.lignesDocument.removeAt(index);
       }
     }
     notifyListeners();
   }
 
   double get totalAmount {
-    return _facture.lignesFacture
+    return _facture.lignesDocument
         .fold(0, (sum, item) => sum + item.prixUnitaire * item.quantite);
   }
 
@@ -845,7 +846,7 @@ class CartProvider with ChangeNotifier {
     const double tvaRate = 0.19; // Taux de TVA (20% par exemple)
 
     // Récupérer les factures depuis ObjectBox au moment de l'appel de la méthode
-    List<Facture> facturesDansIntervalle =
+    List<Document> facturesDansIntervalle =
         _objectBox.factureBox.getAll().where((facture) {
       return (facture.date.isAfter(startDate) &&
               facture.date.isBefore(endDate)) ||
@@ -855,7 +856,7 @@ class CartProvider with ChangeNotifier {
 
     // Calculer les totaux pour chaque facture dans l'intervalle
     for (var facture in facturesDansIntervalle) {
-      double montantHT = facture.lignesFacture.fold(0.0, (sum, ligne) {
+      double montantHT = facture.lignesDocument.fold(0.0, (sum, ligne) {
         return sum + (ligne.prixUnitaire * ligne.quantite);
       });
 
@@ -887,13 +888,14 @@ class CartProvider with ChangeNotifier {
     }
 
     // Génération du QR code et sauvegarde de la facture
-    _facture.qr = await generateQRCode('${_facture.id} ${_facture.date}');
+    _facture.qrReference =
+        await generateQRCode('${_facture.id} ${_facture.date}');
 
     // Sauvegarder la facture
     _objectBox.factureBox.put(_facture);
 
     // Sauvegarde des lignes de facture et mise à jour des produits associés
-    for (var ligne in _facture.lignesFacture) {
+    for (var ligne in _facture.lignesDocument) {
       final produit = ligne.produit.target;
 
       if (produit != null) {
@@ -911,11 +913,12 @@ class CartProvider with ChangeNotifier {
     }
 
     // Réinitialisation de la facture et du client sélectionné
-    _facture = Facture(
+    _facture = Document(
       date: DateTime.now(),
-      qr: '',
+      qrReference: '',
       impayer: 0.0,
       derniereModification: DateTime.now(),
+      type: '',
     );
     _selectedClient = null;
 
@@ -926,11 +929,12 @@ class CartProvider with ChangeNotifier {
   }
 
   void clearCart() {
-    _facture = Facture(
+    _facture = Document(
       date: DateTime.now(),
-      qr: '',
+      qrReference: '',
       impayer: 0.0,
       derniereModification: DateTime.now(),
+      type: '',
     );
     _selectedClient = null;
     notifyListeners();
@@ -946,13 +950,13 @@ class CartProvider with ChangeNotifier {
         "QR_${gRGenerated}";
   }
 
-  Future<void> deleteFacture(Facture facture) async {
+  Future<void> deleteFacture(Document facture) async {
     _objectBox.factureBox.remove(facture.id);
     notifyListeners();
     fetchFactures();
   }
 
-  Future<void> updateFacture(Facture updatedFacture) async {
+  Future<void> updateFacture(Document updatedFacture) async {
     _objectBox.factureBox.put(updatedFacture);
     notifyListeners();
     fetchFactures();
@@ -1000,10 +1004,10 @@ class ClientProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  List<Facture> getFacturesForClient(Client client) {
+  List<Document> getFacturesForClient(Client client) {
     // Utiliser ObjectBox pour récupérer les factures associées au client
     final facturesQuery =
-        _objectBox.factureBox.query(Facture_.client.equals(client.id)).build();
+        _objectBox.factureBox.query(Document_.client.equals(client.id)).build();
     final factures = facturesQuery.find();
     facturesQuery.close();
     return factures;

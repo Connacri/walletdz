@@ -72,7 +72,7 @@ class _FacturePageState extends State<FacturePage> {
     return Scaffold(
       appBar: buildAppBar(context, commerceProvider, cartProvider),
       body: Consumer<CartProvider>(builder: (context, cartProvider, child) {
-        final items = cartProvider.facture.lignesFacture;
+        final items = cartProvider.facture.lignesDocument;
         final totalAmount = cartProvider.totalAmount;
         final tva = totalAmount * 0.19; // TVA à 19%
         final impayer = cartProvider.facture.impayer ?? 0.0;
@@ -96,7 +96,7 @@ class _FacturePageState extends State<FacturePage> {
                       commerceProvider,
                       cartProvider,
                       double.parse('1'),
-                      cartProvider.facture.lignesFacture,
+                      cartProvider.facture.lignesDocument,
                     );
                   } else {
                     // Afficher un message d'erreur ou nettoyer le buffer si la valeur n'est pas valide
@@ -169,7 +169,7 @@ class _FacturePageState extends State<FacturePage> {
                           commerceProvider,
                           cartProvider,
                           double.parse('1'),
-                          cartProvider.facture.lignesFacture,
+                          cartProvider.facture.lignesDocument,
                         );
                         _barcodeBufferController.clear();
                       } else {
@@ -316,7 +316,7 @@ class _FacturePageState extends State<FacturePage> {
   Column buildColumn(
       BuildContext context,
       CartProvider cartProvider,
-      ToMany<LigneFacture> items,
+      ToMany<LigneDocument> items,
       double totalAmount,
       double tva,
       double impayer,
@@ -393,25 +393,25 @@ class _FacturePageState extends State<FacturePage> {
                   DataColumn(label: Text('Total')),
                   DataColumn(label: Text('Actions')),
                 ],
-                rows: items.map((ligneFacture) {
-                  final produit = ligneFacture.produit.target!;
+                rows: items.map((ligneDocument) {
+                  final produit = ligneDocument.produit.target!;
                   final TextEditingController _quantiteController =
                       TextEditingController(
-                    text: ligneFacture.quantite.floor().toString(),
+                    text: ligneDocument.quantite.floor().toString(),
                   );
                   final TextEditingController _prixController =
                       TextEditingController(
-                    text: ligneFacture.prixUnitaire.floor().toString(),
+                    text: ligneDocument.prixUnitaire.floor().toString(),
                   );
                   return DataRow(
                     cells: [
                       DataCell(Text(produit.qr!)),
                       DataCell(Text(produit.nom)),
                       DataCell(
-                          Text(ligneFacture.prixUnitaire.toStringAsFixed(2))),
-                      DataCell(Text(ligneFacture.quantite.toString())),
+                          Text(ligneDocument.prixUnitaire.toStringAsFixed(2))),
+                      DataCell(Text(ligneDocument.quantite.toString())),
                       DataCell(Text(
-                          (ligneFacture.prixUnitaire * ligneFacture.quantite)
+                          (ligneDocument.prixUnitaire * ligneDocument.quantite)
                               .toStringAsFixed(2))),
                       DataCell(
                         Row(
@@ -420,7 +420,7 @@ class _FacturePageState extends State<FacturePage> {
                             IconButton(
                               icon: Icon(Icons.edit),
                               onPressed: () async {
-                                _showEditQuantityDialog(context, ligneFacture,
+                                _showEditQuantityDialog(context, ligneDocument,
                                     _quantiteController, _prixController);
                               },
                             ),
@@ -647,7 +647,7 @@ class _FacturePageState extends State<FacturePage> {
 
   void _showEditQuantityDialog(
       BuildContext context,
-      LigneFacture ligneFacture,
+      LigneDocument ligneFacture,
       TextEditingController _quantiteController,
       TextEditingController _prixController) {
     final _formKey = GlobalKey<FormState>();
@@ -1127,14 +1127,14 @@ class _FacturesListPageState extends State<FacturesListPage> {
     });
   }
 
-  double _calculateTotal(Facture facture) {
-    return facture.lignesFacture
+  double _calculateTotal(Document facture) {
+    return facture.lignesDocument
         .fold(0, (sum, item) => sum + item.prixUnitaire * item.quantite);
   }
 }
 
 class FactureDetailPage extends StatefulWidget {
-  final Facture facture;
+  final Document facture;
 
   final CartProvider cartProvider;
   final CommerceProvider commerceProvider;
@@ -1152,7 +1152,7 @@ class FactureDetailPage extends StatefulWidget {
 class _FactureDetailPageState extends State<FactureDetailPage> {
   @override
   Widget build(BuildContext context) {
-    final lignesFacture = widget.facture.lignesFacture;
+    final lignesFacture = widget.facture.lignesDocument;
     final client = widget.facture.client.target;
     return Scaffold(
       appBar: AppBar(
@@ -1302,7 +1302,7 @@ class _FactureDetailPageState extends State<FactureDetailPage> {
   }
 
   double _calculateTotal() {
-    return widget.facture.lignesFacture
+    return widget.facture.lignesDocument
         .fold(0, (sum, item) => sum + item.prixUnitaire * item.quantite);
   }
 
@@ -1310,7 +1310,7 @@ class _FactureDetailPageState extends State<FactureDetailPage> {
     return _calculateTotal() * 0.19;
   }
 
-  void _showEditDialog(BuildContext context, LigneFacture ligneFacture) {
+  void _showEditDialog(BuildContext context, LigneDocument ligneFacture) {
     TextEditingController _quantiteController = TextEditingController(
       text: ligneFacture.quantite.toString(),
     );
@@ -1354,7 +1354,7 @@ class _FactureDetailPageState extends State<FactureDetailPage> {
 class ProductSearchField extends StatelessWidget {
   final TextEditingController _barcodeBufferController;
   final Function(BuildContext, CommerceProvider, CartProvider, double,
-      List<LigneFacture>) _processBarcode;
+      List<LigneDocument>) _processBarcode;
 
   ProductSearchField(this._barcodeBufferController, this._processBarcode);
 
@@ -1393,7 +1393,7 @@ class ProductSearchField extends StatelessWidget {
                 commerceProvider,
                 cartProvider,
                 double.parse('1'),
-                cartProvider.facture.lignesFacture,
+                cartProvider.facture.lignesDocument,
               );
               fieldTextEditingController.clear();
             } else {
@@ -1451,7 +1451,7 @@ class ProductSearchField extends StatelessWidget {
           commerceProvider,
           cartProvider,
           double.parse('1'),
-          cartProvider.facture.lignesFacture,
+          cartProvider.facture.lignesDocument,
         );
       },
     );

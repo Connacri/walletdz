@@ -1563,10 +1563,6 @@ class ProduitDetailPage extends StatelessWidget {
                           padding: const EdgeInsets.all(8.0),
                           child: ElevatedButton.icon(
                             onPressed: () async {
-                              final produitProvider =
-                                  Provider.of<CommerceProvider>(context,
-                                      listen: false);
-
                               final updatedProduit =
                                   await Navigator.of(context).push(
                                 MaterialPageRoute(

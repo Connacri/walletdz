@@ -1,9 +1,5 @@
 import 'package:objectbox/objectbox.dart';
 
-///toDo///
-///delaisPeremption
-///le produit peut avoir plusieurs qty et plusieurs prix et plusieur delaisPeremption
-
 @Entity()
 class User {
   @Id()
@@ -49,32 +45,6 @@ class User {
 }
 
 @Entity()
-class QrCode {
-  @Id()
-  int id;
-  String serial;
-  String? type;
-  bool isSynced;
-  DateTime syncedAt;
-
-  QrCode({
-    this.id = 0,
-    required this.serial,
-    this.type,
-    this.isSynced = false,
-  DateTime? syncedAt,
-}) : syncedAt = syncedAt ?? DateTime.now();
-
-  factory QrCode.fromJson(Map<String, dynamic> json) {
-    return QrCode(
-      id: json['id'] ?? 0,
-      serial: json['serial'] ?? '',
-      type: json['type'],
-    );
-  }
-}
-
-@Entity()
 class Produit {
   int id;
   @Unique()
@@ -98,7 +68,7 @@ class Produit {
   final approvisionnements = ToMany<Approvisionnement>();
   // Correction : renommage de la relation ToMany<QrCode>
 
-  final qrcodes = ToMany<QrCode>();
+  // final qrcodes = ToMany<QrCode>();
   final crud = ToOne<Crud>();
 
   Produit({
@@ -114,8 +84,9 @@ class Produit {
     this.alertPeremption,
     required this.derniereModification,
     this.isSynced = false,
-DateTime? syncedAt,
-}) : syncedAt = syncedAt ?? DateTime.now();  // // Getters pour calculer les valeurs dynamiques
+    DateTime? syncedAt,
+  }) : syncedAt = syncedAt ??
+            DateTime.now(); // // Getters pour calculer les valeurs dynamiques
   // double get prixAchat => approvisionnements.isNotEmpty
   //     ? approvisionnements.map((a) => a.prixAchat).reduce((a, b) => a + b) /
   //         approvisionnements.length
@@ -206,8 +177,8 @@ class Approvisionnement {
     this.datePeremption,
     this.derniereModification,
     this.isSynced = false,
-DateTime? syncedAt,
-}) : syncedAt = syncedAt ?? DateTime.now();
+    DateTime? syncedAt,
+  }) : syncedAt = syncedAt ?? DateTime.now();
   factory Approvisionnement.fromJson(Map<String, dynamic> json) {
     return Approvisionnement(
       id: json['id'] ?? 0,
@@ -249,8 +220,9 @@ class Crud {
     required this.derniereModification,
     this.dateDeleting,
     this.isSynced = false,
-DateTime? syncedAt,
-}) : syncedAt = syncedAt ?? DateTime.now();  factory Crud.fromJson(Map<String, dynamic> json) {
+    DateTime? syncedAt,
+  }) : syncedAt = syncedAt ?? DateTime.now();
+  factory Crud.fromJson(Map<String, dynamic> json) {
     return Crud(
       id: json['id'] ?? 0,
       createdBy: (json['createdBy']).toInt(),
@@ -294,8 +266,9 @@ class Fournisseur {
     this.adresse,
     required this.derniereModification,
     this.isSynced = false,
-DateTime? syncedAt,
-}) : syncedAt = syncedAt ?? DateTime.now();  factory Fournisseur.fromJson(Map<String, dynamic> json) {
+    DateTime? syncedAt,
+  }) : syncedAt = syncedAt ?? DateTime.now();
+  factory Fournisseur.fromJson(Map<String, dynamic> json) {
     return Fournisseur(
       id: json['id'] ?? 0,
       qr: json['qr'],
@@ -322,7 +295,7 @@ class Client {
   DateTime syncedAt;
 
   @Backlink()
-  final factures = ToMany<Facture>();
+  final factures = ToMany<Document>();
 
   final crud = ToOne<Crud>();
 
@@ -335,8 +308,9 @@ class Client {
     this.description,
     required this.derniereModification,
     this.isSynced = false,
-DateTime? syncedAt,
-}) : syncedAt = syncedAt ?? DateTime.now();  factory Client.fromJson(Map<String, dynamic> json) {
+    DateTime? syncedAt,
+  }) : syncedAt = syncedAt ?? DateTime.now();
+  factory Client.fromJson(Map<String, dynamic> json) {
     return Client(
       id: json['id'] ?? 0,
       qr: json['qr'] ?? '',
@@ -352,9 +326,12 @@ DateTime? syncedAt,
 }
 
 @Entity()
-class Facture {
-  int id;
-  String qr;
+class Document {
+  //int id;
+  @Id()
+  int id = 0;
+  String type; // 'vente', 'achat', etc.
+  String qrReference;
   double? impayer;
   DateTime derniereModification;
   bool isSynced;
@@ -363,23 +340,58 @@ class Facture {
   @Property(type: PropertyType.date)
   DateTime date;
 
+  // Relations spécifiques
   final client = ToOne<Client>();
+  final fournisseur = ToOne<Fournisseur>();
   final crud = ToOne<Crud>();
-  @Backlink()
-  final lignesFacture = ToMany<LigneFacture>();
 
-  Facture({
+  double montantVerse = 0.0; // Montant payé
+
+  @Backlink()
+  final lignesDocument = ToMany<LigneDocument>();
+
+  Document({
     this.id = 0,
     required this.date,
-    required this.qr,
+    required this.qrReference,
+    required this.type,
+    this.montantVerse = 0.0,
     required this.impayer,
     required this.derniereModification,
     this.isSynced = false,
-DateTime? syncedAt,
-}) : syncedAt = syncedAt ?? DateTime.now();  factory Facture.fromJson(Map<String, dynamic> json) {
-    return Facture(
+    DateTime? syncedAt,
+  }) : syncedAt = syncedAt ?? DateTime.now();
+  // Montant total calculé
+  double get montantTotal =>
+      lignesDocument.fold(0.0, (sum, ligne) => sum + ligne.sousTotal);
+
+  // État calculé en fonction du montant payé et du total
+  DocumentEtat get etat {
+    if (montantVerse >= montantTotal) {
+      return DocumentEtat.paye;
+    } else if (montantVerse > 0) {
+      return DocumentEtat.partiellementPaye;
+    } else {
+      return DocumentEtat.nonPaye;
+    }
+  }
+
+  // Validation basée sur le type
+  bool get estValide {
+    if (type == 'vente' && client.target == null) {
+      return false;
+    }
+    if (type == 'achat' && fournisseur.target == null) {
+      return false;
+    }
+    return true;
+  }
+
+  factory Document.fromJson(Map<String, dynamic> json) {
+    return Document(
       id: json['id'] ?? 0,
-      qr: json['qr'] ?? '',
+      type: json['type'] ?? '',
+      qrReference: json['qrReference'] ?? '',
       impayer: (json['impayer'] ?? 0).toDouble(),
       date: DateTime.parse(json['date']),
       derniereModification: json['derniereModification'] != null
@@ -390,8 +402,10 @@ DateTime? syncedAt,
 }
 
 @Entity()
-class LigneFacture {
-  int id;
+class LigneDocument {
+  // int id;
+  @Id()
+  int id = 0;
   double quantite;
   double prixUnitaire;
   DateTime derniereModification;
@@ -399,18 +413,22 @@ class LigneFacture {
   DateTime syncedAt;
 
   final produit = ToOne<Produit>();
-  final facture = ToOne<Facture>();
+  final facture = ToOne<Document>();
 
-  LigneFacture({
+  LigneDocument({
     this.id = 0,
     required this.quantite,
     required this.prixUnitaire,
     required this.derniereModification,
     this.isSynced = false,
-DateTime? syncedAt,
-}) : syncedAt = syncedAt ?? DateTime.now();
-  factory LigneFacture.fromJson(Map<String, dynamic> json) {
-    return LigneFacture(
+    DateTime? syncedAt,
+  }) : syncedAt = syncedAt ?? DateTime.now();
+
+  // Sous-total calculé automatiquement
+  double get sousTotal => quantite * prixUnitaire;
+
+  factory LigneDocument.fromJson(Map<String, dynamic> json) {
+    return LigneDocument(
       id: json['id'] ?? 0,
       quantite: (json['quantite'] ?? 0).toDouble(),
       prixUnitaire: (json['prixUnitaire'] ?? 0).toDouble(),
@@ -419,6 +437,13 @@ DateTime? syncedAt,
           : DateTime.now(),
     );
   }
+}
+
+// État des documents
+enum DocumentEtat {
+  paye,
+  partiellementPaye,
+  nonPaye,
 }
 
 @Entity()
@@ -445,7 +470,8 @@ class DeletedProduct {
     required this.derniereModification,
     this.isSynced = false,
     DateTime? syncedAt,
-}) : syncedAt = syncedAt ?? DateTime.now();  factory DeletedProduct.fromJson(Map<String, dynamic> json) {
+  }) : syncedAt = syncedAt ?? DateTime.now();
+  factory DeletedProduct.fromJson(Map<String, dynamic> json) {
     return DeletedProduct(
       name: json['name'] ?? '',
       description: json['description'] ?? '',

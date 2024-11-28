@@ -206,7 +206,7 @@ class ClientDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final clientProvider = Provider.of<ClientProvider>(context);
-    List<Facture> factures = clientProvider.getFacturesForClient(client);
+    List<Document> factures = clientProvider.getFacturesForClient(client);
     final cartProvider = Provider.of<CartProvider>(context);
     final commercProvider = Provider.of<CommerceProvider>(context);
     return Scaffold(
@@ -236,7 +236,7 @@ class ClientDetailsPage extends StatelessWidget {
                 itemCount: factures.length,
                 itemBuilder: (context, index) {
                   final facture = factures[index];
-                  final totalAmount = facture.lignesFacture.fold(
+                  final totalAmount = facture.lignesDocument.fold(
                       0.0,
                       (sum, ligne) =>
                           sum + (ligne.prixUnitaire * ligne.quantite));

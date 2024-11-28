@@ -19,11 +19,10 @@ class ObjectBox {
   late final Box<Produit> produitBox;
   late final Box<Approvisionnement> approvisionnementBox;
   late final Box<Fournisseur> fournisseurBox;
-  late final Box<Facture> factureBox;
-  late final Box<LigneFacture> ligneFacture;
+  late final Box<Document> factureBox;
+  late final Box<LigneDocument> ligneFacture;
   late final Box<Client> clientBox;
   late final Box<DeletedProduct> deletedProduct;
-  late final Box<QrCode> qrCode;
   Admin? admin; // Admin optionnel
 
   static final ObjectBox _singleton = ObjectBox._internal();
@@ -41,11 +40,10 @@ class ObjectBox {
       produitBox = Box<Produit>(store);
       approvisionnementBox = Box<Approvisionnement>(store);
       fournisseurBox = Box<Fournisseur>(store);
-      factureBox = Box<Facture>(store);
-      ligneFacture = Box<LigneFacture>(store);
+      factureBox = Box<Document>(store);
+      ligneFacture = Box<LigneDocument>(store);
       clientBox = Box<Client>(store);
       deletedProduct = Box<DeletedProduct>(store);
-      qrCode = Box<QrCode>(store);
 
       // Démarre Admin si disponible et vérifie son statut
       if (Admin.isAvailable()) {
@@ -81,6 +79,14 @@ class ObjectBox {
     ];
     Set<String> qrSet = {}; // Utiliser un Set pour garantir l'unicité des QR
 
+    List<String> types = [
+      'vente',
+      'achat',
+      'devis',
+      'facture',
+      'bon',
+      'proforma'
+    ];
     // Créer des utilisateurs
     List<User> users = List.generate(userCount, (index) {
       roles.shuffle(random); // Mélanger les rôles
@@ -212,15 +218,18 @@ class ObjectBox {
     // Créer des factures et les associer aux clients
     for (var client in clients) {
       int numberOfFactures = faker.randomGenerator.integer(50);
-      List<Facture> factures = List.generate(numberOfFactures, (_) {
+      List<Document> factures = List.generate(numberOfFactures, (_) {
         String uniqueQr;
         do {
           uniqueQr = faker.randomGenerator.integer(999999).toString();
         } while (qrSet.contains(uniqueQr)); // Vérifier l'unicité du QR
         qrSet.add(uniqueQr);
 
-        Facture facture = Facture(
-          qr: uniqueQr, // QR unique
+        types.shuffle(random);
+
+        Document facture = Document(
+          type: types.first,
+          qrReference: uniqueQr, // QR unique
           impayer: faker.randomGenerator.decimal(min: 0, scale: 2),
           date: faker.date.dateTime(minYear: 2010, maxYear: 2024),
           derniereModification:
@@ -238,15 +247,15 @@ class ObjectBox {
         int numberOfLignes = faker.randomGenerator.integer(5, min: 1);
         for (int i = 0; i < numberOfLignes; i++) {
           final produit = produits[random.nextInt(produits.length)];
-          final ligneFacture = LigneFacture(
+          final ligneDocument = LigneDocument(
             quantite: faker.randomGenerator.decimal(min: 1, scale: 10),
             prixUnitaire: produit.prixVente,
             derniereModification: faker.date
                 .dateTime(minYear: 2000, maxYear: DateTime.now().year),
           );
-          ligneFacture.produit.target = produit;
-          ligneFacture.facture.target = facture;
-          facture.lignesFacture.add(ligneFacture);
+          ligneDocument.produit.target = produit;
+          ligneDocument.facture.target = facture;
+          facture.lignesDocument.add(ligneDocument);
         }
 
         return facture;
@@ -536,13 +545,23 @@ class ObjectBox {
     }
   }
 
-  Facture _createFacture(Faker faker) {
-    final facture = Facture(
-      qr: faker.randomGenerator.integer(999999).toString(),
+  Document _createFacture(Faker faker) {
+    List<String> types = [
+      'vente',
+      'achat',
+      'devis',
+      'facture',
+      'bon',
+      'proforma'
+    ];
+    types.shuffle(random);
+    final facture = Document(
+      qrReference: faker.randomGenerator.integer(999999).toString(),
       impayer: faker.randomGenerator.decimal(min: 0, scale: 2),
       date: faker.date.dateTime(minYear: 2010, maxYear: 2024),
       derniereModification:
           faker.date.dateTime(minYear: 2000, maxYear: DateTime.now().year),
+      type: types.first,
     )..crud.target = Crud(
         createdBy: 1,
         updatedBy: 1,
@@ -559,7 +578,7 @@ class ObjectBox {
           faker.randomGenerator.integer(produitBox.count()) + 1;
       final produit = produitBox.get(randomProductId);
       if (produit != null) {
-        final ligneFacture = LigneFacture(
+        final ligneFacture = LigneDocument(
           quantite: faker.randomGenerator.decimal(min: 1, scale: 10),
           prixUnitaire: produit.prixVente,
           derniereModification:
@@ -567,7 +586,7 @@ class ObjectBox {
         );
         ligneFacture.produit.target = produit;
         ligneFacture.facture.target = facture;
-        facture.lignesFacture.add(ligneFacture);
+        facture.lignesDocument.add(ligneFacture);
       }
     }
 
@@ -597,10 +616,6 @@ class ObjectBox {
     print('Suppression des crudBox');
     crudBox.removeAll();
     print('crudBox Succefully Deleted');
-
-    print('Suppression des qrCode');
-    qrCode.removeAll();
-    print('qrCode Succefully Deleted');
 
     print('Suppression des produitBox');
     produitBox.removeAll();
